@@ -99,6 +99,8 @@ func _cleanup() -> void:
 	for actor in actors:
 		if is_instance_valid(actor):
 			actor.process_mode = Node.PROCESS_MODE_DISABLED
+			if actor is CollisionObject3D:
+				actor.collision_layer = 0
 			actor.remove_from_group("enemies")
 			actor.hide()
 			actor.queue_free()
@@ -224,6 +226,14 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 
 func near_console() -> bool:
 	return player.position.distance_to(CONSOLE_POSITION) < 4.0
+
+
+func encounter_status() -> String:
+	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
+		return "%d record%s remaining%s" % [remaining, "" if remaining == 1 else "s", " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if not is_instance_valid(active_enemy) and not modal_pending() else ""]
+	if stage == Stage.BOSS and not is_instance_valid(active_enemy):
+		return "The Variance arrives in %ds" % maxi(1, ceili(spawn_delay))
+	return ""
 
 
 func inspect_console() -> void:

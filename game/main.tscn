@@ -159,9 +159,30 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 24
 
-[node name="Text" type="Label" parent="HUD/CapturePrompt/Panel/Padding"]
+[node name="VBox" type="VBoxContainer" parent="HUD/CapturePrompt/Panel/Padding"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Text" type="Label" parent="HUD/CapturePrompt/Panel/Padding/VBox"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 20
 text = "CLICK TO ENTER THE COMBAT LAB\n\nAim the camera toward the incident.\nLeft click or F swings the baton.\nStep aside when it winds up.\n\nR resets both fighters. Escape pauses."
 horizontal_alignment = 1
+
+
+[node name="Comfort" type="HBoxContainer" parent="HUD/CapturePrompt/Panel/Padding/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="Shake" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort"]
+layout_mode = 2
+button_pressed = true
+text = "Camera shake"
+
+[node name="Flash" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort"]
+layout_mode = 2
+button_pressed = true
+text = "Damage flash"

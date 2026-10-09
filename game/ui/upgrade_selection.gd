@@ -12,39 +12,54 @@ func _ready() -> void:
 	layer = 5
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	shade = ColorRect.new()
-	shade.color = Color(.01, .02, .03, .92)
+	shade.color = Color(.01, .02, .03, .95)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
 	panel = CenterContainer.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	var box: VBoxContainer = VBoxContainer.new()
-	box.custom_minimum_size = Vector2(700, 0)
-	box.add_theme_constant_override("separation", 14)
+	box.custom_minimum_size = Vector2(880, 0)
+	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
 	heading = Label.new()
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_color_override("font_color", Color(.65, .95, 1))
 	heading.add_theme_font_size_override("font_size", 22)
 	box.add_child(heading)
 	for index in range(3):
 		var button: Button = Button.new()
-		button.custom_minimum_size.y = 90
+		button.custom_minimum_size.y = 112
 		button.add_theme_font_size_override("font_size", 18)
+		for state in ["normal", "hover", "pressed", "focus"]:
+			var style: StyleBoxFlat = StyleBoxFlat.new()
+			style.bg_color = Color(.045, .075, .09) if state == "normal" else Color(.08, .16, .19)
+			style.set_corner_radius_all(4)
+			style.set_content_margin_all(10)
+			if state == "focus":
+				style.bg_color = Color(0, 0, 0, 0)
+				style.set_border_width_all(3)
+				style.border_color = Color(.5, .95, 1)
+			button.add_theme_stylebox_override(state, style)
 		button.pressed.connect(_choose.bind(index))
 		box.add_child(button)
 		buttons.append(button)
 	footer = Label.new()
-	footer.text = "1 / 2 / 3 or click to choose • Arrows / Enter also work\nBonuses last this run and add against base values. R restarts."
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	footer.add_theme_font_size_override("font_size", 16)
 	box.add_child(footer)
 	close()
 
 
 func open(run: Node) -> void:
-	footer.text = "1 / 2 / 3 or click to choose • Arrows / Enter also work\nBonuses last this run and add against base values. R restarts."
-	heading.text = "CHANGE REQUEST  /  CHOOSE ONE\nTechnical Debt: %d / %d — %s" % [run.debt, run.debt_limit, run.severity()]
+	footer.text = "1 / 2 / 3 or click • Arrows / Enter • R restarts\nThis run only. Percentages are totals against base; lower Taken / Recovery is better."
+	heading.text = "CHANGE REQUEST / CHOOSE ONE\nDebt %d / %d — %s • Burnout %d — %s" % [run.debt, run.debt_limit, run.severity(), run.burnout, run.burnout_title()]
 	for index in range(3):
 		buttons[index].text = run.option_text(index)
+	_show_choices()
+
+
+func _show_choices() -> void:
 	shade.show()
 	panel.show()
 	buttons[0].grab_focus()
@@ -73,11 +88,15 @@ func _input(event: InputEvent) -> void:
 
 
 func open_corporate(run: Node, seconds: float) -> void:
-	heading.text = "MANAGEMENT ESCALATION — ETA REQUIRED\nQuick question. Leadership wants an ETA.\nCan you commit to resolving this in the next five minutes?"
-	buttons[0].text = "1   Commit to Five Minutes\n“Sure. Five minutes should be enough.”\n+%d Burnout. Clear containment in %d active seconds: −%d Burnout bonus. No failure penalty." % [run.commit_burnout, roundi(seconds), run.commitment_reward]
-	buttons[1].text = "2   Give a Realistic Estimate\n“I’ll provide an estimate after identifying the root cause.”\n+%d Burnout. No additional encounter modifier." % run.estimate_burnout
-	buttons[2].text = "3   Escalate the Dependency\n“The issue appears to be owned by another service.”\n−%d Burnout (minimum 0). One extra dependency record in containment." % run.dependency_relief
-	footer.text = "1 / 2 / 3 or click • Arrows / Enter • R restarts\nAll choices: clear containment for −%d Burnout. Technical Debt is unchanged." % run.containment_relief
-	shade.show()
-	panel.show()
-	buttons[0].grab_focus()
+	heading.text = "MANAGEMENT ESCALATION — ETA REQUIRED\nContainment needs an owner. Leadership needs a number."
+	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
+	var titles: Array[String] = ["Commit to Five Minutes", "Give a Realistic Estimate", "Escalate the Dependency"]
+	var consequences: Array[String] = [
+		"Clear containment in %ds: −%d bonus Burnout. Expiry: no penalty." % [roundi(seconds), run.commitment_reward],
+		"Normal containment. No extra records or timer.",
+		"One extra dependency record to fight during containment."]
+	for index in range(3):
+		var after: int = clampi(run.burnout + changes[index], 0, run.burnout_limit)
+		buttons[index].text = "%d   %s\nBurnout %d → %d / %s (%+d now)\n%s\n%s" % [index + 1, titles[index], run.burnout, after, run.burnout_title(after), after - run.burnout, run.modifier_summary(-1, after), consequences[index]]
+	footer.text = "1 / 2 / 3 or click • Arrows / Enter • R restarts\nThis run only. Clear containment: −%d Burnout, not health. Debt stays unchanged." % run.containment_relief
+	_show_choices()

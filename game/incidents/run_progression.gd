@@ -55,16 +55,20 @@ func pressure(value: int = -1) -> float:
 	return 1.0 + pursuit_per_band * band(value)
 
 
-func outgoing() -> float:
-	return clampf(1.0 + choices.count(0) * damage_bonus + burnout_offense(), 1.0, 2.0)
+func outgoing(extra_choice: int = -1, burnout_value: int = -1) -> float:
+	return clampf(1.0 + (choices.count(0) + (1 if extra_choice == 0 else 0)) * damage_bonus + burnout_offense(burnout_value), 1.0, 2.0)
 
 
-func incoming() -> float:
-	return clampf(1.0 - choices.count(1) * defense_bonus + burnout_risk(), .4, 1.25)
+func incoming(extra_choice: int = -1, burnout_value: int = -1) -> float:
+	return clampf(1.0 - (choices.count(1) + (1 if extra_choice == 1 else 0)) * defense_bonus + burnout_risk(burnout_value), .4, 1.25)
 
 
-func recovery() -> float:
-	return maxf(.5, 1.0 - choices.count(2) * recovery_bonus)
+func recovery(extra_choice: int = -1) -> float:
+	return maxf(.5, 1.0 - (choices.count(2) + (1 if extra_choice == 2 else 0)) * recovery_bonus)
+
+
+func modifier_summary(extra_choice: int = -1, burnout_value: int = -1) -> String:
+	return "Damage %d%% • Taken %d%% • Dodge recovery %d%%" % [roundi(outgoing(extra_choice, burnout_value) * 100), roundi(incoming(extra_choice, burnout_value) * 100), roundi(recovery(extra_choice) * 100)]
 
 
 func apply_to(player: CharacterBody3D) -> void:
@@ -76,10 +80,10 @@ func apply_to(player: CharacterBody3D) -> void:
 func option_text(index: int) -> String:
 	var benefits: Array[String] = [
 		"+%d%% base attack damage" % roundi(damage_bonus * 100),
-		"−%d%% incoming damage" % roundi(defense_bonus * 100),
-		"−%d%% dodge recovery" % roundi(recovery_bonus * 100)]
+		"−%d%% base incoming damage" % roundi(defense_bonus * 100),
+		"−%d%% base dodge recovery" % roundi(recovery_bonus * 100)]
 	var after: int = clampi(debt + cost(index), 0, debt_limit)
-	return "%d   %s\n%s  •  +%d debt\nNext: %s / %d debt / +%d%% enemy pursuit" % [index + 1, TITLES[index], benefits[index], cost(index), severity(after), after, roundi((pressure(after) - 1) * 100)]
+	return "%d   %s\n%s • +%d debt\nAfter: %s\nNext enemies: +%d%% pursuit • %d debt / %s" % [index + 1, TITLES[index], benefits[index], cost(index), modifier_summary(index), roundi((pressure(after) - 1) * 100), after, severity(after)]
 
 
 func summary() -> String:
@@ -95,17 +99,18 @@ func change_burnout(amount: int, source: String) -> void:
 	burnout_notice = "%s: %+d" % [source, burnout - before]
 
 
-func burnout_band() -> int:
-	return 2 if burnout >= 70 else (1 if burnout >= 30 else 0)
+func burnout_band(value: int = -1) -> int:
+	var pressure_value: int = burnout if value < 0 else value
+	return 2 if pressure_value >= 70 else (1 if pressure_value >= 30 else 0)
 
 
-func burnout_title() -> String:
-	return ["COMPOSED", "PRESSURED", "OVERLOADED"][burnout_band()]
+func burnout_title(value: int = -1) -> String:
+	return ["COMPOSED", "PRESSURED", "OVERLOADED"][burnout_band(value)]
 
 
-func burnout_offense() -> float:
-	return [0.0, pressured_bonus, overloaded_bonus][burnout_band()]
+func burnout_offense(value: int = -1) -> float:
+	return [0.0, pressured_bonus, overloaded_bonus][burnout_band(value)]
 
 
-func burnout_risk() -> float:
-	return [0.0, pressured_risk, overloaded_risk][burnout_band()]
+func burnout_risk(value: int = -1) -> float:
+	return [0.0, pressured_risk, overloaded_risk][burnout_band(value)]

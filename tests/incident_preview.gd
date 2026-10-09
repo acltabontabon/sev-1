@@ -14,7 +14,8 @@ func _initialize() -> void:
 func shot(name_: String) -> void:
 	for index in range(30):
 		await process_frame
-	await RenderingServer.frame_post_draw
+	# A paused/background window may stop automatic draws; never wait indefinitely.
+	RenderingServer.force_draw()
 	var error: Error = root.get_texture().get_image().save_png("res://builds/" + preview_prefix + "_" + name_ + ".png")
 	if error != OK:
 		push_error(error_string(error))

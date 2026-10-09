@@ -48,6 +48,10 @@ func _physics_process(delta: float) -> void:
 	if health <= 0:
 		marker.text = "✓  RECONCILED"
 		return
+	# The opening is combat time: impact must freeze it alongside the actor/weapon.
+	if hitstop_left > 0:
+		super._physics_process(delta)
+		return
 	phase_time = fmod(phase_time + delta, 8.0)
 	exposed = phase_time >= 4.5
 	if exposed:

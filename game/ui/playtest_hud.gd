@@ -2,6 +2,9 @@ extends CanvasLayer
 
 var hit_left: float = 0.0
 var hurt_left: float = 0.0
+var damage_flash_enabled: bool = true
+var shake_strength: float = 0.0
+@onready var comfort: HBoxContainer = $CapturePrompt/Panel/Padding/VBox/Comfort
 @onready var player: CharacterBody3D = %Player
 @onready var enemy: CharacterBody3D = %Enemy
 @onready var camera_rig: Node3D = %Player/CameraRig
@@ -10,6 +13,9 @@ var hurt_left: float = 0.0
 
 
 func _ready() -> void:
+	shake_strength = camera_rig.impulse_degrees
+	comfort.get_node("Shake").toggled.connect(_set_shake)
+	comfort.get_node("Flash").toggled.connect(_set_flash)
 	if get_parent().has_node("Incident"):
 		var backdrop: StyleBoxFlat = StyleBoxFlat.new()
 		backdrop.bg_color = Color(.025, .045, .055, .96)
@@ -31,6 +37,16 @@ func _ready() -> void:
 	refresh()
 
 
+func _set_shake(enabled: bool) -> void:
+	camera_rig.impulse_degrees = shake_strength if enabled else 0.0
+
+
+func _set_flash(enabled: bool) -> void:
+	damage_flash_enabled = enabled
+	hurt_left = 0.0
+	$DamageFlash.color.a = 0.0
+
+
 func _on_capture_changed(_active: bool) -> void:
 	refresh()
 
@@ -49,12 +65,12 @@ func refresh() -> void:
 	$Margin/VBox/Health.text = "YOU  %d / %d     |     INCIDENT  %d / %d" % [player.health, player.max_health, enemy.health, enemy.max_health]
 	if player.health <= 0:
 		status.text = "YOU ARE OFFLINE  /  R TO RETRY"
-		$CapturePrompt/Panel/Padding/Text.text = "YOU ARE OFFLINE\n\nPress R to reset the encounter.\nThen click to resume."
+		$CapturePrompt/Panel/Padding/VBox/Text.text = "YOU ARE OFFLINE\n\nPress R to reset the encounter.\nThen click to resume."
 	elif enemy.health <= 0:
 		status.text = "INCIDENT RESOLVED  /  R TO RUN IT BACK"
-		$CapturePrompt/Panel/Padding/Text.text = "INCIDENT RESOLVED\n\nPress R for another round.\nClick to keep exploring."
+		$CapturePrompt/Panel/Padding/VBox/Text.text = "INCIDENT RESOLVED\n\nPress R for another round.\nClick to keep exploring."
 	else:
-		$CapturePrompt/Panel/Padding/Text.text = "FRIDAY 16:59  /  CLICK TO BEGIN\n\nLMB or F: three-hit chain. Press again near recovery.\nQ or right mouse: dodge. Move to choose direction.\nNo movement input: dodge backward.\n\nWatch the orange warning. Cyan means invulnerable.\nR resets both fighters. Escape pauses."
+		$CapturePrompt/Panel/Padding/VBox/Text.text = "FRIDAY 16:59  /  CLICK TO BEGIN\n\nLMB or F: three-hit chain. Press again near recovery.\nQ or right mouse: dodge. Move to choose direction.\nNo movement input: dodge backward.\n\nWatch the orange warning. Cyan means invulnerable.\nR resets both fighters. Escape pauses."
 
 
 func _on_hit() -> void:
@@ -63,7 +79,7 @@ func _on_hit() -> void:
 
 
 func _on_hurt() -> void:
-	hurt_left = 0.2
+	hurt_left = 0.2 if damage_flash_enabled else 0.0
 
 
 func _process(delta: float) -> void:
@@ -90,6 +106,9 @@ func _process(delta: float) -> void:
 func _refresh_incident(incident: Node) -> void:
 	$Margin/VBox/Title.text = "SEV—1   /   THE MISSING TRANSACTION"
 	status.text = incident.objective
+	var progress: String = incident.encounter_status()
+	if not progress.is_empty():
+		status.text += "\n" + progress
 	if incident.stage == incident.Stage.INVESTIGATION and incident.inspected and not incident.near_console():
 		status.text = "Return to the OPERATIONS marker to select a record."
 	$Margin/VBox/Health.text = "YOU  %d / %d" % [player.health, player.max_health]
@@ -100,11 +119,16 @@ func _refresh_incident(incident: Node) -> void:
 	$Controls.offset_top = -112
 	$Margin/VBox/Debt.text = "DEBT %d / %d  •  %s  •  Enemy pursuit +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
 	var run: Node = incident.run
-	$Margin/VBox/Burnout.text = "BURNOUT %d / %d • %s • Base damage +%d%% / Taken +%d%%\n%s" % [run.burnout, run.burnout_limit, run.burnout_title(), roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.burnout_notice]
+	$Margin/VBox/Burnout.text = "BURNOUT %d / %d • %s • Own damage / risk +%d%% / +%d%%\n%s" % [run.burnout, run.burnout_limit, run.burnout_title(), roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
 	$Margin/VBox/Burnout.modulate = [Color(.65, .9, 1), Color(1, .8, .4), Color(1, .55, .4)][run.burnout_band()]
 	if incident.challenge_result == "Active":
 		$Margin/VBox/Burnout.text += " • Optional containment ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
 	elif incident.corporate_choice == 0:
 		$Margin/VBox/Burnout.text += " • " + incident.challenge_result
 	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.modal_pending()
-	$CapturePrompt/Panel/Padding/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident."
+	comfort.visible = not incident.terminal()
+	$Margin.visible = not prompt.visible and not incident.modal_pending()
+	$Controls.visible = not prompt.visible and not incident.modal_pending()
+	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident."
+	if not incident.terminal() and incident.elapsed > 0:
+		$CapturePrompt/Panel/Padding/VBox/Text.text += "\n\n" + run.modifier_summary() + "\n" + run.burnout_notice
