@@ -10,7 +10,7 @@ func _run() -> void:
 	check("HEALTHY" in incident.room.get_node("Critical").text and story.monitors.size() > 0, "opening begins with healthy monitoring surfaces")
 	player.camera_rig.set_capture(true)
 	await frames(90)
-	check(player.narrative_hold and story.camera.current and story.seen.has("friday"), "workstation shot starts with one Friday message")
+	check(player.narrative_hold and story.camera.current and story.seen.has("opening"), "workstation shot starts with one Friday message")
 	check(not player.request_attack() and not player.request_dodge(), "staged pose cannot attack or dodge")
 	player.camera_rig.set_capture(false)
 	var before: float = incident.stage_time

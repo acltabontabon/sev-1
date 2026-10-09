@@ -121,3 +121,7 @@ sh tools/godot.sh --path . --resolution 1920x1080 --script tests/incident_previe
 
 No remote backup is configured. Establish Git LFS before substantial binary art intake.
 The creator is the final creative decision-maker and playtester.
+
+## Milestone 11 voice candidate
+
+Incident 001 now includes prerecorded candidate speech and synchronized subtitles. Settings adds **Voice volume** and **Subtitles**. Play normally with `sh tools/godot.sh --path .`; Tab skips introductions and R retries. See the [casting, generation and listening guide](docs/voices.md). Human performance/mix acceptance remains pending. Build this audio candidate separately with `sh tools/release.sh --voice-candidate`.

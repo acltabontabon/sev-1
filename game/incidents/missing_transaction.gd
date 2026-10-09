@@ -11,6 +11,7 @@ const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 @export var boss_health: int = 700
 const RUN: Script = preload("res://game/incidents/run_progression.gd")
 const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
+var voice: Node
 var presentation: CanvasLayer
 var enemies_defeated: int = 0
 var boss_encountered: bool = false
@@ -62,6 +63,9 @@ func _ready() -> void:
 	add_child(upgrade_ui)
 	upgrade_ui.selected.connect(_choose_modal)
 	player.damage_accepted.connect(_on_damage_accepted)
+	voice = preload("res://game/incidents/voice_controller.gd").new()
+	voice.name = "Voice"
+	add_child(voice)
 	presentation = preload("res://game/incidents/incident_presentation.gd").new()
 	add_child(presentation)
 	reset_incident()
@@ -96,7 +100,7 @@ func reset_incident() -> void:
 	room.get_node("IncidentSpill").light_energy = .6
 	_dashboard("PRODUCTION\nHEALTHY", "ALL SYSTEMS OPERATIONAL")
 	room.get_node("Impossible").text = "TRANSACTIONS: CONSISTENT"
-	room.get_node("ETA").text = "NO ACTIVE INCIDENTS"
+	room.get_node("ETA").text = "Happy Friday, team!\nEnjoy your well-deserved weekend!"
 	room.get_node("Clock").text = "FRIDAY / 16:59"
 	presentation.reset_story()
 
@@ -255,6 +259,7 @@ func encounter_status() -> String:
 func inspect_console() -> void:
 	if stage != Stage.INVESTIGATION or not near_console():
 		return
+	presentation.say("evidence_open")
 	inspected = true
 	console_marker.text = "EVIDENCE OPEN\nChoose 1 / 2 / 3"
 	objective = "Which system is missing the record? Press 1, 2, or 3."
@@ -286,6 +291,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _make_copies() -> void:
 	if stage != Stage.BOSS or not is_instance_valid(active_enemy) or not copies.is_empty():
 		return
+	presentation.say("variance_half")
 	presentation.say("copies", true)
 	for side in [-1, 1]:
 		var copy: Node3D = Node3D.new()

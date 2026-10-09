@@ -65,3 +65,7 @@ Creator acceptance should include a normal win, a defeat/retry, all three manage
 choices across runs, settings across a fresh launch, and a copied ZIP on another Mac.
 Automated staged combat does not establish difficulty, ordinary duration, sound
 quality, camera comfort, or whether the slice is fun.
+
+## Voice candidate listening test
+
+The Milestone 11 candidate adds a Voice volume slider and Subtitles toggle. Follow the [voice listening route](voices.md#validation-and-human-listening-route), especially opening timing, boss spatial speech, choice/pause suspension and terminal reports. Candidate performances have not received human listening acceptance. Existing gameplay and platform acceptance gates remain open.

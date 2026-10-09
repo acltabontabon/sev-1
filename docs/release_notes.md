@@ -55,3 +55,7 @@ combat-to-victory/restart/defeat probes passed. Ten application lifecycle cycles
 Automated checks use staged positions and sometimes elevated health/controlled
 damage. Graphical rendering is inspected separately; human gameplay/audio acceptance
 remains open. No new floor, boss, progression, online service or runtime AI was added.
+
+## Milestone 11 voice candidate
+
+Adds 22 prerecorded local Kokoro candidate clips, authored subtitles, separate Voice volume and saved subtitle preference. No runtime network or AI credentials. Voice candidate artifacts are isolated under `builds/releases/0.1.0-voices`; the previous tester package is preserved. Human casting, pronunciation, mixing and positional listening acceptance remain pending. See [voice evidence and listening route](voices.md).

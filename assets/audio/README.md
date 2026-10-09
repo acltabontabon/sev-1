@@ -39,3 +39,7 @@ ambience shares Effects and no music control is advertised. Existing cue levels 
 unchanged. All twelve source WAVs were checked: no clipped 16-bit samples, peaks
 −25.6 to −4.1 dBFS before per-player attenuation. This is a bounds check, not listening
 acceptance. See [release asset inventory](../../docs/asset_licenses.md).
+
+## Authored speech
+
+Milestone 11 adds 22 candidate Kokoro speech clips under `voices/`, separate from the original synthesized effects. See the [voice guide](../../docs/voices.md), [manifest](voices/dialogue.json), and [provenance ledger](voices/provenance.json). Human listening acceptance is pending. Runtime needs no network or generator.

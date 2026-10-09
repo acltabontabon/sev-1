@@ -29,3 +29,7 @@ the authorized tester build; it does not grant recipients permission to redistri
 source/assets under a new license. No asset with identified unclear third-party
 rights was found. No substantial new binary art was introduced; Git LFS remains
 required before future binary asset intake.
+
+## Milestone 11 speech
+
+`assets/audio/voices/*.ogg`: original SEV-1 script synthesized locally with the publisher's Apache-2.0 Kokoro-82M model and six stock English voices. Model revision, source license link, voice, processing, generation date and checksum are recorded per clip in [provenance](../assets/audio/voices/provenance.json). No voice cloning or real-person imitation was used. These are candidate performances awaiting human listening approval. Model weights and development dependencies do not ship. See [voice source and rights](voices.md#provenance-and-rights).

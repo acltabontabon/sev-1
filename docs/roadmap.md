@@ -16,12 +16,13 @@ Advance through playable evidence, not calendar promises. Each milestone has an 
 | 8. The Great Stabilization | Implemented technical playtest candidate: boss hit-stop timing, clearer choice previews and encounter progress, comfort toggles, bounded real-melee run coverage, and graphical transition measurements. See [verification and remaining gates](stabilization.md). | Director accepts movement/combo/dodge feel, true-form readability, tradeoffs, audio, and ordinary run duration; complete Windows runtime validation before content expansion. |
 | 9. Friday, 4:59 PM | Implemented narrative playtest candidate: 24-second opening, skippable staged camera, reactive captions/corporate messages, environmental states, six-second boss arrival, shorter retries and truthful expanded reports. 341 assertions pass; human story/audio acceptance remains open. | Director accepts pacing, personality, camera handoff, readable messages, and convenient retries; preserve previous combat and platform gates. |
 | 10. Friday Deployment | Version 0.1.0 application interface, saved preferences, explicit lifecycle navigation, macOS export automation and tester documentation implemented. Local tester candidate; see [release evidence](release.md). | Full validation/export/packaged smoke must pass; creator must accept ordinary play, audio and remaining first-use hitches. Ad-hoc signing is not public notarized distribution. |
-| 11. Tester acceptance and platform hardening | Next proposed increment: external playtests, measured balance/pacing feedback, first-use hitch investigation and Windows runtime testing. | Resolve or explicitly accept P1 issues before declaring release ready; preserve this bounded slice. |
+| 11. The Voices of Production | Implemented audio candidate: 22 local Kokoro clips, six stock voice profiles, prioritized playback, synchronized subtitles and saved Voice/Subtitles settings. See [voice guide](voices.md). | Human listening acceptance for casting, intelligibility, timing and mix; full validation and packaged resource checks. |
+| Tester acceptance and platform hardening | External playtests, measured balance/pacing feedback, first-use hitch investigation and Windows runtime testing remain open. | Resolve or explicitly accept P1 issues before declaring release ready; preserve this bounded slice. |
 | Later circles | Deferred, conditional long-term work. | A distinct mechanic must earn expansion after the current slice is accepted. |
 
 The intended Windows release target is preserved. Native Windows runtime testing remains outstanding; exporting an executable alone will not satisfy that gate. No dates or final content counts are committed.
 
-## Next development increment
+## Next acceptance increment
 
 Run the packaged Friday Deployment slice with the creator and a few external testers.
 Use the [tester guide](testing.md) and record ordinary completion time, unfair hits,
@@ -60,3 +61,5 @@ for severity-classified limitations and [architecture](architecture.md) for actu
 - The old movement lab has been replaced in the main scene by Office After Hours. Characters and simplified furniture remain provisional; the director has not yet accepted the final visual standard.
 
 Office After Hours preserves Combat Alpha tuning, the free camera, and the existing movement baseline. Automated results do not replace the pending human playtest.
+
+Milestone 11 was explicitly authorized as The Voices of Production on 10 October 2026. It adds authored prerecorded speech only. External playtest and platform gates remain open; generated content does not establish creative acceptance.

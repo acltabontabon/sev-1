@@ -11,6 +11,7 @@ var overlay: CanvasLayer
 var surface: ColorRect
 var box: VBoxContainer
 var save_notice: Label
+var report_subtitle: Label
 
 
 func _ready() -> void:
@@ -81,6 +82,9 @@ func _button(text: String, action: Callable) -> Button:
 
 func show_page(next: String) -> void:
 	page = next
+	report_subtitle = null
+	if session != null:
+		session.get_node("Incident/Voice").set_presentation_state(page, preferences.values.subtitles)
 	for child: Node in box.get_children():
 		box.remove_child(child)
 		child.queue_free()
@@ -118,6 +122,8 @@ func show_page(next: String) -> void:
 			_button("Quit", quit_game)
 		"report":
 			_label(session.get_node("Incident").report.replace("\n\n", "\n"), 17)
+			report_subtitle = _label("", 19)
+			report_subtitle.custom_minimum_size.y = 68
 			var actions: HBoxContainer = HBoxContainer.new()
 			actions.add_theme_constant_override("separation", 12)
 			box.add_child(actions)
@@ -133,6 +139,8 @@ func show_page(next: String) -> void:
 			_label("SETTINGS", 32)
 			_slider("Master volume", "master", 0, 1, .05)
 			_slider("Effects & office ambience", "effects", 0, 1, .05)
+			_slider("Voice volume", "voice", 0, 1, .05)
+			_toggle("Subtitles", "subtitles")
 			_slider("Mouse sensitivity", "sensitivity", .2, 3, .1)
 			_slider("Camera shake", "shake", 0, 1, .1)
 			_toggle("Damage flash", "flash")
@@ -148,7 +156,7 @@ func show_page(next: String) -> void:
 			_button("Back", go_back)
 		"credits":
 			_label("SEV-1 / CREDITS", 32)
-			_label("Created by MayhemProd with AI-assisted code, native geometry and synthesized sound.\n\nAll game assets are original procedural work. Character motion, office props and audio remain provisional.\n\nMade with Godot Engine (MIT). Engine and bundled third-party license notices accompany this build in THIRD_PARTY_NOTICES.txt.\n\nNo runtime AI, telemetry or online account is used.")
+			_label("Created by MayhemProd with AI-assisted code, native geometry and synthesized sound.\n\nVisuals and effects are original procedural work. Authored speech uses local Kokoro synthesis; see the bundled voice provenance and license notices. Character motion, office props and audio remain provisional.\n\nMade with Godot Engine (MIT). Engine and bundled third-party license notices accompany this build in THIRD_PARTY_NOTICES.txt.\n\nNo runtime AI, telemetry or online account is used.")
 			_button("Back", func() -> void: show_page("main"))
 	for child: Node in box.find_children("*", "Control", true, false):
 		if child.focus_mode == Control.FOCUS_ALL:
@@ -248,6 +256,8 @@ func quit_game() -> void:
 
 
 func _process(_delta: float) -> void:
+	if is_instance_valid(report_subtitle) and session != null:
+		report_subtitle.text = session.get_node("Incident/Voice").subtitle
 	if session != null and page.is_empty():
 		var incident: Node = session.get_node("Incident")
 		if incident.terminal():

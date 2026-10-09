@@ -12,5 +12,6 @@ func _initialize() -> void:
 	var licenses: Dictionary = Engine.get_license_info()
 	for title: String in licenses:
 		file.store_string(title + "\n" + str(licenses[title]) + "\n\n")
+	file.store_string(FileAccess.get_file_as_string("res://assets/audio/voices/NOTICE.txt"))
 	file.close()
 	quit()

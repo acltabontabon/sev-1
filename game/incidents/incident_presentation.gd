@@ -1,26 +1,16 @@
 extends CanvasLayer
 ## Authored Incident 001 beats only. Gameplay owns stages, damage and choices.
-const LINES: Dictionary = {
-	"friday": ["PEOPLE OPERATIONS", "Happy Friday, team! Enjoy your well-deserved weekend!"],
-	"relief": ["ENGINEER", "One minute. No deployments. No surprises."],
-	"alert": ["MONITORING / SEV-1", "CRITICAL PRODUCTION INCIDENT\nInconsistent transaction states detected."],
-	"eta": ["MANAGEMENT", "Quick question. Can we have an ETA?"],
-	"start": ["ENGINEER", "You've got to be fucking kidding me."],
-	"enemy": ["ENGINEER", "This was not in the ticket."],
-	"investigate": ["INCIDENT CHANNEL", "Can we confirm whether this is a known issue?"],
-	"debt": ["ENGINEER", "That's a Monday problem."],
-	"contain": ["MANAGEMENT", "Please keep the incident channel updated."],
-	"visibility": ["LEADERSHIP", "Leadership needs visibility."],
-	"burnout": ["ENGINEER", "I am so done with this. Still fixing it."],
-	"boss": ["ENGINEER", "Finally. A reproducible issue."],
-	"copies": ["ENGINEER", "Great. Duplicate records."],
-	"rca": ["MANAGEMENT", "Do we have an RCA?"],
-}
 var incident: Node3D
-var seen: Dictionary = {}
-var queue: Array[String] = []
-var current_line: String = ""
-var line_left: float = 0
+var voice: Node
+# Compatibility views for the existing narrative regression harness.
+var seen: Dictionary:
+	get: return voice.seen
+var queue: Array[String]:
+	get: return voice.queue
+var current_line: String:
+	get: return voice.current_line
+var line_left: float:
+	get: return voice.line_left
 var opening_seen: bool = false
 var boss_seen: bool = false
 var short_opening: bool = false
@@ -38,6 +28,7 @@ var screen_material: StandardMaterial3D
 
 func _ready() -> void:
 	incident = get_parent()
+	voice = incident.voice
 	layer = 4
 	camera = Camera3D.new()
 	camera.fov = 55
@@ -123,10 +114,7 @@ func _ready() -> void:
 func reset_story() -> void:
 	release_camera()
 	short_opening = opening_seen
-	seen.clear()
-	queue.clear()
-	current_line = ""
-	line_left = 0
+	voice.clear(true)
 	panel.hide()
 	title.hide()
 	hint.hide()
@@ -141,18 +129,8 @@ func reset_story() -> void:
 func set_screens(color: Color) -> void:
 	screen_material.albedo_color = color
 
-func say(id: String, priority: bool = false) -> void:
-	if seen.has(id):
-		return
-	seen[id] = true
-	if priority:
-		queue.push_front(id)
-		line_left = 0
-	else:
-		queue.append(id)
-	# Bounded backlog; discarded lines never return later out of context.
-	if queue.size() > 3:
-		queue.remove_at(1)
+func say(id: String, _priority: bool = false) -> void:
+	voice.request(id)
 
 func sound(path: String) -> void:
 	if DisplayServer.get_name() != "headless":
@@ -186,15 +164,14 @@ func skip() -> void:
 		declare_incident()
 		incident._enter(incident.Stage.ENCOUNTER_ONE)
 	elif incident.stage == incident.Stage.BOSS and not is_instance_valid(incident.active_enemy):
+		voice.clear()
 		boss_seen = true
 		incident.spawn_delay = 0
 		incident._spawn()
 
 func stage_changed() -> void:
 	release_camera()
-	queue.clear()
-	line_left = 0
-	current_line = ""
+	voice.clear()
 	match incident.stage:
 		incident.Stage.ENCOUNTER_ONE:
 			opening_seen = true
@@ -202,15 +179,19 @@ func stage_changed() -> void:
 		incident.Stage.INVESTIGATION:
 			say("investigate")
 		incident.Stage.ENCOUNTER_TWO:
+			say("evidence_confirmed")
 			say("contain")
 			set_screens(Color(.65, .12, .04))
 		incident.Stage.BOSS:
+			say("variance_intro")
 			boss_length = 1.5 if boss_seen else 6.0
 			incident.spawn_delay = boss_length
 			incident.light_target = 3.7
 			set_screens(Color(.45, .12, .3))
 			sound("res://assets/audio/boss_arrival.wav")
 		incident.Stage.RESOLVED, incident.Stage.FAILED:
+			say("victory" if incident.stage == incident.Stage.RESOLVED else "defeat")
+			say("postmortem")
 			ambient.stop()
 			set_screens(Color(.12, .42, .38) if incident.stage == incident.Stage.RESOLVED else Color(.25, .05, .025))
 			sound("res://assets/audio/resolved.wav" if incident.stage == incident.Stage.RESOLVED else "res://assets/audio/boss_arrival.wav")
@@ -251,7 +232,7 @@ func _process(delta: float) -> void:
 				camera.make_current()
 			else:
 				release_camera()
-			say("friday")
+			say("opening")
 			if time >= 5: say("relief")
 			if time >= 10:
 				declare_incident()
@@ -279,11 +260,5 @@ func _process(delta: float) -> void:
 			say("boss", true)
 	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 18: say("visibility")
 	if incident.stage == incident.Stage.BOSS and time > 22: say("rca")
-	line_left = maxf(0, line_left - delta)
-	if line_left == 0 and not queue.is_empty():
-		current_line = queue.pop_front()
-		var line: Array = LINES[current_line]
-		caption.text = tr(line[0]) + "\n" + tr(line[1])
-		line_left = 4.5
-		if line[0] != "ENGINEER": sound("res://assets/audio/notification.wav")
-	panel.visible = line_left > 0
+	caption.text = voice.subtitle
+	panel.visible = not voice.subtitle.is_empty()

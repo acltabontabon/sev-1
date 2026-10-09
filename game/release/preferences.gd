@@ -1,6 +1,6 @@
 extends RefCounted
 ## Device preferences only; never serialize incident state or run modifiers.
-const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1}
+const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1}
 var values: Dictionary = DEFAULTS.duplicate()
 var path: String = "user://settings.cfg"
 
@@ -12,7 +12,7 @@ func load_settings() -> void:
 		return
 	for key: String in DEFAULTS:
 		var value: Variant = config.get_value("preferences", key, DEFAULTS[key])
-		if key in ["flash", "fullscreen"]:
+		if key in ["flash", "fullscreen", "subtitles"]:
 			if value is bool:
 				values[key] = value
 		elif value is float or value is int:
@@ -31,7 +31,7 @@ func save_settings() -> Error:
 
 
 func apply(scene: Node = null) -> void:
-	for bus_name: String in ["Master", "Effects"]:
+	for bus_name: String in ["Master", "Effects", "Voice"]:
 		var index: int = AudioServer.get_bus_index(bus_name)
 		if index >= 0:
 			var gain: float = values[bus_name.to_lower()]
@@ -43,6 +43,8 @@ func apply(scene: Node = null) -> void:
 			DisplayServer.window_set_mode(mode)
 	if scene == null:
 		return
+	if scene.has_node("Incident/Voice"):
+		scene.get_node("Incident/Voice").subtitles_enabled = values.subtitles
 	var camera: Node3D = scene.get_node("Player/CameraRig")
 	camera.mouse_sensitivity = .0025 * float(values.sensitivity)
 	camera.impulse_degrees = .8 * float(values.shake)

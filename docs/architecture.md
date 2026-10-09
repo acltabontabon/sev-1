@@ -468,3 +468,9 @@ See [release engineering](release.md), [asset inventory](asset_licenses.md), and
 [release notes](release_notes.md) for verified results and open gates. Earlier milestone
 sections above describe their historical implementation; saved preferences and macOS
 packaging supersede their former persistence/export limitations.
+
+## Milestone 11 authored voice candidate
+
+Incident now owns a local voice controller with a single active line, three pending requests, two audio players and a four-stream cache. The 22-entry JSON manifest supplies speech text and subtitles. Existing presentation triggers delegate to this controller; gameplay timing and camera staging remain unchanged. Variance speech follows the boss in 3D; other roles use flat playback with baked Production filtering. The Voice bus is independent of Effects and feeds Master.
+
+Saved preferences add Voice volume and Subtitles with backward-compatible defaults. Application page state suspends speech except on the terminal report, whose dedicated subtitle slot displays victory/defeat and postmortem speech while gameplay remains paused. Restart and scene removal stop all speech. Development-only Kokoro generation and import tooling, lifecycle behavior, provenance and validation are described in [the voice guide](voices.md). This supersedes Milestone 9's fixed 4.5-second caption queue; no runtime AI or autoload is introduced.

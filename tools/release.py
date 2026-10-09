@@ -45,8 +45,12 @@ def digest(path):
 def main():
     if sys.platform != "darwin":
         raise SystemExit("This release script requires macOS (codesign and ditto). Windows preset is preparatory only.")
-    if len(sys.argv) != 1:
-        raise SystemExit("Usage: sh tools/release.sh (always validates before export)")
+    global OUT, APP
+    if sys.argv[1:] == ["--voice-candidate"]:
+        OUT = ROOT / "builds/releases" / (VERSION + "-voices")
+        APP = OUT / "SEV-1 Friday Deployment.app"
+    elif len(sys.argv) != 1:
+        raise SystemExit("Usage: sh tools/release.sh [--voice-candidate] (always validates before export)")
     OUT.mkdir(parents=True, exist_ok=True)
     LOGS.mkdir(exist_ok=True)
     # Remove only the stale success marker, never previous artifacts, before any gate.
@@ -79,7 +83,7 @@ def main():
         smoke = run("smoke", [str(executable), "--headless", "--fixed-fps", "60", "--", "--release-smoke"], cwd=temporary)
         if "RESULT: 0 failure(s)" not in smoke:
             raise SystemExit("Smoke probe did not report successful completion")
-    for source, name in [("docs/testing.md", "TESTING.md"), ("docs/release_notes.md", "RELEASE_NOTES.md"), ("docs/asset_licenses.md", "ASSET_LICENSES.md"), ("THIRD_PARTY_NOTICES.txt", "THIRD_PARTY_NOTICES.txt")]:
+    for source, name in [("docs/testing.md", "TESTING.md"), ("docs/release_notes.md", "RELEASE_NOTES.md"), ("docs/asset_licenses.md", "ASSET_LICENSES.md"), ("THIRD_PARTY_NOTICES.txt", "THIRD_PARTY_NOTICES.txt"), ("docs/voices.md", "VOICES.md"), ("assets/audio/voices/provenance.json", "VOICE_PROVENANCE.json")]:
         shutil.copy2(ROOT / source, OUT / name)
     archive = OUT / "SEV-1-Friday-Deployment-0.1.0-macOS.zip"
     # Archive app plus tester documents; a fresh staging directory avoids stale files.
@@ -87,7 +91,7 @@ def main():
         staging = Path(temporary) / "SEV-1-Friday-Deployment-0.1.0"
         staging.mkdir()
         run("stage", ["ditto", str(APP), str(staging / APP.name)])
-        for name in ["TESTING.md", "RELEASE_NOTES.md", "ASSET_LICENSES.md", "THIRD_PARTY_NOTICES.txt"]:
+        for name in ["TESTING.md", "RELEASE_NOTES.md", "ASSET_LICENSES.md", "THIRD_PARTY_NOTICES.txt", "VOICES.md", "VOICE_PROVENANCE.json"]:
             shutil.copy2(OUT / name, staging / name)
         run("zip", ["ditto", "-c", "-k", "--keepParent", str(staging), str(archive)])
     with tempfile.TemporaryDirectory(prefix="sev1-unzip-") as temporary:

@@ -39,6 +39,9 @@ func _run() -> void:
 	var scene: Node = app.session
 	var player: CharacterBody3D = scene.get_node("Player")
 	var incident: Node = scene.get_node("Incident")
+	for entry: Dictionary in incident.voice.lines.values():
+		if entry.status != "missing":
+			check(ResourceLoader.exists(entry.audio) and load(entry.audio) is AudioStream, "packaged voice resolves: " + entry.id)
 	player.max_health = 10000
 	player.health = 10000
 	await frames(30)

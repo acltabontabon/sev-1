@@ -1939,3 +1939,10 @@ misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
 
+
+SEV-1 Milestone 11 authored speech
+--------------------------------
+Candidate speech was generated locally from original SEV-1 dialogue using hexgrad/Kokoro-82M (publisher-stated Apache-2.0 model license), revision f3ff3571791e39611d31c381e3a41a3af07b4987. Stock voices: am_michael, af_heart, af_kore, am_fenrir, bm_george, bf_emma.
+Model card and license declaration: https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md
+Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+Per-clip provenance ships at assets/audio/voices/provenance.json in the resource package and in the accompanying voice documentation. Model weights, voice tensors and generation dependencies are not distributed in this game. No performer impersonation or custom voice cloning was used.
