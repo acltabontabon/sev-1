@@ -121,3 +121,13 @@ Native Computer Use inspection timed out; engine-rendered captures and packaged
 input simulation provide graphical/technical evidence, not a human playthrough.
 The current lifecycle performance result and remaining P1 gates are recorded in
 [release notes](release_notes.md). No release-ready or human-accepted claim is made.
+
+## Milestone 11 isolated voice candidate
+
+`sh tools/release.sh --voice-candidate` keeps version 0.1.0 but exports under
+`builds/releases/0.1.0-voices` so the earlier tester package is preserved. It includes
+VOICES.md and VOICE_PROVENANCE.json beside the app and usual tester documentation.
+On 10 October 2026, checkpoint `a7462ee` passed the complete gate, including all
+22 packaged voice resources, combat smoke, and ZIP signature verification. See
+[voice validation evidence](voices.md#recorded-evidence--10-october-2026).
+Human listening, notarization and Windows acceptance remain separate.

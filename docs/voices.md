@@ -204,3 +204,34 @@ Human checkpoint (headphones, then ordinary speakers):
 
 Existing first-use hitch, balance, ordinary run duration, Mac distribution and Windows
 runtime gates remain open. This milestone does not establish a new performance claim.
+
+## Recorded evidence — 10 October 2026
+
+- `python3 tools/validate.py`, also rerun by the release gate: **519 Godot outcome
+  assertions passed**, all imports/script parses passed, plus **5 Python asset
+  integrity tests**. The voice suite contributes 32 of the Godot assertions.
+- All 22 candidate assets have matching provenance and checksums. All five timed
+  opening clips fit their budgets: narrator 3.66 s, relief 2.85 s, alert 4.37 s,
+  ETA 2.12 s, protagonist response 1.83 s. An unchanged generator rerun reported
+  all 22 clips cached. Real WAV import/encoding/provenance was also checked in an
+  isolated temporary directory without replacing committed takes.
+- Graphical probes passed **9 checks each** at 1280×720 and 1920×1080 on Apple M2 Pro,
+  Godot 4.7.2 Forward+/Metal. Real stream start, pause, resume, natural completion,
+  modal suppression and terminal playback were observed. Rendered opening, choice,
+  settings and report layouts were inspected. This was not a performance benchmark
+  and not a listening test.
+- `sh tools/release.sh --voice-candidate` passed validation, macOS export, ad-hoc
+  signature verification, packaged launch, complete real-melee headless smoke,
+  all 22 packaged voice resource loads, ZIP creation and extracted signature checks.
+  Package source checkpoint: `a7462ee`; existing 0.1.0 artifacts were not overwritten.
+- Candidate ZIP SHA-256:
+  `7290991172904c722f03716e0b94434d56800e3978371b5816e5290d3da76e30`.
+  The package is ad-hoc signed, not notarized; Windows runtime testing remains open.
+- No automated failures remain. Initial development failures were a missing upstream
+  standalone LICENSE file, a missing FFmpeg Vorbis encoder (resolved by using
+  libsndfile for encoding), and corrected test-fixture focus/staging assumptions.
+- **Human listening is still pending.** No claim is made that performances, word
+  accuracy, mixing or audible positional behavior were heard or accepted here.
+  The local audition reel is `builds/voice_auditions.wav`, ordered Engineer,
+  Management, Production, Variance, Narrator, Postmortem, with one-second gaps.
+  Individual auditions can be recreated with the command above.
