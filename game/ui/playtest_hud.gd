@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+var external_menu: bool = false
 var hit_left: float = 0.0
 var hurt_left: float = 0.0
 var damage_flash_enabled: bool = true
@@ -126,12 +127,25 @@ func _refresh_incident(incident: Node) -> void:
 	elif incident.corporate_choice == 0:
 		$Margin/VBox/Burnout.text += " • " + incident.challenge_result
 	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.modal_pending()
+	if external_menu:
+		prompt.visible = false
 	comfort.visible = not incident.terminal()
-	$Margin.visible = not prompt.visible and not incident.modal_pending()
-	$Controls.visible = not prompt.visible and not incident.modal_pending()
+	$Margin.visible = camera_rig.controls_active and not incident.terminal() and not incident.modal_pending()
+	$Controls.visible = $Margin.visible
 	if incident.stage == incident.Stage.ALERT or (incident.stage == incident.Stage.BOSS and incident.stage_time < incident.presentation.boss_length + 2):
 		$Margin.visible = false
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
 	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."
 	if not incident.terminal() and incident.elapsed > 0:
 		$CapturePrompt/Panel/Padding/VBox/Text.text += "\n\n" + run.modifier_summary() + "\n" + run.burnout_notice
+
+
+func configure_release_ui() -> void:
+	external_menu = true
+	# Keep status in the left column, away from centered boss truth/attack markers.
+	$Margin.offset_right = 500
+	for label: Node in $Margin/VBox.get_children():
+		if label is Label:
+			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			label.add_theme_font_size_override("font_size", 18)
+	$Margin/VBox/Title.add_theme_font_size_override("font_size", 22)

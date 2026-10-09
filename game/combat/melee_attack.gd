@@ -32,6 +32,7 @@ func _ready() -> void:
 	rebuild_arc()
 	arc.hide()
 	audio = AudioStreamPlayer3D.new()
+	audio.bus = &"Effects"
 	audio.volume_db = -12.0
 	add_child(audio)
 

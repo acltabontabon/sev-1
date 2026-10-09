@@ -1,0 +1,123 @@
+# Release engineering — Friday Deployment 0.1.0
+
+## Baseline and disposition
+
+Inspected clean `main` at `1a074b5` on 10 October 2026. Read direction/design/roadmap
+and implementation documentation, Input Map, incident states, reset ownership,
+provenance, and historical performance evidence. Baseline import, parsing and all
+341 existing assertions passed with normal macOS user-directory permissions.
+The first sandbox attempt failed on certificate/editor-settings access, not gameplay.
+
+| Severity | Audit finding | Disposition |
+| --- | --- | --- |
+| P0 for standalone delivery | No export templates, preset or standalone build | Official matching templates obtained; macOS preset/export/signature and packaged smoke implemented |
+| P1 usability | No title, explicit navigation or saved settings | Local application screen owner and native ConfigFile preferences implemented |
+| P1 reliability risk | New screens could compete with decisions, reports, focus and R | Ten application lifecycle cycles cover those boundaries; original incident/combat suites preserved |
+| P1 | Cold first-render and first-use frame hitches | Reproduced and phase/CPU-timed; open creator performance acceptance gate |
+| P1 public distribution | No Developer ID/notarization | Ad-hoc local tester build only; credentials/public distribution remain a human follow-up |
+| P2 | Native models, approximate animation/hit cones, synthesized sound, unmeasured human balance/pacing | Preserved as declared temporary content; tester questionnaire supplied |
+| P3 | Windows runtime, controller/remapping, later chapters | Deferred; Windows preset only, no compatibility claim |
+
+No incomplete incident beat required adding new gameplay. Existing technical tests
+cover opening, live enemy combat, investigation, both upgrades, all corporate paths,
+debt, Burnout, boss shield/copies, victory/defeat and clean retries. No combat values
+were changed without human evidence. Audio source samples were inspected for clipping;
+all players now route through Effects, including dynamically created melee/cue audio.
+There is no score/voice track. Listening acceptance remains required.
+
+## Build
+
+Use Godot **4.7.2 stable standard**. Install matching templates from the
+[official archive](https://godotengine.org/download/archive/4.7.2-stable/) through
+Godot's Manage Export Templates. The expected macOS location is
+`~/Library/Application Support/Godot/export_templates/4.7.2.stable/` with `version.txt`
+and `macos.zip`. This machine has only the macOS and Windows x86-64 templates extracted
+from the official TPZ, not every platform. No automatic engine upgrade is performed.
+
+```sh
+sh tools/release.sh
+```
+
+The shell entry invokes one standard-library Python helper. It verifies the pinned
+engine/templates/resources, runs the full validator, exports, checks plist/PCK and
+ad-hoc signature, launches outside the repository, completes packaged smoke, then
+creates a ZIP and SHA-256 manifest. Each subprocess has a deadline and logged engine
+errors fail the build even with exit code zero. Logs live under ignored `logs/`.
+A failed rebuild removes the old success manifest but preserves prior artifacts;
+do not distribute an old ZIP as evidence that a failed build passed.
+
+Outputs under ignored `builds/releases/0.1.0/`:
+
+- `SEV-1 Friday Deployment.app`
+- `SEV-1-Friday-Deployment-0.1.0-macOS.zip` containing the app and tester/license notes
+- `manifest.json` with source revision/dirty state/content digest, template hash,
+  archive hash, validation/smoke results and honest signing/platform limits
+
+The preset excludes development tests/tools/docs/builds from the runtime resources.
+Engine notices are explicitly included. ASTC import is enabled for Apple Silicon.
+No original app icon existed; the default Godot icon remains. The Windows preset
+is x86-64 with a separate PCK. It has not been runtime-tested or declared supported.
+
+## Packaged verification
+
+Godot release templates do not support the editor's external `--script` harness.
+A small opt-in `-- --release-smoke` probe therefore lives alongside the application
+screen code. Without that explicit flag it never runs or modifies the game.
+The probe uses the exported main scene/resources, performs real F attacks with normal
+boss windows and live AI, traverses upgrades/management, verifies victory/restart/death
+and menu cleanup, then exits nonzero on failure. Elevated health and staged positions
+make it a technical test rather than normal play. Preferences use a separate test path.
+Graphical mode additionally captures title/opening/combat/boss/victory under the app's
+user directory. The regular release script runs headless; graphical checks are separate.
+
+```sh
+"builds/releases/0.1.0/SEV-1 Friday Deployment.app/Contents/MacOS/SEV-1 Friday Deployment" --resolution 1920x1080 --fixed-fps 60 -- --release-smoke
+```
+
+This accelerated graphical probe is not a frame-time benchmark. Source graphical
+probes remain available for measured performance:
+
+```sh
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/stabilization_preview.gd
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/incident_preview.gd -- --burnout --measure
+```
+
+## Signing and remaining acceptance
+
+The bundle is universal arm64/x86-64, **ad-hoc signed**, with no Apple team identity,
+Developer ID signing or notarization. `codesign --verify --deep --strict` checks local
+integrity; it is not Gatekeeper/notarization approval. See
+[Godot macOS distribution documentation](https://docs.godotengine.org/en/4.7/tutorials/export/exporting_for_macos.html).
+Do not embed signing credentials in source or claim trusted public distribution.
+
+Only the current M2 Pro is the graphical execution/performance baseline. Another-Mac,
+Intel, minimum OS and Windows runtime tests are outstanding. The first-use hitches
+and ordinary human gameplay/audio acceptance remain open. A successful build produces
+a local tester candidate; **Milestone 10 is not creator-accepted or public-release ready**
+until these remaining gates are explicitly accepted or resolved.
+
+
+## Verified checkpoint
+
+The full suite passed **487 assertions**: 341 existing plus 146 release checks,
+with imports and every script parse passing. The release workflow completed export,
+plist/PCK checks, ad-hoc signature verification, standalone headless launch, and a
+packaged real-melee smoke run through both upgrades, management, six enemies, victory,
+restart, damage-triggered defeat, and menu cleanup. The ZIP is extracted and its
+signature/executable integrity checked before a successful manifest is written.
+
+A separate packaged Forward+/Metal run at 1920×1080 completed the same sequence with
+no logged engine errors. Title, office/combat, boss and postmortem frames were captured;
+menu/settings/controls/pause/report layouts were also rendered at 1280×720. The smoke
+simulation is accelerated, with elevated health and staged positions; its 1:19 incident
+time is not ordinary player pacing. The final report action row and narrower combat
+status column address clipping/marker overlap observed during this review.
+
+The twelve source WAVs have no clipped 16-bit samples. Peak levels range from −25.6
+to −4.1 dBFS before existing per-player attenuation; this verifies sample bounds, not
+perceived loudness or a finished mix. No external sound was introduced.
+
+Native Computer Use inspection timed out; engine-rendered captures and packaged
+input simulation provide graphical/technical evidence, not a human playthrough.
+The current lifecycle performance result and remaining P1 gates are recorded in
+[release notes](release_notes.md). No release-ready or human-accepted claim is made.

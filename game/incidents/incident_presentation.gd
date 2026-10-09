@@ -88,10 +88,12 @@ func _ready() -> void:
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(hint)
 	ambient = AudioStreamPlayer.new()
+	ambient.bus = &"Effects"
 	ambient.stream = preload("res://assets/audio/office_air.wav")
 	ambient.volume_db = -28
 	add_child(ambient)
 	cue = AudioStreamPlayer.new()
+	cue.bus = &"Effects"
 	cue.volume_db = -20
 	add_child(cue)
 	screen_material = StandardMaterial3D.new()

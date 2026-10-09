@@ -1,10 +1,10 @@
 # SEV-1 Implemented Architecture
 
-This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, and Milestone 8 stabilization, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, and Milestone 8 stabilization, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, saved run progression, or runtime AI service. Milestone 10 adds local device preferences only.
 
 ## Runtime composition
 
-`project.godot` opens `game/incidents/missing_transaction.tscn`, which inherits `game/main.tscn` and adds a local Incident controller. The base scene still launches the single-enemy regression arena. The project uses Godot 4.7.2 standard, GDScript, Forward+, a 1280×720 development viewport, physics interpolation, and the default 60 Hz physics tick. The launcher enforces the 4.7.2 stable version family. Graphics are configured in the main scene through sky/ambient lighting, directional shadows, local colored lights, SSAO, glow, and light fog.
+`project.godot` opens `game/release/front_end.tscn`; Start Incident instantiates `game/incidents/missing_transaction.tscn`, which inherits `game/main.tscn` and adds a local Incident controller. The base scene still launches the single-enemy regression arena. The project uses Godot 4.7.2 standard, GDScript, Forward+, a 1280×720 development viewport, physics interpolation, and the default 60 Hz physics tick. The launcher enforces the 4.7.2 stable version family. Graphics are configured in the main scene through sky/ambient lighting, directional shadows, local colored lights, SSAO, glow, and light fog.
 
 ```text
 Incident001                incidents/missing_transaction.tscn (inherits Main)
@@ -82,7 +82,7 @@ R restores existing actors' positions, health, attack timers, collision state, a
 
 Text `.tscn` scenes hold primitive meshes, materials, colliders, and lights. Limb/weapon motion is scripted; there is no imported rig or animation library. The arc is a small generated `ImmediateMesh`. Eight synthesized WAV effects live in [assets/audio](../assets/audio/README.md), with committed import sidecars and documented provenance. Headless tests skip sound playback because the dummy audio path did not drain reliably on test exit. Sound quality still requires graphical listening and human feedback.
 
-Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, and logs are ignored. Git text files use LF; large binary asset intake should establish LFS and remote support before committing substantial art libraries. No such library, export preset, or CI configuration exists yet.
+Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, and logs are ignored. Git text files use LF; large binary asset intake should establish LFS and remote support before committing substantial art libraries. No such library or CI configuration exists yet.
 
 ## Validation and limits
 
@@ -156,7 +156,7 @@ The incident controller processes while paused only to settle environmental ligh
 
 `tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
-Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with temporary upgrades but no healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor, Windows runtime test, or release build is included.
+Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with temporary upgrades but no healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor or Windows runtime test is included. Milestone 10 adds the macOS release build described below.
 
 
 ## Milestone 5 character presentation
@@ -254,7 +254,7 @@ edges, resource preservation, pursuit limits, environmental updates, victory/def
 summaries, modal reset, repeated-run node/subscription counts, and fresh scene load.
 The existing incident suite now traverses both upgrade moments and still tests boss
 windows, copies, reports, and lifecycle. Staged preview flags and measurements are in
-[README](../README.md#milestone-6-technical-debt-playtest). Human pacing, readability,
+[README](../README.md#validation). Human pacing, readability,
 audio, creative acceptance, and Windows testing remain open.
 
 Final Milestone 6 validation: 208 assertions (155 baseline, four added incident checks,
@@ -422,3 +422,49 @@ All 341 assertions plus imports/parsing pass. `tests/narrative_preview.gd` captu
 rendered opening and terminal states. Human pacing, humor, listening, camera comfort,
 and Windows validation remain separate gates; native art/poses and synthesized audio
 are still placeholders. README owns launch, controls, preview commands and performance.
+
+
+## Milestone 10 application and release boundary
+
+`game/release/front_end.tscn` is the application root. Its local script owns title,
+controls, settings, credits, pause and postmortem screens, and at most one Incident001
+child. No autoload or general scene-management framework is introduced. Start creates
+the incident and captures input; menu removes/frees its entire subtree, including
+signals, actor groups and audio owners. Restart delegates to the existing reset path.
+Standalone incident/lab tests retain their original capture/comfort interface.
+
+The front end sets HUD `external_menu` to suppress its old capture card. Gameplay HUD
+still reads Incident. Active play is represented by an empty application page; incident
+modal flags remain the authority for choices. Escape can cover a decision with pause,
+hiding/disabling its input until Resume restores its original focus and pending state.
+Camera unhandled input is disabled on application screens. R is consumed in settings/
+controls. Terminal states are detected once and shown as actionable reports. No other
+screen can resume a terminal state. Focus loss still releases capture and opens pause.
+
+`preferences.gd` is a local RefCounted object with a fixed allowlist. ConfigFile stores
+only master/effects volume, sensitivity, shake, flash, fullscreen and quality in
+`user://settings.cfg`, under the explicit SEV-1 user directory. Invalid types/ranges
+fall back or clamp. Save errors appear in the settings UI. Changes apply immediately,
+and new incidents receive the same preferences. Reduced quality disables SSAO/glow/MSAA;
+it preserves fog, lighting and gameplay. Default settings retain the scene effects.
+No music control is shown because there is no music track.
+
+`default_bus_layout.tres` adds an Effects bus feeding Master. All authored/dynamic
+players use it; existing per-cue gain and event timing are unchanged. Master and Effects
+both default to 80%. No new audio asset or mixer framework is added.
+
+`tests/release_tests.gd` adds persisted-setting validation and ten UI/input-driven
+application lifecycle cycles. The existing full melee simulations remain in stabilization.
+`release_smoke.gd` runs only with an explicit `--release-smoke` user argument because
+release templates cannot load an external `--script` harness. It is bounded, uses
+staged positions/elevated health, verifies packaged resources through real combat and
+terminal cleanup, and exits. It never participates in ordinary play.
+
+`tools/release.sh` / `release.py` own version/resource/template checks, validation,
+macOS export, plist/PCK/signature verification, packaged headless launch and smoke,
+ZIP creation and manifest hashes. Presets exclude development resources. Engine notices
+are generated from the pinned engine's native license APIs and included in the package.
+See [release engineering](release.md), [asset inventory](asset_licenses.md), and
+[release notes](release_notes.md) for verified results and open gates. Earlier milestone
+sections above describe their historical implementation; saved preferences and macOS
+packaging supersede their former persistence/export limitations.

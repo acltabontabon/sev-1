@@ -111,6 +111,7 @@ radius = 0.65
 avoidance_enabled = false
 
 [node name="DefeatSound" type="AudioStreamPlayer3D" parent="."]
+bus = &"Effects"
 process_mode = 3
 stream = ExtResource("8")
 volume_db = -10.0

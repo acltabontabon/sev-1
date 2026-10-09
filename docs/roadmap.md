@@ -15,20 +15,30 @@ Advance through playable evidence, not calendar promises. Each milestone has an 
 | 7. Burnout & Corporate Decisions | Implemented playtest candidate by explicit authorization: immediate risk/reward bands, meaningful-hit pressure, limited recovery, one three-option management decision, optional containment ETA, and dependency consequence. | Director can distinguish Burnout from debt, understand every tradeoff, and complete/retry all paths. Balance, audio, and Windows acceptance remain open. |
 | 8. The Great Stabilization | Implemented technical playtest candidate: boss hit-stop timing, clearer choice previews and encounter progress, comfort toggles, bounded real-melee run coverage, and graphical transition measurements. See [verification and remaining gates](stabilization.md). | Director accepts movement/combo/dodge feel, true-form readability, tradeoffs, audio, and ordinary run duration; complete Windows runtime validation before content expansion. |
 | 9. Friday, 4:59 PM | Implemented narrative playtest candidate: 24-second opening, skippable staged camera, reactive captions/corporate messages, environmental states, six-second boss arrival, shorter retries and truthful expanded reports. 341 assertions pass; human story/audio acceptance remains open. | Director accepts pacing, personality, camera handoff, readable messages, and convenient retries; preserve previous combat and platform gates. |
-| 10. Additional circles | Conditional long-term work. Prototype one new circle's distinct mechanic before producing its environment or boss. | Its mechanic is fair, its theme has a recognizable visual identity, and its contribution to the systemic incident is clear. Reassess campaign scope after each. |
-| 11. Polish and release | Release scope determined by evidence. Controls, accessibility, performance, usability, audio, packaging, credits/licenses, and final platform testing. Save migration/testing only if persistence is adopted. | Supported builds behave correctly on target hardware; no critical blockers; director accepts the bounded release scope. |
+| 10. Friday Deployment | Version 0.1.0 application interface, saved preferences, explicit lifecycle navigation, macOS export automation and tester documentation implemented. Local tester candidate; see [release evidence](release.md). | Full validation/export/packaged smoke must pass; creator must accept ordinary play, audio and remaining first-use hitches. Ad-hoc signing is not public notarized distribution. |
+| 11. Tester acceptance and platform hardening | Next proposed increment: external playtests, measured balance/pacing feedback, first-use hitch investigation and Windows runtime testing. | Resolve or explicitly accept P1 issues before declaring release ready; preserve this bounded slice. |
+| Later circles | Deferred, conditional long-term work. | A distinct mechanic must earn expansion after the current slice is accepted. |
 
 The intended Windows release target is preserved. Native Windows runtime testing remains outstanding; exporting an executable alone will not satisfy that gate. No dates or final content counts are committed.
 
 ## Next development increment
 
-Playtest the cinematic Incident 001 before expanding content. Review the first opening, Tab skips, pause/resume, boss arrival, victory/defeat report and shortened R retry; judge timing and humor in actual combat. Compare all management choices and damage/defense/mobility upgrades; check whether the five-minute commitment matters, overload earns its risk, and two free defense choices dominate. The new cards preview combined effects, and the HUD explains remaining records and arrivals. Retry from both modal types, victory, and defeat; test comfort toggles while paused. The recommended next milestone is director-led balance/usability acceptance plus Windows validation, not another circle. Critical debt remains a tuning band, unreachable with two default upgrades.
+Run the packaged Friday Deployment slice with the creator and a few external testers.
+Use the [tester guide](testing.md) and record ordinary completion time, unfair hits,
+confusing choices, readability, humor and desire to replay. Compare all management
+paths and damage/defense/mobility upgrades. Earlier human gates are still open;
+automated completion does not retroactively accept feel, art, sound or balance.
 
-Review the Milestone 5 native character pass before treating it as an accepted art standard. Check the keyboard grip, attack anticipation/contact/recovery, running feet, dodge ring, enemy warning/recovery, and restrained audio. See [character provenance and integration](../assets/characters/README.md). Then play Incident 001 from beginning to end, including a wrong investigation choice, boss false positives, a death, and repeated R retries. Measure the ordinary run duration against the 5–10-minute target; do not pad an efficient run with waiting merely to reach it. Review whether the first combat arrives promptly, the evidence makes sense without domain knowledge, and the solid-diamond/OPEN cue is clear while moving.
+First-use frame hitches remain a P1 performance gate; diagnose them with measured
+profiles before speculative optimization. Obtain explicit creator acceptance or resolve
+them. Test the copied ZIP on another Mac. Developer ID/notarization and Windows runtime
+validation remain separate distribution/platform work; do not claim them from export.
 
-The creator explicitly authorized Milestones 4, 5, 6, 7, 8, and 9 on 10 October 2026 while earlier human feel/art and Windows gates remained outstanding. This is an implementation checkpoint, not retroactive creative acceptance. Refine this episode and its new tradeoffs from feedback before further content expansion.
-
-Current defensive rules remain unchanged. The existing 94 baseline assertions passed before and after integration. Incident tests additionally cover the state lifecycle, real investigation input, boss damage windows, copies, terminal reports, cleanup, and reload. See [architecture](architecture.md#incident-001-orchestration) for exact behavior and [README](../README.md#incident-visual-and-performance-review) for the measured boss scenario.
+Milestone 10 was explicitly authorized on 10 October 2026. It supersedes the old
+"additional circles" milestone numbering and generic polish/release plan. No new
+chapter, boss, progression system or balance redesign was authorized or implemented.
+The native art/audio remain usable temporary assets. See [release notes](release_notes.md)
+for severity-classified limitations and [architecture](architecture.md) for actual rules.
 
 ## Open creative decisions
 
@@ -44,7 +54,7 @@ Current defensive rules remain unchanged. The existing 94 baseline assertions pa
 ## Planning corrections from vision alignment
 
 - The old first-playable proposal combined a 3–5-minute wave encounter with an upgrade choice. It is superseded: the current one-opponent lab is milestone 1; the 5–10-minute narrative incident is milestone 4; temporary progression is implemented in milestone 6 following the explicitly requested presentation milestone.
-- Incident 001 now launches by default in the Office After Hours. The original single-opponent arena remains available for regression tests.
+- The Friday Deployment title now launches by default and starts Incident 001 in the Office After Hours. The original single-opponent arena remains available for regression tests.
 - Dodge and combos remain Combat Alpha experiments. Handcrafted reports and Friday incident reset fiction are implemented; the six circles and persistent progression remain deferred.
 - The old proposed folder tree included progression/UI/data concepts that do not exist. [Architecture](architecture.md) now describes only the inspected implementation.
 - The old movement lab has been replaced in the main scene by Office After Hours. Characters and simplified furniture remain provisional; the director has not yet accepted the final visual standard.

@@ -31,3 +31,11 @@ and −28 dB ambience. The incident alert reuses `alert.wav`. Reset stops presen
 players; terminal transitions stop ambience and play one resolution/failure accent.
 These AI-assisted synthesized placeholders need human listening and replacement by a
 cohesive sound-design pass; there is no voice acting or adaptive score.
+
+
+Milestone 10 routes every authored and dynamic player through the Effects bus, feeding
+Master. The application saves separate master/effects gain (both default 80%); office
+ambience shares Effects and no music control is advertised. Existing cue levels remain
+unchanged. All twelve source WAVs were checked: no clipped 16-bit samples, peaks
+−25.6 to −4.1 dBFS before per-player attenuation. This is a bounds check, not listening
+acceptance. See [release asset inventory](../../docs/asset_licenses.md).
