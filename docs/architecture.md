@@ -1,6 +1,6 @@
 # SEV-1 Implemented Architecture
 
-This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, and Milestone 8 stabilization, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
@@ -150,7 +150,7 @@ The inherited lab enemy is hidden, disabled, and removed from the melee target g
 
 Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
 
-`game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains a settled fractured pose and removes projections; there is no imported boss animation.
+`game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Milestone 8 freezes the phase clock during actor hit-stop, so an impact cannot consume the remaining OPEN time while motion is frozen. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains a settled fractured pose and removes projections; there is no imported boss animation.
 
 The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player and camera. A fresh scene load also resets everything; nothing persists between runs.
 
@@ -299,8 +299,8 @@ The existing active-enemy death guard prevents duplicate completion/recovery.
 Countdown uses the existing incident active delta, including arrival delays, and
 stops on modal, Escape, or focus pause. Defeat interrupts it. Restart clears all
 Burnout, notices, decisions, and countdown state. No health recovery is introduced.
-HUD displays value, band, Burnout's contribution to damage, latest change/source,
-and optional timer/outcome. Color supplements text; no new distortion or flashing.
+HUD displays value, band, Burnout's own contribution, combined active modifiers,
+and optional timer/outcome; the pause card retains the latest change/source. Color supplements text; no new distortion or flashing.
 Reports retain the decision, final Burnout, and challenge outcome.
 
 `tests/burnout_tests.gd` covers accepted/rejected/minor hits, threshold edges, actual
@@ -318,3 +318,50 @@ pointer, and Enter selection; all three corporate paths through victory; defeat;
 thresholds; single-hit damage; recovery; expiry/pause; and reset/reload cleanup.
 The initial sandbox-only baseline failed on macOS settings access; rerunning with
 normal Godot user-directory access passed. No automated failures remain.
+
+
+## Milestone 8 stabilization
+
+The existing architecture and combat tuning remain in place. `Variance._physics_process`
+now drains hit-stop before advancing its shield/open clock. A regression reproduces
+rejected damage near the end of OPEN on the original code and accepts it with the fix;
+shielding still resumes once impact and the remaining window expire. Reset immediately
+removes spawned enemy collision before deferred deletion, avoiding a stale collider in
+the reset frame. Existing corpse retention stays bounded by authored encounter counts.
+
+`RunProgression` accepts optional hypothetical choice/Burnout values in the same bounded
+modifier functions used by live damage. Previewing never selects an upgrade or mutates
+run state. Cards show benefits, run duration, actual clamped Burnout changes, resulting
+band, combined damage/taken/recovery totals, and future pursuit. Thus an escalation at
+zero Burnout visibly removes zero, and a defense choice under overload shows its true
+net cost. Base values, additive stacking, all thresholds and corporate consequences
+are unchanged; their strategic balance remains a human gate.
+
+The existing modal has dark teal cards and a thick cyan keyboard focus outline. Shared
+opening behavior is local to the modal. Number keys, pointer, arrows/Enter and R remain
+supported. The HUD adds remaining-record/arrival feedback and combined modifier totals;
+its gameplay text hides beneath pause, choices and reports. The pause card exposes two
+native CheckButtons for camera shake and the full-screen damage flash. Their preferences
+survive R for the current scene session; a fresh launch uses defaults. Shake changes
+only the existing rotation amplitude, and flash disablement leaves health, hurt audio,
+state text and hit-stop available. There is no settings framework or persistence.
+Canvas stretching remains configured in `project.godot`.
+
+`tests/stabilization_tests.gd` extends existing input/test helpers. Besides the boss
+regression, it verifies rendered feedback toggles, pointer handling without resumption,
+arrow navigation, preview clarity/layout, active modifier/progress text, modal/report
+occlusion, immediate reset collision cleanup, and three bounded complete simulated runs.
+Each run uses real F attacks, normal boss windows and live enemy AI; position staging
+and elevated player health make it a lifecycle check rather than a difficulty test.
+Both upgrade moments, all three management paths, copies, victory and neutral stable
+restart are exercised. The validator includes it alongside all existing suites.
+
+`tests/stabilization_preview.gd` records frame intervals, slow-frame phase labels, native
+process/physics peaks, static/video memory monitors, draw calls and CPU times for scene
+creation, spawns, copies and resets. Three graphical lifecycles use controlled deaths
+and short real boss fights; first rendering and paused UI are included, screenshot
+saving is excluded. This is not an ordinary complete gameplay benchmark or a per-script
+profiler. Screenshot capture in `incident_preview.gd` forces a render after settling frames rather
+than waiting indefinitely for a paused/background draw signal. Results, QA evidence,
+unresolved balance questions and limits live in
+[the stabilization verification](stabilization.md); README owns commands and controls.

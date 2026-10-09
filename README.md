@@ -14,7 +14,7 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt; Milestone 7 adds Burnout and one corporate decision. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt; Milestone 7 adds Burnout and one corporate decision; Milestone 8 stabilizes the existing slice. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
 ## Play Incident 001
 
@@ -36,7 +36,7 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs the sel
 | E | Inspect the operations console when nearby |
 | 1 / 2 / 3 | Choose an upgrade or corporate response while its screen is open; otherwise select a system after inspecting evidence |
 | R | Restart the entire incident, including health, camera, enemies, evidence, and lighting; works while paused or dead |
-| Escape / left click | Pause and release cursor / resume |
+| Escape / left click | Pause and release cursor / resume; pause card offers camera shake and damage flash switches |
 
 Changing app focus also pauses. After clicking to begin, the short alert leaves movement available immediately. The first record materializes after about nine active seconds. Face the enemy with the camera, read its orange warning arc, dodge aside, and strike during recovery. Press LMB/F again late in recovery to chain up to three hits. Q/right mouse cancels wind-up or recovery, but cannot interrupt an active strike. Attacks and dodges are grounded.
 
@@ -62,7 +62,7 @@ First playtest: can you explain why the payment record is missing, read the boss
 python3 tools/validate.py
 ```
 
-The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, and incident lifecycle checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
+The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, incident, presentation, progression, Burnout, and stabilization checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
 The pre-Milestone 6 baseline passed **155 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation, plus import and every script parse. Current progression results are recorded below. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
 
@@ -334,3 +334,38 @@ pointer, and Enter selection; all three corporate paths through victory; defeat;
 thresholds; single-hit damage; recovery; expiry/pause; and reset/reload cleanup.
 The initial sandbox-only baseline failed on macOS settings access; rerunning with
 normal Godot user-directory access passed. No automated failures remain.
+
+
+## Milestone 8 stabilization playtest
+
+The playable now keeps The Variance's OPEN clock frozen during impact hit-stop,
+explains record counts and upcoming arrivals, and previews combined modifiers on both
+choice screens. Corporate choices show the actual clamped Burnout change and resulting
+band. Active HUD totals include upgrades and Burnout; pause/reports no longer overlap
+with gameplay text. Camera shake and the full-screen damage flash can be switched off
+from the start/pause card; preferences survive R within this session.
+
+Final validation passed **320 assertions**, resource import and every script parse.
+Three bounded real-melee simulations completed all management paths through victory,
+copies and clean restart. They use elevated health and staged positioning, so they
+prove lifecycle reliability rather than balance or ordinary run duration. Actual
+rendered start/decision/HUD/boss/report views were inspected at 720p and 1080p.
+
+The repeated graphical lifecycle probe on Apple M2 Pro / 16 GiB / macOS 27.0.1 at
+1920×1080, Forward+/Metal, MSAA 2×, SSAO, glow and fog measured **118.99 / 138.97 FPS**,
+p95 **10.68 / 9.27 ms**, but maxima **167.92 / 165.67 ms**. Startup, the first management
+screen and first boss arrival reproduced hitches; later cycles did not repeat those
+phase hitches. This is evidence of unresolved first-use work, not a hitch-free 60 FPS
+claim or an ordinary full-run benchmark. See [verification and performance details](docs/stabilization.md).
+
+```sh
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/stabilization_preview.gd
+```
+
+Play from Finder with `play.command`. Try intentional combo chaining and dodging,
+compare all three management paths and upgrade styles over R retries, and identify the
+solid original during OPEN. Report total ordinary run time, unfair hits/camera
+obstructions, choice defaults, audio levels and whether you want another run. Try R
+from both decisions and both reports, and try the comfort switches while paused.
+Next: director-led balance/usability acceptance and Windows validation of this slice.
+Models, animation, sound, ordinary run pacing and subjective polish remain provisional.
