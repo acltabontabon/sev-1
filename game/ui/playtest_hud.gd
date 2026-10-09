@@ -10,6 +10,10 @@ var hurt_left: float = 0.0
 
 
 func _ready() -> void:
+	if get_parent().has_node("Incident"):
+		var backdrop: StyleBoxFlat = StyleBoxFlat.new()
+		backdrop.bg_color = Color(.025, .045, .055, .96)
+		$CapturePrompt/Panel.add_theme_stylebox_override("panel", backdrop)
 	camera_rig.capture_changed.connect(_on_capture_changed)
 	player.health_changed.connect(_on_health_changed)
 	enemy.health_changed.connect(_on_health_changed)
@@ -27,6 +31,10 @@ func _on_health_changed(_value: int) -> void:
 
 
 func refresh() -> void:
+	var incident: Node = get_parent().get_node_or_null("Incident")
+	if incident != null and incident.is_node_ready():
+		_refresh_incident(incident)
+		return
 	prompt.visible = not camera_rig.controls_active
 	status.text = "OFFICE AFTER HOURS   /   LIVE" if camera_rig.controls_active else "OFFICE AFTER HOURS   /   PAUSED"
 	$Margin/VBox/Health.text = "YOU  %d / %d     |     INCIDENT  %d / %d" % [player.health, player.max_health, enemy.health, enemy.max_health]
@@ -50,11 +58,15 @@ func _on_hurt() -> void:
 
 
 func _process(delta: float) -> void:
+	if get_parent().has_node("Incident"):
+		refresh()
 	hit_left = maxf(0, hit_left - delta)
 	hurt_left = maxf(0, hurt_left - delta)
 	$HitFeedback.visible = hit_left > 0
 	$DamageFlash.color.a = hurt_left * 0.75
-	if player.health <= 0:
+	if get_parent().has_node("Incident") and get_parent().get_node("Incident").terminal():
+		$Margin/VBox/AttackState.text = "R TO RESTART INCIDENT"
+	elif player.health <= 0:
 		$Margin/VBox/AttackState.text = "R TO RESTART"
 	elif player.dodging:
 		$Margin/VBox/AttackState.text = "DODGE  /  INVULNERABLE" if player.dodge_is_invulnerable() else "DODGE  /  RECOVERY"
@@ -64,3 +76,18 @@ func _process(delta: float) -> void:
 		$Margin/VBox/AttackState.text = "%d / 3  %s  /  %s%s" % [player.combo_index + 1, player.combo[player.combo_index].title, phase, queue_text]
 	else:
 		$Margin/VBox/AttackState.text = "READY  /  LMB OR F   •   Q OR RMB TO DODGE"
+
+
+func _refresh_incident(incident: Node) -> void:
+	$Margin/VBox/Title.text = "SEV—1   /   THE MISSING TRANSACTION"
+	status.text = incident.objective
+	if incident.stage == incident.Stage.INVESTIGATION and incident.inspected and not incident.near_console():
+		status.text = "Return to the OPERATIONS marker to select a record."
+	$Margin/VBox/Health.text = "YOU  %d / %d" % [player.health, player.max_health]
+	if is_instance_valid(incident.active_enemy):
+		var foe: CharacterBody3D = incident.active_enemy
+		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
+	$Controls.text = incident.message + "\nE  Inspect   •   WASD  Move   •   LMB/F  Combo   •   Q/RMB  Dodge   •   R  Restart   •   Esc  Pause"
+	$Controls.offset_top = -112
+	prompt.visible = not camera_rig.controls_active or incident.terminal()
+	$CapturePrompt/Panel/Padding/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident."

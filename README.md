@@ -2,7 +2,7 @@
 
 *The system is down. Management is watching. You're the only engineer online.*
 
-A single-player, third-person 3D action roguelite about an exhausted software engineer trapped in a corporate nightmare. Satisfying combat, systemic satire, and a visually serious workplace are the direction. The current playable is one Office After Hours arena with the Combat Alpha encounter, not the narrative campaign.
+A single-player, third-person 3D action roguelite about an exhausted software engineer trapped in a corporate nightmare. Satisfying combat, systemic satire, and a visually serious workplace are the direction. The default playable is **Incident 001 — The Missing Transaction**, a bounded narrative episode in the existing Office After Hours arena.
 
 ## Project documentation
 
@@ -14,9 +14,9 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. It does not authorize implementing the six circles, abilities, progression, or narrative scenes now. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident; the six circles, extra abilities, and progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
-## Play the Office After Hours
+## Play Incident 001
 
 Double-click `play.command` in Finder, or run from the repository:
 
@@ -24,7 +24,7 @@ Double-click `play.command` in Finder, or run from the repository:
 sh tools/godot.sh --path .
 ```
 
-Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs `game/main.tscn` when that scene is open. Click the game window to capture the mouse. The first click only resumes; subsequent clicks attack. Close the game window to quit.
+Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs the selected scene: `game/incidents/missing_transaction.tscn` is the episode; `game/main.tscn` retains the original single-opponent arena for regression work. Click the game window to capture the mouse. The first click only resumes; subsequent clicks attack. Close the game window to quit.
 
 | Input | Action |
 | --- | --- |
@@ -33,20 +33,28 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs `game/m
 | Shift / Space | Sprint / jump |
 | Left click or F | Light attack; press again late in recovery to chain up to three hits |
 | Q or right click | Dodge in movement direction; backward relative to camera when stationary |
-| R | Restore both fighters, health, and camera; also works while paused or dead |
+| E | Inspect the operations console when nearby |
+| 1 / 2 / 3 | Select a system after inspecting evidence |
+| R | Restart the entire incident, including health, camera, enemies, evidence, and lighting; works while paused or dead |
 | Escape / left click | Pause and release cursor / resume |
 
-Changing app focus also pauses the encounter. Approach the red Production Incident in the open center. Watch its orange ground arc, raised arms, and warning sound; move aside, then strike during recovery. Two complete combos deal enough damage to defeat it, if every hit connects. Dodge cancels attack wind-up or recovery, but cannot interrupt the active strike. Attacks and dodges are grounded. R offers a fast retry.
+Changing app focus also pauses. After clicking to begin, the short alert leaves movement available immediately. The first record materializes after about nine active seconds. Face the enemy with the camera, read its orange warning arc, dodge aside, and strike during recovery. Press LMB/F again late in recovery to chain up to three hits. Q/right mouse cancels wind-up or recovery, but cannot interrupt an active strike. Attacks and dodges are grounded.
 
-Explore the workstation beside the start, the desk clusters on the left, the glass conference room up the right-hand ramp, and the production wall ahead. The enemy follows baked routes around furniture and up the ramp. Test wall-adjacent camera angles and dodges beside the conference deck. Characters, animation, audio, and simplified furniture remain provisional; this pass is not final art approval. Keyboard/mouse is the only implemented control scheme.
+Incident flow:
+
+1. **The Discrepancy:** defeat two corrupted records arriving individually in the clear office lane.
+2. **Investigation:** follow the cyan OPERATIONS marker to the far wall. Press E within four meters. Read three short statements, then choose 1, 2, or 3. Incorrect choices give a clue and allow immediate retry. Payment Processing (3) is missing the delivered record.
+3. **Containment:** defeat three more records, one at a time. Their only combat variation is faster pursuit; attack timing remains familiar.
+4. **The Variance:** evade during SHIELDED, then strike during the 3.5-second OPEN window. The genuine boss always carries a solid cyan diamond and VERIFIED ORIGINAL. At half health, two harmless hollow-marker projections appear. Follow the original, not the copies.
+5. **Review:** victory restores the dashboards and subsides incident lighting; death provides a different handcrafted report. R returns to Friday, 4:59 PM. Click to resume after a report.
+
+Explore the existing workstation, desk clusters, conference ramp/glass, and production wall. Keyboard/mouse is the only implemented control scheme. The original movement, combo, dodge, damage, navigation, and office geometry are preserved. No external art, runtime AI, persistence, upgrades, or new floor were added.
 
 ## Current status
 
-Implemented: camera-relative movement, sprint/jump, orbit/zoom and camera obstruction, a buffered three-hit grounded combo, directional dodge with brief invulnerability, one enemy with telegraph/attack/recovery, health, hit feedback, defeat, pause, and encounter reset.
+Incident 001 is implemented as a technical playtest candidate. Its 5–10-minute duration is a **human pacing target, not a measured or accepted result**; experienced players may finish faster. Combat feel, difficulty across a full run, audio, and artistic quality still need the creator's review. Characters, procedural limb motion, corrupted-record markers, and translucent boss copies remain provisional native geometry.
 
-Human acceptance of combat feel is pending. Waves, upgrades, progression, workstation/death fiction, post-incident reviews, bosses, and narrative scenes are not implemented. The office is an environment pass, not a narrative episode; the future narrative slice is **Incident 001: The Missing Transaction**.
-
-Next: playtest the office lighting, combat readability, collision, and camera alongside attack and dodge feel. Refine this space from feedback before a narrative incident or progression experiment. See the [roadmap](docs/roadmap.md) for gates and deferred scope.
+First playtest: can you explain why the payment record is missing, read the boss's diamond and opening without guessing, and complete the episode without repeated frustrating deaths? Record total run time and the point where pacing drags or becomes unfair. See the [roadmap](docs/roadmap.md) for acceptance gates.
 
 ## Validation
 
@@ -54,9 +62,11 @@ Next: playtest the office lighting, combat readability, collision, and camera al
 python3 tools/validate.py
 ```
 
-The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, and Combat Alpha checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
+The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, and incident lifecycle checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
-The Combat Alpha validation on 10 October 2026 passed 85 assertions (16 movement, 29 combat, 40 alpha), plus import/script checks. Alpha checks cover the buffered chain, cancellation, dodge timing/distance at 30/60/120 physics Hz, real input bindings, enemy evasion, hit-stop, death, and reset stability. Windows runtime testing and human feel/audio acceptance remain outstanding.
+The current Incident 001 validation passed **138 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, and 44 incident, plus import and every script parse. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
+
+The earlier Combat Alpha validation on 10 October 2026 passed 85 assertions (16 movement, 29 combat, 40 alpha), plus import/script checks. Alpha checks cover the buffered chain, cancellation, dodge timing/distance at 30/60/120 physics Hz, real input bindings, enemy evasion, hit-stop, death, and reset stability. Windows runtime testing and human feel/audio acceptance remain outstanding.
 
 To capture a staged graphical preview:
 
@@ -111,6 +121,16 @@ pursuit is unsupported. Human visual/audio acceptance and Windows testing remain
 Asset origins and replacement priorities are in [environment provenance](assets/environment/README.md).
 Reproducible scene authoring and navigation baking are documented in [architecture](docs/architecture.md#office-after-hours-environment).
 
+## Incident visual and performance review
+
+Staged introduction, investigation, boss/copies, victory, and failure views were inspected at 1280×720 and 1920×1080. These captures verify layout, not ordinary play pacing. The original arena's historical measurements above remain separate.
+
+```sh
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/incident_preview.gd -- --measure
+```
+
+Omit `-- --measure` for screenshots only. Outputs are ignored under `builds/incident_*.png` and `builds/incident_performance.json`. On the M2 Pro with Forward+/Metal, MSAA 2×, SSAO, glow, and fog, the 25-second boss/copies scenario measured **119.95 average FPS**, **8.29 ms median**, **11.19 ms p95**, and **19.70 ms maximum**, over 2,400 frames after five seconds of warm-up. Actor health was elevated; screenshot saving was excluded. This short local measurement does not establish full-episode performance, spawn-transition hitch behavior, Windows performance, or a long-duration soak result.
+
 ## Development setup
 
 Use Godot 4.7.2 standard, GDScript, Forward+, Git, and macOS. Windows remains the future release target. `tools/godot.sh` checks the engine version and searches the Applications folders, Downloads, and PATH; `GODOT_BIN` can specify an absolute executable. No .NET SDK or additional package installation is required for this prototype.
@@ -121,4 +141,4 @@ Matching export templates and an export preset are needed for future distributio
 
 No Godot MCP is installed. CLI editing/validation is sufficient for this checkpoint; the creator has authorized an integration if it materially improves live observation. Reassess compatibility and dependencies when needed. Do not add runtime AI services for narrative text or incident reports.
 
-Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. Combat Alpha is committed on `main` at `74d1cb5`. Office development uses `codex/office-after-hours`. No remote is configured; local commits are not an off-machine backup.
+Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. Combat Alpha is checkpointed at `74d1cb5`, Office After Hours at `65d2f3b`, and Incident 001 work uses `codex/incident-001`. No remote is configured; local commits are not an off-machine backup.

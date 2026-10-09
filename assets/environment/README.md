@@ -18,3 +18,9 @@ Replacement priorities after visual feedback: a cohesive licensed office chair a
 workstation prop set, subtle tileable carpet/wood/paint PBR textures, and representative
 rigged characters. Record source URL, author, license, and attribution requirements
 before importing any replacements. Keep the tested simplified collision envelopes.
+
+Incident 001 adds original procedural transaction labels, a solid boss diamond, translucent
+false-copy silhouettes reusing the existing enemy mesh parts, dashboard color/text
+changes, and handcrafted report text. These are authored locally in the incident
+scripts; no external meshes, images, fonts, or sounds were introduced. Their rendered
+appearance was inspected; the mannequin and copy silhouettes remain placeholders.

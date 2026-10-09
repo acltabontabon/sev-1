@@ -1,13 +1,16 @@
 # SEV-1 Implemented Architecture
 
-This describes the Office After Hours implementation inspected on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours and Incident 001, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
-`project.godot` opens `game/main.tscn`. The project uses Godot 4.7.2 standard, GDScript, Forward+, a 1280×720 development viewport, physics interpolation, and the default 60 Hz physics tick. The launcher enforces the 4.7.2 stable version family. Graphics are configured in the main scene through sky/ambient lighting, directional shadows, local colored lights, SSAO, glow, and light fog.
+`project.godot` opens `game/incidents/missing_transaction.tscn`, which inherits `game/main.tscn` and adds a local Incident controller. The base scene still launches the single-enemy regression arena. The project uses Godot 4.7.2 standard, GDScript, Forward+, a 1280×720 development viewport, physics interpolation, and the default 60 Hz physics tick. The launcher enforces the 4.7.2 stable version family. Graphics are configured in the main scene through sky/ambient lighting, directional shadows, local colored lights, SSAO, glow, and light fog.
 
 ```text
-Main                       game/main.tscn + main.gd
+Incident001                incidents/missing_transaction.tscn (inherits Main)
+  Incident                 incidents/missing_transaction.gd
+    Spawned records/boss   existing enemy scene; variance.gd for boss
+Main base                  game/main.tscn + main.gd
   WorldEnvironment/lights  scene-owned presentation
   OfficeAfterHours         rooms/office/office_after_hours.tscn
     Navigation             offline-baked NavigationMesh
@@ -27,12 +30,12 @@ Main                       game/main.tscn + main.gd
 
 | Owner | Implemented responsibility |
 | --- | --- |
-| [Main](../game/main.gd) | Connects capture, death, and reset signals. Pauses/resumes the tree and restores both actors in place. R is handled here, including while paused. |
+| [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal capture. R works while paused. |
 | [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, procedural limb motion, health/invulnerability, attack request, damage/death, and reset. |
 | [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
 | [Enemy](../game/enemies/incident.gd) | Pursuit within detection distance, direction committed at attack start, telegraph/recovery, health, flash, short stagger, knockback, defeat, and reset. Native NavigationAgent3D follows the office mesh while approaching; attack timing/facing remains unchanged. |
-| [HUD](../game/ui/playtest_hud.gd) | Capture prompt, fighter health, attack state, hit marker, damage flash, and defeat/retry text. Reads the two known actors rather than a general UI data layer. |
+| [HUD](../game/ui/playtest_hud.gd) | Capture prompt, fighter health, attack state, hit marker, damage flash, and defeat/retry text. Reads the known actors in the lab, or the local Incident controller for objectives, narrative, investigation, boss health, and reports. |
 | [Room](../game/rooms/office/office_after_hours.tscn) | Authored office shell, workstation instances, glass conference room, operations hardware, practical lights, and baked navigation. |
 
 There are no autoloads, dedicated health component, animation framework, or global event bus. Three typed AttackProfile Resources (`slash.tres`, `reverse_slash.tres`, `finisher.tres`) define player attacks. Other tuning lives in exported script properties and scene overrides. Health belongs to each actor; the only shared gameplay component is melee, justified by its two users.
@@ -63,11 +66,11 @@ Impact freezes the two actors and their melee timers locally for 45/55/80 ms by 
 
 The enemy exposes IDLE, APPROACH, TELEGRAPH, ATTACK, RECOVER, REACT, and DEAD states. It commits direction at wind-up and shows the full warning reach throughout. Reaction does not interrupt a committed attack, preventing indefinite stun lock. Death cancels damage; player death also cancels the enemy swing before pausing.
 
-## Pause and reset
+## Base arena pause and reset
 
 Main, HUD, and CameraRig process while paused; both fighters are explicitly pausable. Capture changes toggle tree pause. The initial click resumes and is consumed before it can trigger a strike. Escape or focus loss pauses combat and releases the cursor. Headless execution skips focus-loss release.
 
-R restores existing actors' positions, health, attack timers, collision state, and camera, and clears HUD hit/hurt timers, combo buffers, dodge state/pose, local hit-stop, camera impulse, and sparks. It does not instantiate another opponent. A player falling below the safety threshold requests the same encounter reset; enemy fall recovery resets the enemy. There is no persistent run history. The workstation loop and postmortem are not implemented by this reset code.
+R restores existing actors' positions, health, attack timers, collision state, and camera, and clears HUD hit/hurt timers, combo buffers, dodge state/pose, local hit-stop, camera impulse, and sparks. It does not instantiate another opponent. A player falling below the safety threshold requests the same encounter reset; enemy fall recovery resets the enemy. There is no persistent run history. In the episode, Main instead resets the Incident controller and player; the controller removes dynamic actors and restores Friday, evidence, reports, dashboards, and lighting.
 
 ## Physics and assets
 
@@ -83,13 +86,13 @@ Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, 
 
 ## Validation and limits
 
-`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, and `tests/office_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
+`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, and `tests/incident_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
 
-The last existing results from 10 October 2026 report 16 movement, 29 combat, 40 alpha, and 9 office assertions passing. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
+The 10 October 2026 results report 138 assertions passing: 16 movement, 29 combat, 40 alpha, 9 office, and 44 incident. Import and all script checks also pass. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
 
 `tests/capture_preview.gd -- --combat` stages a reproducible graphical shot and writes an ignored preview. It deliberately overrides capture-driven pause during setup, freezes the action, and cleans up paused audio on exit. That staged image is useful for visual inspection, not evidence of normal encounter pacing.
 
-Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no progression, narrative sequence, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
+Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no progression, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
 
 ## Office After Hours environment
 
@@ -130,11 +133,27 @@ python3 tools/validate.py
 ```
 
 This uses Godot's [static collision navigation bake](https://docs.godotengine.org/en/stable/tutorials/navigation/navigation_using_navigationmeshes.html)
-and saves `navigation.tres`; no runtime bake occurs. No crowd avoidance is needed for
-one enemy. Furniture-top pursuit is not supported; the intended encounter uses the
+and saves `navigation.tres`; no runtime bake occurs. Encounters activate one damaging enemy at a time, so no crowd avoidance is introduced. Furniture-top pursuit is not supported; the intended encounter uses the
 floor and ramp-connected conference deck.
 
 Office integration tests check the clear floor lane, workstation collision, dodge and
 camera near the conference boundary, real enemy pursuit around desks and up the ramp,
 and repeated-reset stability. Rendered views and frame-time measurements are produced
 by `tests/office_preview.gd`; see README for the command and measured results.
+
+
+## Incident 001 orchestration
+
+`game/incidents/missing_transaction.gd` owns the explicit sequence ALERT → ENCOUNTER_ONE → INVESTIGATION → ENCOUNTER_TWO → BOSS → RESOLVED, with FAILED reachable from every live stage. Invalid skips and repeated terminal transitions are ignored. No autoload, quest framework, asynchronous gameplay timer, external asset, or runtime service was added. Main's existing signal subscriptions are connected once and never reconnected on restart.
+
+The inherited lab enemy is hidden, disabled, and removed from the melee target group. Original player, enemy, melee, camera, office geometry, navigation, and tuning files are unchanged. A seven-second alert runs only during active play; a two-second arrival delay puts the first enemy in play around nine seconds. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes only pursuit speed from 2.4 to 3.4 m/s. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
+
+Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
+
+`game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains the existing collapse pose and removes projections; there is no imported boss animation.
+
+The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player and camera. A fresh scene load also resets everything; nothing persists between runs.
+
+`tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
+
+Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with no upgrades or healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor, Windows runtime test, or release build is included.

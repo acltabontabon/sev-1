@@ -13,17 +13,26 @@ func _ready() -> void:
 
 
 func _on_capture_changed(active: bool) -> void:
+	var incident: Node = get_node_or_null("Incident")
+	if active and incident != null and incident.terminal():
+		player.camera_rig.set_capture(false)
+		return
 	get_tree().paused = not active
 
 
 func _on_player_died() -> void:
 	enemy.melee.cancel()
+	if has_node("Incident"):
+		$Incident.fail()
 	player.camera_rig.set_capture(false)
 
 
 func reset_encounter() -> void:
 	player.reset_player()
-	enemy.reset_enemy()
+	if has_node("Incident"):
+		$Incident.reset_incident()
+	else:
+		enemy.reset_enemy()
 	$HUD.hit_left = 0.0
 	$HUD.hurt_left = 0.0
 	$HUD.refresh()

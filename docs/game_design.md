@@ -4,7 +4,7 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** enter the combat lab → approach one Production Incident → read its warning → move out of danger and strike during an opening → defeat it or lose health → reset both fighters with R. There are no waves, run rewards, saves, or permanent unlocks.
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. R resets the entire episode. The single-opponent combat lab remains as a regression scene. There are no run rewards, saves, or permanent unlocks.
 
 **Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence rules are unsettled.
 
@@ -120,7 +120,7 @@ A future manager request—“Leadership already promised the client; can you de
 
 ## Death and post-incident review
 
-The established narrative goal is to turn death/restart into an absurd Post-Incident Review. The current prototype only pauses and offers R to reset; no report or workstation sequence exists.
+The established narrative goal is to turn death/restart into an absurd Post-Incident Review. Incident 001 now implements deterministic victory/death reports and a Friday reset with R; a cinematic workstation sequence remains deferred.
 
 Use handcrafted templates with deterministic contextual variation based on recorded run events. For example, “SEV-404 — Developer Unexpectedly Ceased Functioning” might assign “Improve anticipation” to “You,” due “Yesterday,” after a missed telegraph. Separate truthful gameplay feedback from the fictional organization's unfair assessment so players can still learn.
 
@@ -136,7 +136,7 @@ Keep writing dry, absurd, occasionally dark, and capable of unexpected empathy. 
 
 ## Incident 001: The Missing Transaction
 
-**Established slice target:** a compact, replayable 5–10-minute episode combining satisfying combat, a representative corporate environment, reconciliation horror, and an incident review. It is not built yet. The following beat structure is a proposed minimum to validate that target.
+**Established slice target:** a compact, replayable 5–10-minute episode combining satisfying combat, a representative corporate environment, reconciliation horror, and an incident review. A first implementation now exists; the duration, feel, and creative acceptance remain unverified playtest targets. The following beat structure remains the creative direction; [architecture](architecture.md#incident-001-orchestration) records the narrower implemented rules, including two harmless false copies and no wrong-strike multiplication penalty.
 
 1. **Friday interruption.** In one small office, a missing transaction alert interrupts departure. A brief management message supplies pressure. Use in-world text and simple staging before considering a cinematic pipeline.
 2. **A visible discrepancy.** Conflicting records intrude into the office. Teach one perceptual cue for a genuine threat; no accounting task or coding knowledge gates progress.

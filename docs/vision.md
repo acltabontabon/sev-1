@@ -31,7 +31,7 @@ The identity, Friday loop, six thematic circles, systemic revelation, visual con
 
 ## Current boundary
 
-The playable is a combat laboratory with one opponent and a temporary mannequin. It establishes a foundation, not the finished art style or a narrative episode. Preserve it while refining feel. No new gameplay is authorized by these planning documents alone.
+The playable now includes the explicitly authorized Incident 001 episode in the Office After Hours, built on the preserved combat laboratory. Its temporary characters, encounter balance, and narrative pacing still need human acceptance; it does not establish the finished art style or authorize the rest of the campaign. No new gameplay is authorized by these planning documents alone.
 
 The human creator is the final creative decision-maker and playtester. Codex handles implementation, configuration, and validation in small, reviewable increments.
 
