@@ -8,7 +8,7 @@ Advance through playable evidence, not calendar promises. Each milestone has an 
 | --- | --- | --- |
 | 1. First playable prototype | Technical core implemented: movement, camera, one melee attack, one enemy, HUD, health, pause, death/reset. Human acceptance pending. | Director can play and retry reliably, understand attacks, and identify specific feel problems. Existing regression checks remain green. |
 | 2. Combat Alpha | Technical implementation ready for playtest: buffered three-hit combo, directional dodge, hit-stop/impulse/sparks, explicit enemy states, and clean resets. Human acceptance pending. | Fighting one enemy is rewarding without jokes or rewards; threats and defensive outcomes are fair and repeatable. |
-| 3. Visual vertical slice | Deferred. Finish one small office area with a coherent asset/animation pipeline, credible materials, deliberate light, and a readable encounter. | Director accepts the visual standard; moving combat remains readable; record frame times, resolution, and settings on the M2 Pro. Establish a Windows build check before major content expansion. |
+| 3. The Office After Hours | Implemented environment pass: workstations, glazed conference room, operations wall, after-hours lighting, shared materials, and baked enemy routes. Visual acceptance remains pending; characters and furniture remain simplified. | Director accepts the visual standard; moving combat remains readable; record frame times, resolution, and settings on the M2 Pro. Establish a Windows build check before major content expansion. |
 | 4. First narrative incident | Deferred. Build [Incident 001: The Missing Transaction](game_design.md#incident-001-the-missing-transaction), reusing proven combat and office assets. | A replayable 5–10-minute experience teaches its true/false cue, supports resolution and death/review/retry, and works for a non-developer. It is enjoyable without progression. |
 | 5. Roguelite progression prototype | Deferred until the prior gates pass. One small upgrade selection, one meaningful run modifier, and a bounded Technical Debt experiment; expand contextual postmortem variations. | The player understands the tradeoff, can recognize its later consequence, and wants to try another choice. Do not add Burnout and Reputation simultaneously. |
 | 6. Expanded content | Conditional. Add only encounter, enemy, and ability variations supported by playtests and a sustainable asset pipeline. | Added content creates different decisions rather than repetition; production and regression costs stay manageable. |
@@ -19,9 +19,9 @@ The intended Windows release target is preserved. Native Windows runtime testing
 
 ## Next development increment
 
-Play the Combat Alpha in the same one-enemy office lab. Evaluate combo rhythm, dodge distance/recovery, camera aiming, impact strength, and warning fairness. Tune the smallest changes supported by that feedback before adding enemies, upgrades, or progression.
+Play Combat Alpha in the Office After Hours arena. Review the starting desk, central fight, conference ramp/glass, and operations corner under movement. Evaluate combo rhythm, dodge distance/recovery, camera aiming, impact strength, and warning fairness. Tune the smallest changes supported by that feedback before adding enemies, upgrades, or progression.
 
-Current defensive rules: dodge cancels wind-up/recovery, not an active strike; movement input chooses direction, otherwise dodge goes backward relative to the camera. These are implemented experiments, not permanent design commitments. Automated validation passes 85 assertions; human acceptance is still required.
+Current defensive rules: dodge cancels wind-up/recovery, not an active strike; movement input chooses direction, otherwise dodge goes backward relative to the camera. These are implemented experiments, not permanent design commitments. Automated validation passes 94 assertions, including office traversal and pursuit; human acceptance is still required.
 
 ## Open creative decisions
 
@@ -37,9 +37,9 @@ Current defensive rules: dodge cancels wind-up/recovery, not an active strike; m
 ## Planning corrections from vision alignment
 
 - The old first-playable proposal combined a 3–5-minute wave encounter with an upgrade choice. It is superseded: the current one-opponent lab is milestone 1; the 5–10-minute narrative incident is milestone 4; upgrades start at milestone 5.
-- “Incident Response” in the existing HUD is a prototype label. “Incident 001: The Missing Transaction” is the future narrative slice, not a claim that the current room implements that story.
+- “After Hours” in the HUD names the current environment pass. “Incident 001: The Missing Transaction” is the future narrative slice, not a claim that the current room implements that story.
 - Dodge and combos are now implemented Combat Alpha experiments. A post-incident report, workstation reset fiction, and the six circles remain deferred. The current R reset remains a development convenience.
 - The old proposed folder tree included progression/UI/data concepts that do not exist. [Architecture](architecture.md) now describes only the inspected implementation.
-- The lab's primitive character, generic opponent, and teal/amber room are temporary. They do not fulfill the representative visual-quality milestone.
+- The old movement lab has been replaced in the main scene by Office After Hours. Characters and simplified furniture remain provisional; the director has not yet accepted the final visual standard.
 
-Combat Alpha preserves the office, free camera, and existing movement baseline. Automated results do not replace the pending human playtest.
+Office After Hours preserves Combat Alpha tuning, the free camera, and the existing movement baseline. Automated results do not replace the pending human playtest.

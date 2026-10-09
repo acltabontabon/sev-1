@@ -28,7 +28,7 @@ func _on_health_changed(_value: int) -> void:
 
 func refresh() -> void:
 	prompt.visible = not camera_rig.controls_active
-	status.text = "COMBAT LAB   /   LIVE" if camera_rig.controls_active else "COMBAT LAB   /   PAUSED"
+	status.text = "OFFICE AFTER HOURS   /   LIVE" if camera_rig.controls_active else "OFFICE AFTER HOURS   /   PAUSED"
 	$Margin/VBox/Health.text = "YOU  %d / %d     |     INCIDENT  %d / %d" % [player.health, player.max_health, enemy.health, enemy.max_health]
 	if player.health <= 0:
 		status.text = "YOU ARE OFFLINE  /  R TO RETRY"
@@ -37,7 +37,7 @@ func refresh() -> void:
 		status.text = "INCIDENT RESOLVED  /  R TO RUN IT BACK"
 		$CapturePrompt/Panel/Padding/Text.text = "INCIDENT RESOLVED\n\nPress R for another round.\nClick to keep exploring."
 	else:
-		$CapturePrompt/Panel/Padding/Text.text = "COMBAT ALPHA  /  CLICK TO BEGIN\n\nLMB or F: three-hit chain. Press again near recovery.\nQ or right mouse: dodge. Move to choose direction.\nNo movement input: dodge backward.\n\nWatch the orange warning. Cyan means invulnerable.\nR resets both fighters. Escape pauses."
+		$CapturePrompt/Panel/Padding/Text.text = "FRIDAY 16:59  /  CLICK TO BEGIN\n\nLMB or F: three-hit chain. Press again near recovery.\nQ or right mouse: dodge. Move to choose direction.\nNo movement input: dodge backward.\n\nWatch the orange warning. Cyan means invulnerable.\nR resets both fighters. Escape pauses."
 
 
 func _on_hit() -> void:

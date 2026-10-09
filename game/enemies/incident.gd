@@ -23,6 +23,7 @@ var target: CharacterBody3D
 var flash_material: StandardMaterial3D
 var state: State = State.IDLE
 var hitstop_left: float = 0.0
+@onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
 @onready var melee: Node3D = $Visual/Melee
 @onready var tell: MeshInstance3D = $Visual/Telegraph
@@ -131,9 +132,15 @@ func _physics_process(delta: float) -> void:
 				if get_world_3d().direct_space_state.intersect_ray(query).is_empty():
 					melee.start()
 					state = State.TELEGRAPH
-			else:
+			# Being close through furniture is not an attack opportunity: keep routing.
+			if state != State.TELEGRAPH:
 				state = State.APPROACH
 				direction = planar.normalized()
+				# The office has furniture; use its baked routes without changing attacks.
+				if NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:
+					navigation.target_position = target.global_position
+					var next: Vector3 = navigation.get_next_path_position() - global_position
+					direction = Vector3(next.x, 0, next.z).normalized()
 	velocity.x = direction.x * move_speed + knockback.x
 	velocity.z = direction.z * move_speed + knockback.z
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 22.0 * delta

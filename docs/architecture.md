@@ -1,6 +1,6 @@
 # SEV-1 Implemented Architecture
 
-This describes the combat-lab implementation inspected on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes the Office After Hours implementation inspected on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
@@ -9,7 +9,8 @@ This describes the combat-lab implementation inspected on 10 October 2026. Futur
 ```text
 Main                       game/main.tscn + main.gd
   WorldEnvironment/lights  scene-owned presentation
-  MovementLab              rooms/movement_lab.tscn
+  OfficeAfterHours         rooms/office/office_after_hours.tscn
+    Navigation             offline-baked NavigationMesh
   Player                   player/player.tscn + player.gd
     Visual/Melee           combat/melee_attack.gd
     Visual/WeaponPivot     procedural baton pose
@@ -30,9 +31,9 @@ Main                       game/main.tscn + main.gd
 | [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, procedural limb motion, health/invulnerability, attack request, damage/death, and reset. |
 | [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
-| [Enemy](../game/enemies/incident.gd) | Direct pursuit within detection distance, direction committed at attack start, telegraph/recovery, health, flash, short stagger, knockback, defeat, and reset. No navigation agent. |
+| [Enemy](../game/enemies/incident.gd) | Pursuit within detection distance, direction committed at attack start, telegraph/recovery, health, flash, short stagger, knockback, defeat, and reset. Native NavigationAgent3D follows the office mesh while approaching; attack timing/facing remains unchanged. |
 | [HUD](../game/ui/playtest_hud.gd) | Capture prompt, fighter health, attack state, hit marker, damage flash, and defeat/retry text. Reads the two known actors rather than a general UI data layer. |
-| [Room](../game/rooms/movement_lab.tscn) | Authored text scene with static floor/walls, ramp/deck, cabinets, structural props, floor markings, and signage. |
+| [Room](../game/rooms/office/office_after_hours.tscn) | Authored office shell, workstation instances, glass conference room, operations hardware, practical lights, and baked navigation. |
 
 There are no autoloads, dedicated health component, animation framework, or global event bus. Three typed AttackProfile Resources (`slash.tres`, `reverse_slash.tres`, `finisher.tres`) define player attacks. Other tuning lives in exported script properties and scene overrides. Health belongs to each actor; the only shared gameplay component is melee, justified by its two users.
 
@@ -82,10 +83,58 @@ Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, 
 
 ## Validation and limits
 
-`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
+`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, and `tests/office_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
 
-The last existing results from 10 October 2026 report 16 movement, 29 combat, and 40 alpha assertions passing. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
+The last existing results from 10 October 2026 report 16 movement, 29 combat, 40 alpha, and 9 office assertions passing. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
 
 `tests/capture_preview.gd -- --combat` stages a reproducible graphical shot and writes an ignored preview. It deliberately overrides capture-driven pause during setup, freezes the action, and cleans up paused audio on exit. That staged image is useful for visual inspection, not evidence of normal encounter pacing.
 
-Known limits: direct enemy pursuit can stick on obstacles; art/animation and sounds are placeholders; no progression, narrative sequence, export validation, long-duration performance soak, or Windows runtime test is present. The short 1080p Forward+/Metal measurement on M2 Pro averaged 120.0 FPS, with median/p95/max frame times of 8.31/10.46/11.95 ms (2,401 samples, five-second warm-up excluded). `tests/alpha_preview.gd` reproduces this 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
+Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no progression, narrative sequence, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
+
+## Office After Hours environment
+
+The 28×32 m shell and original ramp/deck slope preserve the movement foundation. The
+central x=−4…4 circulation spine remains open for combat; workstations occupy the west
+side, the spawn has a task-lit workstation, the east deck holds the glazed conference
+room, and the north wall contains production dashboards and racks. Chairs and small
+clutter are visual-only; desktops, partitions, architectural glass, ramp guards, and
+major cabinets have simple world-layer box collision. The old movement lab remains
+available as a reference scene but is no longer the main environment.
+
+`tools/build_office.py` deterministically authors the static `.tscn` layout, reusable
+`workstation.tscn`, `chair.tscn`, `server_rack.tscn`, and shared material `.tres` files.
+Edit the authoring source before regeneration; direct generated-file edits will be
+overwritten. No runtime prop generation or new dependencies are required. All props
+are visible and editable in the Godot editor. Original asset provenance and replacement
+priorities live in [assets/environment/README.md](../assets/environment/README.md).
+
+Lighting uses subdued cool ambient fill, six ceiling spot pools (two shadow-casting),
+a warm workstation lamp, restrained incident spill, window bounce, and conference fill.
+Existing Forward+, SSAO, MSAA 2×, glow, and fog remain; glow was reduced. Roughness and
+metallic values distinguish stone, wood, plastic, fabric, metal, and glass. Four small
+seeded noise textures supply surface grain. There is no flashing effect or expensive
+custom shader. The negative uptime and nested frames on a sealed service door are
+static surreal details, not a reality-shifting mechanic or additional playable area.
+
+Furniture required routing beyond the previous straight-line chase. The enemy now
+uses a native NavigationAgent3D only for approach direction. Damage, detection range,
+attack range, timings, reactions, dodge, and player controls are unchanged. The baked
+mesh uses static world collision, 0.75 m clearance, 2 m agent height, and a 0.5 m path
+height offset matching the voxelized floor. Ramp rails block invalid side entry.
+Rebake after collision changes:
+
+```sh
+python3 tools/build_office.py
+sh tools/godot.sh --headless --path . --script tools/bake_office_navigation.gd
+python3 tools/validate.py
+```
+
+This uses Godot's [static collision navigation bake](https://docs.godotengine.org/en/stable/tutorials/navigation/navigation_using_navigationmeshes.html)
+and saves `navigation.tres`; no runtime bake occurs. No crowd avoidance is needed for
+one enemy. Furniture-top pursuit is not supported; the intended encounter uses the
+floor and ramp-connected conference deck.
+
+Office integration tests check the clear floor lane, workstation collision, dodge and
+camera near the conference boundary, real enemy pursuit around desks and up the ramp,
+and repeated-reset stability. Rendered views and frame-time measurements are produced
+by `tests/office_preview.gd`; see README for the command and measured results.

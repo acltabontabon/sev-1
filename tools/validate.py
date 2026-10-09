@@ -31,10 +31,11 @@ def run(name, args, timeout=120):
 if __name__ == "__main__":
     LOGS.mkdir(exist_ok=True)
     run("import", ["--headless", "--path", ".", "--import"])
-    for script in sorted([*ROOT.glob("game/**/*.gd"), *ROOT.glob("tests/**/*.gd")]):
+    for script in sorted([*ROOT.glob("game/**/*.gd"), *ROOT.glob("tests/**/*.gd"), *ROOT.glob("tools/*.gd")]):
         relative = script.relative_to(ROOT).as_posix()
         run(relative.replace("/", "_"), ["--headless", "--path", ".", "--check-only", "--script", relative])
     run("movement", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/run_tests.gd"])
     run("combat", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/combat_tests.gd"])
     run("alpha", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/alpha_tests.gd"])
+    run("office", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/office_tests.gd"])
     print("All checks passed. Graphical review and human playtesting remain separate.")

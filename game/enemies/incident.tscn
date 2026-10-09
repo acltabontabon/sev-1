@@ -93,3 +93,10 @@ pixel_size = 0.005
 outline_size = 6
 modulate = Color(1, 0.5, 0.22, 1)
 text = "PRODUCTION INCIDENT"
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.35
+path_height_offset = 0.5
+target_desired_distance = 1.2
+radius = 0.65
+avoidance_enabled = false

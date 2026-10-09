@@ -64,6 +64,7 @@ func _run() -> void:
 		await physics_frame
 		await process_frame
 	paused = true
+	scene.get_node("HUD/CapturePrompt").hide()
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://builds/alpha_preview.png")
 	player.melee.cancel()
@@ -74,6 +75,7 @@ func _run() -> void:
 		await physics_frame
 		await process_frame
 	paused = true
+	scene.get_node("HUD/CapturePrompt").hide()
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://builds/alpha_dodge.png")
 	player.melee.cancel()
