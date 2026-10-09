@@ -122,6 +122,8 @@ func _refresh_incident(incident: Node) -> void:
 	var run: Node = incident.run
 	$Margin/VBox/Burnout.text = "BURNOUT %d / %d • %s • Own damage / risk +%d%% / +%d%%\n%s" % [run.burnout, run.burnout_limit, run.burnout_title(), roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
 	$Margin/VBox/Burnout.modulate = [Color(.65, .9, 1), Color(1, .8, .4), Color(1, .55, .4)][run.burnout_band()]
+	if not incident.buff_text().is_empty():
+		$Margin/VBox/Burnout.text += " • " + incident.buff_text()
 	if incident.challenge_result == "Active":
 		$Margin/VBox/Burnout.text += " • Optional containment ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
 	elif incident.corporate_choice == 0:
@@ -132,7 +134,7 @@ func _refresh_incident(incident: Node) -> void:
 	comfort.visible = not incident.terminal()
 	$Margin.visible = camera_rig.controls_active and not incident.terminal() and not incident.modal_pending()
 	$Controls.visible = $Margin.visible
-	if incident.stage == incident.Stage.ALERT or (incident.stage == incident.Stage.BOSS and incident.stage_time < incident.presentation.boss_length + 2):
+	if incident.stage == incident.Stage.ALERT or (incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < incident.presentation.boss_length + 2):
 		$Margin.visible = false
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
 	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."

@@ -1,9 +1,9 @@
-[gd_resource type="Theme" format=3]
+[gd_resource type="Theme" format=3 uid="uid://bp6vklvjbukgs"]
 
-[ext_resource type="FontFile" path="res://assets/fonts/barlow_condensed_semibold.ttf" id="1_2inik"]
+[ext_resource type="FontFile" uid="uid://cqgcs6cetmow8" path="res://assets/fonts/barlow_condensed_semibold.ttf" id="1_2inik"]
 [ext_resource type="FontVariation" path="res://game/ui/font_strong.tres" id="2_spbdo"]
 [ext_resource type="FontVariation" path="res://game/ui/font_body.tres" id="3_n57ro"]
-[ext_resource type="FontFile" path="res://assets/fonts/barlow_condensed_bold.ttf" id="4_7kvim"]
+[ext_resource type="FontFile" uid="uid://cr4et5vqg0kxh" path="res://assets/fonts/barlow_condensed_bold.ttf" id="4_7kvim"]
 [ext_resource type="FontVariation" path="res://game/ui/font_mono.tres" id="5_6p3tp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2inik"]

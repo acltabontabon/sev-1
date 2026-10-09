@@ -24,12 +24,15 @@ var peak_burnout: int = 0
 var burnout: int = 0
 var burnout_notice: String = ""
 var debt: int = 0
+## Temporary pantry bonus to outgoing damage; owned and timed by the incident.
+var motivation: float = 0.0
 var choices: Array[int] = []
 const TITLES: Array[String] = ["Ship It Friday", "Add More Tests", "Temporary Workaround"]
 
 
 func reset_run() -> void:
 	debt = 0
+	motivation = 0.0
 	peak_burnout = 0
 	burnout = 0
 	burnout_notice = ""
@@ -58,7 +61,7 @@ func pressure(value: int = -1) -> float:
 
 
 func outgoing(extra_choice: int = -1, burnout_value: int = -1) -> float:
-	return clampf(1.0 + (choices.count(0) + (1 if extra_choice == 0 else 0)) * damage_bonus + burnout_offense(burnout_value), 1.0, 2.0)
+	return clampf(1.0 + (choices.count(0) + (1 if extra_choice == 0 else 0)) * damage_bonus + burnout_offense(burnout_value) + motivation, 1.0, 2.0)
 
 
 func incoming(extra_choice: int = -1, burnout_value: int = -1) -> float:

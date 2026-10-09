@@ -67,6 +67,9 @@ func _run() -> void:
 			player.position = incident.CONSOLE_POSITION
 			await key(KEY_E)
 			await key(KEY_3)
+		elif incident.stage == incident.Stage.BOSS and not incident.boss_triggered:
+			player.position = Vector3(9, .05, -31.5)
+			await frames(3)
 		elif is_instance_valid(incident.active_enemy):
 			var foe: CharacterBody3D = incident.active_enemy
 			if not captured_combat:

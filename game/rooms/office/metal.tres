@@ -1,7 +1,21 @@
 [gd_resource type="StandardMaterial3D" format=3]
 
+[ext_resource type="Texture2D" path="res://assets/environment/textures/brushed_metal/color.jpg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/environment/textures/brushed_metal/normal.jpg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/environment/textures/brushed_metal/roughness.jpg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/environment/textures/brushed_metal/metalness.jpg" id="4"]
 
 [resource]
-albedo_color = Color(0.105, 0.125, 0.14, 1)
-roughness = 0.32
-metallic = 0.8
+albedo_color = Color(0.45, 0.5, 0.55, 1)
+roughness = 1
+metallic = 1
+albedo_texture = ExtResource("1")
+normal_texture = ExtResource("2")
+roughness_texture = ExtResource("3")
+metallic_texture = ExtResource("4")
+normal_enabled = true
+roughness_texture_channel = 0
+metallic_texture_channel = 0
+uv1_triplanar = true
+uv1_world_triplanar = true
+uv1_scale = Vector3(1.0, 1.0, 1.0)

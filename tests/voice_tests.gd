@@ -11,7 +11,7 @@ func _run() -> void:
 	player = scene.get_node("Player")
 	var voice: Node = incident.voice
 	await frames(40)
-	check(voice.lines.size() == 23 and voice.current_line == "opening", "opening requests the authored narrator line")
+	check(voice.lines.size() == 31 and voice.current_line == "opening", "opening requests the authored narrator line")
 	voice.clear()
 	voice.request("enemy")
 	await frames(2)
@@ -71,6 +71,8 @@ func _run() -> void:
 	incident._cleanup()
 	incident._enter(incident.Stage.BOSS)
 	await frames(2)
+	check(voice.current_line == "gate_open" and not incident.boss_triggered, "boss stage opens the gate before any arrival")
+	await enter_vault()
 	check(voice.current_line == "variance_intro" and voice.positional.get_parent() == voice, "boss arrival uses scene-owned positional speech")
 	check(voice.positional.global_position.distance_to(incident.arrival_site() + Vector3.UP * 1.5) < .01, "arrival speech originates at the boss site")
 	incident.presentation.skip()

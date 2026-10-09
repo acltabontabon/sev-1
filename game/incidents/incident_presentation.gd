@@ -78,6 +78,9 @@ var pools: Array[Light3D] = []
 var pool_energy: Array[float] = []
 var dark: Material = preload("res://game/rooms/office/black.tres")
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var corridor_lights: Array[OmniLight3D] = []
+var corridor_leds: Array[MeshInstance3D] = []
+var alert_material: Material = preload("res://game/rooms/office/alert.tres")
 
 
 func _ready() -> void:
@@ -191,6 +194,11 @@ func _ready() -> void:
 	for index in range(6):
 		pools.append(incident.room.get_node("CeilingPool%d" % index))
 		pool_energy.append(pools[index].light_energy)
+	for index in range(4):
+		corridor_lights.append(incident.room.get_node("CorridorLight%d" % index))
+	for rack: Node in incident.room.get_children():
+		if str(rack.name).begins_with("CorridorRack"):
+			corridor_leds.append(rack.get_node("Leds"))
 	emerging = RECORD_VISUAL.instantiate()
 	var menace: OmniLight3D = OmniLight3D.new()
 	menace.position = Vector3(0, 1.4, .8)
@@ -254,6 +262,7 @@ func reset_story() -> void:
 	beat = 0
 	shake = 0
 	_end_opening()
+	_restore_corridor()
 	desk.reset_screen()
 	desk.set_live(true)
 	var character: Node3D = incident.player.get_node("Visual/Character")
@@ -272,6 +281,14 @@ func _restore_lights() -> void:
 	for index in range(pools.size()):
 		pools[index].light_energy = pool_energy[index]
 		incident.room.get_node("Diffuser%d" % index).material_override = null
+
+
+func _restore_corridor() -> void:
+	for light in corridor_lights:
+		light.light_color = Color(.55, .75, 1)
+		light.light_energy = 1.6
+	for led in corridor_leds:
+		led.material_override = null
 
 
 func set_screens(color: Color) -> void:
@@ -333,6 +350,7 @@ func skip() -> void:
 	elif incident.stage == incident.Stage.BOSS and not is_instance_valid(incident.active_enemy):
 		voice.clear()
 		boss_seen = true
+		incident.boss_triggered = true
 		incident.spawn_delay = 0
 		incident._spawn()
 
@@ -352,18 +370,53 @@ func stage_changed() -> void:
 			say("contain")
 			set_screens(Color(.65, .12, .04))
 		incident.Stage.BOSS:
-			say("variance_intro")
+			say("gate_open")
 			boss_length = 1.5 if boss_seen else 6.0
-			incident.spawn_delay = boss_length
 			incident.light_target = 3.7
 			set_screens(Color(.45, .12, .3))
-			sound("res://assets/audio/boss_arrival.wav")
+			sting(preload("res://assets/audio/sfx/door_open.ogg"), -4)
 		incident.Stage.RESOLVED, incident.Stage.FAILED:
 			say("victory" if incident.stage == incident.Stage.RESOLVED else "defeat")
 			say("postmortem")
 			ambient.stop()
 			set_screens(Color(.12, .42, .38) if incident.stage == incident.Stage.RESOLVED else Color(.25, .05, .025))
 			sound("res://assets/audio/resolved.wav" if incident.stage == incident.Stage.RESOLVED else "res://assets/audio/boss_arrival.wav")
+
+
+## The engineer crossed into the vault: the arrival clock starts here.
+func vault_entered() -> void:
+	voice.clear()
+	say("variance_intro")
+	sound("res://assets/audio/boss_arrival.wav")
+
+
+func used(key: String) -> void:
+	var streams: Dictionary = {"coffee": preload("res://assets/audio/sfx/ui_confirm.ogg"), "vending": preload("res://assets/audio/sfx/ui_error.ogg"), "microwave": preload("res://assets/audio/sfx/ui_error.ogg"), "poster": preload("res://assets/audio/sfx/chat_ping_soft.ogg")}
+	sting(streams[key], -8)
+
+
+## Environmental storytelling that runs during play: the gate, the corridor, the sparks.
+func _environment(delta: float) -> void:
+	var gate: Node3D = incident.room.get_node("VaultGate")
+	var open: bool = incident.stage == incident.Stage.BOSS
+	gate.position.y = move_toward(gate.position.y, 5.9 if open else 2.0, delta * 2.2)
+	var z: float = incident.player.global_position.z
+	if open:
+		# Racks fail as the engineer passes them; the light ahead turns red last.
+		for index in range(corridor_lights.size()):
+			var light: OmniLight3D = corridor_lights[index]
+			var passed: bool = z < light.position.z + 2.5
+			light.light_color = light.light_color.lerp(Color(1, .12, .08) if passed else Color(.55, .75, 1), delta * 3.0)
+			light.light_energy = move_toward(light.light_energy, .7 if passed else 1.6, delta * 2.0)
+		for led in corridor_leds:
+			led.material_override = alert_material if led.global_position.z > z - 1.5 and z < -16.5 else null
+		if z < -21.5:
+			say("deployment")
+	if z < -14 and incident.player.global_position.x > 3:
+		for index in range(2):
+			var flicker: bool = rng.randf() < .18
+			incident.room.get_node("SparkLight%d" % index).light_energy = rng.randf_range(1.2, 3.0) if flicker else 0.0
+			incident.room.get_node("Spark%d" % index).visible = flicker
 
 
 func _end_opening() -> void:
@@ -513,6 +566,7 @@ func _process(delta: float) -> void:
 		return
 	if not ambient.playing and DisplayServer.get_name() != "headless":
 		ambient.play()
+	_environment(delta)
 	var time: float = incident.stage_time
 	if incident.stage == incident.Stage.ALERT:
 		if short_opening:
@@ -523,7 +577,8 @@ func _process(delta: float) -> void:
 			_caption_layout(true)
 			hint.visible = skip_unlocked
 			_opening(time, delta)
-	elif incident.stage == incident.Stage.BOSS and time < boss_length + 2:
+	elif incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < boss_length + 2:
+		time = incident.boss_time
 		title.show()
 		title.text = "DISCREPANCY CONVERGING" if time < boss_length - 2 else "THE VARIANCE\nDifference detected. Explanation unavailable."
 		hint.visible = not is_instance_valid(incident.active_enemy)
@@ -540,6 +595,6 @@ func _process(delta: float) -> void:
 			title.text += "\n%d / %d" % [incident.active_enemy.health, incident.active_enemy.max_health]
 			say("boss", true)
 	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 18: say("visibility")
-	if incident.stage == incident.Stage.BOSS and time > 22: say("rca")
+	if incident.stage == incident.Stage.BOSS and incident.boss_time > 22: say("rca")
 	caption.text = voice.subtitle
 	panel.visible = not voice.subtitle.is_empty()

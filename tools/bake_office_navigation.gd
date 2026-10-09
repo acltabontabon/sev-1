@@ -17,7 +17,7 @@ func _bake() -> void:
 	mesh.agent_max_slope = 40
 	mesh.cell_size = 0.25
 	mesh.cell_height = 0.25
-	mesh.filter_baking_aabb = AABB(Vector3(-14, -1, -16), Vector3(28, 6, 32))
+	mesh.filter_baking_aabb = AABB(Vector3(-14, -1, -47), Vector3(42, 8, 63))
 	var source: NavigationMeshSourceGeometryData3D = NavigationMeshSourceGeometryData3D.new()
 	NavigationServer3D.parse_source_geometry_data(mesh, source, room)
 	NavigationServer3D.bake_from_source_geometry_data(mesh, source)

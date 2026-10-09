@@ -135,6 +135,8 @@ func simulated_runs() -> void:
 				player.position = incident.CONSOLE_POSITION
 				await key(KEY_E)
 				await key(KEY_3)
+			elif incident.stage == incident.Stage.BOSS and not incident.boss_triggered:
+				await enter_vault()
 			elif is_instance_valid(incident.active_enemy):
 				var foe: CharacterBody3D = incident.active_enemy
 				# Keep real AI/melee active, but stage both fighters in the clear lane.

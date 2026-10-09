@@ -43,6 +43,7 @@ without an account on 10 October 2026 and reviewed in the running game.
 | --- | --- | --- |
 | Barlow Condensed, Inter, JetBrains Mono typefaces | Official Google Fonts repository; SIL Open Font License 1.1, license text bundled | [assets/fonts](../assets/fonts/README.md), [THIRD_PARTY_NOTICES.txt](../THIRD_PARTY_NOTICES.txt) |
 | 16 interface/effect sounds | Kenney Interface Sounds, Impact Sounds, UI Audio, Sci-Fi Sounds; CC0 1.0 | [assets/audio/sfx](../assets/audio/sfx/README.md) |
+| 7 PBR material sets (1K) | ambientCG and Poly Haven; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md) |
+| 8 pantry props | Kenney Furniture Kit; CC0 1.0, tinted at load | [assets/environment/kenney_furniture](../assets/environment/kenney_furniture/README.md) |
 
-Kenney Furniture Kit (CC0) was downloaded for evaluation only; none of its models are
-imported yet. Mixamo and Freesound remain excluded because they require accounts.
+Kenney's furniture chair and round table were evaluated and rejected as toy-like. Mixamo and Freesound remain excluded because they require accounts.

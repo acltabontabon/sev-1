@@ -1,10 +1,10 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://ctsfwag8qirc5"]
 
 [ext_resource type="PackedScene" path="res://game/player/player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://game/rooms/office/office_after_hours.tscn" id="2"]
-[ext_resource type="Script" path="res://game/ui/playtest_hud.gd" id="3"]
+[ext_resource type="Script" uid="uid://cmld3rtlwvreb" path="res://game/ui/playtest_hud.gd" id="3"]
 [ext_resource type="PackedScene" path="res://game/enemies/incident.tscn" id="4"]
-[ext_resource type="Script" path="res://game/main.gd" id="5"]
+[ext_resource type="Script" uid="uid://dpixbatgb4k5e" path="res://game/main.gd" id="5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
 sky_top_color = Color(0.025, 0.055, 0.09, 1)
@@ -20,7 +20,7 @@ background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
 ambient_light_color = Color(0.45, 0.64, 0.72, 1)
-ambient_light_energy = 0.40
+ambient_light_energy = 0.4
 reflected_light_source = 2
 tonemap_mode = 2
 ssao_enabled = true
@@ -32,72 +32,71 @@ fog_enabled = true
 fog_light_color = Color(0.15, 0.24, 0.29, 1)
 fog_density = 0.006
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=268900053]
 process_mode = 3
 script = ExtResource("5")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1202711072]
 environment = SubResource("Environment")
 
-[node name="KeyLight" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-65, -25, 0)
+[node name="KeyLight" type="DirectionalLight3D" parent="." unique_id=1329493855]
+transform = Transform3D(0.90630776, 0.38302225, -0.17860618, 0, 0.42261824, 0.9063078, 0.42261827, -0.8213938, 0.3830222, 0, 0, 0)
 light_color = Color(0.7, 0.84, 1, 1)
 light_energy = 0.45
-shadow_enabled = false
 directional_shadow_max_distance = 50.0
 
-[node name="OfficeAfterHours" parent="." instance=ExtResource("2")]
+[node name="OfficeAfterHours" parent="." unique_id=2009071766 instance=ExtResource("2")]
 
-[node name="Player" parent="." instance=ExtResource("1")]
-process_mode = 1
+[node name="Player" parent="." unique_id=600882714 instance=ExtResource("1")]
 unique_name_in_owner = true
-position = Vector3(0, 0.05, 8)
-
-[node name="Enemy" parent="." instance=ExtResource("4")]
 process_mode = 1
-unique_name_in_owner = true
-position = Vector3(0, 0.05, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 8)
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="Enemy" parent="." unique_id=1830935706 instance=ExtResource("4")]
+unique_name_in_owner = true
+process_mode = 1
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=761355607]
 process_mode = 3
 script = ExtResource("3")
 
-[node name="Margin" type="MarginContainer" parent="HUD"]
+[node name="Margin" type="MarginContainer" parent="HUD" unique_id=293500410]
 offset_left = 32.0
 offset_top = 26.0
 offset_right = 800.0
 offset_bottom = 130.0
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="HUD/Margin"]
+[node name="VBox" type="VBoxContainer" parent="HUD/Margin" unique_id=971222479]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="HUD/Margin/VBox"]
+[node name="Title" type="Label" parent="HUD/Margin/VBox" unique_id=1993592357]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.6, 0.27, 1)
 theme_override_font_sizes/font_size = 28
 text = "SEV—1   /   AFTER HOURS"
 
-[node name="Status" type="Label" parent="HUD/Margin/VBox"]
+[node name="Status" type="Label" parent="HUD/Margin/VBox" unique_id=1714994479]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.85, 0.88, 1)
 theme_override_font_sizes/font_size = 14
 text = "OFFICE AFTER HOURS"
 
-[node name="Health" type="Label" parent="HUD/Margin/VBox"]
+[node name="Health" type="Label" parent="HUD/Margin/VBox" unique_id=193105322]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "YOU  100 / 100     |     INCIDENT  100 / 100"
 
-[node name="AttackState" type="Label" parent="HUD/Margin/VBox"]
+[node name="AttackState" type="Label" parent="HUD/Margin/VBox" unique_id=540984784]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 15
 text = "BATON READY"
 
-[node name="Controls" type="Label" parent="HUD"]
+[node name="Controls" type="Label" parent="HUD" unique_id=213287767]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -108,22 +107,22 @@ offset_right = -24.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.78, 0.88, 0.9, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 16
-text = "WASD  Move   SHIFT  Sprint   SPACE  Jump   LMB / F  Combo   Q / RMB  Dodge   MOUSE  Aim\nR  Reset encounter     ESC  Pause / release mouse     WHEEL  Zoom     CLICK  Resume"
+text = "WASD  Move   SHIFT  Sprint   SPACE  Jump   LMB / F  Combo   Q / RMB  Dodge   MOUSE  Aim
+R  Reset encounter     ESC  Pause / release mouse     WHEEL  Zoom     CLICK  Resume"
 
-[node name="DamageFlash" type="ColorRect" parent="HUD"]
+[node name="DamageFlash" type="ColorRect" parent="HUD" unique_id=631670074]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0.7, 0.03, 0.01, 0)
 
-[node name="HitFeedback" type="Label" parent="HUD"]
+[node name="HitFeedback" type="Label" parent="HUD" unique_id=1368519042]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -133,13 +132,11 @@ offset_left = -100.0
 offset_top = -90.0
 offset_right = 100.0
 offset_bottom = -50.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
-text = ""
 
-[node name="CapturePrompt" type="CenterContainer" parent="HUD"]
+[node name="CapturePrompt" type="CenterContainer" parent="HUD" unique_id=162821209]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -147,11 +144,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="HUD/CapturePrompt"]
+[node name="Panel" type="PanelContainer" parent="HUD/CapturePrompt" unique_id=1269958257]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Padding" type="MarginContainer" parent="HUD/CapturePrompt/Panel"]
+[node name="Padding" type="MarginContainer" parent="HUD/CapturePrompt/Panel" unique_id=326649976]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 30
@@ -159,30 +156,34 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="HUD/CapturePrompt/Panel/Padding"]
+[node name="VBox" type="VBoxContainer" parent="HUD/CapturePrompt/Panel/Padding" unique_id=1607343584]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 12
 
-[node name="Text" type="Label" parent="HUD/CapturePrompt/Panel/Padding/VBox"]
+[node name="Text" type="Label" parent="HUD/CapturePrompt/Panel/Padding/VBox" unique_id=876553272]
 layout_mode = 2
-mouse_filter = 2
 theme_override_font_sizes/font_size = 20
-text = "CLICK TO ENTER THE COMBAT LAB\n\nAim the camera toward the incident.\nLeft click or F swings the baton.\nStep aside when it winds up.\n\nR resets both fighters. Escape pauses."
+text = "CLICK TO ENTER THE COMBAT LAB
+
+Aim the camera toward the incident.
+Left click or F swings the baton.
+Step aside when it winds up.
+
+R resets both fighters. Escape pauses."
 horizontal_alignment = 1
 
-
-[node name="Comfort" type="HBoxContainer" parent="HUD/CapturePrompt/Panel/Padding/VBox"]
+[node name="Comfort" type="HBoxContainer" parent="HUD/CapturePrompt/Panel/Padding/VBox" unique_id=759619031]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 20
+alignment = 1
 
-[node name="Shake" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort"]
+[node name="Shake" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort" unique_id=777667462]
 layout_mode = 2
 button_pressed = true
 text = "Camera shake"
 
-[node name="Flash" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort"]
+[node name="Flash" type="CheckButton" parent="HUD/CapturePrompt/Panel/Padding/VBox/Comfort" unique_id=323625191]
 layout_mode = 2
 button_pressed = true
 text = "Damage flash"

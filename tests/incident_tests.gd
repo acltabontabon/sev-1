@@ -14,6 +14,12 @@ func defeat_wave() -> void:
 		await frames(2)
 
 
+## The Variance waits in the server vault; staged runs walk in by teleport.
+func enter_vault() -> void:
+	player.position = Vector3(9, .05, -31.5)
+	await frames(3)
+
+
 func key(code: Key) -> void:
 	var event: InputEventKey = InputEventKey.new()
 	event.physical_keycode = code
@@ -77,7 +83,10 @@ func _run() -> void:
 	incident.upgrade_ui.buttons[0].pressed.emit()
 	check(incident.run.debt == 30 and incident.run.choices.size() == 2, "button upgrade persists both run decisions")
 	check(incident.stage == incident.Stage.BOSS, "second wave completion starts boss")
-	await frames(450)
+	await frames(120)
+	check(not is_instance_valid(incident.active_enemy) and incident.room.get_node("VaultGate").collision_layer == 0, "boss stage opens the gate and waits for the engineer")
+	await enter_vault()
+	await frames(400)
 	var boss: CharacterBody3D = incident.active_enemy
 	check(boss.max_health == incident.boss_health, "boss health is configured separately")
 	boss.phase_time = 0

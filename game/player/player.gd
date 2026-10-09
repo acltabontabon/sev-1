@@ -33,6 +33,8 @@ signal damage_accepted(base_amount: int)
 @export var impact_particles_enabled: bool = true
 
 var incoming_damage_multiplier: float = 1.0
+## Temporary run effects (coffee, meeting zones) scale locomotion; reset clears them.
+var move_multiplier: float = 1.0
 var dodge_recovery_multiplier: float = 1.0
 var health: int = 100
 var invulnerable_left: float = 0.0
@@ -173,6 +175,7 @@ func receive_damage(amount: int, _source: Vector3) -> bool:
 
 func reset_player() -> void:
 	incoming_damage_multiplier = 1.0
+	move_multiplier = 1.0
 	dodge_recovery_multiplier = 1.0
 	melee.damage_multiplier = 1.0
 	global_position = spawn_position
@@ -229,6 +232,7 @@ func _physics_process(delta: float) -> void:
 		speed = walk_speed * attack_movement_scale
 	if hurt_left > 0:
 		speed = 0.0
+	speed *= move_multiplier
 	var rate: float = acceleration if not input_vector.is_zero_approx() else braking
 	if not is_on_floor():
 		rate = air_acceleration

@@ -67,6 +67,10 @@ func _run() -> void:
 	if only == "menu":
 		quit()
 		return
+	if only == "areas":
+		await tour()
+		quit()
+		return
 	app.start_incident()
 	var story: CanvasLayer = app.session.get_node("Incident").presentation
 	var incident: Node = app.session.get_node("Incident")
@@ -84,3 +88,54 @@ func _run() -> void:
 	app.queue_free()
 	await frames(3)
 	quit()
+
+
+## Free camera tour of the authored areas, with the run in its exploration stage.
+func tour() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	incident.presentation.skip()
+	await frames(10)
+	incident._cleanup()
+	incident._enter(incident.Stage.INVESTIGATION)
+	var camera: Camera3D = Camera3D.new()
+	app.session.add_child(camera)
+	camera.make_current()
+	var stops: Array = [
+		["area_a_desks", Vector3(-3.2, 2.6, 13.5), Vector3(-7.5, 1.0, 2.0)],
+		["area_a_stories", Vector3(-4.2, 1.8, 2.6), Vector3(-6.5, 1.2, -.5)],
+		["area_d_operations", Vector3(1.5, 2.4, -5.0), Vector3(-1.7, 2.0, -15.5)],
+		["area_b_corridor", Vector3(16.3, 2.0, 14.0), Vector3(16.3, 2.2, -6.0)],
+		["area_b_quick_sync", Vector3(19.4, 2.6, -2.8), Vector3(24.5, 1.0, -11.0)],
+		["area_c_pantry", Vector3(19.4, 2.4, 11.8), Vector3(25.5, 1.0, 5.5)],
+		["area_e_gate", Vector3(12.8, 2.0, -11.6), Vector3(9.0, 2.0, -16.0)],
+	]
+	for stop: Array in stops:
+		camera.position = stop[1]
+		camera.look_at(stop[2])
+		await frames(8)
+		await shot(stop[0])
+	for next in [incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
+		incident._enter(next)
+	app.session.get_node("Player").position = Vector3(9, .05, -24.5)
+	for stop: Array in [["area_e_corridor", Vector3(9.0, 2.2, -17.5), Vector3(8.0, 1.6, -28.0)], ["area_e_deploy", Vector3(10.6, 1.8, -21.0), Vector3(5.6, 1.9, -23.3)], ["area_e_vault", Vector3(9.0, 3.4, -31.0), Vector3(9.0, 1.8, -44.0)]]:
+		camera.position = stop[1]
+		camera.look_at(stop[2])
+		await frames(30)
+		await shot(stop[0])
+	# Gameplay camera measurements in the heaviest views.
+	camera.queue_free()
+	var player: Node3D = app.session.get_node("Player")
+	for spot: Array in [["perf_office", Vector3(0, .05, 8), 0.0], ["perf_wing", Vector3(16.3, .05, 12), 0.0], ["perf_corridor", Vector3(9, .05, -18), 0.0], ["perf_vault", Vector3(9, .05, -33), 0.0]]:
+		player.position = spot[1]
+		player.camera_rig.reset_view()
+		for index in range(20):
+			await process_frame
+		last = 0
+		for index in range(240):
+			app.session.get_node("Player/CameraRig").controls_active = true
+			await process_frame
+			sample()
+		report(spot[0])
+	app.main_menu()
+	await frames(5)

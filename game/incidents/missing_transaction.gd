@@ -11,6 +11,16 @@ const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 @export var boss_health: int = 700
 const RUN: Script = preload("res://game/incidents/run_progression.gd")
 const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
+const INTERACTION: Script = preload("res://game/incidents/interaction_point.gd")
+## Crossing into the server vault starts The Variance's arrival.
+const VAULT_LINE: float = -30.5
+@export_range(5, 120) var coffee_seconds: float = 40.0
+@export_range(0, .5) var coffee_bonus: float = .15
+var boss_triggered: bool = false
+var boss_time: float = 0.0
+var coffee_left: float = 0.0
+var coffee_cups: int = 0
+var interactions: Dictionary = {}
 var voice: Node
 var presentation: CanvasLayer
 var enemies_defeated: int = 0
@@ -68,6 +78,14 @@ func _ready() -> void:
 	add_child(voice)
 	presentation = preload("res://game/incidents/incident_presentation.gd").new()
 	add_child(presentation)
+	# Pantry objects: honest reactions, one of them useful.
+	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"]]:
+		var point: Node3D = INTERACTION.new()
+		point.name = "Use_" + entry[0]
+		point.prompt = entry[2]
+		point.position = room.get_node("SpawnPoints/" + entry[1]).position
+		add_child(point)
+		interactions[entry[0]] = point
 	reset_incident()
 
 
@@ -83,6 +101,12 @@ func reset_incident() -> void:
 	run.apply_to(player)
 	stage = Stage.ALERT
 	alert_played = false
+	boss_triggered = false
+	boss_time = 0
+	coffee_left = 0
+	coffee_cups = 0
+	player.move_multiplier = 1.0
+	_reset_doors()
 	$AlertSound.stop()
 	enemies_defeated = 0
 	boss_encountered = false
@@ -103,6 +127,16 @@ func reset_incident() -> void:
 	room.get_node("ETA").text = "Happy Friday, team!\nEnjoy your well-deserved weekend!"
 	room.get_node("Clock").text = "FRIDAY / 16:59"
 	presentation.reset_story()
+
+
+func _reset_doors() -> void:
+	var gate: StaticBody3D = room.get_node("VaultGate")
+	gate.position.y = 2.0
+	gate.collision_layer = 1
+	for entry: Array in [["QuickSyncDoorA", -10.25], ["QuickSyncDoorB", -5.75]]:
+		var door: StaticBody3D = room.get_node(entry[0])
+		door.position.z = entry[1]
+		door.collision_layer = 0
 
 
 func terminal() -> bool:
@@ -140,7 +174,7 @@ func _enter(next: Stage) -> void:
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
-			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED"
+			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED • The east wing pantry still has coffee."
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
 		Stage.ENCOUNTER_TWO:
@@ -151,7 +185,11 @@ func _enter(next: Stage) -> void:
 			light_target = 3.2
 			_dashboard("DELIVERY\nFAILED", "MISSING: PAYMENT RECORD")
 		Stage.BOSS:
-			objective = "3 / 3 — The Variance: evade while shielded; strike during OPEN."
+			# The gate lifts now; the arrival waits for the engineer to walk into the vault.
+			room.get_node("VaultGate").collision_layer = 0
+			spawn_delay = 9999.0
+			boss_triggered = false
+			objective = "3 / 3 — The Variance: enter the production core, north through the server corridor."
 			message = "The original always carries a solid ◆ and VERIFIED ORIGINAL.\nFalse copies have broken ◇ markers. Trust the steady shape."
 			_dashboard("FALSE\nPOSITIVES", "VERIFY BEFORE RESOLVING")
 		Stage.RESOLVED, Stage.FAILED:
@@ -164,6 +202,8 @@ func _process(delta: float) -> void:
 	spill.light_energy = move_toward(spill.light_energy, light_target + (0.0 if terminal() else run.band() * .35), delta * 1.2)
 	if terminal() or get_tree().paused:
 		return
+	for point: Node3D in interactions.values():
+		point.refresh(player, not modal_pending() and stage != Stage.ALERT)
 	if stage == Stage.ENCOUNTER_TWO and challenge_result == "Active":
 		challenge_left = maxf(0, challenge_left - delta)
 		if challenge_left == 0:
@@ -172,15 +212,41 @@ func _process(delta: float) -> void:
 	stage_time += delta
 	if stage == Stage.ALERT and stage_time >= presentation.opening_duration():
 		_enter(Stage.ENCOUNTER_ONE)
+	if stage == Stage.BOSS and not boss_triggered and player.global_position.z < VAULT_LINE:
+		trigger_boss()
+	if boss_triggered:
+		boss_time += delta
+	if coffee_left > 0:
+		coffee_left = maxf(0, coffee_left - delta)
+		if coffee_left == 0:
+			run.motivation = 0
+			player.move_multiplier = 1.0
+			run.apply_to(player)
+			message = "Motivation expired. Productivity returns to baseline."
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS] and not is_instance_valid(active_enemy):
 		spawn_delay -= delta
 		if spawn_delay <= 0:
 			_spawn()
 
 
+func trigger_boss() -> void:
+	if stage != Stage.BOSS or boss_triggered:
+		return
+	boss_triggered = true
+	boss_time = 0
+	spawn_delay = presentation.boss_length
+	presentation.vault_entered()
+
+
 func arrival_site() -> Vector3:
-	# Fixed clear floor lanes; choose the farthest site so arrivals never hit immediately.
-	var sites: Array[Vector3] = [Vector3(-2, .05, -8), Vector3(2, .05, 1), Vector3(-2, .05, 5)]
+	if stage == Stage.BOSS:
+		return room.get_node("SpawnPoints/VaultArrival").position
+	# Authored clear floor per area; choose the farthest so arrivals never hit immediately.
+	var prefix: String = "Spawn_D" if stage == Stage.ENCOUNTER_TWO else "Spawn_A"
+	var sites: Array[Vector3] = []
+	for marker: Node3D in room.get_node("SpawnPoints").get_children():
+		if marker.name.begins_with(prefix):
+			sites.append(marker.position)
 	var site: Vector3 = sites[0]
 	for candidate in sites:
 		if candidate.distance_to(player.position) > site.distance_to(player.position):
@@ -251,6 +317,8 @@ func near_console() -> bool:
 func encounter_status() -> String:
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
 		return "%d record%s remaining%s" % [remaining, "" if remaining == 1 else "s", " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if not is_instance_valid(active_enemy) and not modal_pending() else ""]
+	if stage == Stage.BOSS and not boss_triggered:
+		return "The restricted gate is open. Follow the corridor north."
 	if stage == Stage.BOSS and not is_instance_valid(active_enemy):
 		return "The Variance arrives in %ds" % maxi(1, ceili(spawn_delay))
 	return ""
@@ -264,6 +332,49 @@ func inspect_console() -> void:
 	console_marker.text = "EVIDENCE OPEN\nChoose 1 / 2 / 3"
 	objective = "Which system is missing the record? Press 1, 2, or 3."
 	message = "1  Core Ledger: SUCCESS — signed receipt confirms money was saved.\n2  Loan Management: FAILED — waiting for payment confirmation.\n3  Payment Processing: NOT FOUND — delivery log stops before arrival."
+
+
+func interact() -> void:
+	if terminal() or modal_pending() or stage == Stage.ALERT:
+		return
+	for key: String in interactions:
+		if interactions[key].in_range(player):
+			use(key)
+			return
+
+
+func use(key: String) -> void:
+	match key:
+		"coffee":
+			coffee_cups += 1
+			if coffee_cups == 1:
+				coffee_left = coffee_seconds
+				run.motivation = coffee_bonus
+				player.move_multiplier = 1.0 + coffee_bonus
+				run.change_burnout(-10, "Coffee")
+				run.apply_to(player)
+				presentation.say("coffee")
+				message = "TEMPORARY MOTIVATION • +%d%% damage and speed for %ds • Burnout −10" % [roundi(coffee_bonus * 100), roundi(coffee_seconds)]
+			elif coffee_cups == 2:
+				presentation.say("coffee_denied")
+				message = "Corporate Notice: Please limit coffee consumption to one cup per employee."
+			else:
+				presentation.say("coffee_water")
+				message = "The machine dispenses hot water. Motivation not included."
+		"vending":
+			presentation.say("vending")
+			message = "SNACK-O-MATIC: ERR ITEM 404. Your snack exists in a different environment."
+		"microwave":
+			presentation.say("microwave")
+			message = "Facilities ticket #2019-0412 (Microwave): status changed to WON'T FIX."
+		"poster":
+			presentation.say("poster")
+			message = "Wellness tip of the week: Burnout is a mindset."
+	presentation.used(key)
+
+
+func buff_text() -> String:
+	return "MOTIVATED  %ds" % ceili(coffee_left) if coffee_left > 0 else ""
 
 
 func choose_system(choice: int) -> void:
@@ -280,7 +391,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused or event.is_echo():
 		return
 	if event.is_action_pressed("inspect_record"):
-		inspect_console()
+		if stage == Stage.INVESTIGATION and near_console():
+			inspect_console()
+		else:
+			interact()
 		get_viewport().set_input_as_handled()
 	for index in range(1, 4):
 		if event.is_action_pressed("choose_record_" + str(index)):

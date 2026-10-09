@@ -54,6 +54,7 @@ func _run() -> void:
 	player.camera_rig.set_capture(true)
 	for next in [incident.Stage.ENCOUNTER_ONE, incident.Stage.INVESTIGATION, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
 		incident._enter(next)
+	await enter_vault()
 	await frames(120)
 	check(not is_instance_valid(incident.active_enemy) and story.title.visible and not player.narrative_hold, "boss arrival builds tension while player retains control")
 	await key(KEY_TAB)
@@ -71,6 +72,7 @@ func _run() -> void:
 	for next in [incident.Stage.ENCOUNTER_ONE, incident.Stage.INVESTIGATION, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
 		incident._enter(next)
 	check(story.boss_length == 1.5, "seen boss introduction shortens on retry")
+	await enter_vault()
 	await frames(120)
 	check(is_instance_valid(incident.active_enemy), "short boss introduction automatically completes")
 	scene.queue_free()
