@@ -55,8 +55,10 @@ func reset_enemy() -> void:
 	body.material_override = null
 	$Visual/LeftArm.rotation = Vector3.ZERO
 	$Visual/RightArm.rotation = Vector3.ZERO
+	$DefeatSound.stop()
 	$ImpactSparks.clear()
 	melee.cancel()
+	visual.reset_pose()
 	tell.hide()
 	collision_layer = 4
 	health_changed.emit(health)
@@ -76,10 +78,12 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 	# Otherwise repeated light attacks could stun-lock the only opponent.
 	if health == 0:
 		state = State.DEAD
+		if DisplayServer.get_name() != "headless":
+			$DefeatSound.play()
 		melee.cancel()
 		tell.hide()
 		collision_layer = 0
-		visual.rotation.z = -PI / 2.0
+		visual.defeat()
 		label.text = "INCIDENT RESOLVED"
 		died.emit()
 	return true
@@ -91,7 +95,7 @@ func apply_hitstop(duration: float) -> void:
 
 
 func show_impact(color: Color) -> void:
-	$ImpactSparks.burst(global_position + Vector3.UP * 1.2, color)
+	$ImpactSparks.burst(global_position + Vector3.UP * 1.2 - knockback.normalized() * .25, color, knockback)
 
 
 func _update_state() -> void:
@@ -158,11 +162,5 @@ func _physics_process(delta: float) -> void:
 		label.text = "STAGGERED"
 	else:
 		label.text = "PRODUCTION INCIDENT  /  %d" % health
-	var arm_pose: float = 0.0
-	if melee.attacking:
-		arm_pose = 0.9 if melee.elapsed < melee.windup else -1.2
-	$Visual/LeftArm.rotation.x = lerpf($Visual/LeftArm.rotation.x, arm_pose, 1.0 - exp(-18.0 * delta))
-	$Visual/RightArm.rotation.x = $Visual/LeftArm.rotation.x
-	visual.rotation.z = sin(stagger_left * 40.0) * 0.12 if stagger_left > 0 else 0.0
 	if global_position.y < -8:
 		reset_enemy()

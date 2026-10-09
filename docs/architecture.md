@@ -1,6 +1,6 @@
 # SEV-1 Implemented Architecture
 
-This describes Office After Hours and Incident 001, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours, Incident 001, and the Milestone 5 presentation pass, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
@@ -16,7 +16,7 @@ Main base                  game/main.tscn + main.gd
     Navigation             offline-baked NavigationMesh
   Player                   player/player.tscn + player.gd
     Visual/Melee           combat/melee_attack.gd
-    Visual/WeaponPivot     procedural baton pose
+    Visual/Character       native engineer + keyboard presentation
     CameraRig              player/camera_rig.gd
       SpringArm3D/Camera3D
   Enemy                    enemies/incident.tscn + incident.gd
@@ -31,7 +31,7 @@ Main base                  game/main.tscn + main.gd
 | Owner | Implemented responsibility |
 | --- | --- |
 | [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal capture. R works while paused. |
-| [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, procedural limb motion, health/invulnerability, attack request, damage/death, and reset. |
+| [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, presentation handoff, health/invulnerability, attack request, damage/death, and reset. |
 | [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
 | [Enemy](../game/enemies/incident.gd) | Pursuit within detection distance, direction committed at attack start, telegraph/recovery, health, flash, short stagger, knockback, defeat, and reset. Native NavigationAgent3D follows the office mesh while approaching; attack timing/facing remains unchanged. |
@@ -56,11 +56,11 @@ Melee tests target centers at `global_position + Vector3.UP`, not blade-to-mesh 
 | Reach / half-angle | 2.25 / 2.45 / 2.55 m; 65 / 65 / 75° | 1.85 m / 55° |
 | Locomotion | Walk 5 m/s; sprint 8 m/s | Pursuit 2.4 m/s; detection 10 m; attack start within 1.65 m |
 
-Player damage cancels the player's attack and grants 0.65 seconds of invulnerability with 0.16 seconds of hurt slowdown. Enemy damage produces a 0.12-second flash, 0.2-second stagger, and decaying knockback; it does not cancel an already committed attack. Enemy death cancels melee and removes its collision layer. Player death releases capture and pauses the encounter. These numbers are baseline tuning, not permanent design commitments.
+Player damage cancels the player's attack and grants 0.65 seconds of invulnerability with 0.16 seconds of hurt slowdown. Enemy damage produces a 0.12-second flash, 0.2-second stagger, and decaying knockback; it does not cancel an already committed attack. Enemy death cancels melee and removes its collision layer and settles its fractured slabs. Player death releases capture and pauses the encounter. These numbers are baseline tuning, not permanent design commitments.
 
 ## Dodge and impact
 
-Q/right mouse starts a grounded dodge in camera-relative movement direction; stationary input defaults backward. Travel is 3 m over 0.24 seconds, followed by 0.32 seconds recovery. Invulnerability is [0, 0.18) seconds and is independently configurable. World collisions shorten travel. During dodge and its recovery, attacks, jumping, and another dodge are unavailable. Dodge cannot bypass an active strike or hit-stop; it can cancel attack wind-up and recovery. The cyan aura marks invulnerability, not the whole dodge. Damage ends the dodge and restores the proxy pose.
+Q/right mouse starts a grounded dodge in camera-relative movement direction; stationary input defaults backward. Travel is 3 m over 0.24 seconds, followed by 0.32 seconds recovery. Invulnerability is [0, 0.18) seconds and is independently configurable. World collisions shorten travel. During dodge and its recovery, attacks, jumping, and another dodge are unavailable. Dodge cannot bypass an active strike or hit-stop; it can cancel attack wind-up and recovery. The cyan foot ring marks invulnerability, not the whole dodge. Damage ends the dodge; the presentation returns from its crouch while the damage origin stays unscaled.
 
 Impact freezes the two actors and their melee timers locally for 45/55/80 ms by combo step; it never changes Engine.time_scale. Camera feedback is a small decaying rotation, preserving spring-arm collision. Eight reusable spark meshes burst at the target; no per-hit nodes accumulate. The existing synthesized audio gains per-step swing pitch. Player exports allow disabling hit-stop, particles, or camera impulse (set strength to zero).
 
@@ -80,15 +80,15 @@ R restores existing actors' positions, health, attack timers, collision state, a
 | Player | 2 | Player body; its mask is 5, world plus enemy |
 | Enemy | 4 | Enemy body; its mask is 3, world plus player |
 
-Text `.tscn` scenes hold primitive meshes, materials, colliders, and lights. Limb/weapon motion is scripted; there is no imported rig or animation library. The arc is a small generated `ImmediateMesh`. Four synthesized WAV effects live in [assets/audio](../assets/audio/README.md), with committed import sidecars and documented provenance. Headless tests skip sound playback because the dummy audio path did not drain reliably on test exit. Sound quality still requires graphical listening and human feedback.
+Text `.tscn` scenes hold primitive meshes, materials, colliders, and lights. Limb/weapon motion is scripted; there is no imported rig or animation library. The arc is a small generated `ImmediateMesh`. Eight synthesized WAV effects live in [assets/audio](../assets/audio/README.md), with committed import sidecars and documented provenance. Headless tests skip sound playback because the dummy audio path did not drain reliably on test exit. Sound quality still requires graphical listening and human feedback.
 
 Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, and logs are ignored. Git text files use LF; large binary asset intake should establish LFS and remote support before committing substantial art libraries. No such library, export preset, or CI configuration exists yet.
 
 ## Validation and limits
 
-`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, and `tests/incident_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
+`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, `tests/incident_tests.gd`, and `tests/presentation_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
 
-The 10 October 2026 results report 138 assertions passing: 16 movement, 29 combat, 40 alpha, 9 office, and 44 incident. Import and all script checks also pass. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
+The final Milestone 5 results on 10 October 2026 report 155 assertions passing: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation. Import and all script checks also pass. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
 
 `tests/capture_preview.gd -- --combat` stages a reproducible graphical shot and writes an ignored preview. It deliberately overrides capture-driven pause during setup, freezes the action, and cleans up paused audio on exit. That staged image is useful for visual inspection, not evidence of normal encounter pacing.
 
@@ -150,10 +150,59 @@ The inherited lab enemy is hidden, disabled, and removed from the melee target g
 
 Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
 
-`game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains the existing collapse pose and removes projections; there is no imported boss animation.
+`game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains a settled fractured pose and removes projections; there is no imported boss animation.
 
 The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player and camera. A fresh scene load also resets everything; nothing persists between runs.
 
 `tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
 Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with no upgrades or healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor, Windows runtime test, or release build is included.
+
+
+## Milestone 5 character presentation
+
+`game/player/engineer_visual.tscn` is instanced under `Player/Visual/Character`.
+`character_presentation.gd` reads the completed actor/melee physics tick at priority
+10. It never invokes damage or changes movement. The original attack resources,
+cone/elevation/obstruction tests, timing, reach, dodge travel, and invulnerability
+remain unchanged. Camera-directed attack facing is unchanged.
+
+The native engineer has rolled sleeves, glasses, a loose tie, ID badge, dark trousers
+and shoes, and a keyboard Escalation Blade. A distance-driven gait uses linear stance
+travel and lifted return with two-segment limb placement. Idle breathing is restrained;
+the torso counter-rotates during gait. Arms track the weapon grip. Attack anticipation,
+sweep, and return read the three existing phase durations; the finisher adds a pitched
+sweep. Local hit-stop freezes presentation. Dodge bends the legs and lowers the torso
+without scaling the actor or damage origin; a small cyan foot ring marks only the
+actual invulnerable interval. Hurt adds torso recoil. Death applies a settled kneel
+before the immediately pausing report, not an animated fall. R resets pose and phase.
+
+`record_visual.tscn` adds misregistered ledger slabs, status rows, offset head, and legs.
+`record_presentation.gd` runs after enemy combat and reads explicit states: quiet drift,
+pursuit arm motion, shoulder-based wind-up/strike/recovery, slab flash/recoil, and an
+extinguished fractured defeat pose. Shape/motion, existing warning arc, and state text
+remain available alongside color. It does not cancel committed attacks. The Variance's
+two harmless projections now copy all visual meshes except attack/telegraph effects;
+solid-original versus hollow-copy markers and boss timing remain unchanged.
+
+Directional impact sparks reuse the same eight meshes, biased by existing knockback.
+No damage comes from effects. Original synthesized step, dodge, defeat, and incident
+alert cues supplement swing/impact/hurt/warning. Playback is bounded, headless-skipped,
+and reset-stopped. Alert begins once after active capture, not during the start pause.
+Per-actor status materials prevent one enemy's state changing another's appearance.
+
+`tools/build_characters.py` deterministically authors only the two native visual scenes;
+`tools/build_presentation_audio.py` authors the four new small sounds. Provenance,
+source evaluation, model replacement instructions, and honest asset limits are in
+[characters](../assets/characters/README.md) and [audio](../assets/audio/README.md).
+There is no Skeleton3D, AnimationTree, external model dependency, runtime asset loader,
+root motion, terrain foot IK, new attack input, or additional gameplay content.
+
+The extended validator adds `tests/presentation_tests.gd`: 17 assertions covering
+native fallback loading, floor clearance, anticipation before damage, recovery,
+interruption, hit-stop, crouch/aura, defeat/collision cleanup, sound reset, and retry.
+All 155 assertions pass (138 existing + 17 presentation), plus import and script parsing.
+The existing incident suite still checks despawn, copies, duplicate events, reset,
+and reload. `tests/character_preview.gd` captures identity/anticipation/strike/dodge/
+defeat at 1080p with a staged camera; `tests/incident_preview.gd -- --measure` retains
+the existing boss/copies measurement. See README for measured results and human gates.

@@ -12,6 +12,7 @@ const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 var stage: Stage = Stage.ALERT
 var elapsed: float = 0.0
 var stage_time: float = 0.0
+var alert_played: bool = false
 var spawn_delay: float = 0.0
 var remaining: int = 0
 var mistakes: int = 0
@@ -46,6 +47,8 @@ func _ready() -> void:
 func reset_incident() -> void:
 	_cleanup()
 	stage = Stage.ALERT
+	alert_played = false
+	$AlertSound.stop()
 	elapsed = 0
 	stage_time = 0
 	spawn_delay = 0
@@ -117,6 +120,10 @@ func _process(delta: float) -> void:
 	spill.light_energy = move_toward(spill.light_energy, light_target, delta * 1.2)
 	if terminal() or get_tree().paused:
 		return
+	if stage == Stage.ALERT and not alert_played:
+		alert_played = true
+		if DisplayServer.get_name() != "headless":
+			$AlertSound.play()
 	elapsed += delta
 	stage_time += delta
 	if stage == Stage.ALERT and stage_time >= 7:
@@ -226,12 +233,14 @@ func _make_copies() -> void:
 		material.albedo_color = Color(.65, .3, .6, .55)
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		for part_name in ["Body", "LeftArm", "RightArm", "Eye"]:
-			var original: MeshInstance3D = active_enemy.get_node("Visual/" + part_name)
+		for original in active_enemy.visual.find_children("*", "MeshInstance3D", true, false):
+			if original.mesh == null or original == active_enemy.tell or original == active_enemy.melee.arc:
+				continue
 			var mesh: MeshInstance3D = MeshInstance3D.new()
 			mesh.mesh = original.mesh
-			mesh.transform = original.transform
+			mesh.transform = active_enemy.visual.global_transform.affine_inverse() * original.global_transform
 			mesh.material_override = material
+			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			copy.add_child(mesh)
 		var tag: Label3D = Label3D.new()
 		tag.text = "◇  UNVERIFIED COPY\nSUCCESS?"

@@ -14,7 +14,7 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident; the six circles, extra abilities, and progression remain deferred. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; the six circles, extra abilities, and progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
 ## Play Incident 001
 
@@ -52,7 +52,7 @@ Explore the existing workstation, desk clusters, conference ramp/glass, and prod
 
 ## Current status
 
-Incident 001 is implemented as a technical playtest candidate. Its 5–10-minute duration is a **human pacing target, not a measured or accepted result**; experienced players may finish faster. Combat feel, difficulty across a full run, audio, and artistic quality still need the creator's review. Characters, procedural limb motion, corrupted-record markers, and translucent boss copies remain provisional native geometry.
+Incident 001 is implemented as a technical playtest candidate. Its 5–10-minute duration is a **human pacing target, not a measured or accepted result**; experienced players may finish faster. Combat feel, difficulty across a full run, audio, and artistic quality still need the creator's review. Milestone 5 adds an office-worker design, keyboard Escalation Blade, articulated procedural poses, fragmented-record enemies, and additional sound cues. Models, animation, and translucent boss copies remain provisional native geometry.
 
 First playtest: can you explain why the payment record is missing, read the boss's diamond and opening without guessing, and complete the episode without repeated frustrating deaths? Record total run time and the point where pacing drags or becomes unfair. See the [roadmap](docs/roadmap.md) for acceptance gates.
 
@@ -64,7 +64,7 @@ python3 tools/validate.py
 
 The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, and incident lifecycle checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
-The current Incident 001 validation passed **138 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, and 44 incident, plus import and every script parse. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
+The current validation passed **155 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation, plus import and every script parse. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
 
 The earlier Combat Alpha validation on 10 October 2026 passed 85 assertions (16 movement, 29 combat, 40 alpha), plus import/script checks. Alpha checks cover the buffered chain, cancellation, dodge timing/distance at 30/60/120 physics Hz, real input bindings, enemy evasion, hit-stop, death, and reset stability. Windows runtime testing and human feel/audio acceptance remain outstanding.
 
@@ -141,4 +141,60 @@ Matching export templates and an export preset are needed for future distributio
 
 No Godot MCP is installed. CLI editing/validation is sufficient for this checkpoint; the creator has authorized an integration if it materially improves live observation. Reassess compatibility and dependencies when needed. Do not add runtime AI services for narrative text or incident reports.
 
-Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. Combat Alpha is checkpointed at `74d1cb5`, Office After Hours at `65d2f3b`, and Incident 001 work uses `codex/incident-001`. No remote is configured; local commits are not an off-machine backup.
+Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. Combat Alpha is checkpointed at `74d1cb5`, Office After Hours at `65d2f3b`; Milestone 5 work uses `codex/character-presentation`. No remote is configured; local commits are not an off-machine backup.
+
+
+## Milestone 5 presentation playtest
+
+The engineer now wears a rolled-sleeve shirt, loosened tie, glasses, ID badge, and
+practical shoes, carrying the keyboard **Escalation Blade**. Distance-driven limb
+motion, visible anticipation/sweep/recovery, hand-to-grip posing, a crouched dodge,
+and settled defeat poses replace the earlier rigid proxy motion. The cyan foot ring
+marks actual dodge invulnerability. Corrupted records have separated ledger slabs,
+status rows, shoulder-driven attacks, recoil, and extinguished defeat indicators.
+Existing hit-stop/camera impulses remain; the bounded spark burst is directional.
+Footsteps, dodge, defeat, and incident alert join the existing combat sounds.
+
+This is an implemented **native fallback presentation pass**, ready for human review.
+It is not a finished rigged human model or imported animation set. There is no terrain
+foot IK, finger rig, or animated death fall. Fast turns/slopes can still slide. Attack
+cone damage is still an approximation rather than weapon-mesh collision. No combat
+profile, damage, reach, dodge timing, controller, or incident progression was redesigned.
+
+All new art and audio are original procedural authoring; no third-party assets were
+imported. See [character provenance, source evaluation, and rig integration](assets/characters/README.md)
+and [sound provenance](assets/audio/README.md). A selected rigged office worker and a
+coherent locomotion/melee set are the next visual priorities after director feedback.
+
+On 10 October 2026, import, all script checks, and **155 assertions passed**. The
+additional 17 checks cover anticipation before damage, interrupted attacks, pose
+recovery, hit-stop, dodge stance/ring, death, and reset. Staged identity, attack, run,
+dodge, defeat, and boss/copies views were inspected in Forward+. Playback ran without
+engine errors; listening, ordinary full-run pacing, and creative acceptance remain
+human checkpoints. Windows and long-duration performance testing remain outstanding.
+
+The M2 Pro boss/copies run at **1920×1080**, Forward+/Metal, MSAA 2×, SSAO, glow, and
+fog measured **139.41 average FPS**, **7.10 ms median**, **9.54 ms p95**, and **17.41 ms
+maximum**, over 2,790 frames. Final sampled draw calls: 417. The 25-second elevated-health
+scenario excludes five seconds of warm-up and screenshot saving. This is a short local
+measurement, not a controlled before/after speedup claim or a full-episode guarantee.
+The previous 119.95 FPS result above is historical; neither run isolates presentation
+cost from display scheduling/system conditions. No rigged-mesh cost was measured.
+
+```sh
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/character_preview.gd
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/incident_preview.gd -- --measure
+```
+
+Outputs are ignored under `builds/character_*.png`, `builds/incident_*.png`, and
+`builds/incident_performance.json`. The close-view script uses a staged camera and
+poses; ordinary gameplay still uses the existing free camera and 1280×720 default.
+
+For a five-minute presentation check, launch `play.command`, click to begin, walk and
+sprint past the workstation, then chain all three attacks and dodge sideways/backward.
+Watch the keyboard grip and whether contact feels synchronized with the hit sound and
+freeze. Compare enemy warning with recovery, follow the boss's solid diamond, and retry
+with R after death and victory. Controls remain WASD/arrows, Shift sprint, Space jump,
+LMB/F combo, Q/RMB dodge, mouse/wheel camera, E inspect, 1–3 choice, Escape pause, R retry.
+Report whether the engineer reads as an exhausted employee, whether the keyboard feels
+weighty, where feet or hands distract, and which sounds are too quiet, harsh, or repetitive.

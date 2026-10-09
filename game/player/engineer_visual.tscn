@@ -1,0 +1,606 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/player/character_presentation.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="Shirt"]
+albedo_color = Color(0.43, 0.53, 0.56, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Cuff"]
+albedo_color = Color(0.63, 0.69, 0.67, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Trousers"]
+albedo_color = Color(0.055, 0.075, 0.09, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Shoe"]
+albedo_color = Color(0.028, 0.032, 0.037, 1)
+metallic = 0.05
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Skin"]
+albedo_color = Color(0.52, 0.32, 0.22, 1)
+metallic = 0
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Hair"]
+albedo_color = Color(0.035, 0.027, 0.025, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Tie"]
+albedo_color = Color(0.16, 0.065, 0.055, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Ivory"]
+albedo_color = Color(0.72, 0.74, 0.67, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.16, 0.20, 0.22, 1)
+metallic = 0.65
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Accent"]
+albedo_color = Color(0.08, 0.62, 0.66, 1)
+metallic = 0.2
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.08, 0.62, 0.66, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="BoxMesh" id="Torso"]
+size = Vector3(0.53, 0.56, 0.28)
+material = SubResource("Shirt")
+
+[sub_resource type="BoxMesh" id="Pelvis"]
+size = Vector3(0.42, 0.18, 0.27)
+material = SubResource("Trousers")
+
+[sub_resource type="BoxMesh" id="Belt"]
+size = Vector3(0.43, 0.045, 0.285)
+material = SubResource("Shoe")
+
+[sub_resource type="CylinderMesh" id="UpperLeg"]
+top_radius = 0.105
+bottom_radius = 0.086
+height = 1.0
+radial_segments = 8
+material = SubResource("Trousers")
+
+[sub_resource type="CylinderMesh" id="Shin"]
+top_radius = 0.083
+bottom_radius = 0.067
+height = 1.0
+radial_segments = 8
+material = SubResource("Trousers")
+
+[sub_resource type="CylinderMesh" id="Sleeve"]
+top_radius = 0.105
+bottom_radius = 0.085
+height = 1.0
+radial_segments = 8
+material = SubResource("Shirt")
+
+[sub_resource type="CylinderMesh" id="Forearm"]
+top_radius = 0.074
+bottom_radius = 0.057
+height = 1.0
+radial_segments = 8
+material = SubResource("Skin")
+
+[sub_resource type="BoxMesh" id="CuffMesh"]
+size = Vector3(0.195, 0.075, 0.21)
+material = SubResource("Cuff")
+
+[sub_resource type="BoxMesh" id="Foot"]
+size = Vector3(0.18, 0.13, 0.32)
+material = SubResource("Shoe")
+
+[sub_resource type="SphereMesh" id="HeadMesh"]
+radius = 0.18
+height = 0.43
+radial_segments = 12
+rings = 6
+material = SubResource("Skin")
+
+[sub_resource type="SphereMesh" id="HairMesh"]
+radius = 0.184
+height = 0.25
+radial_segments = 12
+rings = 6
+material = SubResource("Hair")
+
+[sub_resource type="BoxMesh" id="HairLock"]
+size = Vector3(0.13, 0.09, 0.13)
+material = SubResource("Hair")
+
+[sub_resource type="BoxMesh" id="Nose"]
+size = Vector3(0.075, 0.09, 0.075)
+material = SubResource("Skin")
+
+[sub_resource type="BoxMesh" id="Glasses"]
+size = Vector3(0.135, 0.062, 0.025)
+material = SubResource("Shoe")
+
+[sub_resource type="BoxMesh" id="Lens"]
+size = Vector3(0.098, 0.028, 0.029)
+material = SubResource("Metal")
+
+[sub_resource type="BoxMesh" id="Bridge"]
+size = Vector3(0.04, 0.018, 0.025)
+material = SubResource("Shoe")
+
+[sub_resource type="BoxMesh" id="TieMesh"]
+size = Vector3(0.065, 0.31, 0.025)
+material = SubResource("Tie")
+
+[sub_resource type="BoxMesh" id="Collar"]
+size = Vector3(0.13, 0.10, 0.04)
+material = SubResource("Cuff")
+
+[sub_resource type="BoxMesh" id="Badge"]
+size = Vector3(0.105, 0.135, 0.025)
+material = SubResource("Ivory")
+
+[sub_resource type="BoxMesh" id="BadgeStripe"]
+size = Vector3(0.08, 0.025, 0.03)
+material = SubResource("Accent")
+
+[sub_resource type="BoxMesh" id="Lanyard"]
+size = Vector3(0.018, 0.20, 0.015)
+material = SubResource("Shoe")
+
+[sub_resource type="BoxMesh" id="Grip"]
+size = Vector3(0.10, 0.10, 0.38)
+material = SubResource("Shoe")
+
+[sub_resource type="BoxMesh" id="Keyboard"]
+size = Vector3(0.42, 0.10, 1.08)
+material = SubResource("Metal")
+
+[sub_resource type="BoxMesh" id="Key"]
+size = Vector3(0.08, 0.065, 0.075)
+material = SubResource("Ivory")
+
+[sub_resource type="BoxMesh" id="Rim"]
+size = Vector3(0.035, 0.045, 1.10)
+material = SubResource("Accent")
+
+[sub_resource type="BoxMesh" id="Spacebar"]
+size = Vector3(0.27, 0.06, 0.065)
+material = SubResource("Ivory")
+
+[sub_resource type="BoxMesh" id="Hand"]
+size = Vector3(0.14, 0.17, 0.12)
+material = SubResource("Skin")
+
+[node name="Character" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.17, 0)
+mesh = SubResource("Torso")
+rotation = Vector3(0.06, 0, 0)
+
+[node name="Pelvis" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.83, 0)
+mesh = SubResource("Pelvis")
+
+
+[node name="Belt" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.91, 0)
+mesh = SubResource("Belt")
+
+
+[node name="Head" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.68, -0.035)
+mesh = SubResource("HeadMesh")
+rotation = Vector3(0.07, 0, -0.04)
+
+[node name="Hair" type="MeshInstance3D" parent="Head"]
+position = Vector3(0, 0.115, 0.015)
+mesh = SubResource("HairMesh")
+
+
+[node name="Lock" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.09, 0.2, -0.035)
+mesh = SubResource("HairLock")
+rotation = Vector3(0, 0.2, -0.25)
+
+[node name="Nose" type="MeshInstance3D" parent="Head"]
+position = Vector3(0, -0.025, -0.175)
+mesh = SubResource("Nose")
+
+
+[node name="Glasses-1" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.086, 0.032, -0.163)
+mesh = SubResource("Glasses")
+
+
+[node name="Lens-1" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.086, 0.032, -0.166)
+mesh = SubResource("Lens")
+
+
+[node name="Collar-1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.09, 0.24, -0.151)
+mesh = SubResource("Collar")
+rotation = Vector3(0, 0, -0.45)
+
+[node name="Glasses1" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.086, 0.032, -0.163)
+mesh = SubResource("Glasses")
+
+
+[node name="Lens1" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.086, 0.032, -0.166)
+mesh = SubResource("Lens")
+
+
+[node name="Collar1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0.09, 0.24, -0.151)
+mesh = SubResource("Collar")
+rotation = Vector3(0, 0, 0.45)
+
+[node name="Bridge" type="MeshInstance3D" parent="Head"]
+position = Vector3(0, 0.035, -0.176)
+mesh = SubResource("Bridge")
+
+
+[node name="Tie" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0.015, 0.025, -0.157)
+mesh = SubResource("TieMesh")
+rotation = Vector3(0.08, 0, -0.12)
+
+[node name="Lanyard" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.145, 0.07, -0.157)
+mesh = SubResource("Lanyard")
+
+
+[node name="Badge" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.145, -0.07, -0.174)
+mesh = SubResource("Badge")
+
+
+[node name="BadgeStripe" type="MeshInstance3D" parent="Torso/Badge"]
+position = Vector3(0, 0.028, -0.005)
+mesh = SubResource("BadgeStripe")
+
+
+[node name="LeftLeg" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="LeftLeg"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("UpperLeg")
+
+
+[node name="LeftShin" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="LeftShin"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Shin")
+
+
+[node name="LeftArm" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="LeftArm"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Sleeve")
+
+
+[node name="LeftForearm" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="LeftForearm"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Forearm")
+
+
+[node name="LeftFoot" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16, 0.10, -0.06)
+mesh = SubResource("Foot")
+
+
+[node name="LeftHand" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Hand")
+
+
+[node name="LeftCuff" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("CuffMesh")
+
+
+[node name="RightLeg" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="RightLeg"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("UpperLeg")
+
+
+[node name="RightShin" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="RightShin"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Shin")
+
+
+[node name="RightArm" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="RightArm"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Sleeve")
+
+
+[node name="RightForearm" type="Node3D" parent="."]
+position = Vector3(0, 0, 0)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="RightForearm"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Forearm")
+
+
+[node name="RightFoot" type="MeshInstance3D" parent="."]
+position = Vector3(0.16, 0.10, -0.06)
+mesh = SubResource("Foot")
+
+
+[node name="RightHand" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Hand")
+
+
+[node name="RightCuff" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("CuffMesh")
+
+
+[node name="WeaponPivot" type="Node3D" parent="."]
+position = Vector3(0.38, 0.91, -0.02)
+rotation = Vector3(-0.5, 0, 0)
+
+[node name="Grip" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(0, 0, -0.22)
+mesh = SubResource("Grip")
+
+
+[node name="EscalationBlade" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(0, 0, -0.93)
+mesh = SubResource("Keyboard")
+
+
+[node name="Key0_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, -0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key0_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, -0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key0_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, -0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key0_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, -0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key1_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, -0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key1_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, -0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key1_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, -0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key1_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, -0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key2_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, -0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key2_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, -0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key2_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, -0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key2_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, -0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key3_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, -0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key3_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, -0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key3_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, -0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key3_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, -0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key4_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, -0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key4_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, -0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key4_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, -0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key4_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, -0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key5_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, 0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key5_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, 0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key5_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, 0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key5_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, 0.045)
+mesh = SubResource("Key")
+
+
+[node name="Key6_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, 0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key6_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, 0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key6_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, 0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key6_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, 0.135)
+mesh = SubResource("Key")
+
+
+[node name="Key7_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, 0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key7_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, 0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key7_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, 0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key7_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, 0.22499999999999998)
+mesh = SubResource("Key")
+
+
+[node name="Key8_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, 0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key8_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, 0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key8_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, 0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key8_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, 0.315)
+mesh = SubResource("Key")
+
+
+[node name="Key9_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.14100000000000001, 0.067, 0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key9_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.047, 0.067, 0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key9_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.047, 0.067, 0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Key9_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.14100000000000001, 0.067, 0.40499999999999997)
+mesh = SubResource("Key")
+
+
+[node name="Spacebar" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0, 0.067, 0.48)
+mesh = SubResource("Spacebar")
+
+
+[node name="Edge-1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.206, 0.03, 0)
+mesh = SubResource("Rim")
+
+
+[node name="Edge1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.206, 0.03, 0)
+mesh = SubResource("Rim")
+

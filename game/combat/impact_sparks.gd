@@ -4,6 +4,7 @@ extends Node3D
 @export_range(0, 1) var duration: float = 0.18
 @export_range(0, 8) var speed: float = 2.4
 var remaining: float = 0.0
+var impact_direction: Vector3 = Vector3.ZERO
 var sparks: Array[MeshInstance3D] = []
 var directions: Array[Vector3] = []
 var material: StandardMaterial3D
@@ -26,7 +27,8 @@ func _ready() -> void:
 	clear()
 
 
-func burst(origin: Vector3, color: Color) -> void:
+func burst(origin: Vector3, color: Color, direction: Vector3 = Vector3.ZERO) -> void:
+	impact_direction = direction.normalized()
 	global_position = origin
 	remaining = duration
 	material.albedo_color = color
@@ -46,7 +48,7 @@ func _physics_process(delta: float) -> void:
 		return
 	remaining = maxf(0, remaining - delta)
 	for index in range(sparks.size()):
-		sparks[index].position += directions[index] * speed * delta
+		sparks[index].position += (directions[index] + impact_direction * .8) * speed * delta
 		sparks[index].scale = Vector3.ONE * maxf(0.01, remaining / maxf(duration, 0.01))
 	if remaining == 0:
 		hide()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://game/player/player.gd" id="1"]
 [ext_resource type="Script" path="res://game/player/camera_rig.gd" id="2"]
@@ -11,64 +11,26 @@
 [ext_resource type="Resource" path="res://game/player/finisher.tres" id="9"]
 [ext_resource type="Script" path="res://game/combat/attack_profile.gd" id="10"]
 
+[ext_resource type="PackedScene" path="res://game/player/engineer_visual.tscn" id="11"]
+
+[ext_resource type="AudioStream" path="res://assets/audio/dodge.wav" id="12"]
+[ext_resource type="AudioStream" path="res://assets/audio/step.wav" id="13"]
+
 [sub_resource type="StandardMaterial3D" id="DodgeMaterial"]
 transparency = 1
 shading_mode = 0
-albedo_color = Color(0.2, 0.95, 1, 0.35)
+albedo_color = Color(0.2, 0.95, 1, 0.65)
 
-[sub_resource type="CapsuleMesh" id="DodgeMesh"]
+[sub_resource type="TorusMesh" id="DodgeMesh"]
 material = SubResource("DodgeMaterial")
-radius = 0.46
-height = 1.95
-
-[sub_resource type="StandardMaterial3D" id="WeaponMaterial"]
-albedo_color = Color(0.3, 0.85, 0.95, 1)
-emission_enabled = true
-emission = Color(0.1, 0.65, 0.9, 1)
-emission_energy_multiplier = 1.2
-
-[sub_resource type="BoxMesh" id="WeaponMesh"]
-material = SubResource("WeaponMaterial")
-size = Vector3(0.12, 0.14, 1.15)
+inner_radius = 0.40
+outer_radius = 0.47
+rings = 24
+ring_segments = 8
 
 [sub_resource type="CapsuleShape3D" id="BodyShape"]
 radius = 0.32
 height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Coat"]
-albedo_color = Color(0.13, 0.24, 0.29, 1)
-roughness = 0.7
-
-[sub_resource type="StandardMaterial3D" id="Dark"]
-albedo_color = Color(0.045, 0.06, 0.075, 1)
-roughness = 0.8
-
-[sub_resource type="StandardMaterial3D" id="Head"]
-albedo_color = Color(0.62, 0.67, 0.66, 1)
-roughness = 0.65
-
-[sub_resource type="StandardMaterial3D" id="Badge"]
-albedo_color = Color(1, 0.47, 0.12, 1)
-emission_enabled = true
-emission = Color(1, 0.3, 0.04, 1)
-emission_energy_multiplier = 0.7
-
-[sub_resource type="BoxMesh" id="TorsoMesh"]
-material = SubResource("Coat")
-size = Vector3(0.58, 0.7, 0.32)
-
-[sub_resource type="BoxMesh" id="LimbMesh"]
-material = SubResource("Dark")
-size = Vector3(0.2, 0.65, 0.22)
-
-[sub_resource type="SphereMesh" id="HeadMesh"]
-material = SubResource("Head")
-radius = 0.22
-height = 0.44
-
-[sub_resource type="BoxMesh" id="BadgeMesh"]
-material = SubResource("Badge")
-size = Vector3(0.12, 0.16, 0.025)
 
 [node name="Player" type="CharacterBody3D" groups=["players"]]
 collision_layer = 2
@@ -86,56 +48,11 @@ shape = SubResource("BodyShape")
 
 [node name="DodgeAura" type="MeshInstance3D" parent="Visual"]
 visible = false
-position = Vector3(0, 0.95, 0)
+position = Vector3(0, 0.08, 0)
 mesh = SubResource("DodgeMesh")
 cast_shadow = 0
 
-[node name="Torso" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.12, 0)
-mesh = SubResource("TorsoMesh")
-
-[node name="Head" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.68, 0)
-mesh = SubResource("HeadMesh")
-
-[node name="Badge" type="MeshInstance3D" parent="Visual"]
-position = Vector3(-0.14, 1.22, -0.17)
-mesh = SubResource("BadgeMesh")
-
-[node name="BackMarker" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.22, 0.17)
-scale = Vector3(2.6, 0.25, 1)
-mesh = SubResource("BadgeMesh")
-
-[node name="LeftLeg" type="Node3D" parent="Visual"]
-position = Vector3(-0.17, 0.72, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visual/LeftLeg"]
-position = Vector3(0, -0.32, 0)
-mesh = SubResource("LimbMesh")
-
-[node name="RightLeg" type="Node3D" parent="Visual"]
-position = Vector3(0.17, 0.72, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visual/RightLeg"]
-position = Vector3(0, -0.32, 0)
-mesh = SubResource("LimbMesh")
-
-[node name="LeftArm" type="Node3D" parent="Visual"]
-position = Vector3(-0.4, 1.38, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visual/LeftArm"]
-position = Vector3(0, -0.3, 0)
-scale = Vector3(0.7, 0.9, 0.8)
-mesh = SubResource("LimbMesh")
-
-[node name="RightArm" type="Node3D" parent="Visual"]
-position = Vector3(0.4, 1.38, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visual/RightArm"]
-position = Vector3(0, -0.3, 0)
-scale = Vector3(0.7, 0.9, 0.8)
-mesh = SubResource("LimbMesh")
+[node name="Character" parent="Visual" instance=ExtResource("11")]
 
 [node name="CameraRig" type="Node3D" parent="."]
 process_mode = 3
@@ -157,17 +74,19 @@ position = Vector3(0, 1, 0)
 script = ExtResource("3")
 swing_sound = ExtResource("4")
 
-[node name="WeaponPivot" type="Node3D" parent="Visual"]
-position = Vector3(0, 1.05, 0)
-
-[node name="Baton" type="MeshInstance3D" parent="Visual/WeaponPivot"]
-position = Vector3(0.45, 0, -0.65)
-mesh = SubResource("WeaponMesh")
-
 [node name="HitSound" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5")
 volume_db = -8.0
 
 [node name="HurtSound" type="AudioStreamPlayer" parent="."]
+process_mode = 3
 stream = ExtResource("6")
 volume_db = -9.0
+
+[node name="DodgeSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("12")
+volume_db = -12.0
+
+[node name="StepSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("13")
+volume_db = -17.0

@@ -43,15 +43,10 @@ var dodge_elapsed: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 
 var spawn_position: Vector3
-var stride: float = 0.0
+@onready var presentation: Node3D = $Visual/Character
 @onready var visual: Node3D = $Visual
 @onready var camera_rig: Node3D = $CameraRig
-@onready var left_leg: Node3D = $Visual/LeftLeg
-@onready var right_leg: Node3D = $Visual/RightLeg
-@onready var left_arm: Node3D = $Visual/LeftArm
-@onready var right_arm: Node3D = $Visual/RightArm
 @onready var melee: Node3D = $Visual/Melee
-@onready var weapon: Node3D = $Visual/WeaponPivot
 @onready var dodge_aura: MeshInstance3D = $Visual/DodgeAura
 
 
@@ -60,6 +55,7 @@ func _ready() -> void:
 	spawn_position = global_position
 	melee.hit_landed.connect(_on_hit_landed)
 	melee.finished.connect(_on_attack_finished)
+	presentation.reset_pose()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -122,6 +118,8 @@ func request_dodge() -> bool:
 	dodge_direction = dodge_direction.normalized()
 	dodge_elapsed = 0.0
 	dodging = true
+	if DisplayServer.get_name() != "headless":
+		$DodgeSound.play()
 	return true
 
 
@@ -163,7 +161,7 @@ func receive_damage(amount: int, _source: Vector3) -> bool:
 	hurt.emit()
 	if health == 0:
 		velocity = Vector3.ZERO
-		visual.rotation.z = PI / 2.0
+		presentation.defeat()
 		died.emit()
 	return true
 
@@ -183,11 +181,11 @@ func reset_player() -> void:
 	hitstop_left = 0.0
 	dodge_aura.hide()
 	visual.scale = Vector3.ONE
-	for limb in [left_leg, right_leg, left_arm, right_arm]:
-		limb.rotation = Vector3.ZERO
-	weapon.rotation = Vector3.ZERO
+	presentation.reset_pose()
 	$HitSound.stop()
 	$HurtSound.stop()
+	$DodgeSound.stop()
+	$StepSound.stop()
 	health_changed.emit(health)
 	camera_rig.reset_view()
 	reset_physics_interpolation()
@@ -235,7 +233,6 @@ func _physics_process(delta: float) -> void:
 	if not melee.attacking and direction.length_squared() > 0.001:
 		var facing: float = atan2(-direction.x, -direction.z)
 		visual.rotation.y = lerp_angle(visual.rotation.y, facing, 1.0 - exp(-turn_speed * delta))
-	_animate_proxy(delta)
 
 
 func _tick_dodge(delta: float) -> void:
@@ -247,32 +244,9 @@ func _tick_dodge(delta: float) -> void:
 	velocity.y = 0.0 if is_on_floor() else velocity.y - gravity * delta
 	move_and_slide()
 	dodge_aura.visible = dodge_is_invulnerable()
-	visual.scale = Vector3(1.08, 0.78, 1.08) if travel_delta > 0 else visual.scale.lerp(Vector3.ONE, minf(1, delta * 20))
-	visual.rotation.x = -0.18 if travel_delta > 0 else 0.0
+	# The presentation scene bends limbs; the body and damage origin stay unscaled.
 	if dodge_elapsed >= dodge_duration + dodge_recovery:
 		dodging = false
 		dodge_aura.hide()
 		visual.scale = Vector3.ONE
 		visual.rotation.x = 0.0
-
-
-func _animate_proxy(delta: float) -> void:
-	var planar_speed: float = Vector2(velocity.x, velocity.z).length()
-	stride += planar_speed * delta * 2.4
-	var amplitude: float = minf(planar_speed / sprint_speed, 1.0) * 0.65
-	if not is_on_floor():
-		amplitude = 0.0
-	var swing: float = sin(stride) * amplitude
-	left_leg.rotation.x = swing
-	right_leg.rotation.x = -swing
-	left_arm.rotation.x = -swing * 0.7
-	right_arm.rotation.x = swing * 0.7
-	if melee.attacking:
-		var swing_progress: float = clampf((melee.elapsed - melee.windup) / melee.active_time, 0.0, 1.0)
-		var swing_direction: float = combo[combo_index].swing_direction if combo_index >= 0 else 1.0
-		weapon.rotation.y = lerpf(-1.0, 1.0, swing_progress) * swing_direction
-		weapon.rotation.z = sin(swing_progress * PI) * 0.45 if combo_index == 2 else 0.0
-		right_arm.rotation.x = -1.0
-	else:
-		weapon.rotation.y = lerp_angle(weapon.rotation.y, 0.0, 1.0 - exp(-18.0 * delta))
-		weapon.rotation.z = lerp_angle(weapon.rotation.z, 0.0, 1.0 - exp(-18.0 * delta))

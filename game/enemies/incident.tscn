@@ -6,12 +6,18 @@
 [ext_resource type="AudioStream" path="res://assets/audio/warning.wav" id="4"]
 [ext_resource type="Script" path="res://game/combat/impact_sparks.gd" id="5"]
 
+[ext_resource type="Script" path="res://game/enemies/record_presentation.gd" id="7"]
+
+[ext_resource type="PackedScene" path="res://game/enemies/record_visual.tscn" id="6"]
+
+[ext_resource type="AudioStream" path="res://assets/audio/defeat.wav" id="8"]
+
 [sub_resource type="CapsuleShape3D" id="Shape"]
 radius = 0.45
 height = 2.0
 
 [sub_resource type="StandardMaterial3D" id="BodyMat"]
-albedo_color = Color(0.28, 0.055, 0.035, 1)
+albedo_color = Color(0.105, 0.12, 0.14, 1)
 metallic = 0.5
 roughness = 0.5
 
@@ -22,11 +28,11 @@ emission = Color(1, 0.12, 0.025, 1)
 emission_energy_multiplier = 2.5
 
 [sub_resource type="BoxMesh" id="BodyMesh"]
-size = Vector3(0.85, 1.45, 0.65)
+size = Vector3(0.22, 1.35, 0.24)
 material = SubResource("BodyMat")
 
 [sub_resource type="BoxMesh" id="EyeMesh"]
-size = Vector3(0.65, 0.16, 0.06)
+size = Vector3(0.30, 0.06, 0.06)
 material = SubResource("GlowMat")
 
 [sub_resource type="BoxMesh" id="ArmMesh"]
@@ -49,13 +55,14 @@ position = Vector3(0, 1, 0)
 shape = SubResource("Shape")
 
 [node name="Visual" type="Node3D" parent="."]
+script = ExtResource("7")
 
 [node name="Body" type="MeshInstance3D" parent="Visual"]
 position = Vector3(0, 1.1, 0)
 mesh = SubResource("BodyMesh")
 
 [node name="Eye" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.55, -0.35)
+position = Vector3(0.17, 1.94, -0.24)
 mesh = SubResource("EyeMesh")
 
 [node name="LeftArm" type="MeshInstance3D" parent="Visual"]
@@ -65,6 +72,8 @@ mesh = SubResource("ArmMesh")
 [node name="RightArm" type="MeshInstance3D" parent="Visual"]
 position = Vector3(0.6, 0.95, 0)
 mesh = SubResource("ArmMesh")
+
+[node name="RecordDetails" parent="Visual" instance=ExtResource("6")]
 
 [node name="Telegraph" type="MeshInstance3D" parent="Visual"]
 position = Vector3(0, 0.06, 0)
@@ -100,3 +109,8 @@ path_height_offset = 0.5
 target_desired_distance = 1.2
 radius = 0.65
 avoidance_enabled = false
+
+[node name="DefeatSound" type="AudioStreamPlayer3D" parent="."]
+process_mode = 3
+stream = ExtResource("8")
+volume_db = -10.0
