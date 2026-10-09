@@ -1,0 +1,18 @@
+# Godot-generated cache and imported translations.
+.godot/
+*.translation
+
+# Local builds, diagnostics, tools, and OS metadata.
+/builds/
+/logs/
+/.tools/
+.DS_Store
+__pycache__/
+
+# Local credentials must never enter source control.
+.env
+.env.*
+!.env.example
+export_credentials.cfg
+*.p12
+*.pfx
