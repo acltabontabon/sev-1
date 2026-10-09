@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AttackProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://game/combat/attack_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "FINISHER"
+damage = 45
+windup = 0.2
+active_time = 0.16
+recovery = 0.4
+reach = 2.55
+half_angle_degrees = 75.0
+hitstop = 0.08
+color = Color(1, 0.72, 0.25, 1)

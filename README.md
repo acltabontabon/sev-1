@@ -31,21 +31,22 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs `game/m
 | WASD or arrow keys | Move relative to camera direction |
 | Mouse / wheel | Orbit / zoom |
 | Shift / Space | Sprint / jump |
-| Left click or F | One baton strike toward camera direction |
+| Left click or F | Light attack; press again late in recovery to chain up to three hits |
+| Q or right click | Dodge in movement direction; backward relative to camera when stationary |
 | R | Restore both fighters, health, and camera; also works while paused or dead |
 | Escape / left click | Pause and release cursor / resume |
 
-Changing app focus also pauses the encounter. Approach the red Production Incident in the open center. Watch its orange ground arc, raised arms, and warning sound; move aside, then strike during recovery. Four current baton hits defeat it. R offers a fast retry.
+Changing app focus also pauses the encounter. Approach the red Production Incident in the open center. Watch its orange ground arc, raised arms, and warning sound; move aside, then strike during recovery. Two complete combos deal enough damage to defeat it, if every hit connects. Dodge cancels attack wind-up or recovery, but cannot interrupt the active strike. Attacks and dodges are grounded. R offers a fast retry.
 
 Try the ramp, raised deck, cabinets, and wall-adjacent camera angles for movement feedback. Enemy pursuit is direct and can stick behind obstacles. Character, enemy, animation, audio, and room are prototype assets; the current style is not final art approval. Keyboard/mouse is the only implemented control scheme.
 
 ## Current status
 
-Implemented: camera-relative movement, sprint/jump, orbit/zoom and camera obstruction, one grounded melee strike, one enemy with telegraph/attack/recovery, health, hit feedback, defeat, pause, and encounter reset.
+Implemented: camera-relative movement, sprint/jump, orbit/zoom and camera obstruction, a buffered three-hit grounded combo, directional dodge with brief invulnerability, one enemy with telegraph/attack/recovery, health, hit feedback, defeat, pause, and encounter reset.
 
-Human acceptance of combat feel is pending. Dodge, combos, waves, upgrades, progression, workstation/death fiction, post-incident reviews, bosses, and narrative scenes are not implemented. “Incident Response” remains a generic HUD label; the future narrative slice is **Incident 001: The Missing Transaction**.
+Human acceptance of combat feel is pending. Waves, upgrades, progression, workstation/death fiction, post-incident reviews, bosses, and narrative scenes are not implemented. “Incident Response” remains a generic HUD label; the future narrative slice is **Incident 001: The Missing Transaction**.
 
-Next: playtest attack timing, reach, impact, camera aim, and warning fairness; tune the current encounter before adding a defensive mechanic. The sequence is combat refinement → one polished office → a 5–10-minute narrative incident → a small progression experiment. See the [roadmap](docs/roadmap.md) for gates and deferred scope.
+Next: playtest attack timing, reach, impact, camera aim, and warning fairness; tune the current encounter before expanding combat or content. The sequence is combat refinement → one polished office → a 5–10-minute narrative incident → a small progression experiment. See the [roadmap](docs/roadmap.md) for gates and deferred scope.
 
 ## Validation
 
@@ -53,9 +54,9 @@ Next: playtest attack timing, reach, impact, camera aim, and warning fairness; t
 python3 tools/validate.py
 ```
 
-The existing Python 3 standard-library tool imports resources, parses scripts, and runs fixed-rate movement and combat checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
+The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, and Combat Alpha checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
-The last implementation validation on 10 October 2026 passed 16 movement and 29 combat assertions plus import/script checks. A Forward+/Metal combat preview was visually inspected and exited without logged errors. These are prior implementation results; the subsequent documentation-only alignment did not rerun or modify the game. Windows runtime testing and sustained performance measurements remain outstanding.
+The Combat Alpha validation on 10 October 2026 passed 85 assertions (16 movement, 29 combat, 40 alpha), plus import/script checks. Alpha checks cover the buffered chain, cancellation, dodge timing/distance at 30/60/120 physics Hz, real input bindings, enemy evasion, hit-stop, death, and reset stability. Windows runtime testing and human feel/audio acceptance remain outstanding.
 
 To capture a staged graphical preview:
 
@@ -64,6 +65,12 @@ sh tools/godot.sh --path . --script tests/capture_preview.gd -- --combat
 ```
 
 The output is `builds/combat_preview.png`. This tests presentation, not normal encounter pacing.
+
+The Combat Alpha graphics run on the M2 Pro used Forward+/Metal at 1920×1080 with existing scene effects and MSAA 2×. A 25-second automated close-range fight (five-second warm-up excluded, elevated actor health) measured 120.0 average FPS, 8.31 ms median, 10.46 ms p95, and 11.95 ms maximum over 2,401 frames. Screenshot saving occurs after measurement. This short local run is not a long-duration or Windows performance guarantee.
+
+To repeat it, run `sh tools/godot.sh --path . --resolution 1920x1080 --script tests/alpha_preview.gd` without `--fixed-fps`. It writes ignored `builds/alpha_performance.json`, `alpha_preview.png`, and `alpha_dodge.png`. Append `-- --capture-only` to skip measurement. Rendered attack/dodge images were inspected; human audio and combat-feel review remains pending.
+
+Useful tuning starts in the three `game/player/*.tres` attack profiles (damage, timing, reach, hit-stop) and Player exports (0.24 s combo buffer, 3 m dodge, 0.18 s invulnerability, 0.32 s dodge recovery, camera impulse strength). Try changing one variable at a time.
 
 ## Development setup
 
@@ -75,4 +82,4 @@ Matching export templates and an export preset are needed for future distributio
 
 No Godot MCP is installed. CLI editing/validation is sufficient for this checkpoint; the creator has authorized an integration if it materially improves live observation. Reassess compatibility and dependencies when needed. Do not add runtime AI services for narrative text or incident reports.
 
-Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. At this documentation checkpoint the repository still has no commits or remote, and project files are untracked on `codex/melee-playtest`; a Git baseline/remote remains operational follow-up rather than evidence of a backed-up project. This documentation pass does not switch branches or create a commit.
+Git ignore and attribute files preserve LF text, omit caches/builds/credentials, and retain UIDs/import sidecars. Preserve the existing identity and signing configuration. The initial playable and creative direction are committed on `main` at `10af59b`. Combat Alpha development uses `codex/combat-alpha`. No remote is configured; local commits are not an off-machine backup.

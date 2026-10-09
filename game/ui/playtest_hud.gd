@@ -37,7 +37,7 @@ func refresh() -> void:
 		status.text = "INCIDENT RESOLVED  /  R TO RUN IT BACK"
 		$CapturePrompt/Panel/Padding/Text.text = "INCIDENT RESOLVED\n\nPress R for another round.\nClick to keep exploring."
 	else:
-		$CapturePrompt/Panel/Padding/Text.text = "CLICK TO ENTER THE COMBAT LAB\n\nAim the camera toward the incident.\nLeft click or F swings the baton.\nStep aside when it winds up.\n\nR resets both fighters. Escape pauses."
+		$CapturePrompt/Panel/Padding/Text.text = "COMBAT ALPHA  /  CLICK TO BEGIN\n\nLMB or F: three-hit chain. Press again near recovery.\nQ or right mouse: dodge. Move to choose direction.\nNo movement input: dodge backward.\n\nWatch the orange warning. Cyan means invulnerable.\nR resets both fighters. Escape pauses."
 
 
 func _on_hit() -> void:
@@ -56,7 +56,11 @@ func _process(delta: float) -> void:
 	$DamageFlash.color.a = hurt_left * 0.75
 	if player.health <= 0:
 		$Margin/VBox/AttackState.text = "R TO RESTART"
+	elif player.dodging:
+		$Margin/VBox/AttackState.text = "DODGE  /  INVULNERABLE" if player.dodge_is_invulnerable() else "DODGE  /  RECOVERY"
 	elif player.melee.attacking:
-		$Margin/VBox/AttackState.text = "SWINGING" if player.melee.elapsed < player.melee.windup + player.melee.active_time else "RECOVERING"
+		var phase: String = "WIND-UP" if player.melee.elapsed < player.melee.windup else ("STRIKE" if player.melee.is_active() else "RECOVERY")
+		var queue_text: String = "  /  NEXT QUEUED" if player.combo_buffer_left > 0 else ""
+		$Margin/VBox/AttackState.text = "%d / 3  %s  /  %s%s" % [player.combo_index + 1, player.combo[player.combo_index].title, phase, queue_text]
 	else:
-		$Margin/VBox/AttackState.text = "BATON READY  /  LMB OR F"
+		$Margin/VBox/AttackState.text = "READY  /  LMB OR F   •   Q OR RMB TO DODGE"

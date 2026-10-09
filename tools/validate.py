@@ -36,4 +36,5 @@ if __name__ == "__main__":
         run(relative.replace("/", "_"), ["--headless", "--path", ".", "--check-only", "--script", relative])
     run("movement", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/run_tests.gd"])
     run("combat", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/combat_tests.gd"])
+    run("alpha", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/alpha_tests.gd"])
     print("All checks passed. Graphical review and human playtesting remain separate.")

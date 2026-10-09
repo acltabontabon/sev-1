@@ -17,6 +17,7 @@ func _on_capture_changed(active: bool) -> void:
 
 
 func _on_player_died() -> void:
+	enemy.melee.cancel()
 	player.camera_rig.set_capture(false)
 
 

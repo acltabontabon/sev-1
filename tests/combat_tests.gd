@@ -39,6 +39,9 @@ func _run() -> void:
 	current_scene = scene
 	player = scene.get_node("Player")
 	enemy = scene.get_node("Enemy")
+	# Retain the original 100-health fixture while live alpha uses a longer bout.
+	enemy.max_health = 100
+	enemy.reset_enemy()
 	check(paused, "encounter starts paused until captured")
 	var click: InputEventMouseButton = InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
@@ -124,7 +127,8 @@ func _run() -> void:
 		if index == 3:
 			enemy.melee.start()
 		player.request_attack()
-		await frames(34)
+		# Space these out past the combo link window: four independent first hits.
+		await frames(60)
 	check(enemy.health == 0 and enemy.collision_layer == 0, "four strikes defeat and disable the enemy")
 	check(not enemy.receive_damage(25, player.position), "dead enemy ignores later hits")
 	check(not enemy.melee.attacking, "enemy death cancels its pending attack")

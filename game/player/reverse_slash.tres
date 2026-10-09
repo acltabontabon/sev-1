@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AttackProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://game/combat/attack_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "REVERSE"
+damage = 30
+windup = 0.1
+active_time = 0.14
+recovery = 0.26
+reach = 2.45
+swing_direction = -1
+hitstop = 0.055
+color = Color(0.55, 0.8, 1, 1)

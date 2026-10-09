@@ -8,8 +8,11 @@ signal capture_changed(active: bool)
 @export var max_pitch_degrees: float = 25.0
 @export var min_distance: float = 2.0
 @export var max_distance: float = 7.0
+@export_range(0, 2) var impulse_degrees: float = 0.8
+@export_range(1, 30) var impulse_decay: float = 12.0
 
 var controls_active: bool = false
+var impulse: float = 0.0
 @onready var spring_arm: SpringArm3D = $SpringArm3D
 
 
@@ -19,9 +22,23 @@ func _ready() -> void:
 
 
 func reset_view() -> void:
+	impulse = 0.0
+	$SpringArm3D/Camera3D.rotation = Vector3.ZERO
 	rotation = Vector3.ZERO
 	spring_arm.rotation.x = deg_to_rad(-18.0)
 	spring_arm.spring_length = 5.0
+
+
+func add_impulse(strength: float) -> void:
+	impulse = minf(1, impulse + strength)
+
+
+func _physics_process(delta: float) -> void:
+	if get_tree().paused:
+		return
+	impulse = move_toward(impulse, 0, delta * impulse_decay)
+	# Rotation only: never move the lens through the spring arm's collision plane.
+	$SpringArm3D/Camera3D.rotation = Vector3(deg_to_rad(impulse_degrees) * impulse, 0, deg_to_rad(impulse_degrees) * impulse * 0.35)
 
 
 func orbit(motion: Vector2) -> void:

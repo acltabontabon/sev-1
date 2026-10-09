@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://game/combat/melee_attack.gd" id="2"]
 [ext_resource type="AudioStream" path="res://assets/audio/swing.wav" id="3"]
 [ext_resource type="AudioStream" path="res://assets/audio/warning.wav" id="4"]
+[ext_resource type="Script" path="res://game/combat/impact_sparks.gd" id="5"]
 
 [sub_resource type="CapsuleShape3D" id="Shape"]
 radius = 0.45
@@ -37,6 +38,11 @@ collision_layer = 4
 collision_mask = 3
 floor_snap_length = 0.3
 script = ExtResource("1")
+max_health = 180
+
+[node name="ImpactSparks" type="Node3D" parent="."]
+top_level = true
+script = ExtResource("5")
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 position = Vector3(0, 1, 0)

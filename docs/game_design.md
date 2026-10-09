@@ -16,7 +16,7 @@ Preserve the current ability to win through positioning. Develop dodge and other
 
 Hades and Devil May Cry are references named by the creator for readable encounter decisions and expressive action. Use design principles as inspiration, not their assets, characters, or exact move sets. SEV-1's camera, scope, and control scheme must work on their own terms.
 
-The current baton and generic incident are test fixtures. Their tuning and camera-directed targeting are provisional. Current implementation details live in [architecture](architecture.md); desired combos, dodge, abilities, and finished animation are not present yet.
+The current baton and generic incident are test fixtures. Their tuning and camera-directed targeting are provisional. Current implementation details live in [architecture](architecture.md); the Combat Alpha now tests a three-hit combo and dodge; abilities and finished animation are not present yet.
 
 ## Narrative foundation
 

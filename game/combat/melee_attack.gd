@@ -2,6 +2,7 @@ extends Node3D
 ## A bounded forward strike shared by player and enemy; no lingering hitboxes.
 
 signal hit_landed(target: Node3D)
+signal finished
 
 @export var target_group: StringName = &"enemies"
 @export var damage: int = 25
@@ -19,11 +20,41 @@ var attacking: bool = false
 var hit_targets: Array[int] = []
 var arc: MeshInstance3D
 var audio: AudioStreamPlayer3D
+var freeze_left: float = 0.0
 
 
 func _ready() -> void:
 	arc = MeshInstance3D.new()
 	arc.name = "StrikeArc"
+	arc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(arc)
+	rebuild_arc()
+	arc.hide()
+	audio = AudioStreamPlayer3D.new()
+	audio.volume_db = -12.0
+	add_child(audio)
+
+
+func configure(profile: AttackProfile) -> void:
+	damage = profile.damage
+	reach = profile.reach
+	windup = profile.windup
+	active_time = profile.active_time
+	recovery = profile.recovery
+	half_angle_degrees = profile.half_angle_degrees
+	arc_color = profile.color
+	rebuild_arc()
+
+
+func is_active() -> bool:
+	return attacking and elapsed >= windup and elapsed < windup + active_time
+
+
+func remaining_time() -> float:
+	return maxf(0.0, windup + active_time + recovery - elapsed)
+
+
+func rebuild_arc() -> void:
 	var mesh: ImmediateMesh = ImmediateMesh.new()
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -37,12 +68,6 @@ func _ready() -> void:
 		mesh.surface_add_vertex(direction * reach)
 	mesh.surface_end()
 	arc.mesh = mesh
-	arc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(arc)
-	arc.hide()
-	audio = AudioStreamPlayer3D.new()
-	audio.volume_db = -12.0
-	add_child(audio)
 
 
 func start() -> bool:
@@ -59,6 +84,7 @@ func start() -> bool:
 
 
 func cancel() -> void:
+	freeze_left = 0.0
 	attacking = false
 	elapsed = 0.0
 	hit_targets.clear()
@@ -67,6 +93,9 @@ func cancel() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if freeze_left > 0:
+		freeze_left = maxf(0, freeze_left - delta)
+		return
 	if not attacking:
 		return
 	var previous: float = elapsed
@@ -80,6 +109,7 @@ func _physics_process(delta: float) -> void:
 	arc.visible = attacking and elapsed >= windup and elapsed < windup + active_time
 	if elapsed >= windup + active_time + recovery:
 		cancel()
+		finished.emit()
 
 
 func _resolve_hits() -> void:
