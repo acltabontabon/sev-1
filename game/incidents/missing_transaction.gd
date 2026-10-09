@@ -11,6 +11,9 @@ const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 @export var boss_health: int = 700
 const RUN: Script = preload("res://game/incidents/run_progression.gd")
 const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
+var presentation: CanvasLayer
+var enemies_defeated: int = 0
+var boss_encountered: bool = false
 var run: Node
 var upgrade_ui: CanvasLayer
 @export_range(1, 600) var commitment_seconds: float = 300.0
@@ -59,6 +62,8 @@ func _ready() -> void:
 	add_child(upgrade_ui)
 	upgrade_ui.selected.connect(_choose_modal)
 	player.damage_accepted.connect(_on_damage_accepted)
+	presentation = preload("res://game/incidents/incident_presentation.gd").new()
+	add_child(presentation)
 	reset_incident()
 
 
@@ -75,6 +80,8 @@ func reset_incident() -> void:
 	stage = Stage.ALERT
 	alert_played = false
 	$AlertSound.stop()
+	enemies_defeated = 0
+	boss_encountered = false
 	elapsed = 0
 	stage_time = 0
 	spawn_delay = 0
@@ -83,11 +90,15 @@ func reset_incident() -> void:
 	inspected = false
 	report = ""
 	objective = "Friday, 4:59 PM. Head into the office."
-	message = "One payment. Three answers.\nCore: SUCCESS   /   Loans: FAILED   /   Payments: NOT FOUND\n“Quick question. Can we have an ETA?”"
+	message = "Your shift is over. Almost.   •   TAB skips the opening."
 	console_marker.text = ""
 	light_target = .6
 	room.get_node("IncidentSpill").light_energy = .6
-	_dashboard("THREE SYSTEMS\nDISAGREE", "INCIDENT DECLARED")
+	_dashboard("PRODUCTION\nHEALTHY", "ALL SYSTEMS OPERATIONAL")
+	room.get_node("Impossible").text = "TRANSACTIONS: CONSISTENT"
+	room.get_node("ETA").text = "NO ACTIVE INCIDENTS"
+	room.get_node("Clock").text = "FRIDAY / 16:59"
+	presentation.reset_story()
 
 
 func terminal() -> bool:
@@ -141,6 +152,7 @@ func _enter(next: Stage) -> void:
 			_dashboard("FALSE\nPOSITIVES", "VERIFY BEFORE RESOLVING")
 		Stage.RESOLVED, Stage.FAILED:
 			_finish()
+	presentation.stage_changed()
 
 
 func _process(delta: float) -> void:
@@ -148,22 +160,28 @@ func _process(delta: float) -> void:
 	spill.light_energy = move_toward(spill.light_energy, light_target + (0.0 if terminal() else run.band() * .35), delta * 1.2)
 	if terminal() or get_tree().paused:
 		return
-	if stage == Stage.ALERT and not alert_played:
-		alert_played = true
-		if DisplayServer.get_name() != "headless":
-			$AlertSound.play()
 	if stage == Stage.ENCOUNTER_TWO and challenge_result == "Active":
 		challenge_left = maxf(0, challenge_left - delta)
 		if challenge_left == 0:
 			challenge_result = "Expired — no penalty"
 	elapsed += delta
 	stage_time += delta
-	if stage == Stage.ALERT and stage_time >= 7:
+	if stage == Stage.ALERT and stage_time >= presentation.opening_duration():
 		_enter(Stage.ENCOUNTER_ONE)
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS] and not is_instance_valid(active_enemy):
 		spawn_delay -= delta
 		if spawn_delay <= 0:
 			_spawn()
+
+
+func arrival_site() -> Vector3:
+	# Fixed clear floor lanes; choose the farthest site so arrivals never hit immediately.
+	var sites: Array[Vector3] = [Vector3(-2, .05, -8), Vector3(2, .05, 1), Vector3(-2, .05, 5)]
+	var site: Vector3 = sites[0]
+	for candidate in sites:
+		if candidate.distance_to(player.position) > site.distance_to(player.position):
+			site = candidate
+	return site
 
 
 func _spawn() -> void:
@@ -174,13 +192,7 @@ func _spawn() -> void:
 		actor.set_script(VARIANCE)
 		actor.max_health = boss_health
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
-	# Fixed clear floor lanes; choose the farthest site so arrivals never hit immediately.
-	var sites: Array[Vector3] = [Vector3(-2, .05, -8), Vector3(2, .05, 1), Vector3(-2, .05, 5)]
-	var site: Vector3 = sites[0]
-	for candidate in sites:
-		if candidate.distance_to(player.position) > site.distance_to(player.position):
-			site = candidate
-	actor.position = site
+	actor.position = arrival_site()
 	actor.detection_distance = 50
 	if stage == Stage.ENCOUNTER_TWO:
 		actor.move_speed = 3.4
@@ -190,6 +202,7 @@ func _spawn() -> void:
 	active_enemy = actor
 	actor.died.connect(_on_record_died.bind(actor), CONNECT_ONE_SHOT)
 	if stage == Stage.BOSS:
+		boss_encountered = true
 		actor.false_positives.connect(_make_copies, CONNECT_ONE_SHOT)
 	else:
 		var tag: Label3D = Label3D.new()
@@ -202,11 +215,14 @@ func _spawn() -> void:
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		actor.add_child(tag)
 	actor.show_impact(Color(.4, 1, 1))
+	if stage == Stage.ENCOUNTER_ONE:
+		presentation.say("enemy")
 
 
 func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal() or actor != active_enemy:
 		return
+	enemies_defeated += 1
 	active_enemy = null
 	actor.label.text = "RECORD RECONCILED"
 	if actor.has_node("RecordMarker"):
@@ -270,6 +286,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _make_copies() -> void:
 	if stage != Stage.BOSS or not is_instance_valid(active_enemy) or not copies.is_empty():
 		return
+	presentation.say("copies", true)
 	for side in [-1, 1]:
 		var copy: Node3D = Node3D.new()
 		copy.position = active_enemy.position + Vector3(side * 2.3, 0, 0)
@@ -325,14 +342,17 @@ func _finish() -> void:
 	report = "INCIDENT 001 — RESOLVED\n\nRoot cause: downstream transaction delivery failed.\nResolution: missing record identified; discrepancy eliminated.\n\nManagement: Great collaborative effort.\nSpecial thanks to leadership for driving the resolution.\nActual engineering contributors: 1" if won else "INCIDENT 001 — UNRESOLVED\n\nRoot cause: engineer failed to anticipate undocumented behavior.\nCorrective action: Improve anticipation.\nAssigned owner: You.    Due date: Yesterday.\n\nField note: evade the orange arc; counter during recovery.\nThe Variance takes damage only while marked OPEN."
 	report += "\n\nDebt: %d — %s\nUpgrades: %s" % [run.debt, run.severity(), run.summary()]
 	report += "\nBurnout: %d — %s\nManagement: %s\nCommitment: %s" % [run.burnout, run.burnout_title(), corporate_title(), challenge_result]
+	report += "\nPeak Burnout: %d • Enemies defeated: %d\nBoss: %s" % [run.peak_burnout, enemies_defeated, "Eliminated" if won else ("Encountered — unresolved" if boss_encountered else "Not encountered")]
 	report += "\n\nTime: %d:%02d    Investigation retries: %d\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, mistakes]
+	report += "\n\nEngineer: Can I go home now?\nCalendar: Retrospective — tomorrow, 09:00." if won else "\n\nCalendar: Your retrospective attendance is still required."
+	room.get_node("Clock").text = "FRIDAY / 17:00" if won else "FRIDAY / 16:59"
 	player.melee.cancel()
 	player.camera_rig.set_capture(false)
 
 
 func _dashboard(title: String, detail: String) -> void:
 	var recovered: bool = stage == Stage.RESOLVED
-	var color: Color = Color(.3, .9, .75) if recovered else Color(1, .3, .12)
+	var color: Color = Color(.3, .9, .75) if recovered or (stage == Stage.ALERT and not alert_played) else Color(1, .3, .12)
 	room.get_node("Critical").modulate = color
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.albedo_color = color
@@ -367,6 +387,8 @@ func choose_upgrade(index: int) -> void:
 	upgrade_ui.close()
 	_enter(upgrade_next)
 	message = "%s • +%d DEBT → %d / %s\n%s" % [run.TITLES[index], run.debt - before, run.debt, run.severity(), message]
+	if run.debt > before:
+		presentation.say("debt")
 	player.camera_rig.set_capture(true)
 
 
@@ -433,6 +455,8 @@ func _on_damage_accepted(base_amount: int) -> void:
 		return
 	run.change_burnout(run.hit_burnout, "Meaningful hit")
 	run.apply_to(player)
+	if run.burnout >= 70:
+		presentation.say("burnout", true)
 
 
 func _complete_containment() -> void:

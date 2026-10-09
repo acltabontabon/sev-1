@@ -45,6 +45,7 @@ var dodging: bool = false
 var dodge_elapsed: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 
+var narrative_hold: bool = false
 var spawn_position: Vector3
 @onready var presentation: Node3D = $Visual/Character
 @onready var visual: Node3D = $Visual
@@ -71,7 +72,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func request_attack() -> bool:
-	if health <= 0 or hurt_left > 0 or dodging or not is_on_floor() or combo.is_empty():
+	if narrative_hold or health <= 0 or hurt_left > 0 or dodging or not is_on_floor() or combo.is_empty():
 		return false
 	if melee.attacking:
 		if combo_index < combo.size() - 1 and melee.remaining_time() <= combo_buffer_window:
@@ -109,7 +110,7 @@ func clear_combo() -> void:
 
 
 func request_dodge() -> bool:
-	if health <= 0 or hurt_left > 0 or dodging or not is_on_floor() or melee.is_active() or hitstop_left > 0:
+	if narrative_hold or health <= 0 or hurt_left > 0 or dodging or not is_on_floor() or melee.is_active() or hitstop_left > 0:
 		return false
 	melee.cancel()
 	clear_combo()
@@ -199,6 +200,9 @@ func reset_player() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if narrative_hold:
+		velocity = Vector3.ZERO
+		return
 	if health <= 0:
 		return
 	if hitstop_left > 0:

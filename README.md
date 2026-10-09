@@ -14,7 +14,7 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt; Milestone 7 adds Burnout and one corporate decision; Milestone 8 stabilizes the existing slice. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt; Milestone 7 adds Burnout and one corporate decision; Milestone 8 stabilizes the existing slice; Milestone 9 adds cinematic narrative presentation. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
 ## Play Incident 001
 
@@ -35,10 +35,11 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs the sel
 | Q or right click | Dodge in movement direction; backward relative to camera when stationary |
 | E | Inspect the operations console when nearby |
 | 1 / 2 / 3 | Choose an upgrade or corporate response while its screen is open; otherwise select a system after inspecting evidence |
+| Tab | Skip the opening or boss arrival during active play |
 | R | Restart the entire incident, including health, camera, enemies, evidence, and lighting; works while paused or dead |
 | Escape / left click | Pause and release cursor / resume; pause card offers camera shake and damage flash switches |
 
-Changing app focus also pauses. After clicking to begin, the short alert leaves movement available immediately. The first record materializes after about nine active seconds. Face the enemy with the camera, read its orange warning arc, dodge aside, and strike during recovery. Press LMB/F again late in recovery to chain up to three hits. Q/right mouse cancels wind-up or recovery, but cannot interrupt an active strike. Attacks and dodges are grounded.
+Changing app focus also pauses. After clicking to begin, the first opening lasts 24 active seconds. A nine-second workstation shot establishes Friday; movement and the normal camera return before the incident alert at ten seconds. The first record materializes around 26 seconds. Tab immediately skips to the encounter arrival. After seeing or skipping the opening, R retries use a three-second opening and reach combat around five seconds; a fresh launch restores the full sequence. Face the enemy with the camera, read its orange warning arc, dodge aside, and strike during recovery. Press LMB/F again late in recovery to chain up to three hits. Q/right mouse cancels wind-up or recovery, but cannot interrupt an active strike. Attacks and dodges are grounded.
 
 Incident flow:
 
@@ -62,7 +63,7 @@ First playtest: can you explain why the payment record is missing, read the boss
 python3 tools/validate.py
 ```
 
-The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, incident, presentation, progression, Burnout, and stabilization checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
+The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, incident, presentation, progression, Burnout, stabilization, and narrative checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
 The pre-Milestone 6 baseline passed **155 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation, plus import and every script parse. Current progression results are recorded below. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
 
@@ -369,3 +370,72 @@ obstructions, choice defaults, audio levels and whether you want another run. Tr
 from both decisions and both reports, and try the comfort switches while paused.
 Next: director-led balance/usability acceptance and Windows validation of this slice.
 Models, animation, sound, ordinary run pacing and subjective polish remain provisional.
+
+
+## Milestone 9 — Friday, 4:59 PM
+
+The opening now stages the existing engineer at their desk: a weekend notification,
+a clock-check/relief pose, the SEV-1 alert, an ETA request, and a dry response. The
+normal camera blends back at nine seconds. Tab skips both the opening and The
+Variance's six-second arrival; its repeat arrival lasts 1.5 seconds. Movement remains
+available throughout the boss introduction. Escape/focus loss pauses narrative timing.
+R is always the quick retry. Seen flags last only in this scene session.
+
+A single lower-right caption card alternates engineer dialogue and corporate messages.
+First record arrival, investigation, paid debt, containment, critical Burnout, boss
+arrival, and false copies trigger short one-shot lines. Leadership checks in during
+containment; management requests an RCA during the boss fight. Choices and reports
+hide the card. Gameplay never pauses for a message.
+
+Workstation data rows and operations signage start healthy, turn critical, intensify
+through containment, become magenta around The Variance, and stabilize after victory.
+One restrained emergency-light sag accompanies declaration. Eight native ledger shards
+converge before the boss; existing arrival sparks complete the manifestation. No combat
+values, boss phases, office geometry, or navigation were changed.
+
+Reports retain actual choices, debt, final Burnout, duration and investigation retries,
+and add peak Burnout, defeated enemies (including the boss), encounter outcome and a
+retrospective punchline. No statistics persist between runs. Original synthesized office
+hum, notification, boss and resolution cues remain placeholders; see
+[audio provenance](assets/audio/README.md).
+
+Validation on 10 October 2026: **341 assertions pass**, plus import and all script parses.
+This includes 21 narrative checks. The earlier run failed the superseded ten-second
+opening expectation and healthy-dashboard reset expectation; both tests now reflect the
+authorized narrative timing/state. No outstanding automated failure remains.
+
+Graphical previews at 1280×720 inspect the workstation, relief, alert, ETA, reaction,
+first record, boss title/arrival and both reports. These are staged captures, not evidence
+of human pacing or finished art. Repeat with:
+
+```sh
+sh tools/godot.sh --path . --script tests/narrative_preview.gd
+```
+
+Outputs are ignored under `builds/narrative_*.png`. The existing native model and
+procedural poses remain provisional. No voice acting, licensed external art, persistent
+seen state, or new gameplay system was added. Listen for cue balance, check that the
+nine-second camera handoff feels comfortable, and judge whether the messages remain
+readable during dodges. Complete a victory, a defeat, and an R retry; try Tab and Escape
+at both introductions. The next milestone should be director-led pacing/feel acceptance,
+first-use hitch investigation, and Windows runtime validation of this same episode.
+
+Milestone 9 performance on Apple M2 Pro, 1920×1080, Forward+/Metal, MSAA 2×,
+SSAO, glow and fog: the existing 25-second boss/two-copy scenario (60 debt, 100
+Burnout, elevated health, five-second warm-up and screenshot saving excluded) measured
+**120.00 average FPS**, **8.26 ms median**, **9.46 ms p95**, **12.00 ms maximum**
+over 2,401 frames, with 422 final-frame draw calls. The earlier Milestone 8 p95 was
+9.67 ms; average FPS differs with frame pacing, so this is not a causal optimization
+claim or a full-run performance guarantee.
+
+The three-run graphical lifecycle probe measured **120.48 average FPS**, **9.95 ms
+p95**, **143.23 ms maximum**, and 11 frames above 16.67 ms over 4,140 frames. The
+largest hitch was initial rendering; management, boss arrival/combat and failure retry
+also had isolated slow frames. Peak tracked static/video memory was 81.43/340.81 MiB;
+peak draw calls were 551. Spawn calls took 0.60–1.86 ms and the three measured victory
+resets 0.67–1.32 ms. This probe stages transitions directly, bypasses the normal opening
+timeline, and includes paused UI/first rendering; it does not establish natural run
+pacing or cinematic transition smoothness. Existing first-use hitch work remains open.
+The steady-combat sample shows no new slow-frame tail, but hitch-free play and Windows
+performance remain unverified. Repeat using the existing `incident_preview.gd --burnout
+--measure` and `stabilization_preview.gd` commands documented above.

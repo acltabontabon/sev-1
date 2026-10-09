@@ -20,6 +20,7 @@ extends Node
 @export_range(0, .30) var overloaded_bonus: float = .25
 @export_range(0, .25) var pressured_risk: float = .10
 @export_range(0, .25) var overloaded_risk: float = .25
+var peak_burnout: int = 0
 var burnout: int = 0
 var burnout_notice: String = ""
 var debt: int = 0
@@ -29,6 +30,7 @@ const TITLES: Array[String] = ["Ship It Friday", "Add More Tests", "Temporary Wo
 
 func reset_run() -> void:
 	debt = 0
+	peak_burnout = 0
 	burnout = 0
 	burnout_notice = ""
 	choices.clear()
@@ -96,6 +98,7 @@ func summary() -> String:
 func change_burnout(amount: int, source: String) -> void:
 	var before: int = burnout
 	burnout = clampi(burnout + amount, 0, burnout_limit)
+	peak_burnout = maxi(peak_burnout, burnout)
 	burnout_notice = "%s: %+d" % [source, burnout - before]
 
 

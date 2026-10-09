@@ -100,7 +100,7 @@ func _run() -> void:
 		await frames(3)
 		check(run.debt == 0 and run.choices.is_empty() and player.melee.damage_multiplier == 1 and player.incoming_damage_multiplier == 1 and player.dodge_recovery_multiplier == 1, "restart clears all run modifiers")
 		check(scene.find_children("*", "", true, false).size() == base_nodes, "restart retains bounded nodes and modal")
-		check(scene.get_node("OfficeAfterHours/Impossible").text == "CORE: SUCCESS", "restart clears environmental corruption")
+		check(scene.get_node("OfficeAfterHours/Impossible").text == "TRANSACTIONS: CONSISTENT", "restart clears environmental corruption")
 		await fixture()
 		await key(KEY_3)
 		player.invulnerable_left = 0

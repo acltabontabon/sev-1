@@ -146,13 +146,13 @@ by `tests/office_preview.gd`; see README for the command and measured results.
 
 `game/incidents/missing_transaction.gd` owns the explicit sequence ALERT → ENCOUNTER_ONE → INVESTIGATION → ENCOUNTER_TWO → BOSS → RESOLVED, with FAILED reachable from every live stage. Invalid skips and repeated terminal transitions are ignored. No autoload, quest framework, asynchronous gameplay timer, external asset, or runtime service was added. Main's existing signal subscriptions are connected once and never reconnected on restart.
 
-The inherited lab enemy is hidden, disabled, and removed from the melee target group. Original player, enemy, melee, camera, office geometry, navigation, and tuning files are unchanged. A seven-second alert runs only during active play; a two-second arrival delay puts the first enemy in play around nine seconds. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes pursuit speed from 2.4 to 3.4 m/s before the run debt multiplier. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
+The inherited lab enemy is hidden, disabled, and removed from the melee target group. The original combat tuning, enemy/melee behavior, office geometry and navigation are preserved. Milestone 9 adds only a short presentation hold to the player and an independent opening camera. Milestone 9 replaces the seven-second alert with a 24-active-second opening; a two-second arrival delay puts the first enemy in play around 26 seconds. Seen session retries shorten the opening to three seconds. Tab skips it. See the narrative presentation section below. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes pursuit speed from 2.4 to 3.4 m/s before the run debt multiplier. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
 
 Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
 
 `game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Milestone 8 freezes the phase clock during actor hit-stop, so an impact cannot consume the remaining OPEN time while motion is frozen. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains a settled fractured pose and removes projections; there is no imported boss animation.
 
-The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player and camera. A fresh scene load also resets everything; nothing persists between runs.
+The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player at the workstation with the gameplay camera. A fresh scene load also resets everything. Milestone 9 retains only opening/boss seen flags across R within the same scene session; gameplay state never persists between runs.
 
 `tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
@@ -365,3 +365,60 @@ profiler. Screenshot capture in `incident_preview.gd` forces a render after sett
 than waiting indefinitely for a paused/background draw signal. Results, QA evidence,
 unresolved balance questions and limits live in
 [the stabilization verification](stabilization.md); README owns commands and controls.
+
+
+## Milestone 9 narrative presentation
+
+`game/incidents/incident_presentation.gd` is one local CanvasLayer owned by Incident.
+It has an explicit Incident 001 timeline and a bounded queue of authored captions,
+not a general cutscene/dialogue engine. Incident still owns the seven stages, spawns,
+choices, deaths, and reset. Stage changes call `stage_changed`; arrival, paid upgrades,
+accepted hits reaching critical Burnout, and false positives request named one-shot
+lines. A maximum three queued lines prevents backlog; urgent protagonist/alert lines
+preempt the current card. Stage changes discard stale pending messages. Text is held
+in one dictionary and passed through `tr`, ready for later localization without a
+translation asset or localization framework. Timed messages last 4.5 active seconds.
+Modal/terminal/pause states hide captions and titles, and freeze their countdown.
+
+The full opening has weekend notification (0s), clock-check relief (5s), incident
+alert/dashboard change (10s), management ETA (15s), and protagonist response (20s).
+At 24s the existing encounter begins, with its unchanged two-second arrival delay.
+The first nine seconds use one Camera3D near the existing workstation, with a final
+one-second transform blend to the spring-arm camera. `Player.narrative_hold` gates
+movement, attack and dodge only during that shot. Pause/reset input remains live.
+`CharacterPresentation.story_pose` lowers the weapon and adds head/arm gestures; it
+never changes attack timing or damage. Release/skip/stage/reset restores the gameplay
+camera and clears hold/pose. No combat occurs during the held shot.
+
+Boss arrival uses six seconds of active time (1.5 on subsequent session encounters),
+a title/subtitle, and eight preallocated native fragments converging at the existing
+safe arrival site. The player retains control. Tab sets arrival delay to zero and
+spawns through the existing guarded function. Boss mechanics and phase durations
+are unchanged; health appears on the title briefly, then in the normal HUD.
+Opening/boss seen flags survive only R in the same loaded scene; a fresh launch
+shows full introductions. No timers, autoload, storage, or delayed callbacks exist.
+
+Workstation code rows share a local unshaded material, independent of existing shared
+assets: healthy teal, critical red, containment orange, boss magenta, recovered teal.
+Existing operations labels and strip retain the debt indicators. Only emergency spill
+energy has a brief smooth sag during declaration; ambient combat lighting stays intact.
+No extra real-time lights, shaders or navigation work are introduced. Victory subsides
+the existing spill, restores production/clock text, and hides hostile fragments/copies.
+Four small original synthesized sounds are authored by `tools/build_narrative_audio.py`;
+the air loop uses its preserved import setting. All playback skips headless mode.
+
+The original deterministic reports now include Incident's live enemy-death counter and
+boss-spawn flag, plus RunProgression's peak Burnout, recorded inside `change_burnout`
+before any later relief. Duplicate death guards still prevent double counts. Time is
+active incident time including introductions/arrivals, excluding pauses/decisions;
+enemy count includes The Variance. R clears these values. Reports use 17px text at the
+720p canvas reference to fit the existing pause panel, with the restart action visible.
+
+`tests/narrative_tests.gd` adds 21 outcome checks for healthy monitoring, staging,
+input gates, pause, real Tab/R events, guarded spawns, one-shot lines, modal suppression,
+recorded peak/final pressure, accurate reports, and shortened repeated runs. Existing
+incident timing and progression reset expectations now match the authorized new opening.
+All 341 assertions plus imports/parsing pass. `tests/narrative_preview.gd` captures the
+rendered opening and terminal states. Human pacing, humor, listening, camera comfort,
+and Windows validation remain separate gates; native art/poses and synthesized audio
+are still placeholders. README owns launch, controls, preview commands and performance.

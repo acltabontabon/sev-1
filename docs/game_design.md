@@ -4,7 +4,7 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. There are no saves or permanent unlocks.
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. There are no saves or permanent unlocks.
 
 **Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence rules are unsettled.
 
@@ -120,7 +120,7 @@ Burnout and Technical Debt are now implemented; do not add Reputation alongside 
 
 ## Death and post-incident review
 
-The established narrative goal is to turn death/restart into an absurd Post-Incident Review. Incident 001 now implements deterministic victory/death reports and a Friday reset with R; a cinematic workstation sequence remains deferred.
+The established narrative goal is to turn death/restart into an absurd Post-Incident Review. Incident 001 now implements deterministic victory/death reports and a Friday reset with R; Milestone 9 implements a concise real-time workstation opening with skip and shortened session retries.
 
 Use handcrafted templates with deterministic contextual variation based on recorded run events. For example, “SEV-404 — Developer Unexpectedly Ceased Functioning” might assign “Improve anticipation” to “You,” due “Yesterday,” after a missed telegraph. Separate truthful gameplay feedback from the fictional organization's unfair assessment so players can still learn.
 

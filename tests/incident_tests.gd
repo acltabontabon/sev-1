@@ -42,8 +42,8 @@ func _run() -> void:
 	player.health = 10000
 	incident._enter(incident.Stage.BOSS)
 	check(incident.stage == incident.Stage.ALERT, "out-of-order transitions are rejected")
-	await frames(580)
-	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within ten active seconds")
+	await frames(1600)
+	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within twenty-seven active seconds")
 	check(get_nodes_in_group("enemies").size() == 1, "lab opponent is disabled and only one record is active")
 	var first: CharacterBody3D = incident.active_enemy
 	check(first.position.distance_to(player.position) > 3, "arrival is outside immediate striking distance")
@@ -73,7 +73,7 @@ func _run() -> void:
 	incident.upgrade_ui.buttons[0].pressed.emit()
 	check(incident.run.debt == 30 and incident.run.choices.size() == 2, "button upgrade persists both run decisions")
 	check(incident.stage == incident.Stage.BOSS, "second wave completion starts boss")
-	await frames(150)
+	await frames(450)
 	var boss: CharacterBody3D = incident.active_enemy
 	check(boss.max_health == incident.boss_health, "boss health is configured separately")
 	boss.phase_time = 0

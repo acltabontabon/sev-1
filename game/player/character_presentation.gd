@@ -4,6 +4,7 @@ extends Node3D
 
 @export var stride_length: float = 1.25
 @export var breathing_amount: float = 0.008
+var story_pose: int = 0
 var phase: float = 0.0
 var clock: float = 0.0
 var crouch: float = 0.0
@@ -60,6 +61,14 @@ func _physics_process(delta: float) -> void:
 	var target_crouch: float = .30 if actor.dodging and actor.dodge_elapsed < actor.dodge_duration else 0.0
 	crouch = move_toward(crouch, target_crouch, delta * 4.5)
 	_pose(speed, delta)
+	if story_pose > 0:
+		weapon.rotation.x = -1.35
+		_pose_arms(0)
+		$Head.rotation.x = .22 if story_pose == 1 else -.08
+		$Head.rotation.y = -.3 if story_pose == 1 else .4
+		_arm("Left", Vector3(-.34, 1.39, 0), Vector3(-.12, 1.22, -.38), Vector3(-.3, 0, .2))
+	else:
+		$Head.rotation.y = 0
 
 
 func _pose(speed: float, delta: float) -> void:

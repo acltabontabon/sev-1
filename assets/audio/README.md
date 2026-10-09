@@ -1,6 +1,6 @@
 # Prototype sounds
 
-All eight short mono WAV effects are original, AI-assisted synthesis for SEV-1.
+All twelve mono WAV sounds are original, AI-assisted synthesis for SEV-1.
 No recordings, third-party samples, commercial-game sounds, or outside licenses are
 involved. They are provisional feedback sounds, not a finished sound design pass.
 
@@ -20,3 +20,14 @@ through terminal pause; reset still stops them. Headless validation skips playba
 Graphical runs exercise playback without engine errors. Listening and human volume,
 material, and impact acceptance are still required. The existing accepted-hit impact
 also serves as enemy-damage audio; no redundant second hit cue is layered onto it.
+
+
+Milestone 9 adds four original oscillator-only cues, with no external samples or
+licenses: `notification.wav` (0.3s), `boss_arrival.wav` (1.8s), `resolved.wav` (1.4s),
+and `office_air.wav` (4s seamless integer-frequency hum). Reproduce with
+`python3 tools/build_narrative_audio.py`; preserve the air sound's loop-enabled import
+sidecar. They use 22,050 Hz / 16-bit mono, bounded source gain, −20 dB cue playback
+and −28 dB ambience. The incident alert reuses `alert.wav`. Reset stops presentation
+players; terminal transitions stop ambience and play one resolution/failure accent.
+These AI-assisted synthesized placeholders need human listening and replacement by a
+cohesive sound-design pass; there is no voice acting or adaptive score.
