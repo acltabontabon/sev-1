@@ -24,7 +24,7 @@
 - Headless tests skip audio and do not prove visual quality, sound, performance, or fun. Inspect the actual rendered scene and provide a human playtest checkpoint. Measure performance with stated hardware, resolution, and settings.
 - After gameplay changes, report what changed, what actually passed/failed, known limits, how to play, and the feedback needed. Preserve the working movement/camera/combat baseline.
 - For documentation-only changes, verify links, status claims, consistency, and preservation of runtime files. Do not launch/restart the game or rerun imports merely to validate prose.
-- Use `codex/` branches for implementation and focused Git checkpoints. Preserve identity/signing settings; never commit caches, credentials, or build output. Establish LFS before substantial binary asset intake.
+- Work and commit directly on `main`, including focused Git checkpoints, unless the creator explicitly requests another branch. Preserve identity/signing settings; never commit caches, credentials, or build output. Establish LFS before substantial binary asset intake.
 
 ## Art and documentation
 
