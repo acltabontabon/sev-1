@@ -4,7 +4,7 @@
 
 - Read [vision](docs/vision.md), the relevant [design](docs/game_design.md) section, and the current [roadmap](docs/roadmap.md) gate before proposing broad work. [Architecture](docs/architecture.md) describes the implementation; README owns launch and controls.
 - The human creator is final creative decision-maker and playtester. Deliver a fun action game accessible to non-developers; satire targets systemic incentives rather than entire professions.
-- Current playable scope is movement, a three-hit melee combo, one dodge, and one enemy. Future circles, bosses, abilities, progression, and narrative scenes in design documents are not automatic implementation authorization.
+- Current playable scope includes movement, a three-hit melee combo, one dodge, Office After Hours, Incident 001 with The Variance, native character presentation, and two temporary Technical Debt upgrade decisions. Future circles, bosses, abilities, progression, and narrative scenes in design documents are not automatic implementation authorization.
 - Preserve the existing playable. Follow the current user request and accepted feedback; refine combat before expanding content. Keep each increment independently playable with concrete acceptance criteria and a quick retry.
 - Avoid multiplayer, open worlds, large procedural systems, elaborate inventory/skill trees, custom engine frameworks, databases, authentication, paid runtime AI, and complex cinematic pipelines at this stage.
 

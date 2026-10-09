@@ -46,6 +46,9 @@ func _run() -> void:
 	var first: CharacterBody3D = incident.active_enemy
 	check(first.position.distance_to(player.position) > 3, "arrival is outside immediate striking distance")
 	await defeat_wave()
+	check(incident.upgrade_pending and paused, "first wave safely pauses for upgrade")
+	await key(KEY_2)
+	check(incident.run.choices.size() == 1 and not paused, "keyboard upgrade resumes exactly once")
 	check(incident.stage == incident.Stage.INVESTIGATION, "defeating first records opens investigation")
 	incident._on_record_died(first)
 	check(incident.stage == incident.Stage.INVESTIGATION, "duplicate death cannot advance incident")
@@ -62,6 +65,9 @@ func _run() -> void:
 	await frames(150)
 	check(incident.active_enemy.move_speed > first.move_speed, "second encounter escalates pursuit only")
 	await defeat_wave()
+	check(incident.upgrade_pending and paused, "second wave opens second upgrade")
+	incident.upgrade_ui.buttons[0].pressed.emit()
+	check(incident.run.debt == 30 and incident.run.choices.size() == 2, "button upgrade persists both run decisions")
 	check(incident.stage == incident.Stage.BOSS, "second wave completion starts boss")
 	await frames(150)
 	var boss: CharacterBody3D = incident.active_enemy

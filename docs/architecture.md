@@ -1,6 +1,6 @@
 # SEV-1 Implemented Architecture
 
-This describes Office After Hours, Incident 001, and the Milestone 5 presentation pass, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, and Milestone 6 run progression, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
@@ -30,7 +30,7 @@ Main base                  game/main.tscn + main.gd
 
 | Owner | Implemented responsibility |
 | --- | --- |
-| [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal capture. R works while paused. |
+| [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal and upgrade-modal capture. R works while paused. |
 | [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, presentation handoff, health/invulnerability, attack request, damage/death, and reset. |
 | [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
@@ -86,13 +86,13 @@ Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, 
 
 ## Validation and limits
 
-`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, `tests/incident_tests.gd`, and `tests/presentation_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
+`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, `tests/incident_tests.gd`, and `tests/presentation_tests.gd`, and `tests/progression_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
 
 The final Milestone 5 results on 10 October 2026 report 155 assertions passing: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation. Import and all script checks also pass. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
 
 `tests/capture_preview.gd -- --combat` stages a reproducible graphical shot and writes an ignored preview. It deliberately overrides capture-driven pause during setup, freezes the action, and cleans up paused audio on exit. That staged image is useful for visual inspection, not evidence of normal encounter pacing.
 
-Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no progression, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
+Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no permanent progression, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
 
 ## Office After Hours environment
 
@@ -146,7 +146,7 @@ by `tests/office_preview.gd`; see README for the command and measured results.
 
 `game/incidents/missing_transaction.gd` owns the explicit sequence ALERT → ENCOUNTER_ONE → INVESTIGATION → ENCOUNTER_TWO → BOSS → RESOLVED, with FAILED reachable from every live stage. Invalid skips and repeated terminal transitions are ignored. No autoload, quest framework, asynchronous gameplay timer, external asset, or runtime service was added. Main's existing signal subscriptions are connected once and never reconnected on restart.
 
-The inherited lab enemy is hidden, disabled, and removed from the melee target group. Original player, enemy, melee, camera, office geometry, navigation, and tuning files are unchanged. A seven-second alert runs only during active play; a two-second arrival delay puts the first enemy in play around nine seconds. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes only pursuit speed from 2.4 to 3.4 m/s. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
+The inherited lab enemy is hidden, disabled, and removed from the melee target group. Original player, enemy, melee, camera, office geometry, navigation, and tuning files are unchanged. A seven-second alert runs only during active play; a two-second arrival delay puts the first enemy in play around nine seconds. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes pursuit speed from 2.4 to 3.4 m/s before the run debt multiplier. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
 
 Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
 
@@ -156,7 +156,7 @@ The incident controller processes while paused only to settle environmental ligh
 
 `tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
-Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with no upgrades or healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor, Windows runtime test, or release build is included.
+Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with temporary upgrades but no healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor, Windows runtime test, or release build is included.
 
 
 ## Milestone 5 character presentation
@@ -206,3 +206,59 @@ The existing incident suite still checks despawn, copies, duplicate events, rese
 and reload. `tests/character_preview.gd` captures identity/anticipation/strike/dodge/
 defeat at 1080p with a staged camera; `tests/incident_preview.gd -- --measure` retains
 the existing boss/copies measurement. See README for measured results and human gates.
+
+
+## Technical Debt run progression
+
+Incident owns one `run_progression.gd` Node and one `upgrade_selection.gd` CanvasLayer,
+created once in `_ready`. No autoload, new global signal bus, save data, or dependency
+was added. `_on_record_died` opens a choice when a record wave reaches zero, retaining
+the current stage and a pending next stage. Only the first valid selection consumes
+the pending decision and advances. Capture cannot resume while pending; the modal
+processes while paused. Number keys are consumed in `_input` before investigation or
+combat can interpret them. Buttons support pointer and native keyboard focus. Reset
+and terminal transitions close the modal; reset clears run state and actor modifiers.
+
+Run exports own damage/defense/recovery bonuses, debt costs, debt limit (default 100),
+and pursuit increase per band (default .05). Choices add against the base: damage
+`1 + .35 * count`, incoming `max(.4, 1 - .2 * count)`, dodge recovery
+`max(.5, 1 - .25 * count)`. Existing AttackProfile resources stay unchanged. Melee
+rounds effective damage at the existing valid-hit call; Player scales accepted incoming
+damage after invulnerability checks, and scales only dodge recovery duration. Resets
+restore multiplier 1. The original combat lab uses those same neutral defaults.
+
+Debt bands are Stable 0–24, Fragile 25–49, Unstable 50–74, Critical 75–100. Each newly
+spawned actor receives its base pursuit speed times 1/1.05/1.10/1.15. Spawn guards
+prevent duplicate actors or spawns while choosing. Boss shield/open timing, attack
+telegraphs, active frames, recovery, collision, and projection rules remain intact.
+This is one gameplay consequence, with no damage hazard or random failures.
+
+The existing Critical, Impossible, ETA, IncidentStrip, and IncidentSpill nodes provide
+environmental feedback. Only the local strip override material changes, on stage/
+choice updates. Spill adds .35 energy per debt band and settles through the existing
+light update. There is no new shader, per-frame material creation, or flashing. Victory
+retains the existing recovered presentation. Reset restores the opening labels, material,
+and .6 spill exactly. HUD reports debt/severity/pursuit; choice cards preview the next
+state; the incident message shows debt gained; both reports summarize choices and debt.
+
+There are two fixed decision points: after the first record wave (before investigation)
+and after containment (before boss). Maximum normal debt is 60. Critical remains a
+tested tuning band; reaching it would require changed costs or additional decisions,
+which are future proposals. Two free defense choices may dominate for some players;
+one mobility choice costs debt without crossing a threshold. Those are explicit balance
+questions, not claims of an optimized economy. No healing or permanent unlock exists.
+
+`tests/progression_tests.gd` exercises actual F/number/R and mouse events, one-shot
+selection, applied melee damage, defense/invulnerability, dodge duration, threshold
+edges, resource preservation, pursuit limits, environmental updates, victory/defeat
+summaries, modal reset, repeated-run node/subscription counts, and fresh scene load.
+The existing incident suite now traverses both upgrade moments and still tests boss
+windows, copies, reports, and lifecycle. Staged preview flags and measurements are in
+[README](../README.md#milestone-6-technical-debt-playtest). Human pacing, readability,
+audio, creative acceptance, and Windows testing remain open.
+
+Final Milestone 6 validation: 208 assertions (155 baseline, four added incident checks,
+49 progression checks), with successful imports and all script parses. Current-build
+zero/60-debt 1080p measurements on M2 Pro were 123.18/120.01 average FPS with both p95
+frame times at 10.39 ms; this short sequential comparison does not establish full-run
+or Windows performance. See README for the complete measurement conditions and limits.

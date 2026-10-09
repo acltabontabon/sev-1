@@ -4,7 +4,7 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. R resets the entire episode. The single-opponent combat lab remains as a regression scene. There are no run rewards, saves, or permanent unlocks.
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. There are no saves or permanent unlocks.
 
 **Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence rules are unsettled.
 
@@ -108,7 +108,7 @@ These are proposed experiments, not a committed loadout or implementation queue.
 
 **Burnout:** pressure from damage, failed objectives, escalations, or risky abilities might increase offense while reducing safety. First prove it offers a choice; avoid a damage spiral that punishes struggling players twice.
 
-**Technical Debt:** a shortcut or unstable upgrade offers immediate power in exchange for a clearly previewed later modifier. Extra hazards, aggression, altered attacks, or boss behavior are candidates. Record the promised cost when accepted and make repayment/consequences understandable. Test one bounded modifier before building a general system.
+**Technical Debt — implemented Milestone 6 experiment:** choose one of three upgrades after each record encounter. Ship It Friday adds 35% base damage and 30 debt; Add More Tests reduces incoming damage by 20% of base with no debt; Temporary Workaround reduces dodge recovery by 25% of base and adds 15 debt. Choices last only this run and stack additively. Debt bands at 25/50/75 increase upcoming enemy pursuit by 5/10/15%, including shielded boss pursuit, with unchanged tells and damage windows. Office warnings escalate alongside the HUD. The normal two-choice episode reaches at most 60 debt. Critical is implemented and tested for tuning, not naturally reachable. No healing, unavoidable punishment, or permanent progression is introduced. Balance and the meaningfulness of these tradeoffs require creator playtesting. See [architecture](architecture.md#technical-debt-run-progression) for integration and limits.
 
 **Corporate Reputation:** choices might affect dialogue, assistance, events, or upgrades. Technical correctness and organizational approval need not align. Prefer competing relationships or situational reactions over a good/evil meter; the representation remains undecided.
 

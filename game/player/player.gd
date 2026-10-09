@@ -31,6 +31,8 @@ signal hurt
 @export_range(0, 1) var camera_impulse_strength: float = 0.4
 @export var impact_particles_enabled: bool = true
 
+var incoming_damage_multiplier: float = 1.0
+var dodge_recovery_multiplier: float = 1.0
 var health: int = 100
 var invulnerable_left: float = 0.0
 var hurt_left: float = 0.0
@@ -145,7 +147,7 @@ func _on_hit_landed(target: Node3D) -> void:
 func receive_damage(amount: int, _source: Vector3) -> bool:
 	if health <= 0 or invulnerable_left > 0 or dodge_is_invulnerable():
 		return false
-	health = maxi(0, health - amount)
+	health = maxi(0, health - roundi(amount * incoming_damage_multiplier))
 	invulnerable_left = damage_invulnerability
 	hurt_left = hurt_duration
 	melee.cancel()
@@ -167,6 +169,9 @@ func receive_damage(amount: int, _source: Vector3) -> bool:
 
 
 func reset_player() -> void:
+	incoming_damage_multiplier = 1.0
+	dodge_recovery_multiplier = 1.0
+	melee.damage_multiplier = 1.0
 	global_position = spawn_position
 	velocity = Vector3.ZERO
 	visual.rotation = Vector3.ZERO
@@ -245,7 +250,7 @@ func _tick_dodge(delta: float) -> void:
 	move_and_slide()
 	dodge_aura.visible = dodge_is_invulnerable()
 	# The presentation scene bends limbs; the body and damage origin stay unscaled.
-	if dodge_elapsed >= dodge_duration + dodge_recovery:
+	if dodge_elapsed >= dodge_duration + dodge_recovery * dodge_recovery_multiplier:
 		dodging = false
 		dodge_aura.hide()
 		visual.scale = Vector3.ONE

@@ -19,6 +19,11 @@ func _ready() -> void:
 	enemy.health_changed.connect(_on_health_changed)
 	player.hit_confirmed.connect(_on_hit)
 	player.hurt.connect(_on_hurt)
+	if get_parent().has_node("Incident"):
+		var debt: Label = Label.new()
+		debt.name = "Debt"
+		debt.add_theme_font_size_override("font_size", 18)
+		$Margin/VBox.add_child(debt)
 	refresh()
 
 
@@ -50,7 +55,7 @@ func refresh() -> void:
 
 func _on_hit() -> void:
 	hit_left = 0.18
-	$HitFeedback.text = "HIT  −%d" % player.melee.damage
+	$HitFeedback.text = "HIT  −%d" % player.melee.effective_damage()
 
 
 func _on_hurt() -> void:
@@ -89,5 +94,6 @@ func _refresh_incident(incident: Node) -> void:
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
 	$Controls.text = incident.message + "\nE  Inspect   •   WASD  Move   •   LMB/F  Combo   •   Q/RMB  Dodge   •   R  Restart   •   Esc  Pause"
 	$Controls.offset_top = -112
-	prompt.visible = not camera_rig.controls_active or incident.terminal()
+	$Margin/VBox/Debt.text = "DEBT %d / %d  •  %s  •  Enemy pursuit +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
+	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.upgrade_pending
 	$CapturePrompt/Panel/Padding/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident."

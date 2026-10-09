@@ -9,6 +9,12 @@ const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 @export var first_records: int = 2
 @export var second_records: int = 3
 @export var boss_health: int = 700
+const RUN: Script = preload("res://game/incidents/run_progression.gd")
+const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
+var run: Node
+var upgrade_ui: CanvasLayer
+var upgrade_pending: bool = false
+var upgrade_next: Stage = Stage.INVESTIGATION
 var stage: Stage = Stage.ALERT
 var elapsed: float = 0.0
 var stage_time: float = 0.0
@@ -41,11 +47,21 @@ func _ready() -> void:
 	console_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	console_marker.modulate = Color(.5, .95, 1)
 	add_child(console_marker)
+	run = RUN.new()
+	run.name = "RunProgression"
+	add_child(run)
+	upgrade_ui = UPGRADE_UI.new()
+	add_child(upgrade_ui)
+	upgrade_ui.selected.connect(choose_upgrade)
 	reset_incident()
 
 
 func reset_incident() -> void:
 	_cleanup()
+	upgrade_pending = false
+	upgrade_ui.close()
+	run.reset_run()
+	run.apply_to(player)
 	stage = Stage.ALERT
 	alert_played = false
 	$AlertSound.stop()
@@ -81,7 +97,7 @@ func _cleanup() -> void:
 
 
 func _enter(next: Stage) -> void:
-	if terminal():
+	if terminal() or (upgrade_pending and next != Stage.FAILED):
 		return
 	var valid: bool = next == Stage.FAILED or int(next) == int(stage) + 1
 	if not valid:
@@ -117,7 +133,7 @@ func _enter(next: Stage) -> void:
 
 func _process(delta: float) -> void:
 	var spill: OmniLight3D = room.get_node("IncidentSpill")
-	spill.light_energy = move_toward(spill.light_energy, light_target, delta * 1.2)
+	spill.light_energy = move_toward(spill.light_energy, light_target + (0.0 if terminal() else run.band() * .35), delta * 1.2)
 	if terminal() or get_tree().paused:
 		return
 	if stage == Stage.ALERT and not alert_played:
@@ -135,6 +151,8 @@ func _process(delta: float) -> void:
 
 
 func _spawn() -> void:
+	if upgrade_pending or terminal() or is_instance_valid(active_enemy) or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS]:
+		return
 	var actor: CharacterBody3D = RECORD.instantiate()
 	if stage == Stage.BOSS:
 		actor.set_script(VARIANCE)
@@ -150,6 +168,7 @@ func _spawn() -> void:
 	actor.detection_distance = 50
 	if stage == Stage.ENCOUNTER_TWO:
 		actor.move_speed = 3.4
+	actor.move_speed *= run.pressure()
 	add_child(actor)
 	actors.append(actor)
 	active_enemy = actor
@@ -180,7 +199,7 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	else:
 		remaining -= 1
 		if remaining == 0:
-			_enter(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)
+			_offer_upgrade(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)
 		else:
 			spawn_delay = 2.5
 
@@ -256,6 +275,8 @@ func fail() -> void:
 
 
 func _finish() -> void:
+	upgrade_pending = false
+	upgrade_ui.close()
 	var won: bool = stage == Stage.RESOLVED
 	console_marker.text = ""
 	message = "Friday, 17:00. You may now leave. Subject to availability." if won else "Friday, 16:59. The incident has been reassigned to you."
@@ -270,6 +291,7 @@ func _finish() -> void:
 	_dashboard("PRODUCTION\nRECOVERED" if won else "INCIDENT\nUNRESOLVED", "FRIDAY / 17:00" if won else "OWNER: YOU")
 	objective = "R — return to Friday, 4:59 PM"
 	report = "INCIDENT 001 — RESOLVED\n\nRoot cause: downstream transaction delivery failed.\nResolution: missing record identified; discrepancy eliminated.\n\nManagement: Great collaborative effort.\nSpecial thanks to leadership for driving the resolution.\nActual engineering contributors: 1" if won else "INCIDENT 001 — UNRESOLVED\n\nRoot cause: engineer failed to anticipate undocumented behavior.\nCorrective action: Improve anticipation.\nAssigned owner: You.    Due date: Yesterday.\n\nField note: evade the orange arc; counter during recovery.\nThe Variance takes damage only while marked OPEN."
+	report += "\n\nDebt: %d — %s\nUpgrades: %s" % [run.debt, run.severity(), run.summary()]
 	report += "\n\nTime: %d:%02d    Investigation retries: %d\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, mistakes]
 	player.melee.cancel()
 	player.camera_rig.set_capture(false)
@@ -288,3 +310,40 @@ func _dashboard(title: String, detail: String) -> void:
 	room.get_node("RootCause").text = detail
 	room.get_node("Impossible").text = "CORE: SUCCESS"
 	room.get_node("ETA").text = "PAYMENTS: RECOVERED" if stage == Stage.RESOLVED else "PAYMENTS: NOT FOUND"
+	_debt_dashboard()
+
+
+func _offer_upgrade(next: Stage) -> void:
+	if upgrade_pending or terminal():
+		return
+	upgrade_next = next
+	upgrade_pending = true
+	player.melee.cancel()
+	player.clear_combo()
+	player.camera_rig.set_capture(false)
+	upgrade_ui.open(run)
+
+
+func choose_upgrade(index: int) -> void:
+	if not upgrade_pending or index < 0 or index > 2 or terminal():
+		return
+	var before: int = run.debt
+	run.select(index)
+	run.apply_to(player)
+	upgrade_pending = false
+	upgrade_ui.close()
+	_enter(upgrade_next)
+	message = "%s • +%d DEBT → %d / %s\n%s" % [run.TITLES[index], run.debt - before, run.debt, run.severity(), message]
+	player.camera_rig.set_capture(true)
+
+
+func _debt_dashboard() -> void:
+	if run.debt == 0 or terminal():
+		return
+	var color: Color = [Color(1, .55, .2), Color(1, .4, .12), Color(1, .2, .12), Color(1, .12, .3)][run.band()]
+	room.get_node("Critical").modulate = color
+	var material: StandardMaterial3D = room.get_node("IncidentStrip").material_override
+	material.albedo_color = color
+	material.emission = color
+	room.get_node("Impossible").text = "DEBT %d / %s" % [run.debt, run.severity()]
+	room.get_node("ETA").text = "PURSUIT +%d%% / RISK ACCEPTED" % roundi((run.pressure() - 1) * 100)

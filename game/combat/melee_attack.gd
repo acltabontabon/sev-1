@@ -15,6 +15,7 @@ signal finished
 @export var swing_sound: AudioStream
 @export var windup_sound: AudioStream
 
+var damage_multiplier: float = 1.0
 var elapsed: float = 0.0
 var attacking: bool = false
 var hit_targets: Array[int] = []
@@ -132,5 +133,9 @@ func _resolve_hits() -> void:
 		if not get_world_3d().direct_space_state.intersect_ray(ray).is_empty():
 			continue
 		hit_targets.append(target.get_instance_id())
-		if target.receive_damage(damage, global_position):
+		if target.receive_damage(effective_damage(), global_position):
 			hit_landed.emit(target)
+
+
+func effective_damage() -> int:
+	return roundi(damage * damage_multiplier)

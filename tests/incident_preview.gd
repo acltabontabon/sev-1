@@ -4,6 +4,7 @@ extends SceneTree
 var scene: Node3D
 var player: CharacterBody3D
 var incident: Node3D
+var preview_prefix: String = "incident"
 
 
 func _initialize() -> void:
@@ -14,12 +15,14 @@ func shot(name_: String) -> void:
 	for index in range(30):
 		await process_frame
 	await RenderingServer.frame_post_draw
-	var error: Error = root.get_texture().get_image().save_png("res://builds/incident_" + name_ + ".png")
+	var error: Error = root.get_texture().get_image().save_png("res://builds/" + preview_prefix + "_" + name_ + ".png")
 	if error != OK:
 		push_error(error_string(error))
 
 
 func _run() -> void:
+	if "--debt" in OS.get_cmdline_user_args():
+		preview_prefix = "debt"
 	DirAccess.make_dir_recursive_absolute("res://builds")
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -32,12 +35,23 @@ func _run() -> void:
 	player.camera_rig.capture_changed.disconnect(scene._on_capture_changed)
 	player.camera_rig.controls_active = true
 	incident._enter(incident.Stage.ENCOUNTER_ONE)
-	incident._enter(incident.Stage.INVESTIGATION)
+	if preview_prefix == "debt":
+		incident._offer_upgrade(incident.Stage.INVESTIGATION)
+		await shot("selection")
+		incident.choose_upgrade(0)
+	else:
+		incident._enter(incident.Stage.INVESTIGATION)
 	player.position = Vector3(-1.7, .05, -11)
 	incident.inspect_console()
 	await shot("investigation")
 	incident.choose_system(3)
-	incident._enter(incident.Stage.BOSS)
+	if preview_prefix == "debt":
+		incident._offer_upgrade(incident.Stage.BOSS)
+		await shot("second_selection")
+		incident.choose_upgrade(0)
+		await shot("applied")
+	else:
+		incident._enter(incident.Stage.BOSS)
 	incident._spawn()
 	var boss: CharacterBody3D = incident.active_enemy
 	boss.position = Vector3(0, .05, 0)
@@ -70,7 +84,7 @@ func _run() -> void:
 			total += sample
 		samples.sort()
 		var report: Dictionary = {
-			"resolution": str(root.size), "samples": samples.size(),
+			"debt": incident.run.debt, "resolution": str(root.size), "samples": samples.size(),
 			"mean_fps": 1000.0 / (total / samples.size()),
 			"median_ms": samples[samples.size() / 2],
 			"p95_ms": samples[int(samples.size() * .95)], "max_ms": samples.back(),
@@ -79,7 +93,7 @@ func _run() -> void:
 			"scenario": "25s Variance with two projections, elevated health; 5s warmup excluded; screenshots excluded"
 		}
 		print(JSON.stringify(report))
-		var output: FileAccess = FileAccess.open("res://builds/incident_performance.json", FileAccess.WRITE)
+		var output: FileAccess = FileAccess.open("res://builds/" + preview_prefix + "_performance.json", FileAccess.WRITE)
 		output.store_string(JSON.stringify(report, "\t"))
 	paused = true
 	player.max_health = 100

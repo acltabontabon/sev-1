@@ -14,7 +14,7 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; the six circles, extra abilities, and progression remain deferred. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
 ## Play Incident 001
 
@@ -34,7 +34,7 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs the sel
 | Left click or F | Light attack; press again late in recovery to chain up to three hits |
 | Q or right click | Dodge in movement direction; backward relative to camera when stationary |
 | E | Inspect the operations console when nearby |
-| 1 / 2 / 3 | Select a system after inspecting evidence |
+| 1 / 2 / 3 | Choose an upgrade while its screen is open; otherwise select a system after inspecting evidence |
 | R | Restart the entire incident, including health, camera, enemies, evidence, and lighting; works while paused or dead |
 | Escape / left click | Pause and release cursor / resume |
 
@@ -42,13 +42,13 @@ Changing app focus also pauses. After clicking to begin, the short alert leaves 
 
 Incident flow:
 
-1. **The Discrepancy:** defeat two corrupted records arriving individually in the clear office lane.
+1. **The Discrepancy:** defeat two corrupted records arriving individually in the clear office lane. Choose one of three upgrades; combat pauses until selection.
 2. **Investigation:** follow the cyan OPERATIONS marker to the far wall. Press E within four meters. Read three short statements, then choose 1, 2, or 3. Incorrect choices give a clue and allow immediate retry. Payment Processing (3) is missing the delivered record.
-3. **Containment:** defeat three more records, one at a time. Their only combat variation is faster pursuit; attack timing remains familiar.
+3. **Containment:** defeat three more records, one at a time. Their combat variation is faster pursuit, including any debt bonus; attack timing remains familiar. Choose a second upgrade before The Variance.
 4. **The Variance:** evade during SHIELDED, then strike during the 3.5-second OPEN window. The genuine boss always carries a solid cyan diamond and VERIFIED ORIGINAL. At half health, two harmless hollow-marker projections appear. Follow the original, not the copies.
 5. **Review:** victory restores the dashboards and subsides incident lighting; death provides a different handcrafted report. R returns to Friday, 4:59 PM. Click to resume after a report.
 
-Explore the existing workstation, desk clusters, conference ramp/glass, and production wall. Keyboard/mouse is the only implemented control scheme. The original movement, combo, dodge, damage, navigation, and office geometry are preserved. No external art, runtime AI, persistence, upgrades, or new floor were added.
+Explore the existing workstation, desk clusters, conference ramp/glass, and production wall. Keyboard/mouse is the only implemented control scheme. The original movement, combo, dodge, damage, navigation, and office geometry are preserved. No external art, runtime AI, persistence, or new floor was added. Two temporary upgrade choices now make the episode a run.
 
 ## Current status
 
@@ -64,7 +64,7 @@ python3 tools/validate.py
 
 The existing Python 3 standard-library tool imports resources, parses scripts, and runs movement, combat, Combat Alpha, office, and incident lifecycle checks. It has timeouts and checks logged errors as well as exit codes. Logs are ignored under `logs/`. Headless tests skip audio playback; graphical inspection, listening, and human playtests remain necessary.
 
-The current validation passed **155 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation, plus import and every script parse. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
+The pre-Milestone 6 baseline passed **155 assertions**: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation, plus import and every script parse. Current progression results are recorded below. The incident checks cover real E/number/F/R input, boss damage windows and copies, reports, repeated resets, and scene reload.
 
 The earlier Combat Alpha validation on 10 October 2026 passed 85 assertions (16 movement, 29 combat, 40 alpha), plus import/script checks. Alpha checks cover the buffered chain, cancellation, dodge timing/distance at 30/60/120 physics Hz, real input bindings, enemy evasion, hit-stop, death, and reset stability. Windows runtime testing and human feel/audio acceptance remain outstanding.
 
@@ -198,3 +198,70 @@ with R after death and victory. Controls remain WASD/arrows, Shift sprint, Space
 LMB/F combo, Q/RMB dodge, mouse/wheel camera, E inspect, 1–3 choice, Escape pause, R retry.
 Report whether the engineer reads as an exhausted employee, whether the keyboard feels
 weighty, where feet or hands distract, and which sounds are too quiet, harsh, or repetitive.
+
+
+## Milestone 6 Technical Debt playtest
+
+Two upgrade screens appear after clearing each record encounter. Press **1 / 2 / 3**,
+click a card, or use arrows and Enter. Each card previews the resulting debt band and
+enemy pursuit increase. Combat and run time pause during selection; choosing resumes
+play. R restarts even from this screen. Upgrades last until restart, with no saves.
+
+| Upgrade | Benefit per selection | Debt |
+| --- | --- | --- |
+| Ship It Friday | +35% base outgoing damage | +30 |
+| Add More Tests | −20% base incoming damage | 0 |
+| Temporary Workaround | −25% base dodge recovery | +15 |
+
+Repeated bonuses add against the base: two damage choices give +70%, two defensive
+choices give −40%, and two mobility choices give −50% recovery. Integer damage rounds
+to nearest (first upgraded slash: 34 instead of 25). Dodge travel and invulnerability
+remain unchanged. There is no healing.
+
+Debt is bounded to 0–100: Stable 0–24, Fragile 25–49, Unstable 50–74, Critical 75–100.
+Upcoming enemies pursue 0/5/10/15% faster respectively, including the boss while
+shielded. Warning, attack, recovery, and boss OPEN timings stay unchanged. Dashboards,
+warning-strip color, and smoothly raised incident spill show escalating debt without
+flashes. The HUD reports debt and pursuit; reports record choices. R resets all of it.
+With two default choices, the maximum is 60: Critical is a tested tuning band, not
+reachable in the normal episode. A single Workaround stays Stable; two reach Fragile.
+
+Human checkpoint: try one defensive run and one shortcut run. Does the damage benefit
+feel worth faster pursuit? Does faster dodge recovery change your options? Can you
+explain the debt consequence before choosing? Are office warnings readable without
+hiding attacks? Record deaths and total duration. Balance, fun, audio, Windows, and
+full-run performance acceptance remain outstanding.
+
+Capture the two choice screens, applied warning, boss, and reports:
+
+```sh
+sh tools/godot.sh --path . --resolution 1280x720 --script tests/incident_preview.gd -- --debt
+```
+
+Add `--measure` and use `--resolution 1920x1080` for the 25-second elevated-health
+boss/copies measurement. Outputs are ignored under `builds/debt_*.png` and
+`builds/debt_performance.json`. Omit `--debt` for the zero-debt reference scenario.
+Staged captures and automated combat do not constitute a normal human playthrough.
+
+On 10 October 2026, final Milestone 6 validation passed **208 assertions**: 16 movement,
+29 combat, 40 alpha, 9 office, 48 incident, 17 presentation, and 49 progression, plus
+import and all script parsing. An initial sandbox-only import failed on macOS settings/
+certificate access; the authorized run passed. A pointer-test coordinate failure was
+corrected to use viewport-local coordinates after layout; the full rerun passed.
+
+Rendered choice screens, debt-applied dashboards, boss/copies, and both reports were
+inspected. These are scripted scenes, not a completed human playthrough. Native desktop
+control was unavailable because Computer Use permissions were not enabled.
+
+On Apple M2 Pro, 1920×1080, Forward+/Metal, MSAA 2×, SSAO, glow, and fog:
+
+| Current-build boss scenario | Average FPS | Median / p95 / max frame (ms) | Samples | Final draw calls |
+| --- | --- | --- | --- | --- |
+| Zero debt | 123.18 | 8.10 / 10.39 / 29.83 | 2,464 | 423 |
+| 60 debt, two Ship It Friday choices | 120.01 | 8.33 / 10.39 / 12.23 | 2,401 | 421 |
+
+Each scenario ran 25 seconds with elevated health and two projections; five seconds of
+warm-up and screenshot saving were excluded. The similar p95 suggests no material
+steady-state cost from debt in this short sample. These sequential runs do not isolate
+all system variance, establish a pre-change benchmark, or rule out transition hitches.
+Normal full-run pacing, sound, long-duration performance, and Windows remain unverified.
