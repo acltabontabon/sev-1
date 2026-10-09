@@ -11,6 +11,8 @@ var seal: MeshInstance3D
 
 func _ready() -> void:
 	super._ready()
+	title = "THE VARIANCE"
+	motto = "Difference detected. Explanation unavailable."
 	marker = Label3D.new()
 	marker.position.y = 3.1
 	marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -33,6 +35,7 @@ func _ready() -> void:
 
 func receive_damage(amount: int, source: Vector3) -> bool:
 	if not exposed:
+		show_blocked()
 		return false
 	var accepted: bool = super.receive_damage(amount, source)
 	if health <= 0:

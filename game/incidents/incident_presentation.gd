@@ -284,6 +284,8 @@ func _restore_lights() -> void:
 
 
 func _restore_corridor() -> void:
+	incident.room.get_node("QuickSyncLight").light_energy = 1.6
+	incident.room.get_node("ProjectorGlow").light_energy = 0.0
 	for light in corridor_lights:
 		light.light_color = Color(.55, .75, 1)
 		light.light_energy = 1.6
@@ -381,6 +383,45 @@ func stage_changed() -> void:
 			ambient.stop()
 			set_screens(Color(.12, .42, .38) if incident.stage == incident.Stage.RESOLVED else Color(.25, .05, .025))
 			sound("res://assets/audio/resolved.wav" if incident.stage == incident.Stage.RESOLVED else "res://assets/audio/boss_arrival.wav")
+
+
+const INTRODUCTIONS: Dictionary = {"blocker": "blocker_intro", "invite": "invite_intro", "scope": "scope_intro"}
+
+
+## First sighting of a kind this run: a name card above it and one line of voice.
+func introduce(kind: String, actor: Node3D) -> void:
+	if INTRODUCTIONS.has(kind):
+		say(INTRODUCTIONS[kind])
+	elif kind == "record" and incident.stage == incident.Stage.ENCOUNTER_ONE:
+		say("enemy")
+	var card: Label3D = Label3D.new()
+	card.text = "%s\n%s" % [actor.title, actor.motto]
+	card.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	card.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
+	card.font_size = 56
+	card.pixel_size = .004
+	card.outline_size = 12
+	card.modulate = Color(1, .92, .8)
+	card.position.y = 3.2
+	card.no_depth_test = true
+	actor.add_child(card)
+	var fade: Tween = card.create_tween()
+	fade.tween_property(card, "position:y", 3.6, 2.4)
+	fade.parallel().tween_interval(2.0)
+	fade.tween_property(card, "modulate:a", 0.0, .8)
+	fade.tween_callback(card.queue_free)
+
+
+func meeting_booked() -> void:
+	sting(preload("res://assets/audio/sfx/chat_ping_soft.ogg"), -6)
+
+
+## Quick Sync: doors shut, the lights go out, the projector becomes the only light.
+func quick_sync(active: bool) -> void:
+	incident.room.get_node("QuickSyncLight").light_energy = 0.0 if active else 1.6
+	incident.room.get_node("ProjectorGlow").light_energy = 2.2 if active else 0.0
+	sting(preload("res://assets/audio/sfx/door_close.ogg") if active else preload("res://assets/audio/sfx/door_open.ogg"), -4)
+	say("quick_sync_start" if active else "quick_sync_end")
 
 
 ## The engineer crossed into the vault: the arrival clock starts here.

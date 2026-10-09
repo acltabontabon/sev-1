@@ -32,7 +32,9 @@ func _run() -> void:
 	player.position = Vector3(0, .05, 5)
 	incident._enter(incident.Stage.ENCOUNTER_TWO)
 	incident._spawn()
-	var foe: CharacterBody3D = incident.active_enemy
+	incident._spawn()
+	# The containment wave opens with a Blocker; measure the plain record behind it.
+	var foe: CharacterBody3D = incident.alive[1]
 	foe.position = Vector3(0, .05, 3.4)
 	foe.set_physics_process(false)
 	await frames(5)

@@ -3,14 +3,18 @@ extends "res://tests/combat_tests.gd"
 var incident: Node3D
 
 
+## Clear every wave of the current stage: each live enemy, then the breather.
 func defeat_wave() -> void:
 	var original_stage: int = incident.stage
-	for index in range(8):
-		if incident.stage != original_stage:
+	# Short beats: a crowd left alive would land hits and change Burnout under test.
+	for index in range(40):
+		if incident.stage != original_stage or incident.modal_pending():
 			break
-		await frames(180)
-		if is_instance_valid(incident.active_enemy):
-			incident.active_enemy.receive_damage(10000, player.position)
+		await frames(40)
+		for foe: CharacterBody3D in incident.alive.duplicate():
+			if is_instance_valid(foe):
+				foe.drop_shield()
+				foe.receive_damage(10000, player.position)
 		await frames(2)
 
 
@@ -50,19 +54,22 @@ func _run() -> void:
 	check(incident.stage == incident.Stage.ALERT, "out-of-order transitions are rejected")
 	await frames(1200)
 	check(incident.alert_played and incident.presentation.desk.alarm_panel.visible and player.narrative_hold, "pager fires on the desk monitor mid-opening while control stays held")
-	await frames(1100)
+	await frames(1130)
 	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within thirty-nine active seconds")
 	check(not player.narrative_hold and player.camera_rig.get_node("SpringArm3D/Camera3D").current and scene.get_node("HUD").visible, "unskipped opening hands camera, input and HUD to the player")
 	check(not incident.presentation.emerging.visible and incident.room.get_node("CeilingPool0").light_energy > 1.0, "opening leaves no staged monster and restores combat lighting")
-	check(get_nodes_in_group("enemies").size() == 1, "lab opponent is disabled and only one record is active")
+	check(get_nodes_in_group("enemies").size() == 2 and incident.alive.size() == 2, "lab opponent is disabled and the first wave arrives as a pair")
 	var first: CharacterBody3D = incident.active_enemy
+	var first_speed: float = first.move_speed
 	check(first.position.distance_to(player.position) > 3, "arrival is outside immediate striking distance")
 	await defeat_wave()
 	check(incident.upgrade_pending and paused, "first wave safely pauses for upgrade")
 	await key(KEY_2)
 	check(incident.run.choices.size() == 1 and not paused, "keyboard upgrade resumes exactly once")
 	check(incident.stage == incident.Stage.INVESTIGATION, "defeating first records opens investigation")
-	incident._on_record_died(first)
+	# Defeated actors are freed after a short corpse beat; a stale signal must be ignored.
+	if is_instance_valid(first):
+		incident._on_record_died(first)
 	check(incident.stage == incident.Stage.INVESTIGATION, "duplicate death cannot advance incident")
 	await key(KEY_E)
 	check(not incident.inspected, "inspection cannot happen from across office")
@@ -77,7 +84,8 @@ func _run() -> void:
 	await key(KEY_2)
 	check(incident.stage == incident.Stage.ENCOUNTER_TWO, "realistic estimate starts containment")
 	await frames(150)
-	check(incident.active_enemy.move_speed > first.move_speed, "second encounter escalates pursuit only")
+	var record: CharacterBody3D = incident.alive.filter(func(foe: CharacterBody3D) -> bool: return foe.speed_scale == 1.0)[0]
+	check(record.move_speed > first_speed, "second encounter escalates pursuit only")
 	await defeat_wave()
 	check(incident.upgrade_pending and paused, "second wave opens second upgrade")
 	incident.upgrade_ui.buttons[0].pressed.emit()
@@ -139,7 +147,7 @@ func _run() -> void:
 		await frames(2)
 		player.camera_rig.set_capture(true)
 		await frames(580)
-		check(get_nodes_in_group("enemies").filter(func(node: Node) -> bool: return node.health > 0).size() == 1, "restart creates exactly one active record")
+		check(get_nodes_in_group("enemies").filter(func(node: Node) -> bool: return node.health > 0).size() == 2, "restart creates exactly the first wave")
 		scene.reset_encounter()
 		player.camera_rig.set_capture(false)
 		await frames(2)

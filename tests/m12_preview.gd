@@ -67,6 +67,10 @@ func _run() -> void:
 	if only == "menu":
 		quit()
 		return
+	if only == "enemies":
+		await roster()
+		quit()
+		return
 	if only == "areas":
 		await tour()
 		quit()
@@ -137,5 +141,48 @@ func tour() -> void:
 			await process_frame
 			sample()
 		report(spot[0])
+	app.main_menu()
+	await frames(5)
+
+
+## Containment-style lineup for visual review of silhouettes, tells and feedback.
+func roster() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await frames(10)
+	incident._cleanup()
+	incident._enter(incident.Stage.INVESTIGATION)
+	player.max_health = 10000
+	player.health = 10000
+	player.position = Vector3(0, .05, 2)
+	player.camera_rig.reset_view()
+	var lineup: Array = [["record", Vector3(-1.6, .05, -1.5)], ["blocker", Vector3(.2, .05, -3.2)], ["record", Vector3(1.8, .05, -1.8)], ["invite", Vector3(-3.5, .05, -6.5)], ["scope", Vector3(3.2, .05, -4.5)]]
+	var actors: Array = []
+	for entry: Array in lineup:
+		var actor: CharacterBody3D = incident._spawn_entry([entry[0], "A1"], incident.alive)
+		actor.position = entry[1]
+		actors.append(actor)
+	await frames(90)
+	await shot("enemies_intro")
+	actors[1].cast_cooldown = 0
+	actors[4].grow()
+	actors[4].grow()
+	await frames(40)
+	await shot("enemies_cast")
+	await frames(60)
+	actors[0].receive_damage(10, player.position)
+	await frames(3)
+	await shot("enemies_blocked")
+	actors[3].zone_cooldown = 0
+	await frames(50)
+	await shot("enemies_zone")
+	last = 0
+	for index in range(300):
+		app.session.get_node("Player/CameraRig").controls_active = true
+		await process_frame
+		sample()
+	report("combat_five_enemies")
 	app.main_menu()
 	await frames(5)

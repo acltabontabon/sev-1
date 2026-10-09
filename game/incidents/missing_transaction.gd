@@ -6,9 +6,23 @@ const RECORD: PackedScene = preload("res://game/enemies/incident.tscn")
 const VARIANCE: Script = preload("res://game/incidents/variance.gd")
 const CONSOLE_POSITION: Vector3 = Vector3(-1.7, 0, -12.5)
 
-@export var first_records: int = 2
-@export var second_records: int = 3
 @export var boss_health: int = 700
+const ARCHETYPES: Dictionary = {
+	"record": null,
+	"blocker": preload("res://game/enemies/blocker.gd"),
+	"invite": preload("res://game/enemies/meeting_invite.gd"),
+	"scope": preload("res://game/enemies/scope_creep.gd"),
+}
+const ZONE: Script = preload("res://game/enemies/meeting_zone.gd")
+## Authored encounters: each wave is [kind, spawn marker]; waves arrive after a breather.
+const WAVES: Dictionary = {
+	Stage.ENCOUNTER_ONE: [[["record", "A1"], ["record", "A3"]], [["record", "A2"], ["scope", "A4"]]],
+	Stage.ENCOUNTER_TWO: [[["blocker", "D2"], ["record", "D1"], ["record", "D3"]], [["invite", "D2"], ["record", "D4"], ["scope", "D1"]]],
+}
+## The optional meeting: an invite holds the room while two records press in.
+const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
+@export_range(0, 6) var max_telegraphs: int = 2
+@export_range(0, 6) var wave_breather: float = 2.8
 const RUN: Script = preload("res://game/incidents/run_progression.gd")
 const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
 const INTERACTION: Script = preload("res://game/incidents/interaction_point.gd")
@@ -45,7 +59,25 @@ var inspected: bool = false
 var objective: String = ""
 var message: String = ""
 var report: String = ""
-var active_enemy: CharacterBody3D
+## Compatibility view for the single-foe era: the boss, else the first live enemy.
+var active_enemy: CharacterBody3D:
+	get:
+		if is_instance_valid(boss) and boss.health > 0:
+			return boss
+		for actor: CharacterBody3D in alive + sync_alive:
+			if is_instance_valid(actor) and actor.health > 0:
+				return actor
+		return null
+var alive: Array[CharacterBody3D] = []
+var sync_alive: Array[CharacterBody3D] = []
+var boss: CharacterBody3D
+var pending: Array = []
+var pop_left: float = 0.0
+var wave_index: int = 0
+var zones: Array[Node3D] = []
+var corpses: Dictionary = {}
+var seen_kinds: Dictionary = {}
+var quick_sync: String = "idle"
 var actors: Array[Node3D] = []
 var copies: Array[Node3D] = []
 var console_marker: Label3D
@@ -106,6 +138,10 @@ func reset_incident() -> void:
 	coffee_left = 0
 	coffee_cups = 0
 	player.move_multiplier = 1.0
+	player.zone_multiplier = 1.0
+	quick_sync = "idle"
+	seen_kinds.clear()
+	wave_index = 0
 	_reset_doors()
 	$AlertSound.stop()
 	enemies_defeated = 0
@@ -144,7 +180,12 @@ func terminal() -> bool:
 
 
 func _cleanup() -> void:
-	active_enemy = null
+	alive.clear()
+	sync_alive.clear()
+	boss = null
+	pending.clear()
+	zones.clear()
+	corpses.clear()
 	for actor in actors:
 		if is_instance_valid(actor):
 			actor.process_mode = Node.PROCESS_MODE_DISABLED
@@ -168,7 +209,8 @@ func _enter(next: Stage) -> void:
 	spawn_delay = 2.0
 	match stage:
 		Stage.ENCOUNTER_ONE:
-			remaining = first_records
+			wave_index = 0
+			remaining = stage_total()
 			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
 			message = "Orange arc: an attack is coming. Dodge aside, then counter."
 			light_target = 2.3
@@ -178,7 +220,8 @@ func _enter(next: Stage) -> void:
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
 		Stage.ENCOUNTER_TWO:
-			remaining = second_records + (1 if corporate_choice == 2 else 0)
+			wave_index = 0
+			remaining = stage_total()
 			objective = "2 / 3 — Contain the failed delivery. Clear the aggressive records."
 			message = "Payment Processing is missing the delivered record.\nCore saved it. Delivery stopped downstream. These records pursue faster."
 			console_marker.text = ""
@@ -223,10 +266,33 @@ func _process(delta: float) -> void:
 			player.move_multiplier = 1.0
 			run.apply_to(player)
 			message = "Motivation expired. Productivity returns to baseline."
-	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS] and not is_instance_valid(active_enemy):
+	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and not modal_pending():
+		if not pending.is_empty():
+			pop_left -= delta
+			if pop_left <= 0:
+				_spawn_entry(pending.pop_front(), alive)
+				pop_left = .4
+		elif alive.is_empty() and wave_index < waves().size():
+			spawn_delay -= delta
+			if spawn_delay <= 0:
+				_spawn()
+	elif stage == Stage.BOSS and not is_instance_valid(boss):
 		spawn_delay -= delta
 		if spawn_delay <= 0:
 			_spawn()
+	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
+		_start_quick_sync()
+	var attending: bool = false
+	for zone: Node3D in zones:
+		attending = attending or zone.contains(player)
+	player.zone_multiplier = .5 if attending else 1.0
+	for actor: Node3D in corpses.keys():
+		corpses[actor] -= delta
+		if corpses[actor] <= 0:
+			corpses.erase(actor)
+			actors.erase(actor)
+			if is_instance_valid(actor):
+				actor.queue_free()
 
 
 func trigger_boss() -> void:
@@ -254,60 +320,200 @@ func arrival_site() -> Vector3:
 	return site
 
 
+func waves() -> Array:
+	if not WAVES.has(stage):
+		return []
+	var list: Array = WAVES[stage].duplicate(true)
+	# Escalating the dependency returns it: a Blocker joins the final containment wave.
+	if stage == Stage.ENCOUNTER_TWO and corporate_choice == 2:
+		list[list.size() - 1].append(["blocker", "D3", "dependency"])
+	return list
+
+
+func stage_total() -> int:
+	var total: int = 0
+	for wave: Array in waves():
+		total += wave.size()
+	return total
+
+
+## Queue the next wave (popping its first member now), or manifest the boss.
 func _spawn() -> void:
-	if modal_pending() or terminal() or is_instance_valid(active_enemy) or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS]:
+	if modal_pending() or terminal() or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS]:
 		return
-	var actor: CharacterBody3D = RECORD.instantiate()
 	if stage == Stage.BOSS:
+		if is_instance_valid(boss):
+			return
+		var actor: CharacterBody3D = RECORD.instantiate()
 		actor.set_script(VARIANCE)
 		actor.max_health = boss_health
-	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
-	actor.position = arrival_site()
-	actor.detection_distance = 50
-	if stage == Stage.ENCOUNTER_TWO:
-		actor.move_speed = 3.4
-	actor.move_speed *= run.pressure()
-	add_child(actor)
-	actors.append(actor)
-	active_enemy = actor
-	actor.died.connect(_on_record_died.bind(actor), CONNECT_ONE_SHOT)
-	if stage == Stage.BOSS:
+		actor.process_mode = Node.PROCESS_MODE_PAUSABLE
+		actor.position = arrival_site()
+		actor.detection_distance = 50
+		actor.move_speed *= run.pressure()
+		add_child(actor)
+		actors.append(actor)
+		boss = actor
 		boss_encountered = true
+		actor.died.connect(_on_record_died.bind(actor), CONNECT_ONE_SHOT)
 		actor.false_positives.connect(_make_copies, CONNECT_ONE_SHOT)
-	else:
+		actor.show_impact(Color(.4, 1, 1))
+		return
+	if pending.is_empty():
+		if wave_index >= waves().size():
+			return
+		pending = waves()[wave_index].duplicate(true)
+		wave_index += 1
+	_spawn_entry(pending.pop_front(), alive)
+	pop_left = .4
+
+
+func spawn_site(name: String) -> Vector3:
+	var site: Vector3 = room.get_node("SpawnPoints/Spawn_" + name).position
+	# Never materialize on top of the engineer; fall back to the farthest clear site.
+	return arrival_site() if site.distance_to(player.position) < 4.0 and stage != Stage.INVESTIGATION else site
+
+
+func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3D:
+	var kind: String = entry[0]
+	var actor: CharacterBody3D = RECORD.instantiate()
+	if ARCHETYPES[kind] != null:
+		actor.set_script(ARCHETYPES[kind])
+	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
+	actor.position = spawn_site(entry[1])
+	actor.detection_distance = 50
+	add_child(actor)
+	actor.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * actor.speed_scale * run.pressure()
+	actors.append(actor)
+	group.append(actor)
+	actor.died.connect(_on_record_died.bind(actor), CONNECT_ONE_SHOT)
+	if actor.has_signal("grew"):
+		actor.grew.connect(_on_scope_grew)
+	if actor.has_signal("zone_requested"):
+		actor.zone_requested.connect(_book_meeting)
+	if actor.has_signal("shield_cast"):
+		actor.shield_cast.connect(_on_shield_cast)
+	if entry.size() > 2:
 		var tag: Label3D = Label3D.new()
 		tag.name = "RecordMarker"
-		tag.text = "TX–001  /  CORRUPTED\nSUCCESS ≠ FAILED ≠ NOT FOUND"
-		if stage == Stage.ENCOUNTER_TWO and corporate_choice == 2 and remaining == 1:
-			tag.text = "DEPENDENCY RETURNED\nOWNERSHIP: STILL YOU"
-		tag.position.y = 2.8
+		tag.text = "DEPENDENCY RETURNED\nOWNERSHIP: STILL YOU"
+		tag.position.y = 3.3
 		tag.font_size = 30
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		actor.add_child(tag)
 	actor.show_impact(Color(.4, 1, 1))
-	if stage == Stage.ENCOUNTER_ONE:
+	if not seen_kinds.has(kind):
+		seen_kinds[kind] = true
+		presentation.introduce(kind, actor)
+	elif stage == Stage.ENCOUNTER_ONE:
 		presentation.say("enemy")
+	return actor
+
+
+## At most a few enemies wind up at once, so a crowd reads as a sequence of tells.
+func request_attack(actor: Node) -> bool:
+	var busy: int = 0
+	for other: CharacterBody3D in alive + sync_alive:
+		if other != actor and is_instance_valid(other) and other.health > 0 and other.melee.attacking and other.melee.elapsed < other.melee.windup + other.melee.active_time:
+			busy += 1
+	return busy < max_telegraphs
+
+
+func _book_meeting(at: Vector3) -> void:
+	if terminal():
+		return
+	var zone: Node3D = ZONE.new()
+	zone.player = player
+	zone.position = at
+	zone.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(zone)
+	actors.append(zone)
+	zones.append(zone)
+	zone.expired.connect(_on_zone_expired.bind(zone), CONNECT_ONE_SHOT)
+	presentation.meeting_booked()
+
+
+func _on_zone_expired(zone: Node3D) -> void:
+	zones.erase(zone)
+	actors.erase(zone)
+	zone.queue_free()
+
+
+func _on_scope_grew(stage_reached: int) -> void:
+	presentation.say("scope_grow%d" % stage_reached)
+	message = ["", "SCOPE CHANGE • One small requirement has been added.", "SCOPE CHANGE • …and one more. Tiny.", "SCOPE CHANGE • Final requirement. (Not final.)"][stage_reached]
+
+
+func _on_shield_cast(count: int) -> void:
+	if count > 0:
+		message = "DEPENDENCY LOCK • %d ally shielded for 5s. Break it: hit the Blocker mid-cast, or take it down." % count
+
+
+func in_quick_sync() -> bool:
+	var at: Vector3 = player.global_position
+	return at.x > 18.8 and at.z > -15.5 and at.z < -2.3
+
+
+func _start_quick_sync() -> void:
+	quick_sync = "active"
+	for entry: Array in [["QuickSyncDoorA", -8.75], ["QuickSyncDoorB", -7.25]]:
+		var door: StaticBody3D = room.get_node(entry[0])
+		door.position.z = entry[1]
+		door.collision_layer = 1
+	presentation.quick_sync(true)
+	message = "QUICK SYNC (15 MIN) • Leadership has taken this offline. Survive the meeting."
+	for entry: Array in QUICK_SYNC:
+		_spawn_entry(entry, sync_alive)
+
+
+func _end_quick_sync() -> void:
+	quick_sync = "done"
+	for entry: Array in [["QuickSyncDoorA", -10.25], ["QuickSyncDoorB", -5.75]]:
+		var door: StaticBody3D = room.get_node(entry[0])
+		door.position.z = entry[1]
+		door.collision_layer = 0
+	player.health = mini(player.max_health, player.health + 30)
+	player.health_changed.emit(player.health)
+	run.change_burnout(-20, "Quick Sync minutes")
+	run.apply_to(player)
+	presentation.quick_sync(false)
+	message = "MEETING ENDED • Action items: none • +30 health • Burnout −20"
 
 
 func _on_record_died(actor: CharacterBody3D) -> void:
-	if terminal() or actor != active_enemy:
+	if terminal():
+		return
+	if actor == boss:
+		enemies_defeated += 1
+		_enter(Stage.RESOLVED)
+		return
+	var in_sync: bool = sync_alive.has(actor)
+	if not in_sync and not alive.has(actor):
 		return
 	enemies_defeated += 1
-	active_enemy = null
-	actor.label.text = "RECORD RECONCILED"
+	corpses[actor] = 3.0
+	if actor.label != null:
+		actor.label.text = "RECORD RECONCILED"
 	if actor.has_node("RecordMarker"):
 		actor.get_node("RecordMarker").hide()
-	# A brief corpse pose remains until the next spawn; bounded to this episode.
-	if stage == Stage.BOSS:
-		_enter(Stage.RESOLVED)
-	else:
-		remaining -= 1
-		if remaining == 0:
+	if actor.get("growth") != null and actor.growth >= 2:
+		run.change_burnout(-8, "Descoped")
+		run.apply_to(player)
+		presentation.say("descoped")
+	if in_sync:
+		sync_alive.erase(actor)
+		if sync_alive.is_empty():
+			_end_quick_sync()
+		return
+	alive.erase(actor)
+	remaining -= 1
+	if alive.is_empty() and pending.is_empty():
+		if wave_index >= waves().size():
 			if stage == Stage.ENCOUNTER_TWO:
 				_complete_containment()
 			_offer_upgrade(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)
 		else:
-			spawn_delay = 2.5
+			spawn_delay = wave_breather
 
 
 func near_console() -> bool:
@@ -315,8 +521,10 @@ func near_console() -> bool:
 
 
 func encounter_status() -> String:
+	if quick_sync == "active":
+		return "Quick Sync in progress • %d attendee%s remaining" % [sync_alive.size(), "" if sync_alive.size() == 1 else "s"]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
-		return "%d record%s remaining%s" % [remaining, "" if remaining == 1 else "s", " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if not is_instance_valid(active_enemy) and not modal_pending() else ""]
+		return "%d threat%s remaining • wave %d / %d%s" % [remaining, "" if remaining == 1 else "s", wave_index, waves().size(), " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
 	if stage == Stage.BOSS and not boss_triggered:
 		return "The restricted gate is open. Follow the corridor north."
 	if stage == Stage.BOSS and not is_instance_valid(active_enemy):
@@ -452,6 +660,10 @@ func _finish() -> void:
 	for actor in actors:
 		if is_instance_valid(actor) and actor is CharacterBody3D:
 			actor.melee.cancel()
+	for zone: Node3D in zones:
+		zone.hide()
+		zone.set_physics_process(false)
+	player.zone_multiplier = 1.0
 	for copy in copies:
 		copy.hide()
 		copy.queue_free()

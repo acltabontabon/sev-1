@@ -1,0 +1,148 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="Bulk"]
+albedo_color = Color(0.09, 0.095, 0.1, 1)
+metallic = 0.6
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Hazard"]
+albedo_color = Color(0.95, 0.62, 0.12, 1)
+metallic = 0.2
+roughness = 0.5
+emission_enabled = true
+emission = Color(0.95, 0.62, 0.12, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Stripe"]
+albedo_color = Color(0.025, 0.025, 0.03, 1)
+metallic = 0.3
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="TorsoMesh"]
+size = Vector3(1.0, 1.0, 0.62)
+material = SubResource("Bulk")
+
+[sub_resource type="BoxMesh" id="HeadMesh"]
+size = Vector3(0.38, 0.3, 0.34)
+material = SubResource("Bulk")
+
+[sub_resource type="BoxMesh" id="VisorMesh"]
+size = Vector3(0.3, 0.06, 0.02)
+material = SubResource("Hazard")
+
+[sub_resource type="BoxMesh" id="LegMesh"]
+size = Vector3(0.3, 0.66, 0.32)
+material = SubResource("Bulk")
+
+[sub_resource type="BoxMesh" id="ShieldMesh"]
+size = Vector3(1.35, 1.55, 0.12)
+material = SubResource("Bulk")
+
+[sub_resource type="BoxMesh" id="RimMesh"]
+size = Vector3(1.43, 0.07, 0.14)
+material = SubResource("Hazard")
+
+[sub_resource type="BoxMesh" id="SideMesh"]
+size = Vector3(0.07, 1.6, 0.14)
+material = SubResource("Hazard")
+
+[sub_resource type="BoxMesh" id="StripeMesh"]
+size = Vector3(0.12, 1.5, 0.02)
+material = SubResource("Stripe")
+
+[node name="BlockerDetails" type="Node3D"]
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.15, 0)
+mesh = SubResource("TorsoMesh")
+
+
+[node name="Head" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.84, 0.02)
+mesh = SubResource("HeadMesh")
+
+
+[node name="Visor" type="MeshInstance3D" parent="Head"]
+position = Vector3(0, 0.02, -0.18)
+mesh = SubResource("VisorMesh")
+
+
+[node name="Leg-1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.26, 0.33, 0)
+mesh = SubResource("LegMesh")
+
+
+[node name="Leg1" type="MeshInstance3D" parent="."]
+position = Vector3(0.26, 0.33, 0)
+mesh = SubResource("LegMesh")
+
+
+[node name="Shield" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.05, -0.52)
+mesh = SubResource("ShieldMesh")
+
+
+[node name="Rim-0.8" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0, -0.8, 0)
+mesh = SubResource("RimMesh")
+
+
+[node name="Rim0.8" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("RimMesh")
+
+
+[node name="Side-0.7" type="MeshInstance3D" parent="Shield"]
+position = Vector3(-0.7, 0, 0)
+mesh = SubResource("SideMesh")
+
+
+[node name="Side0.7" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0.7, 0, 0)
+mesh = SubResource("SideMesh")
+
+
+[node name="Stripe0" type="MeshInstance3D" parent="Shield"]
+position = Vector3(-0.5, 0, -0.07)
+mesh = SubResource("StripeMesh")
+rotation = Vector3(0, 0, 0.5)
+
+[node name="Stripe1" type="MeshInstance3D" parent="Shield"]
+position = Vector3(-0.25, 0, -0.07)
+mesh = SubResource("StripeMesh")
+rotation = Vector3(0, 0, 0.5)
+
+[node name="Stripe2" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0.0, 0, -0.07)
+mesh = SubResource("StripeMesh")
+rotation = Vector3(0, 0, 0.5)
+
+[node name="Stripe3" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0.25, 0, -0.07)
+mesh = SubResource("StripeMesh")
+rotation = Vector3(0, 0, 0.5)
+
+[node name="Stripe4" type="MeshInstance3D" parent="Shield"]
+position = Vector3(0.5, 0, -0.07)
+mesh = SubResource("StripeMesh")
+rotation = Vector3(0, 0, 0.5)
+
+[node name="ShieldText" type="Label3D" parent="Shield"]
+position = Vector3(0, 0.12, -0.09)
+text = "BLOCKED"
+font_size = 72
+pixel_size = 0.004
+modulate = Color(0.95, 0.62, 0.12, 1)
+outline_size = 8
+rotation = Vector3(0, 3.14159, 0)
+
+
+[node name="ShieldSub" type="Label3D" parent="Shield"]
+position = Vector3(0, -0.3, -0.09)
+text = "AWAITING DEPENDENCY"
+font_size = 30
+pixel_size = 0.004
+modulate = Color(1, 0.8, 0.5, 1)
+outline_size = 8
+rotation = Vector3(0, 3.14159, 0)
+

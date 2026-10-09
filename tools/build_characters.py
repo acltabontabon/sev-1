@@ -117,3 +117,79 @@ for side in [-1,1]:
     node('Fragment'+str(side), pos=f'{side*.53}, 1.28, .04', mesh='Fragment', extra=f'rotation = Vector3(0, {side*.2}, {side*.22})')
 text='[gd_scene format=3]\n\n'+'\n'.join(resources)+'\n[node name="RecordDetails" type="Node3D"]\n\n'+'\n'.join(nodes)
 (ROOT/'game/enemies/record_visual.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
+
+# Milestone 12 archetypes: each silhouette reads at combat distance before color does.
+def save_visual(root, path):
+    text='[gd_scene format=3]\n\n'+'\n'.join(resources)+f'\n[node name="{root}" type="Node3D"]\n\n'+'\n'.join(nodes)
+    (ROOT/path).write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
+
+def label(name, parent, pos, text, size, color, extra=''):
+    nodes.append(f'[node name="{name}" type="Label3D" parent="{parent}"]\nposition = Vector3({pos})\ntext = "{text}"\nfont_size = {size}\npixel_size = 0.004\nmodulate = Color({color}, 1)\noutline_size = 8\n' + extra + '\n')
+
+# The Blocker: a wide hazard-striped bulk carrying its own excuse as a shield.
+resources.clear(); nodes.clear()
+mat('Bulk', '.09, .095, .1', .6, .45)
+mat('Hazard', '.95, .62, .12', .2, .5, True)
+mat('Stripe', '.025, .025, .03', .3, .6)
+box('TorsoMesh', '1.0, 1.0, .62', 'Bulk')
+box('HeadMesh', '.38, .3, .34', 'Bulk')
+box('VisorMesh', '.3, .06, .02', 'Hazard')
+box('LegMesh', '.3, .66, .32', 'Bulk')
+box('ShieldMesh', '1.35, 1.55, .12', 'Bulk')
+box('RimMesh', '1.43, .07, .14', 'Hazard')
+box('SideMesh', '.07, 1.6, .14', 'Hazard')
+box('StripeMesh', '.12, 1.5, .02', 'Stripe')
+node('Torso', pos='0, 1.15, 0', mesh='TorsoMesh')
+node('Head', pos='0, 1.84, .02', mesh='HeadMesh')
+node('Visor', 'Head', '0, .02, -.18', 'VisorMesh')
+for side in [-1, 1]:
+    node(f'Leg{side}', pos=f'{side*.26}, .33, 0', mesh='LegMesh')
+node('Shield', pos='0, 1.05, -.52', mesh='ShieldMesh')
+for y in [-.8, .8]:
+    node(f'Rim{y}', 'Shield', f'0, {y}, 0', 'RimMesh')
+for x in [-.7, .7]:
+    node(f'Side{x}', 'Shield', f'{x}, 0, 0', 'SideMesh')
+for i in range(5):
+    node(f'Stripe{i}', 'Shield', f'{-.5+i*.25}, 0, -.07', 'StripeMesh', 'rotation = Vector3(0, 0, .5)')
+label('ShieldText', 'Shield', '0, .12, -.09', 'BLOCKED', 72, '.95, .62, .12', 'rotation = Vector3(0, 3.14159, 0)\n')
+label('ShieldSub', 'Shield', '0, -.3, -.09', 'AWAITING DEPENDENCY', 30, '1, .8, .5', 'rotation = Vector3(0, 3.14159, 0)\n')
+save_visual('BlockerDetails', 'game/enemies/blocker_visual.tscn')
+
+# The Meeting Invite: a hovering calendar card with nothing beneath it.
+resources.clear(); nodes.clear()
+mat('Card', '.78, .81, .86', 0, .7)
+mat('Header', '.3, .55, 1', .1, .4, True)
+mat('Ring', '.12, .13, .15', .7, .35)
+mat('Rsvp', '1, .3, .2', .1, .4, True)
+box('CardMesh', '1.3, .85, .06', 'Card')
+box('HeaderMesh', '1.3, .2, .07', 'Header')
+box('RingMesh', '.06, .16, .06', 'Ring')
+box('RsvpMesh', '.42, .14, .02', 'Rsvp')
+node('Card', pos='0, 1.7, 0', mesh='CardMesh')
+node('Header', 'Card', '0, .33, 0', 'HeaderMesh')
+for x in [-.4, 0, .4]:
+    node(f'Ring{x}', 'Card', f'{x}, .45, 0', 'RingMesh')
+node('Rsvp', 'Card', '.38, -.27, -.04', 'RsvpMesh')
+label('Title', 'Card', '0, .05, -.04', 'MANDATORY', 44, '.12, .14, .2', 'rotation = Vector3(0, 3.14159, 0)\noutline_size = 0\n')
+label('Detail', 'Card', '-.15, -.25, -.04', 'Attendance required', 22, '.25, .28, .35', 'rotation = Vector3(0, 3.14159, 0)\noutline_size = 0\n')
+label('RsvpText', 'Card', '.38, -.27, -.052', 'ACCEPT', 18, '1, 1, 1', 'rotation = Vector3(0, 3.14159, 0)\noutline_size = 0\n')
+save_visual('InviteDetails', 'game/enemies/meeting_invite_visual.tscn')
+
+# Scope Creep: a leaning tower of sticky notes; growth reveals more of it.
+resources.clear(); nodes.clear()
+for name, color in [('Yellow', '.95, .85, .3'), ('Pink', '.95, .5, .7'), ('Green', '.55, .9, .45'), ('Blue', '.45, .75, .95')]:
+    mat(name, color, 0, .85)
+mat('Eye', '1, .95, .4', 0, .3, True)
+mat('Leg', '.1, .1, .12', .3, .6)
+box('NoteMesh', '.52, .05, .52', 'Yellow')
+for name in ['Pink', 'Green', 'Blue']:
+    box(f'Note{name}', '.52, .05, .52', name)
+box('EyeMesh', '.08, .08, .02', 'Eye')
+box('StickLeg', '.07, .45, .07', 'Leg')
+for i in range(12):
+    mesh = 'NoteMesh' if i % 4 == 0 else ['NotePink', 'NoteGreen', 'NoteBlue'][i % 3]
+    node(f'Note{i}', pos=f'{(i%3-1)*.035}, {.5+i*.11}, {((i*7)%5-2)*.02}', mesh=mesh, extra=f'rotation = Vector3({((i*5)%7-3)*.04}, {i*.55}, {((i*3)%5-2)*.05})')
+for side in [-1, 1]:
+    node(f'Eye{side}', pos=f'{side*.1}, 1.0, -.27', mesh='EyeMesh')
+    node(f'Leg{side}', pos=f'{side*.14}, .22, 0', mesh='StickLeg')
+save_visual('CreepDetails', 'game/enemies/scope_creep_visual.tscn')

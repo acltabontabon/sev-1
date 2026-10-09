@@ -63,7 +63,7 @@ func _run() -> void:
 		player.health = 10000
 		player.camera_rig.set_capture(true)
 		incident._enter(incident.Stage.ENCOUNTER_ONE)
-		for record in range(incident.first_records):
+		for record in range(incident.stage_total()):
 			await spawn_measured("run%d_first_spawn%d" % [path, record])
 			incident.active_enemy.receive_damage(10000, player.position)
 			await dwell("run%d_record_defeat%d" % [path, record])

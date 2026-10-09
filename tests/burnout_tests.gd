@@ -89,13 +89,14 @@ func _run() -> void:
 		var expected: Array[int] = [75, 48, 20]
 		check(run.burnout == expected[choice] and incident.corporate_choice == choice and run.debt == 0, "choice %d applies once without debt" % choice)
 		check(not paused and not incident.modal_pending() and not incident.upgrade_ui.panel.visible, "selection closes modal and resumes")
-		check(incident.remaining == (4 if choice == 2 else 3), "dependency only adds one containment record")
+		check(incident.remaining == (7 if choice == 2 else 6), "dependency only adds one containment threat")
 		player.max_health = 10000
 		player.health = 10000
 		await defeat_wave()
 		check(incident.upgrade_pending and paused, "containment still reaches second upgrade")
 		var recovered: int = run.burnout
-		incident._on_record_died(incident.actors.back())
+		var defeated: Array = incident.corpses.keys().filter(func(actor: Node) -> bool: return is_instance_valid(actor))
+		incident._on_record_died(defeated.back())
 		check(run.burnout == recovered, "stale death cannot apply recovery twice")
 		check(run.burnout == expected[choice] - (35 if choice == 0 else 15), "containment gives single recovery and earned commitment bonus")
 		await key(KEY_2)
@@ -119,10 +120,10 @@ func _run() -> void:
 		click.pressed = pressed
 		root.push_input(click, true)
 		await frames(2)
-	check(incident.corporate_choice == 2 and not paused and incident.remaining == 4, "real mouse selects corporate dependency card and resumes")
-	incident.remaining = 1
-	incident._spawn()
-	check("DEPENDENCY RETURNED" in incident.active_enemy.get_node("RecordMarker").text, "extra dependency record has an observable identity")
+	check(incident.corporate_choice == 2 and not paused and incident.remaining == 7, "real mouse selects corporate dependency card and resumes")
+	var returned: Array = incident.waves().back().back()
+	var dependency: CharacterBody3D = incident._spawn_entry(returned, incident.alive)
+	check(returned[0] == "blocker" and "DEPENDENCY RETURNED" in dependency.get_node("RecordMarker").text, "the escalated dependency returns as a labeled Blocker")
 	decision_fixture()
 	incident.upgrade_ui.buttons[1].grab_focus()
 	await key(KEY_ENTER)

@@ -87,7 +87,7 @@ func _run() -> void:
 		await frames(1)
 	await frames(3)
 	check(incident.stage == incident.Stage.RESOLVED and app.page == "report", "packaged real-melee run reaches victory and report")
-	check(incident.run.choices.size() == 2 and incident.corporate_choice == 1 and incident.enemies_defeated == 6, "packaged run traverses two upgrades, management, and six enemies")
+	check(incident.run.choices.size() == 2 and incident.corporate_choice == 1 and incident.enemies_defeated == 11, "packaged run traverses two upgrades, management, and every authored wave")
 	print("SIMULATED RUN WALL MS: ", Time.get_ticks_msec() - started)
 	for button: Node in app.box.find_children("*", "Button", true, false):
 		check(get_viewport().get_visible_rect().encloses(button.get_global_rect()), "postmortem action fits viewport: " + button.text)
