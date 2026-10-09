@@ -67,6 +67,10 @@ func _run() -> void:
 	if only == "menu":
 		quit()
 		return
+	if only == "ui":
+		await ui_pass()
+		quit()
+		return
 	if only == "enemies":
 		await roster()
 		quit()
@@ -184,5 +188,49 @@ func roster() -> void:
 		await process_frame
 		sample()
 	report("combat_five_enemies")
+	app.main_menu()
+	await frames(5)
+
+
+## Gameplay interface surfaces: chat cards, HUD, change requests, the leadership DM, boss bar.
+func ui_pass() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	for index in range(260):
+		app.session.get_node("Player/CameraRig").controls_active = true
+		await process_frame
+	await shot("ui_combat_cards")
+	incident.run.change_burnout(45, "preview")
+	app.resume_incident()
+	incident._offer_upgrade(incident.Stage.INVESTIGATION)
+	app.show_page("")
+	await frames(10)
+	await shot("ui_change_request")
+	incident.choose_upgrade(0)
+	player.position = incident.CONSOLE_POSITION
+	incident.inspect_console()
+	app.resume_incident()
+	for index in range(20):
+		app.session.get_node("Player/CameraRig").controls_active = true
+		await process_frame
+	await shot("ui_evidence")
+	incident.choose_system(3)
+	app.show_page("")
+	await frames(10)
+	await shot("ui_leadership_dm")
+	incident.choose_corporate(1)
+	for next in [incident.Stage.BOSS]:
+		incident._cleanup()
+		incident._enter(next)
+	app.resume_incident()
+	player.position = Vector3(9, .05, -33)
+	player.camera_rig.reset_view()
+	incident.presentation.skip()
+	for index in range(200):
+		app.session.get_node("Player/CameraRig").controls_active = true
+		await process_frame
+	await shot("ui_boss")
 	app.main_menu()
 	await frames(5)

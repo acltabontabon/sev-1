@@ -11,7 +11,7 @@ func _run() -> void:
 	player = scene.get_node("Player")
 	var voice: Node = incident.voice
 	await frames(40)
-	check(voice.lines.size() == 40 and voice.current_line == "opening", "opening requests the authored narrator line")
+	check(voice.lines.size() == 51 and voice.current_line == "opening", "opening requests the authored narrator line")
 	voice.clear()
 	voice.request("enemy")
 	await frames(2)
@@ -66,7 +66,8 @@ func _run() -> void:
 	check(voice.seen.has("evidence_open"), "console interaction triggers evidence speech")
 	incident.choose_system(3)
 	incident.choose_corporate(1)
-	check(voice.seen.has("evidence_confirmed"), "correct evidence and management choice trigger confirmation")
+	await frames(2)
+	check(voice.current_line == "not_found" and incident.presentation.sequence == ["evidence_confirmed", "mgmt_estimate"], "correct evidence, confirmation and the chosen management reply play in order")
 	# Fixture moves only stages; original boss timing and mechanics remain live.
 	incident._cleanup()
 	incident._enter(incident.Stage.BOSS)
@@ -87,9 +88,9 @@ func _run() -> void:
 	boss.exposed = true
 	boss.receive_damage(10000, player.position)
 	await frames(3)
-	check(app.page == "report" and voice.current_line == "victory" and not voice.suspended, "victory speech plays over paused report")
+	check(app.page == "report" and voice.current_line == "victory_thanks" and not voice.suspended, "victory speech plays over paused report")
 	check(app.report_subtitle.text == voice.subtitle and not voice.subtitle.is_empty(), "report slot shows synchronized terminal subtitle")
-	await frames(420)
+	await frames(600)
 	check(voice.seen.has("postmortem") and voice.current_line != "victory", "postmortem follows terminal reaction without blocking report")
 	app.restart_incident()
 	check(voice.seen.is_empty() and voice.current_line.is_empty() and voice.queue.is_empty(), "restart immediately clears all old speech")

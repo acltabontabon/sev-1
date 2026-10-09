@@ -88,7 +88,7 @@ func option_text(index: int) -> String:
 		"−%d%% base incoming damage" % roundi(defense_bonus * 100),
 		"−%d%% base dodge recovery" % roundi(recovery_bonus * 100)]
 	var after: int = clampi(debt + cost(index), 0, debt_limit)
-	return "%d   %s\n%s • +%d debt\nAfter: %s\nNext enemies: +%d%% pursuit • %d debt / %s" % [index + 1, TITLES[index], benefits[index], cost(index), modifier_summary(index), roundi((pressure(after) - 1) * 100), after, severity(after)]
+	return "%d  ·  %s\n%s\n+%d tech debt\n\nAfter: %s\nNext enemies: +%d%% pursuit  ·  %d debt / %s" % [index + 1, TITLES[index].to_upper(), benefits[index], cost(index), modifier_summary(index), roundi((pressure(after) - 1) * 100), after, severity(after)]
 
 
 func summary() -> String:

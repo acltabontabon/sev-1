@@ -764,9 +764,9 @@ func choose_corporate(index: int) -> void:
 	decision_pending = false
 	upgrade_ui.close()
 	var responses: Array[String] = [
-		"Leadership: Thank you. The estimate is now a commitment.",
-		"Leadership: Understood. What’s the ETA for the estimate?",
-		"Dependency acknowledged. One additional record returns for reconciliation."]
+		"Commitment logged. The estimate is now a deadline.",
+		"Estimate logged. An estimate of the estimate has been requested.",
+		"Dependency escalated. It has been reassigned back to you as a Blocker."]
 	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
 	run.change_burnout(changes[index], corporate_title())
 	run.apply_to(player)
@@ -789,6 +789,8 @@ func _on_damage_accepted(base_amount: int) -> void:
 	run.apply_to(player)
 	if run.burnout >= 70:
 		presentation.say("burnout", true)
+	if player.health <= 30:
+		presentation.say("low_health")
 
 
 func _complete_containment() -> void:

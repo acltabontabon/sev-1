@@ -1,6 +1,8 @@
 extends Node
 ## Local, bounded authored speech. Never owns gameplay time or progression.
 signal subtitle_changed(text: String)
+## Emitted when a line actually starts, so interfaces can show it in sync with speech.
+signal line_started(id: String)
 const MANIFEST: String = "res://assets/audio/voices/dialogue.json"
 var lines: Dictionary = {}
 var seen: Dictionary = {}
@@ -141,6 +143,7 @@ func _process(delta: float) -> void:
 			optional_cooldown = 8.0
 		var stream: AudioStream = _stream(entry.audio)
 		line_left = stream.get_length() if stream != null else float(entry.fallback_duration)
+		line_started.emit(current_line)
 		using_audio = stream != null and DisplayServer.get_name() != "headless"
 		if using_audio:
 			if entry.voice_profile == "variance":

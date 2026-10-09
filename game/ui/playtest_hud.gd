@@ -5,6 +5,20 @@ var hit_left: float = 0.0
 var hurt_left: float = 0.0
 var damage_flash_enabled: bool = true
 var shake_strength: float = 0.0
+var vitals: PanelContainer
+var health_bar: ProgressBar
+var health_value: Label
+var burnout_bar: ProgressBar
+var burnout_value: Label
+var buff: Label
+var boss_box: VBoxContainer
+var boss_bar: ProgressBar
+var boss_state: Label
+var notice: PanelContainer
+var notice_text: Label
+var last_message: String = ""
+var message_age: float = 99.0
+const STATUS: Array[String] = ["NEW", "TRIAGE", "INVESTIGATING", "CONTAINING", "ESCALATED TO: YOU", "RESOLVED", "REOPENED"]
 @onready var comfort: HBoxContainer = $CapturePrompt/Panel/Padding/VBox/Comfort
 @onready var player: CharacterBody3D = %Player
 @onready var enemy: CharacterBody3D = %Enemy
@@ -29,13 +43,129 @@ func _ready() -> void:
 	if get_parent().has_node("Incident"):
 		var debt: Label = Label.new()
 		debt.name = "Debt"
-		debt.add_theme_font_size_override("font_size", 18)
 		$Margin/VBox.add_child(debt)
 		var burnout: Label = Label.new()
 		burnout.name = "Burnout"
-		burnout.add_theme_font_size_override("font_size", 18)
 		$Margin/VBox.add_child(burnout)
+		_build_incident_hud()
 	refresh()
+
+
+func _bar(fill: Color, width: float) -> ProgressBar:
+	var bar: ProgressBar = ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(width, 12)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var back: StyleBoxFlat = StyleBoxFlat.new()
+	back.bg_color = Color(.08, .1, .12, .9)
+	back.set_corner_radius_all(2)
+	var front: StyleBoxFlat = StyleBoxFlat.new()
+	front.bg_color = fill
+	front.set_corner_radius_all(2)
+	bar.add_theme_stylebox_override("background", back)
+	bar.add_theme_stylebox_override("fill", front)
+	return bar
+
+
+func _row(parent: Container, caption: String, bar: ProgressBar) -> Label:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	parent.add_child(row)
+	var name_label: Label = Label.new()
+	name_label.text = caption
+	name_label.theme_type_variation = "Eyebrow"
+	name_label.custom_minimum_size.x = 84
+	row.add_child(name_label)
+	row.add_child(bar)
+	var value: Label = Label.new()
+	value.theme_type_variation = "MonoLabel"
+	value.add_theme_font_size_override("font_size", 13)
+	row.add_child(value)
+	return value
+
+
+## Incident HUD: a ticket header, a vitals card, a boss bar and a transient notice.
+## Existing labels are restyled and reused so the run still reads them by name.
+func _build_incident_hud() -> void:
+	$Margin/VBox/Title.theme_type_variation = "Eyebrow"
+	$Margin/VBox/Title.remove_theme_font_size_override("font_size")
+	$Margin/VBox/Title.add_theme_color_override("font_color", Color(1, .55, .35))
+	status.theme_type_variation = "Subhead"
+	status.remove_theme_font_size_override("font_size")
+	status.add_theme_font_size_override("font_size", 18)
+	status.remove_theme_color_override("font_color")
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	$Margin/VBox/Health.hide()
+	$Margin/VBox/AttackState.hide()
+	$Margin.offset_right = 560
+	vitals = PanelContainer.new()
+	vitals.theme_type_variation = "Card"
+	vitals.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vitals.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	vitals.offset_left = 24
+	vitals.offset_right = 470
+	vitals.offset_top = -196
+	vitals.offset_bottom = -24
+	vitals.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	add_child(vitals)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	vitals.add_child(column)
+	health_bar = _bar(Color(.4, .9, .85), 250)
+	health_value = _row(column, "YOU", health_bar)
+	burnout_bar = _bar(Color(1, .7, .3), 250)
+	burnout_value = _row(column, "BURNOUT", burnout_bar)
+	for node_name: String in ["Debt", "Burnout"]:
+		var label: Label = $Margin/VBox.get_node(node_name)
+		label.reparent(column)
+		label.theme_type_variation = "MonoLabel"
+		label.add_theme_font_size_override("font_size", 13)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size.x = 420
+	buff = Label.new()
+	buff.theme_type_variation = "Subhead"
+	buff.add_theme_font_size_override("font_size", 15)
+	buff.add_theme_color_override("font_color", Color(.55, 1, .7))
+	column.add_child(buff)
+	boss_box = VBoxContainer.new()
+	boss_box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	boss_box.offset_left = -260
+	boss_box.offset_right = 260
+	boss_box.offset_top = 28
+	boss_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(boss_box)
+	var boss_name: Label = Label.new()
+	boss_name.text = "THE VARIANCE"
+	boss_name.theme_type_variation = "Headline"
+	boss_name.add_theme_font_size_override("font_size", 30)
+	boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_box.add_child(boss_name)
+	boss_bar = _bar(Color(.7, .45, 1), 520)
+	boss_box.add_child(boss_bar)
+	boss_state = Label.new()
+	boss_state.theme_type_variation = "Eyebrow"
+	boss_state.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_box.add_child(boss_state)
+	notice = PanelContainer.new()
+	notice.theme_type_variation = "Card"
+	notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	notice.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	notice.offset_left = -330
+	notice.offset_right = 330
+	notice.offset_top = -150
+	notice.offset_bottom = -70
+	notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	add_child(notice)
+	notice_text = Label.new()
+	notice_text.theme_type_variation = "MonoLabel"
+	notice_text.add_theme_font_size_override("font_size", 14)
+	notice_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	notice_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	notice.add_child(notice_text)
+	$Controls.theme_type_variation = "Eyebrow"
+	$Controls.remove_theme_font_size_override("font_size")
+	$Controls.add_theme_font_size_override("font_size", 12)
+	$Controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 
 func _set_shake(enabled: bool) -> void:
@@ -84,6 +214,7 @@ func _on_hurt() -> void:
 
 
 func _process(delta: float) -> void:
+	message_age += delta
 	if get_parent().has_node("Incident"):
 		refresh()
 	hit_left = maxf(0, hit_left - delta)
@@ -105,7 +236,8 @@ func _process(delta: float) -> void:
 
 
 func _refresh_incident(incident: Node) -> void:
-	$Margin/VBox/Title.text = "SEV—1   /   THE MISSING TRANSACTION"
+	var open_seconds: int = maxi(0, int(incident.elapsed - 13.4))
+	$Margin/VBox/Title.text = "INC-001  ·  SEV-1  ·  %s  ·  OPEN %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
 	status.text = incident.objective
 	var progress: String = incident.encounter_status()
 	if not progress.is_empty():
@@ -116,26 +248,50 @@ func _refresh_incident(incident: Node) -> void:
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
-	$Controls.text = incident.message + "\nE  Inspect   •   WASD  Move   •   LMB/F  Combo   •   Q/RMB  Dodge   •   R  Restart   •   Esc  Pause"
-	$Controls.offset_top = -112
-	$Margin/VBox/Debt.text = "DEBT %d / %d  •  %s  •  Enemy pursuit +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
+	$Controls.text = "E  USE    WASD  MOVE    LMB / F  COMBO    Q / RMB  DODGE    R  RESTART    ESC  PAUSE"
+	$Controls.offset_top = -30
+	if incident.message != last_message:
+		last_message = incident.message
+		message_age = 0.0
+	notice_text.text = incident.message
+	health_bar.max_value = player.max_health
+	health_bar.value = player.health
+	health_value.text = "%d / %d" % [player.health, player.max_health]
+	burnout_bar.max_value = incident.run.burnout_limit
+	burnout_bar.value = incident.run.burnout
+	burnout_value.text = "%d  %s" % [incident.run.burnout, incident.run.burnout_title()]
+	(burnout_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = [Color(.55, .85, 1), Color(1, .72, .3), Color(1, .38, .25)][incident.run.burnout_band()]
+	buff.text = incident.buff_text()
+	buff.visible = not buff.text.is_empty()
+	var boss: CharacterBody3D = incident.boss
+	boss_box.visible = is_instance_valid(boss) and boss.health > 0
+	if boss_box.visible:
+		boss_bar.max_value = boss.max_health
+		boss_bar.value = boss.health
+		boss_state.text = "OPEN — STRIKE NOW" if boss.exposed else "SHIELDED — EVADE"
+	var debt_label: Label = find_child("Debt", true, false)
+	var burnout_label: Label = find_child("Burnout", true, false)
+	debt_label.text = "TECH DEBT %d / %d  ·  %s  ·  enemies pursue +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
 	var run: Node = incident.run
-	$Margin/VBox/Burnout.text = "BURNOUT %d / %d • %s • Own damage / risk +%d%% / +%d%%\n%s" % [run.burnout, run.burnout_limit, run.burnout_title(), roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
-	$Margin/VBox/Burnout.modulate = [Color(.65, .9, 1), Color(1, .8, .4), Color(1, .55, .4)][run.burnout_band()]
+	burnout_label.text = "Burnout: your damage +%d%% · risk +%d%%   %s" % [roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
+	burnout_label.modulate = [Color(.75, .85, .9), Color(1, .85, .55), Color(1, .65, .5)][run.burnout_band()]
 	if not incident.buff_text().is_empty():
-		$Margin/VBox/Burnout.text += " • " + incident.buff_text()
+		burnout_label.text += "  ·  " + incident.buff_text()
 	if incident.challenge_result == "Active":
-		$Margin/VBox/Burnout.text += " • Optional containment ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
+		burnout_label.text += "  ·  Committed ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
 	elif incident.corporate_choice == 0:
-		$Margin/VBox/Burnout.text += " • " + incident.challenge_result
+		burnout_label.text += "  ·  " + incident.challenge_result
 	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.modal_pending()
 	if external_menu:
 		prompt.visible = false
 	comfort.visible = not incident.terminal()
 	$Margin.visible = camera_rig.controls_active and not incident.terminal() and not incident.modal_pending()
-	$Controls.visible = $Margin.visible
 	if incident.stage == incident.Stage.ALERT or (incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < incident.presentation.boss_length + 2):
 		$Margin.visible = false
+	$Controls.visible = $Margin.visible
+	vitals.visible = $Margin.visible
+	notice.visible = $Margin.visible and not incident.message.is_empty() and (message_age < 7.0 or (incident.stage == incident.Stage.INVESTIGATION and incident.inspected))
+	boss_box.visible = boss_box.visible and $Margin.visible
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
 	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."
 	if not incident.terminal() and incident.elapsed > 0:
@@ -144,10 +300,3 @@ func _refresh_incident(incident: Node) -> void:
 
 func configure_release_ui() -> void:
 	external_menu = true
-	# Keep status in the left column, away from centered boss truth/attack markers.
-	$Margin.offset_right = 500
-	for label: Node in $Margin/VBox.get_children():
-		if label is Label:
-			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			label.add_theme_font_size_override("font_size", 18)
-	$Margin/VBox/Title.add_theme_font_size_override("font_size", 22)

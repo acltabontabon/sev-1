@@ -1,6 +1,8 @@
 extends CanvasLayer
 ## Authored Incident 001 beats only. Gameplay owns stages, damage and choices.
 const DESK_SCREEN: Script = preload("res://game/ui/desk_screen.gd")
+const FEED: Script = preload("res://game/ui/notification_feed.gd")
+const ALERT_SENDERS: Array[String] = ["MONITORING / SEV-1", "PRODUCTION SYSTEM", "STATUS PAGE", "THE VARIANCE"]
 const CHARACTER = preload("res://game/player/character_presentation.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
@@ -78,6 +80,10 @@ var pools: Array[Light3D] = []
 var pool_energy: Array[float] = []
 var dark: Material = preload("res://game/rooms/office/black.tres")
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var feed: Control
+var pinger: AudioStreamPlayer
+## Lines that must follow each other without competing for the bounded voice queue.
+var sequence: Array[String] = []
 var corridor_lights: Array[OmniLight3D] = []
 var corridor_leds: Array[MeshInstance3D] = []
 var alert_material: Material = preload("res://game/rooms/office/alert.tres")
@@ -107,6 +113,13 @@ func _ready() -> void:
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(caption)
 	_caption_layout(false)
+	feed = FEED.new()
+	add_child(feed)
+	pinger = AudioStreamPlayer.new()
+	pinger.bus = &"Effects"
+	pinger.volume_db = -14
+	add_child(pinger)
+	voice.line_started.connect(_on_line_started)
 	title = Label.new()
 	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	title.offset_left = -450
@@ -254,6 +267,8 @@ func reset_story() -> void:
 	release_camera()
 	short_opening = opening_seen
 	voice.clear(true)
+	feed.clear()
+	sequence.clear()
 	panel.hide()
 	title.hide()
 	hint.hide()
@@ -299,6 +314,29 @@ func set_screens(color: Color) -> void:
 
 func say(id: String, _priority: bool = false) -> void:
 	voice.request(id)
+
+
+## Queue lines that belong together (a joke and its reply) so neither is dropped.
+func say_sequence(ids: Array[String]) -> void:
+	sequence.append_array(ids)
+
+
+## The ALERT stage (full opening or quick retry) speaks in subtitles, not chat cards.
+func in_cinematic() -> bool:
+	return incident.stage == incident.Stage.ALERT
+
+
+func _on_line_started(id: String) -> void:
+	var entry: Dictionary = voice.lines[id]
+	if in_cinematic() or entry.character == "NARRATOR":
+		return
+	var minutes: int = maxi(0, int((incident.elapsed - 13.4) / 20.0))
+	feed.post(entry.character, entry.subtitle, voice.line_left, "%d:%02d PM" % [5 + minutes / 60, minutes % 60])
+	if DisplayServer.get_name() != "headless" and entry.character != "ENGINEER":
+		var alert: bool = entry.character in ALERT_SENDERS
+		pinger.stream = preload("res://assets/audio/notification.wav") if alert else preload("res://assets/audio/sfx/chat_ping.ogg")
+		pinger.pitch_scale = .85 if alert else 1.0
+		pinger.play()
 
 
 func sound(path: String) -> void:
@@ -360,16 +398,18 @@ func skip() -> void:
 func stage_changed() -> void:
 	release_camera()
 	voice.clear()
+	sequence.clear()
 	match incident.stage:
 		incident.Stage.ENCOUNTER_ONE:
 			opening_seen = true
 			declare_incident()
 			_end_opening()
+			say_sequence(["status_ok", "status_except"])
 		incident.Stage.INVESTIGATION:
 			say("investigate")
 		incident.Stage.ENCOUNTER_TWO:
-			say("evidence_confirmed")
-			say("contain")
+			var reply: String = ["mgmt_commit", "mgmt_estimate", "mgmt_escalate"][clampi(incident.corporate_choice, 0, 2)]
+			say_sequence(["not_found", "evidence_confirmed", reply])
 			set_screens(Color(.65, .12, .04))
 		incident.Stage.BOSS:
 			say("gate_open")
@@ -378,8 +418,10 @@ func stage_changed() -> void:
 			set_screens(Color(.45, .12, .3))
 			sting(preload("res://assets/audio/sfx/door_open.ogg"), -4)
 		incident.Stage.RESOLVED, incident.Stage.FAILED:
-			say("victory" if incident.stage == incident.Stage.RESOLVED else "defeat")
-			say("postmortem")
+			if incident.stage == incident.Stage.RESOLVED:
+				say_sequence(["victory_thanks", "victory", "postmortem", "postmortem_owner"])
+			else:
+				say_sequence(["defeat", "postmortem", "postmortem_owner"])
 			ambient.stop()
 			set_screens(Color(.12, .42, .38) if incident.stage == incident.Stage.RESOLVED else Color(.25, .05, .025))
 			sound("res://assets/audio/resolved.wav" if incident.stage == incident.Stage.RESOLVED else "res://assets/audio/boss_arrival.wav")
@@ -438,10 +480,19 @@ func used(key: String) -> void:
 
 ## Environmental storytelling that runs during play: the gate, the corridor, the sparks.
 func _environment(delta: float) -> void:
+	# The public status page stays green and keeps improving while everything is red.
+	var uptime: Label3D = incident.room.get_node("Uptime")
+	if incident.alert_played:
+		uptime.text = "STATUS PAGE: ALL SYSTEMS OPERATIONAL  ·  UPTIME 99.9%02d%%" % (90 + int(incident.elapsed / 7.0) % 10)
+	else:
+		uptime.text = "UPTIME 99.999%"
 	var gate: Node3D = incident.room.get_node("VaultGate")
 	var open: bool = incident.stage == incident.Stage.BOSS
 	gate.position.y = move_toward(gate.position.y, 5.9 if open else 2.0, delta * 2.2)
 	var z: float = incident.player.global_position.z
+	var at: Vector3 = incident.player.global_position
+	if at.x > 18.8 and at.z > 3.7 and at.z < 12.8:
+		say("pantry_found")
 	if open:
 		# Racks fail as the engineer passes them; the light ahead turns red last.
 		for index in range(corridor_lights.size()):
@@ -599,8 +650,13 @@ func _opening(time: float, delta: float) -> void:
 func _process(delta: float) -> void:
 	for fragment in fragments:
 		fragment.visible = false
+	if not sequence.is_empty() and voice.current_line.is_empty() and voice.queue.is_empty() and not voice.suspended:
+		say(sequence.pop_front())
 	var visible_play: bool = not get_tree().paused and not incident.terminal() and not incident.modal_pending()
 	panel.visible = visible_play and line_left > 0
+	feed.visible = visible_play
+	if visible_play:
+		feed.tick(delta)
 	title.visible = false
 	hint.visible = false
 	if not visible_play:
@@ -633,9 +689,12 @@ func _process(delta: float) -> void:
 				fragments[index].show()
 		if is_instance_valid(incident.active_enemy):
 			boss_seen = true
-			title.text += "\n%d / %d" % [incident.active_enemy.health, incident.active_enemy.max_health]
 			say("boss", true)
+	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 10: say("contain")
 	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 18: say("visibility")
+	if incident.player.dodging and incident.stage in [incident.Stage.ENCOUNTER_ONE, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
+		say("first_dodge")
 	if incident.stage == incident.Stage.BOSS and incident.boss_time > 22: say("rca")
 	caption.text = voice.subtitle
-	panel.visible = not voice.subtitle.is_empty()
+	# Film subtitles belong to the cinematic; in play, speech arrives as chat cards.
+	panel.visible = not voice.subtitle.is_empty() and in_cinematic()
