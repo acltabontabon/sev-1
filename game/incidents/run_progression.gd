@@ -8,6 +8,20 @@ extends Node
 @export var ship_debt: int = 30
 @export var workaround_debt: int = 15
 @export_range(0, .15) var pursuit_per_band: float = .05
+@export_range(70, 200) var burnout_limit: int = 100
+@export var meaningful_hit: int = 10
+@export var hit_burnout: int = 8
+@export var commit_burnout: int = 35
+@export var estimate_burnout: int = 8
+@export var dependency_relief: int = 20
+@export var containment_relief: int = 15
+@export var commitment_reward: int = 20
+@export_range(0, .25) var pressured_bonus: float = .10
+@export_range(0, .30) var overloaded_bonus: float = .25
+@export_range(0, .25) var pressured_risk: float = .10
+@export_range(0, .25) var overloaded_risk: float = .25
+var burnout: int = 0
+var burnout_notice: String = ""
 var debt: int = 0
 var choices: Array[int] = []
 const TITLES: Array[String] = ["Ship It Friday", "Add More Tests", "Temporary Workaround"]
@@ -15,6 +29,8 @@ const TITLES: Array[String] = ["Ship It Friday", "Add More Tests", "Temporary Wo
 
 func reset_run() -> void:
 	debt = 0
+	burnout = 0
+	burnout_notice = ""
 	choices.clear()
 
 
@@ -40,11 +56,11 @@ func pressure(value: int = -1) -> float:
 
 
 func outgoing() -> float:
-	return 1.0 + choices.count(0) * damage_bonus
+	return clampf(1.0 + choices.count(0) * damage_bonus + burnout_offense(), 1.0, 2.0)
 
 
 func incoming() -> float:
-	return maxf(.4, 1.0 - choices.count(1) * defense_bonus)
+	return clampf(1.0 - choices.count(1) * defense_bonus + burnout_risk(), .4, 1.25)
 
 
 func recovery() -> float:
@@ -71,3 +87,25 @@ func summary() -> String:
 	for index in choices:
 		titles.append(TITLES[index])
 	return ", ".join(titles) if not titles.is_empty() else "None"
+
+
+func change_burnout(amount: int, source: String) -> void:
+	var before: int = burnout
+	burnout = clampi(burnout + amount, 0, burnout_limit)
+	burnout_notice = "%s: %+d" % [source, burnout - before]
+
+
+func burnout_band() -> int:
+	return 2 if burnout >= 70 else (1 if burnout >= 30 else 0)
+
+
+func burnout_title() -> String:
+	return ["COMPOSED", "PRESSURED", "OVERLOADED"][burnout_band()]
+
+
+func burnout_offense() -> float:
+	return [0.0, pressured_bonus, overloaded_bonus][burnout_band()]
+
+
+func burnout_risk() -> float:
+	return [0.0, pressured_risk, overloaded_risk][burnout_band()]

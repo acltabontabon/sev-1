@@ -13,6 +13,11 @@ const RUN: Script = preload("res://game/incidents/run_progression.gd")
 const UPGRADE_UI: Script = preload("res://game/ui/upgrade_selection.gd")
 var run: Node
 var upgrade_ui: CanvasLayer
+@export_range(1, 600) var commitment_seconds: float = 300.0
+var decision_pending: bool = false
+var corporate_choice: int = -1
+var challenge_left: float = 0.0
+var challenge_result: String = "Not requested"
 var upgrade_pending: bool = false
 var upgrade_next: Stage = Stage.INVESTIGATION
 var stage: Stage = Stage.ALERT
@@ -52,12 +57,17 @@ func _ready() -> void:
 	add_child(run)
 	upgrade_ui = UPGRADE_UI.new()
 	add_child(upgrade_ui)
-	upgrade_ui.selected.connect(choose_upgrade)
+	upgrade_ui.selected.connect(_choose_modal)
+	player.damage_accepted.connect(_on_damage_accepted)
 	reset_incident()
 
 
 func reset_incident() -> void:
 	_cleanup()
+	decision_pending = false
+	corporate_choice = -1
+	challenge_left = 0
+	challenge_result = "Not requested"
 	upgrade_pending = false
 	upgrade_ui.close()
 	run.reset_run()
@@ -97,7 +107,7 @@ func _cleanup() -> void:
 
 
 func _enter(next: Stage) -> void:
-	if terminal() or (upgrade_pending and next != Stage.FAILED):
+	if terminal() or (modal_pending() and next != Stage.FAILED):
 		return
 	var valid: bool = next == Stage.FAILED or int(next) == int(stage) + 1
 	if not valid:
@@ -117,7 +127,7 @@ func _enter(next: Stage) -> void:
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
 		Stage.ENCOUNTER_TWO:
-			remaining = second_records
+			remaining = second_records + (1 if corporate_choice == 2 else 0)
 			objective = "2 / 3 — Contain the failed delivery. Clear the aggressive records."
 			message = "Payment Processing is missing the delivered record.\nCore saved it. Delivery stopped downstream. These records pursue faster."
 			console_marker.text = ""
@@ -140,6 +150,10 @@ func _process(delta: float) -> void:
 		alert_played = true
 		if DisplayServer.get_name() != "headless":
 			$AlertSound.play()
+	if stage == Stage.ENCOUNTER_TWO and challenge_result == "Active":
+		challenge_left = maxf(0, challenge_left - delta)
+		if challenge_left == 0:
+			challenge_result = "Expired — no penalty"
 	elapsed += delta
 	stage_time += delta
 	if stage == Stage.ALERT and stage_time >= 7:
@@ -151,7 +165,7 @@ func _process(delta: float) -> void:
 
 
 func _spawn() -> void:
-	if upgrade_pending or terminal() or is_instance_valid(active_enemy) or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS]:
+	if modal_pending() or terminal() or is_instance_valid(active_enemy) or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO, Stage.BOSS]:
 		return
 	var actor: CharacterBody3D = RECORD.instantiate()
 	if stage == Stage.BOSS:
@@ -179,6 +193,8 @@ func _spawn() -> void:
 		var tag: Label3D = Label3D.new()
 		tag.name = "RecordMarker"
 		tag.text = "TX–001  /  CORRUPTED\nSUCCESS ≠ FAILED ≠ NOT FOUND"
+		if stage == Stage.ENCOUNTER_TWO and corporate_choice == 2 and remaining == 1:
+			tag.text = "DEPENDENCY RETURNED\nOWNERSHIP: STILL YOU"
 		tag.position.y = 2.8
 		tag.font_size = 30
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -199,6 +215,8 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	else:
 		remaining -= 1
 		if remaining == 0:
+			if stage == Stage.ENCOUNTER_TWO:
+				_complete_containment()
 			_offer_upgrade(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)
 		else:
 			spawn_delay = 2.5
@@ -218,10 +236,10 @@ func inspect_console() -> void:
 
 
 func choose_system(choice: int) -> void:
-	if stage != Stage.INVESTIGATION or not inspected or not near_console():
+	if modal_pending() or stage != Stage.INVESTIGATION or not inspected or not near_console():
 		return
 	if choice == 3:
-		_enter(Stage.ENCOUNTER_TWO)
+		_offer_corporate()
 	elif choice in [1, 2]:
 		mistakes += 1
 		objective = "Core saved it; Loans is waiting. Which system never received it? Try again."
@@ -275,6 +293,10 @@ func fail() -> void:
 
 
 func _finish() -> void:
+	decision_pending = false
+	if challenge_result == "Active":
+		challenge_result = "Interrupted"
+	challenge_left = 0
 	upgrade_pending = false
 	upgrade_ui.close()
 	var won: bool = stage == Stage.RESOLVED
@@ -292,6 +314,7 @@ func _finish() -> void:
 	objective = "R — return to Friday, 4:59 PM"
 	report = "INCIDENT 001 — RESOLVED\n\nRoot cause: downstream transaction delivery failed.\nResolution: missing record identified; discrepancy eliminated.\n\nManagement: Great collaborative effort.\nSpecial thanks to leadership for driving the resolution.\nActual engineering contributors: 1" if won else "INCIDENT 001 — UNRESOLVED\n\nRoot cause: engineer failed to anticipate undocumented behavior.\nCorrective action: Improve anticipation.\nAssigned owner: You.    Due date: Yesterday.\n\nField note: evade the orange arc; counter during recovery.\nThe Variance takes damage only while marked OPEN."
 	report += "\n\nDebt: %d — %s\nUpgrades: %s" % [run.debt, run.severity(), run.summary()]
+	report += "\nBurnout: %d — %s\nManagement: %s\nCommitment: %s" % [run.burnout, run.burnout_title(), corporate_title(), challenge_result]
 	report += "\n\nTime: %d:%02d    Investigation retries: %d\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, mistakes]
 	player.melee.cancel()
 	player.camera_rig.set_capture(false)
@@ -314,7 +337,7 @@ func _dashboard(title: String, detail: String) -> void:
 
 
 func _offer_upgrade(next: Stage) -> void:
-	if upgrade_pending or terminal():
+	if modal_pending() or terminal():
 		return
 	upgrade_next = next
 	upgrade_pending = true
@@ -347,3 +370,66 @@ func _debt_dashboard() -> void:
 	material.emission = color
 	room.get_node("Impossible").text = "DEBT %d / %s" % [run.debt, run.severity()]
 	room.get_node("ETA").text = "PURSUIT +%d%% / RISK ACCEPTED" % roundi((run.pressure() - 1) * 100)
+
+
+func modal_pending() -> bool:
+	return upgrade_pending or decision_pending
+
+
+func _choose_modal(index: int) -> void:
+	if decision_pending:
+		choose_corporate(index)
+	else:
+		choose_upgrade(index)
+
+
+func _offer_corporate() -> void:
+	if modal_pending() or terminal() or corporate_choice != -1:
+		return
+	decision_pending = true
+	player.melee.cancel()
+	player.clear_combo()
+	player.camera_rig.set_capture(false)
+	upgrade_ui.open_corporate(run, commitment_seconds)
+
+
+func choose_corporate(index: int) -> void:
+	if not decision_pending or terminal() or index < 0 or index > 2:
+		return
+	corporate_choice = index
+	decision_pending = false
+	upgrade_ui.close()
+	var responses: Array[String] = [
+		"Leadership: Thank you. The estimate is now a commitment.",
+		"Leadership: Understood. What’s the ETA for the estimate?",
+		"Dependency acknowledged. One additional record returns for reconciliation."]
+	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
+	run.change_burnout(changes[index], corporate_title())
+	run.apply_to(player)
+	if index == 0:
+		challenge_left = commitment_seconds
+		challenge_result = "Active"
+	_enter(Stage.ENCOUNTER_TWO)
+	message = responses[index] + "\n" + ("Optional: clear containment before the timer for Burnout relief." if index == 0 else "Containment: %d records. Clear them for Burnout relief." % remaining)
+	player.camera_rig.set_capture(true)
+
+
+func corporate_title() -> String:
+	return "None" if corporate_choice < 0 else ["Commit to Five Minutes", "Give a Realistic Estimate", "Escalate the Dependency"][corporate_choice]
+
+
+func _on_damage_accepted(base_amount: int) -> void:
+	if terminal() or base_amount < run.meaningful_hit:
+		return
+	run.change_burnout(run.hit_burnout, "Meaningful hit")
+	run.apply_to(player)
+
+
+func _complete_containment() -> void:
+	var relief: int = run.containment_relief
+	if challenge_result == "Active":
+		challenge_result = "Met — bonus recovery"
+		relief += run.commitment_reward
+	challenge_left = 0
+	run.change_burnout(-relief, "Containment resolved")
+	run.apply_to(player)

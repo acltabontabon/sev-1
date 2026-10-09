@@ -21,21 +21,23 @@ func shot(name_: String) -> void:
 
 
 func _run() -> void:
-	if "--debt" in OS.get_cmdline_user_args():
-		preview_prefix = "debt"
+	if "--debt" in OS.get_cmdline_user_args() or "--burnout" in OS.get_cmdline_user_args():
+		preview_prefix = "burnout" if "--burnout" in OS.get_cmdline_user_args() else "debt"
 	DirAccess.make_dir_recursive_absolute("res://builds")
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
 	current_scene = scene
 	player = scene.get_node("Player")
 	incident = scene.get_node("Incident")
+	if "--composed" in OS.get_cmdline_user_args():
+		incident.run.hit_burnout = 0
 	# Keep native mouse movement from changing a reproducible capture/benchmark.
 	player.camera_rig.set_process_unhandled_input(false)
 	await shot("intro")
 	player.camera_rig.capture_changed.disconnect(scene._on_capture_changed)
 	player.camera_rig.controls_active = true
 	incident._enter(incident.Stage.ENCOUNTER_ONE)
-	if preview_prefix == "debt":
+	if preview_prefix in ["debt", "burnout"]:
 		incident._offer_upgrade(incident.Stage.INVESTIGATION)
 		await shot("selection")
 		incident.choose_upgrade(0)
@@ -45,13 +47,23 @@ func _run() -> void:
 	incident.inspect_console()
 	await shot("investigation")
 	incident.choose_system(3)
-	if preview_prefix == "debt":
+	await shot("management")
+	incident.choose_corporate(0 if preview_prefix == "burnout" else 1)
+	if preview_prefix == "burnout":
+		incident.run.change_burnout(70, "Overload preview")
+		incident.run.apply_to(player)
+	await shot("containment")
+	if preview_prefix in ["debt", "burnout"]:
+		incident._complete_containment()
 		incident._offer_upgrade(incident.Stage.BOSS)
 		await shot("second_selection")
 		incident.choose_upgrade(0)
 		await shot("applied")
 	else:
 		incident._enter(incident.Stage.BOSS)
+	if preview_prefix == "burnout":
+		incident.run.change_burnout(100, "Overload preview")
+		incident.run.apply_to(player)
 	incident._spawn()
 	var boss: CharacterBody3D = incident.active_enemy
 	boss.position = Vector3(0, .05, 0)
@@ -84,7 +96,7 @@ func _run() -> void:
 			total += sample
 		samples.sort()
 		var report: Dictionary = {
-			"debt": incident.run.debt, "resolution": str(root.size), "samples": samples.size(),
+			"burnout": incident.run.burnout, "debt": incident.run.debt, "resolution": str(root.size), "samples": samples.size(),
 			"mean_fps": 1000.0 / (total / samples.size()),
 			"median_ms": samples[samples.size() / 2],
 			"p95_ms": samples[int(samples.size() * .95)], "max_ms": samples.back(),

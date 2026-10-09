@@ -24,6 +24,10 @@ func _ready() -> void:
 		debt.name = "Debt"
 		debt.add_theme_font_size_override("font_size", 18)
 		$Margin/VBox.add_child(debt)
+		var burnout: Label = Label.new()
+		burnout.name = "Burnout"
+		burnout.add_theme_font_size_override("font_size", 18)
+		$Margin/VBox.add_child(burnout)
 	refresh()
 
 
@@ -95,5 +99,12 @@ func _refresh_incident(incident: Node) -> void:
 	$Controls.text = incident.message + "\nE  Inspect   •   WASD  Move   •   LMB/F  Combo   •   Q/RMB  Dodge   •   R  Restart   •   Esc  Pause"
 	$Controls.offset_top = -112
 	$Margin/VBox/Debt.text = "DEBT %d / %d  •  %s  •  Enemy pursuit +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
-	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.upgrade_pending
+	var run: Node = incident.run
+	$Margin/VBox/Burnout.text = "BURNOUT %d / %d • %s • Base damage +%d%% / Taken +%d%%\n%s" % [run.burnout, run.burnout_limit, run.burnout_title(), roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.burnout_notice]
+	$Margin/VBox/Burnout.modulate = [Color(.65, .9, 1), Color(1, .8, .4), Color(1, .55, .4)][run.burnout_band()]
+	if incident.challenge_result == "Active":
+		$Margin/VBox/Burnout.text += " • Optional containment ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
+	elif incident.corporate_choice == 0:
+		$Margin/VBox/Burnout.text += " • " + incident.challenge_result
+	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.modal_pending()
 	$CapturePrompt/Panel/Padding/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident."

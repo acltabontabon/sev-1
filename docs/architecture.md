@@ -1,6 +1,6 @@
 # SEV-1 Implemented Architecture
 
-This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, and Milestone 6 run progression, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
+This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, persistence layer, or runtime AI service.
 
 ## Runtime composition
 
@@ -30,7 +30,7 @@ Main base                  game/main.tscn + main.gd
 
 | Owner | Implemented responsibility |
 | --- | --- |
-| [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal and upgrade-modal capture. R works while paused. |
+| [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal and choice-modal capture. R works while paused. |
 | [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, presentation handoff, health/invulnerability, attack request, damage/death, and reset. |
 | [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
@@ -86,7 +86,7 @@ Keep `.uid` and asset `.import` sidecars with their sources. `.godot/`, builds, 
 
 ## Validation and limits
 
-`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, `tests/incident_tests.gd`, and `tests/presentation_tests.gd`, and `tests/progression_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
+`python3 tools/validate.py` invokes the pinned launcher, imports resources, parses all game/test scripts, then runs `tests/run_tests.gd`, `tests/combat_tests.gd`, and `tests/alpha_tests.gd`, `tests/office_tests.gd`, `tests/incident_tests.gd`, and `tests/presentation_tests.gd`, and `tests/progression_tests.gd`, and `tests/burnout_tests.gd` at fixed 60 Hz without real-time waiting. Each command has a 120-second deadline; both exit status and recognized engine/script errors can fail the run. Logs are written under `logs/`.
 
 The final Milestone 5 results on 10 October 2026 report 155 assertions passing: 16 movement, 29 combat, 40 alpha, 9 office, 44 incident, and 17 presentation. Import and all script checks also pass. Coverage includes actual attack bindings, timing, one hit per strike, obstruction/direction/elevation, invulnerability, enemy tells/evasion, death, pause, and repeated reset. Movement tests disable the opponent to isolate locomotion. Combat tests combine controlled actor placement with active enemy behavior; they are not full human play sessions.
 
@@ -262,3 +262,59 @@ Final Milestone 6 validation: 208 assertions (155 baseline, four added incident 
 zero/60-debt 1080p measurements on M2 Pro were 123.18/120.01 average FPS with both p95
 frame times at 10.39 ms; this short sequential comparison does not establish full-run
 or Windows performance. See README for the complete measurement conditions and limits.
+
+## Burnout and corporate pressure
+
+Milestone 7 extends the existing local RunProgression, Incident, and choice modal;
+there are no new managers, assets, or external dependencies. Player emits
+`damage_accepted(base_amount)` once after invulnerability checks and damage, before
+death. Incident subscribes once: accepted base hits of at least 10 add 8 Burnout.
+This uses the attack's base size so defensive upgrades do not hide stressful hits.
+The triggering hit uses the old band; the new band affects subsequent damage.
+Time alone, rejected hits, and minor hits do not add Burnout.
+
+RunProgression exports the 0–100 bound, event amounts, and band modifiers. Composed
+(0–29) is neutral; Pressured (30–69) adds .10 to base outgoing and incoming damage;
+Overloaded (70–100) adds .25 to each. These add to upgrade modifiers in the existing
+single calculation, with final outgoing clamped 1–2 and incoming .4–1.25. With two
+Ship upgrades plus overload, outgoing is 1.95; two defensive upgrades plus overload
+produce .85 incoming. Rounding happens once at the existing damage boundary.
+Debt still affects only upcoming pursuit. Attack resources, input, hit windows,
+movement, dodge travel/invulnerability, and enemy tells are unchanged.
+
+After correct investigation, `decision_pending` blocks capture, spawns, and stage
+transitions until a valid choice. The existing persistent upgrade modal displays
+three corporate cards; its single subscription routes to the pending interaction.
+This follows the first upgrade and precedes containment and the second upgrade.
+Reset/terminal transitions close either interaction, and R remains available.
+
+- Commit: +35 Burnout and an optional 300-active-second containment challenge.
+  Clearing containment before expiry grants 20 bonus relief. Expiry has no penalty.
+- Realistic estimate: +8 Burnout, no encounter modifier.
+- Dependency escalation: −20 Burnout, with one extra sequential containment record,
+  labeled DEPENDENCY RETURNED. There is still only one damaging enemy at a time.
+
+Containment completion gives 15 relief once, plus any earned challenge bonus.
+The existing active-enemy death guard prevents duplicate completion/recovery.
+Countdown uses the existing incident active delta, including arrival delays, and
+stops on modal, Escape, or focus pause. Defeat interrupts it. Restart clears all
+Burnout, notices, decisions, and countdown state. No health recovery is introduced.
+HUD displays value, band, Burnout's contribution to damage, latest change/source,
+and optional timer/outcome. Color supplements text; no new distortion or flashing.
+Reports retain the decision, final Burnout, and challenge outcome.
+
+`tests/burnout_tests.gd` covers accepted/rejected/minor hits, threshold edges, actual
+combined melee and defense outcomes, bounds, all three decision paths to victory,
+single recovery, pause/expiry, defeat, repeated reset/subscription counts, and reload.
+`tests/incident_preview.gd -- --burnout` captures management, overloaded HUD, and
+reports; append `--measure` for the boss scenario. `--debt --composed --measure`
+uses the same debt with hit-driven Burnout disabled only in the measurement fixture.
+See README for results and remaining human acceptance gates.
+
+Final Milestone 7 validation passed **286 assertions** (16 movement, 29 combat,
+40 alpha, 9 office, 49 incident, 17 presentation, 49 progression, 77 Burnout),
+plus resource import and all script parses. Coverage includes actual number-key,
+pointer, and Enter selection; all three corporate paths through victory; defeat;
+thresholds; single-hit damage; recovery; expiry/pause; and reset/reload cleanup.
+The initial sandbox-only baseline failed on macOS settings access; rerunning with
+normal Godot user-directory access passed. No automated failures remain.

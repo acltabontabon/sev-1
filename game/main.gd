@@ -14,7 +14,7 @@ func _ready() -> void:
 
 func _on_capture_changed(active: bool) -> void:
 	var incident: Node = get_node_or_null("Incident")
-	if active and incident != null and (incident.terminal() or incident.upgrade_pending):
+	if active and incident != null and (incident.terminal() or incident.modal_pending()):
 		player.camera_rig.set_capture(false)
 		return
 	get_tree().paused = not active

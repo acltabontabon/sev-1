@@ -14,7 +14,7 @@ A single-player, third-person 3D action roguelite about an exhausted software en
 | [Implemented architecture](docs/architecture.md) | Actual scenes, scripts, contracts, tuning, tools, and limitations |
 | [Agent guidelines](AGENTS.md) | Development and validation rules |
 
-The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
+The creative brief supplied on 10 October 2026 establishes long-term direction. The subsequent Milestone 4 request authorizes this first incident and Milestone 5 authorizes character/combat presentation; Milestone 6 adds temporary run upgrades and Technical Debt; Milestone 7 adds Burnout and one corporate decision. The six circles, extra abilities, and permanent progression remain deferred. Proposed experiments are labeled separately from implemented features.
 
 ## Play Incident 001
 
@@ -34,7 +34,7 @@ Alternatively, open `project.godot` in Godot 4.7.2 and press F5. F6 runs the sel
 | Left click or F | Light attack; press again late in recovery to chain up to three hits |
 | Q or right click | Dodge in movement direction; backward relative to camera when stationary |
 | E | Inspect the operations console when nearby |
-| 1 / 2 / 3 | Choose an upgrade while its screen is open; otherwise select a system after inspecting evidence |
+| 1 / 2 / 3 | Choose an upgrade or corporate response while its screen is open; otherwise select a system after inspecting evidence |
 | R | Restart the entire incident, including health, camera, enemies, evidence, and lighting; works while paused or dead |
 | Escape / left click | Pause and release cursor / resume |
 
@@ -44,11 +44,11 @@ Incident flow:
 
 1. **The Discrepancy:** defeat two corrupted records arriving individually in the clear office lane. Choose one of three upgrades; combat pauses until selection.
 2. **Investigation:** follow the cyan OPERATIONS marker to the far wall. Press E within four meters. Read three short statements, then choose 1, 2, or 3. Incorrect choices give a clue and allow immediate retry. Payment Processing (3) is missing the delivered record.
-3. **Containment:** defeat three more records, one at a time. Their combat variation is faster pursuit, including any debt bonus; attack timing remains familiar. Choose a second upgrade before The Variance.
+3. **Management / Containment:** choose a corporate response after identifying Payment Processing. Its screen pauses combat and previews costs. Defeat three more records (four when escalating the dependency), one at a time. Their combat variation is faster pursuit, including any debt bonus; attack timing remains familiar. Choose a second upgrade before The Variance.
 4. **The Variance:** evade during SHIELDED, then strike during the 3.5-second OPEN window. The genuine boss always carries a solid cyan diamond and VERIFIED ORIGINAL. At half health, two harmless hollow-marker projections appear. Follow the original, not the copies.
 5. **Review:** victory restores the dashboards and subsides incident lighting; death provides a different handcrafted report. R returns to Friday, 4:59 PM. Click to resume after a report.
 
-Explore the existing workstation, desk clusters, conference ramp/glass, and production wall. Keyboard/mouse is the only implemented control scheme. The original movement, combo, dodge, damage, navigation, and office geometry are preserved. No external art, runtime AI, persistence, or new floor was added. Two temporary upgrade choices now make the episode a run.
+Explore the existing workstation, desk clusters, conference ramp/glass, and production wall. Keyboard/mouse is the only implemented control scheme. The original movement, combo, dodge, damage, navigation, and office geometry are preserved. No external art, runtime AI, persistence, or new floor was added. Two temporary upgrades and one corporate decision shape the run.
 
 ## Current status
 
@@ -265,3 +265,72 @@ warm-up and screenshot saving were excluded. The similar p95 suggests no materia
 steady-state cost from debt in this short sample. These sequential runs do not isolate
 all system variance, establish a pre-change benchmark, or rule out transition hitches.
 Normal full-run pacing, sound, long-duration performance, and Windows remain unverified.
+
+## Milestone 7 Burnout and corporate decisions playtest
+
+Burnout is immediate combat pressure, separate from Technical Debt's future pursuit
+pressure. It starts at zero, caps at 100, and resets with R. Accepted hits with at
+least 10 base damage add 8 Burnout; rejected/invulnerable hits, minor hits, and time
+alone add none. The triggering hit uses the current band before pressure rises.
+
+| Band | Burnout | Added base damage dealt / taken |
+| --- | --- | --- |
+| Composed | 0–29 | No change |
+| Pressured | 30–69 | +10% / +10% |
+| Overloaded | 70–100 | +25% / +25% |
+
+Modifiers add to existing upgrades. Two damage upgrades plus overload yield 1.95×
+damage; two defense upgrades plus overload yield .85× incoming damage. Final bounds
+are 1–2× outgoing and .4–1.25× incoming. Input, combo timing, and dodge stay unchanged.
+
+After the first upgrade and correct investigation, **Management Escalation — ETA
+Required** pauses the game. Use 1/2/3, click, or focus a card and press Enter:
+
+| Choice | Immediate effect | Containment consequence |
+| --- | --- | --- |
+| Commit to Five Minutes | +35 Burnout | Optional 300-active-second challenge; success removes 20 extra Burnout, expiry has no penalty |
+| Give a Realistic Estimate | +8 Burnout | Normal three records |
+| Escalate the Dependency | Remove up to 20 Burnout | Four sequential records; the extra is labeled DEPENDENCY RETURNED |
+
+Every path removes 15 Burnout once containment is cleared, before the second upgrade.
+This is pressure recovery, not healing. Countdown pauses with the game. HUD shows
+Burnout's own stat contributions, source of the latest change, and challenge time or
+outcome; Technical Debt remains a separate line. Reports include the selected response.
+
+Play with `play.command` or the launch command above. Finish the first wave, choose an
+upgrade, inspect OPERATIONS with E, identify Payment Processing with 3, then try a
+management response. Compare all three paths over retries. Check whether overload
+feels worth the vulnerability, whether five minutes is too generous, and whether the
+extra dependency record justifies relief. Try R from the management screen and both
+reports. Human pacing, balance, audio, and Windows acceptance remain outstanding.
+
+Graphical management, containment HUD, boss, and report captures were reviewed at
+1280×720 and 1920×1080. Capture files are local, ignored build outputs:
+`builds/incident_management.png` and `builds/burnout_*.png`.
+
+```sh
+sh tools/godot.sh --path . --resolution 1920x1080 --script tests/incident_preview.gd -- --burnout --measure
+```
+
+On 10 October 2026, M2 Pro, Forward+/Metal, MSAA 2×, SSAO, glow, and fog at 1920×1080,
+the 100-Burnout/60-debt boss/copies scenario measured **123.78 average FPS**, **8.21 ms
+median**, **9.53 ms p95**, **25.82 ms maximum**, 2,476 frames and 419 final-frame draw
+calls. The 25-second automated fight elevates health, excludes five seconds of warmup,
+and excludes screenshot saving. A composed/60-debt reference measured 144.93 FPS,
+7.01/7.90/10.32 ms median/p95/max over 2,899 frames. The runs were not controlled
+isolation benchmarks (other development activity and frame pacing varied); they do
+not establish a causal Burnout cost or prove the absence of significant regressions.
+Earlier Milestone 6 debt measurement was 120.01 FPS. Full-episode, transition, soak,
+and Windows performance remain unverified.
+
+Recommended next milestone: director-led balance and usability refinement of the
+existing episode, followed by Windows validation. No Reputation, permanent progression,
+new circle, or additional boss was introduced.
+
+Final Milestone 7 validation passed **286 assertions** (16 movement, 29 combat,
+40 alpha, 9 office, 49 incident, 17 presentation, 49 progression, 77 Burnout),
+plus resource import and all script parses. Coverage includes actual number-key,
+pointer, and Enter selection; all three corporate paths through victory; defeat;
+thresholds; single-hit damage; recovery; expiry/pause; and reset/reload cleanup.
+The initial sandbox-only baseline failed on macOS settings access; rerunning with
+normal Godot user-directory access passed. No automated failures remain.

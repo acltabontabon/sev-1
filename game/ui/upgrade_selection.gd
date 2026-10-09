@@ -4,6 +4,7 @@ signal selected(index: int)
 var panel: CenterContainer
 var shade: ColorRect
 var heading: Label
+var footer: Label
 var buttons: Array[Button] = []
 
 
@@ -32,7 +33,7 @@ func _ready() -> void:
 		button.pressed.connect(_choose.bind(index))
 		box.add_child(button)
 		buttons.append(button)
-	var footer: Label = Label.new()
+	footer = Label.new()
 	footer.text = "1 / 2 / 3 or click to choose • Arrows / Enter also work\nBonuses last this run and add against base values. R restarts."
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(footer)
@@ -40,6 +41,7 @@ func _ready() -> void:
 
 
 func open(run: Node) -> void:
+	footer.text = "1 / 2 / 3 or click to choose • Arrows / Enter also work\nBonuses last this run and add against base values. R restarts."
 	heading.text = "CHANGE REQUEST  /  CHOOSE ONE\nTechnical Debt: %d / %d — %s" % [run.debt, run.debt_limit, run.severity()]
 	for index in range(3):
 		buttons[index].text = run.option_text(index)
@@ -68,3 +70,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			_choose(index)
 			return
+
+
+func open_corporate(run: Node, seconds: float) -> void:
+	heading.text = "MANAGEMENT ESCALATION — ETA REQUIRED\nQuick question. Leadership wants an ETA.\nCan you commit to resolving this in the next five minutes?"
+	buttons[0].text = "1   Commit to Five Minutes\n“Sure. Five minutes should be enough.”\n+%d Burnout. Clear containment in %d active seconds: −%d Burnout bonus. No failure penalty." % [run.commit_burnout, roundi(seconds), run.commitment_reward]
+	buttons[1].text = "2   Give a Realistic Estimate\n“I’ll provide an estimate after identifying the root cause.”\n+%d Burnout. No additional encounter modifier." % run.estimate_burnout
+	buttons[2].text = "3   Escalate the Dependency\n“The issue appears to be owned by another service.”\n−%d Burnout (minimum 0). One extra dependency record in containment." % run.dependency_relief
+	footer.text = "1 / 2 / 3 or click • Arrows / Enter • R restarts\nAll choices: clear containment for −%d Burnout. Technical Debt is unchanged." % run.containment_relief
+	shade.show()
+	panel.show()
+	buttons[0].grab_focus()

@@ -6,6 +6,7 @@ signal died
 signal reset_requested
 signal hit_confirmed
 signal hurt
+signal damage_accepted(base_amount: int)
 
 @export var walk_speed: float = 5.0
 @export var sprint_speed: float = 8.0
@@ -160,6 +161,7 @@ func receive_damage(amount: int, _source: Vector3) -> bool:
 	health_changed.emit(health)
 	if DisplayServer.get_name() != "headless":
 		$HurtSound.play()
+	damage_accepted.emit(amount)
 	hurt.emit()
 	if health == 0:
 		velocity = Vector3.ZERO

@@ -17,11 +17,13 @@ func defeat_wave() -> void:
 func key(code: Key) -> void:
 	var event: InputEventKey = InputEventKey.new()
 	event.physical_keycode = code
+	event.keycode = code
 	event.pressed = true
 	Input.parse_input_event(event)
 	await frames(2)
 	event = InputEventKey.new()
 	event.physical_keycode = code
+	event.keycode = code
 	event.pressed = false
 	Input.parse_input_event(event)
 	await frames(2)
@@ -61,7 +63,9 @@ func _run() -> void:
 	await key(KEY_1)
 	check(incident.stage == incident.Stage.INVESTIGATION and incident.mistakes == 1, "wrong record gives retry feedback without advancing")
 	await key(KEY_3)
-	check(incident.stage == incident.Stage.ENCOUNTER_TWO, "3 identifies missing downstream record")
+	check(incident.decision_pending and paused, "3 identifies record and safely opens management decision")
+	await key(KEY_2)
+	check(incident.stage == incident.Stage.ENCOUNTER_TWO, "realistic estimate starts containment")
 	await frames(150)
 	check(incident.active_enemy.move_speed > first.move_speed, "second encounter escalates pursuit only")
 	await defeat_wave()

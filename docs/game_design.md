@@ -106,17 +106,17 @@ These are proposed experiments, not a committed loadout or implementation queue.
 
 ## Roguelite system candidates
 
-**Burnout:** pressure from damage, failed objectives, escalations, or risky abilities might increase offense while reducing safety. First prove it offers a choice; avoid a damage spiral that punishes struggling players twice.
+**Burnout — implemented Milestone 7 experiment:** accepted meaningful hits add 8 pressure; time alone adds none. Composed (0–29) is neutral, Pressured (30–69) adds 10% base outgoing and incoming damage, and Overloaded (70–100) adds 25% to each. The value is bounded 0–100 and resets with the run. These bonuses add to upgrades, rather than multiplying them. Containment grants one 15-point recovery; corporate choices can grant additional relief. Input, movement, dodge, and hit timing stay reliable. Human testing must establish whether the tradeoff is worth the immediate risk.
 
 **Technical Debt — implemented Milestone 6 experiment:** choose one of three upgrades after each record encounter. Ship It Friday adds 35% base damage and 30 debt; Add More Tests reduces incoming damage by 20% of base with no debt; Temporary Workaround reduces dodge recovery by 25% of base and adds 15 debt. Choices last only this run and stack additively. Debt bands at 25/50/75 increase upcoming enemy pursuit by 5/10/15%, including shielded boss pursuit, with unchanged tells and damage windows. Office warnings escalate alongside the HUD. The normal two-choice episode reaches at most 60 debt. Critical is implemented and tested for tuning, not naturally reachable. No healing, unavoidable punishment, or permanent progression is introduced. Balance and the meaningfulness of these tradeoffs require creator playtesting. See [architecture](architecture.md#technical-debt-run-progression) for integration and limits.
 
 **Corporate Reputation:** choices might affect dialogue, assistance, events, or upgrades. Technical correctness and organizational approval need not align. Prefer competing relationships or situational reactions over a good/evil meter; the representation remains undecided.
 
-Do not prototype all three together. The [roadmap](roadmap.md) puts progression after enjoyable combat and the first narrative incident.
+Burnout and Technical Debt are now implemented; do not add Reputation alongside their balance work. The [roadmap](roadmap.md) puts progression after enjoyable combat and the first narrative incident.
 
 ### Corporate decisions
 
-A future manager request—“Leadership already promised the client; can you deploy this untested change?”—could offer immediate power with debt, a stability benefit with lost approval or time pressure, or preservation of resources with a different escalation. These outcomes are examples, not balance commitments. Present costs before selection, reflect the actual choice afterward, and allow outcomes that are funny, uncomfortable, or unexpectedly helpful. The speaker should have understandable pressures of their own.
+**Implemented Milestone 7:** “Management Escalation — ETA Required” appears after the investigation, before containment. Commit to Five Minutes adds 35 Burnout and an optional five-minute containment challenge worth 20 bonus Burnout relief; expiry has no penalty. Give a Realistic Estimate adds 8 Burnout without an encounter modifier. Escalate the Dependency removes up to 20 Burnout but adds one clearly identified record to containment. All paths grant the normal 15 relief on containment completion. The paused screen previews costs and recovery; each selection applies once. Different management replies acknowledge the choice. Technical Debt is unchanged, and Reputation remains deferred. See [implementation](architecture.md#burnout-and-corporate-pressure).
 
 ## Death and post-incident review
 
