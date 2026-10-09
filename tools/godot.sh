@@ -2,6 +2,10 @@
 # Usage: sh tools/godot.sh --version (or any Godot arguments).
 # GODOT_BIN may override discovery with an absolute executable path.
 set -eu
+# Without TERM, macOS Godot imports the interactive login-shell environment, which
+# fails on multi-line exported values. Automated shells often leave TERM unset.
+TERM=${TERM:-dumb}
+export TERM
 
 godot_bin=${GODOT_BIN:-}
 if [ -z "$godot_bin" ]; then
