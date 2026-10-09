@@ -1,6 +1,8 @@
 extends RefCounted
 ## Device preferences only; never serialize incident state or run modifiers.
-const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1}
+## Exception: opening_seen records that this device watched the opening once, which
+## unlocks skipping it. It carries no run progress.
+const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1, "opening_seen": false}
 var values: Dictionary = DEFAULTS.duplicate()
 var path: String = "user://settings.cfg"
 
@@ -12,7 +14,7 @@ func load_settings() -> void:
 		return
 	for key: String in DEFAULTS:
 		var value: Variant = config.get_value("preferences", key, DEFAULTS[key])
-		if key in ["flash", "fullscreen", "subtitles"]:
+		if key in ["flash", "fullscreen", "subtitles", "opening_seen"]:
 			if value is bool:
 				values[key] = value
 		elif value is float or value is int:

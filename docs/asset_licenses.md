@@ -33,3 +33,16 @@ required before future binary asset intake.
 ## Milestone 11 speech
 
 `assets/audio/voices/*.ogg`: original SEV-1 script synthesized locally with the publisher's Apache-2.0 Kokoro-82M model and six stock English voices. Model revision, source license link, voice, processing, generation date and checksum are recorded per clip in [provenance](../assets/audio/voices/provenance.json). No voice cloning or real-person imitation was used. These are candidate performances awaiting human listening approval. Model weights and development dependencies do not ship. See [voice source and rights](voices.md#provenance-and-rights).
+
+## Milestone 12 outside assets
+
+Git LFS tracks these new binaries (see `.gitattributes`). Each source was retrieved
+without an account on 10 October 2026 and reviewed in the running game.
+
+| Content | Source and license | Record |
+| --- | --- | --- |
+| Barlow Condensed, Inter, JetBrains Mono typefaces | Official Google Fonts repository; SIL Open Font License 1.1, license text bundled | [assets/fonts](../assets/fonts/README.md), [THIRD_PARTY_NOTICES.txt](../THIRD_PARTY_NOTICES.txt) |
+| 16 interface/effect sounds | Kenney Interface Sounds, Impact Sounds, UI Audio, Sci-Fi Sounds; CC0 1.0 | [assets/audio/sfx](../assets/audio/sfx/README.md) |
+
+Kenney Furniture Kit (CC0) was downloaded for evaluation only; none of its models are
+imported yet. Mixamo and Freesound remain excluded because they require accounts.

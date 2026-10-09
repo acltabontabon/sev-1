@@ -42,8 +42,12 @@ func _run() -> void:
 	player.health = 10000
 	incident._enter(incident.Stage.BOSS)
 	check(incident.stage == incident.Stage.ALERT, "out-of-order transitions are rejected")
-	await frames(1600)
-	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within twenty-seven active seconds")
+	await frames(1200)
+	check(incident.alert_played and incident.presentation.desk.alarm_panel.visible and player.narrative_hold, "pager fires on the desk monitor mid-opening while control stays held")
+	await frames(1100)
+	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within thirty-nine active seconds")
+	check(not player.narrative_hold and player.camera_rig.get_node("SpringArm3D/Camera3D").current and scene.get_node("HUD").visible, "unskipped opening hands camera, input and HUD to the player")
+	check(not incident.presentation.emerging.visible and incident.room.get_node("CeilingPool0").light_energy > 1.0, "opening leaves no staged monster and restores combat lighting")
 	check(get_nodes_in_group("enemies").size() == 1, "lab opponent is disabled and only one record is active")
 	var first: CharacterBody3D = incident.active_enemy
 	check(first.position.distance_to(player.position) > 3, "arrival is outside immediate striking distance")

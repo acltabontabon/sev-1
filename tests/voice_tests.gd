@@ -10,8 +10,8 @@ func _run() -> void:
 	incident = scene.get_node("Incident")
 	player = scene.get_node("Player")
 	var voice: Node = incident.voice
-	await frames(3)
-	check(voice.lines.size() == 22 and voice.current_line == "opening", "opening requests the authored narrator line")
+	await frames(40)
+	check(voice.lines.size() == 23 and voice.current_line == "opening", "opening requests the authored narrator line")
 	voice.clear()
 	voice.request("enemy")
 	await frames(2)

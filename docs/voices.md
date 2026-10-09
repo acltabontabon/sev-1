@@ -10,6 +10,13 @@ replacement/audition but does not compete with the opening narrator. Thus 21 lin
 have live speech triggers, with optional barks intentionally droppable under pressure.
 No new combat, narrative chapter, or runtime service is introduced.
 
+Milestone 12 update (10 October 2026): the rebuilt opening now speaks the `friday`
+notification, rewrites `eta` ("Hi! Just checking if we have an ETA."), adds `leadership`,
+and replaces the `start` profanity with the creator-requested "Tangina naman." The
+Tagalog line uses a phonetic `pronunciation_text` override (`/tɑŋˈinɑ/ /nɑmˈɑn/`) with
+the English protagonist voice; its pronunciation is a candidate pending the creator's
+listening review, and the subtitle intentionally stays untranslated. 23 clips now ship.
+
 These are **candidate performances, not human-approved performances**. Automated
 checks and observed audio-player state cannot establish acting, intelligibility,
 comedic timing, audible spatialization, or mixing quality. No listening-capable tool
@@ -46,11 +53,12 @@ source of truth. This table is its review copy. Priorities: 3 critical/terminal,
 
 | ID | Speaker | Text | Trigger | Priority |
 | --- | --- | --- | --- | --- |
-| `friday` | PEOPLE OPERATIONS | Happy Friday, team! Enjoy your well-deserved weekend! | Environmental Friday notification only; available for audition/import, not spoken during opening | 0 |
-| `relief` | ENGINEER | One minute. No deployments. No surprises. | Opening at 5 seconds | 1 |
-| `alert` | MONITORING / SEV-1 | CRITICAL PRODUCTION INCIDENT Inconsistent transaction states detected. | Opening at 10 seconds | 3 |
-| `eta` | MANAGEMENT | Quick question. Can we have an ETA? | Opening at 15 seconds | 1 |
-| `start` | ENGINEER | You've got to be fucking kidding me. | Opening at 20 seconds; short retry at 0 seconds | 3 |
+| `friday` | PEOPLE OPERATIONS | Happy Friday, team! Enjoy your well-deserved weekend! | Opening monitor close-up, Friday chat message | 0 |
+| `relief` | ENGINEER | One minute. No deployments. No surprises. | Opening face shot at 8.6 seconds | 1 |
+| `alert` | MONITORING / SEV-1 | CRITICAL PRODUCTION INCIDENT Inconsistent transaction states detected. | Opening SEV-1 takeover at 13.6 seconds | 3 |
+| `eta` | MANAGEMENT | Hi! Just checking if we have an ETA. | Opening chat insert at 18.9 seconds | 1 |
+| `leadership` | LEADERSHIP | Leadership is already asking for updates. | Opening face push-in at 21.5 seconds | 1 |
+| `start` | ENGINEER | Tangina naman. | Opening at 24.7 seconds after a held silence; short retry at 0 seconds | 3 |
 | `enemy` | ENGINEER | This was not in the ticket. | First record spawn | 1 |
 | `investigate` | INCIDENT CHANNEL | Can we confirm whether this is a known issue? | Investigation begins | 2 |
 | `debt` | ENGINEER | That's a Monday problem. | First paid upgrade | 1 |
@@ -60,7 +68,7 @@ source of truth. This table is its review copy. Priorities: 3 critical/terminal,
 | `boss` | ENGINEER | Finally. A reproducible issue. | Boss manifests | 1 |
 | `copies` | ENGINEER | Great. Duplicate records. | First false-positive event, after Variance reaction | 1 |
 | `rca` | MANAGEMENT | Do we have an RCA? | Boss stage after 22 seconds | 0 |
-| `opening` | NARRATOR | Friday. Four fifty-nine PM. He was almost free. | Opening at 0 seconds | 3 |
+| `opening` | NARRATOR | Friday. Four fifty-nine PM. He was almost free. | Opening wide shot at 0.5 seconds | 3 |
 | `evidence_open` | PRODUCTION SYSTEM | Delivery records available. Please identify the missing transaction. | Console first inspected | 2 |
 | `evidence_confirmed` | PRODUCTION SYSTEM | Missing delivery confirmed. Containment authorized. | Containment begins after management choice | 2 |
 | `variance_intro` | THE VARIANCE | Records do not match. Reconciliation failed. | Boss arrival begins | 2 |

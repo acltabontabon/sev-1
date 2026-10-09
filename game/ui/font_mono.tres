@@ -1,0 +1,10 @@
+[gd_resource type="FontVariation" format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/jetbrains_mono_variable.ttf" id="1_uv10o"]
+
+[resource]
+base_font = ExtResource("1_uv10o")
+variation_opentype = {
+2003265652: 520
+}
+spacing_glyph = 1

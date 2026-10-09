@@ -49,6 +49,7 @@ func _run() -> void:
 		app.resume_incident()
 		await frames(3)
 	capture("opening")
+	incident.presentation.skip_unlocked = true
 	await key(KEY_TAB)
 	var captured_boss: bool = false
 	var captured_combat: bool = false
