@@ -76,7 +76,7 @@ var closing_bugs: bool = false
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const TALK_RANGE: float = 2.4
 var dialogue: CanvasLayer
-var talk_prompt: Label3D
+var talk_prompt: CanvasLayer
 var talking: Node3D
 var talked: Dictionary = {}
 var talk_with: Dictionary = {}
@@ -193,17 +193,8 @@ func _ready() -> void:
 	dialogue.name = "Dialogue"
 	add_child(dialogue)
 	dialogue.finished.connect(_end_talk)
-	talk_prompt = Label3D.new()
+	talk_prompt = preload("res://game/ui/talk_prompt.gd").new()
 	talk_prompt.name = "TalkPrompt"
-	talk_prompt.text = "E — TALK"
-	talk_prompt.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
-	talk_prompt.font_size = 40
-	talk_prompt.pixel_size = .004
-	talk_prompt.outline_size = 10
-	talk_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	talk_prompt.no_depth_test = true
-	talk_prompt.modulate = Color(.5, .95, 1)
-	talk_prompt.hide()
 	add_child(talk_prompt)
 	coworkers = preload("res://game/incidents/coworkers.gd").new()
 	coworkers.name = "Coworkers"
@@ -1236,9 +1227,10 @@ func talk_target() -> Dictionary:
 
 func _refresh_talk_prompt() -> void:
 	var someone: Dictionary = talk_target()
-	talk_prompt.visible = not someone.is_empty()
-	if talk_prompt.visible:
-		talk_prompt.global_position = (someone.body as Node3D).global_position + Vector3.UP * (2.0 if someone.standing else 1.6)
+	if someone.is_empty():
+		talk_prompt.show_for(null, "", false, 0.0)
+	else:
+		talk_prompt.show_for(someone.body, someone.tree.who, str(someone.tree.get("voice", "")).begins_with("host_"), 2.2 if someone.standing else 1.8)
 
 
 ## Stop and talk: the world pauses, the two face each other, the camera finds the pair.
@@ -1246,7 +1238,7 @@ func talk(someone: Dictionary) -> void:
 	if someone.is_empty() or modal_pending():
 		return
 	talking = someone.body
-	talk_prompt.hide()
+	talk_prompt.show_for(null, "", false, 0.0)
 	# Their passing remark would hang over the conversation.
 	for label: Node in talking.find_children("*", "Label3D", false, false):
 		(label as Label3D).visible = false
@@ -1292,10 +1284,11 @@ func _talk_frame(who: String, time: float, line: int, text: String) -> void:
 		return
 	if line != talk_line:
 		talk_line = line
-		var clip: String = "Idle"
+		var clip: String = "CharacterArmature|Idle"
 		if who == "them":
-			clip = "Victory" if text.contains("!") else ("Shoot_OneHanded" if text.contains("?") or line % 2 == 0 else "Idle")
-		animator.play("CharacterArmature|" + clip, .25)
+			clip = "CharacterArmature|Victory" if text.contains("!") else ("ual/no" if text.begins_with("No") or text.begins_with("Don't") else "ual/talking")
+		if animator.has_animation(clip):
+			animator.play(clip, .25)
 		animator.speed_scale = 1.0
 	elif not animator.is_playing() or (animator.current_animation.ends_with("Victory") and time > 2.4):
 		animator.play("CharacterArmature|Idle", .3)

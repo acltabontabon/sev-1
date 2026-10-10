@@ -148,6 +148,12 @@ func shoulder_transform() -> Transform3D:
 	return Transform3D(basis, center - along * .75)
 
 
+## The hero pose: point down in the floor at his right, pommel at shoulder height.
+func planted_transform() -> Transform3D:
+	var down: Vector3 = Vector3(.06, -1, .08).normalized()
+	return Transform3D(Basis.looking_at(down, Vector3.BACK), Vector3(.62, 1.3, .1))
+
+
 func carry_transform() -> Transform3D:
 	var to_character: Transform3D = global_transform.affine_inverse() * skeleton.global_transform
 	var fist: Transform3D = (to_character * skeleton.get_bone_global_pose(bones["Fist.R"])).orthonormalized()
@@ -167,7 +173,18 @@ func _measure_grip() -> void:
 	hand_to_weapon = fist.affine_inverse() * held_pose
 
 
+## Preview tooling only: hold a library clip at a fraction of its length, IK off.
+var preview_clip: String = ""
+var preview_at: float = 0.0
+
+
 func _physics_process(delta: float) -> void:
+	if not preview_clip.is_empty():
+		_scrub(preview_clip, animator.get_animation("rig/" + preview_clip).length * preview_at, 0.0, delta)
+		right_ik.active = false
+		left_ik.active = false
+		skeleton.advance(delta)
+		return
 	if actor == null:
 		clock += delta
 		_staged(delta)
@@ -402,9 +419,9 @@ func _staged(delta: float) -> void:
 			target_lean = 0.0
 			reach = 0.0
 		Pose.COOL:
-			# Turned away from the mess, chin down, keyboard on the shoulder.
-			look = Vector2(.2, -.35)
-			target_lean = -.05
+			# Turned away from the mess, arms folded, the Monolith planted beside him.
+			look = Vector2(.12, -.3)
+			target_lean = 0.0
 			reach = 0.0
 	# Hands on the desk stay on the desk while the body is lifted onto the cushion.
 	var on_desk: Array[bool] = [story_pose != Pose.SLUMP and story_pose != Pose.RELAX, story_pose in [Pose.TYPING, Pose.ALERT, Pose.GLANCE]]
@@ -413,7 +430,9 @@ func _staged(delta: float) -> void:
 	head_turn = head_turn.lerp(look, blend)
 	lean = lerpf(lean, target_lean, blend)
 	position = SEATED_OFFSET * sit
-	if seated:
+	if story_pose == Pose.COOL:
+		_loop("fold_arms", 1.0, .2, delta)
+	elif seated:
 		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length, .3, delta)
 	elif standing_left > 0:
 		var length: float = ANIMATIONS.get_animation("stand_up").length
@@ -448,7 +467,7 @@ func _solve(delta: float) -> void:
 	left_ik.active = left_ik.influence > .001
 	# The Monolith rests on the right shoulder whenever it is not swinging (and in the
 	# finisher's hero pose); the right hand goes up to hold it there.
-	var resting: bool = story_pose == Pose.COOL or (story_pose < Pose.TYPING and actor != null and actor.melee != null \
+	var resting: bool = (story_pose < Pose.TYPING and actor != null and actor.melee != null \
 		and not actor.melee.attacking and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
 	shoulder_rest = move_toward(shoulder_rest, 1.0 if resting else 0.0, delta * (5.0 if resting else 12.0))
 	if shoulder_rest > 0.0:
@@ -461,6 +480,8 @@ func _solve(delta: float) -> void:
 		weapon.transform = weapon.transform.interpolate_with(carry_transform(), held)
 	if shoulder_rest > 0.0:
 		weapon.transform = weapon.transform.interpolate_with(shoulder_transform(), smoothstep(0.0, 1.0, shoulder_rest))
+	if story_pose == Pose.COOL:
+		weapon.transform = planted_transform()
 	trail.sample()
 	_glow()
 

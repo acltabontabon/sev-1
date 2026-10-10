@@ -651,6 +651,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
 - **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one
   2D mesh once and draws it player-centred, rotated with the camera, with threats,
   patrol sight fans, people and the NEXT step pinned to the rim.
+- **Animation library.** `tools/build_engineer_rig.gd` bakes `engineer_animations.res`:
+  the body's own clips, the Knight pack (rest-relative, same bone names) and the CC0
+  Universal Animation Libraries (`_retarget()`: world-space rotation from each library's
+  A_TPose to the body's rest, hips root offset scaled, feet re-seated on the leg chains,
+  hips/spine damped on attacks). Coworkers and hosts add it as the `ual` library.
 - **Talk.** `game/ui/dialogue_box.gd` is a PROCESS_MODE_ALWAYS modal; `missing_transaction
   .talk()` pauses play (capture off; `modal_pending()` includes `talking`), turns the pair
   to each other, frames them via `presentation.dialogue_shot()`, and applies reply effects

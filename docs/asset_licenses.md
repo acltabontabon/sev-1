@@ -61,3 +61,5 @@ Kenney's furniture chair and round table were evaluated and rejected as toy-like
 The rigged engineer replaced the native procedural engineer after creator feedback;
 the native scene and generator remain as a fallback. Elemental effects, enemy spells
 and the battle-mode grade are original procedural work (shaders and particles in code).
+
+`assets/characters/animations/ual1_standard.glb`, `ual2_standard.glb` (0.2.24): Quaternius, Universal Animation Library and Universal Animation Library 2, Standard editions; CC0 1.0 (licence files kept beside them). Downloaded 10 October 2026 from OpenGameArt (`opengameart.org/content/universal-animation-library-2`, `opengameart.org/node/174563`), no account. Retargeted at build time by `tools/build_engineer_rig.gd` into `game/player/engineer_animations.res`.

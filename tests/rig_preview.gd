@@ -65,6 +65,21 @@ func _run() -> void:
 	player.visual.rotation.y = 0
 	frame_player(Vector3(2.2, 1.4, -2.6))
 	await frames(20)
+	if "--clips" in OS.get_cmdline_user_args():
+		var view: Node3D = player.get_node("Visual/Character")
+		view.weapon.visible = false
+		for entry: Array in [["fold_arms", .5], ["phone", .5], ["talking", .4], ["sitting_talking", .4], ["fixing", .5], ["zombie_walk", .3], ["zombie_idle", .5], ["zombie_scratch", .4], ["no", .5], ["yes", .5], ["sword_a", .4], ["hit_knockback", .3]]:
+			view.preview_clip = entry[0]
+			view.preview_at = entry[1]
+			await frames(4)
+			await grab(entry[0])
+		var clips_sheet: Image = Image.create(640 * 3, 360 * 4, false, Image.FORMAT_RGBA8)
+		for index in range(tiles.size()):
+			clips_sheet.blit_rect(tiles[index], Rect2i(0, 0, 640, 360), Vector2i(640 * (index % 3), 360 * (index / 3)))
+		clips_sheet.save_png("res://builds/ual_sheet.png")
+		print("SHEET clips")
+		quit()
+		return
 	await grab("idle")
 	Input.action_press("move_forward")
 	await frames(30)

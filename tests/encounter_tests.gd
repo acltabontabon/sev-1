@@ -454,7 +454,7 @@ func _run() -> void:
 	player.position = Vector3(morgan.body.global_position.x + 1.2, .05, morgan.body.global_position.z)
 	await frames(2)
 	var someone: Dictionary = incident.talk_target()
-	check(someone.get("name", "") == "Manager" and incident.talk_prompt.visible, "E — TALK appears over a coworker in reach")
+	check(someone.get("name", "") == "Manager" and incident.talk_prompt.is_showing(), "E — TALK appears over a coworker in reach")
 	incident.talk(someone)
 	await frames(2)
 	check(incident.dialogue.is_open() and incident.modal_pending() and paused, "talking opens the dialogue and holds the incident")
@@ -488,7 +488,7 @@ func _run() -> void:
 	check(incident.talk_target().get("body") == planted_talk, "the employees a wave is waiting inside can be talked to")
 	spawn("record", player.position + Vector3(0, 0, 3))
 	await frames(4)
-	check(incident.talk_target().is_empty() and not incident.talk_prompt.visible, "nobody chats while something is hunting the engineer")
+	check(incident.talk_target().is_empty() and not incident.talk_prompt.is_showing(), "nobody chats while something is hunting the engineer")
 	var silent: Array[String] = []
 	var talk_data: Dictionary = preload("res://game/incidents/dialogues.gd").data()
 	for tree: Dictionary in talk_data.trees.values():

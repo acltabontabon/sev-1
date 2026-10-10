@@ -56,6 +56,7 @@ func _ready() -> void:
 	body.scale = Vector3.ONE * .62
 	add_child(body)
 	animator = body.find_child("AnimationPlayer", true, false)
+	animator.add_animation_library("ual", preload("res://game/player/engineer_animations.res"))
 	for clip in ["Idle", "RecieveHit"]:
 		animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
 	preload("res://game/incidents/coworkers.gd").dress(body, PALETTES[hash(identity.name) % PALETTES.size()])
@@ -83,7 +84,7 @@ func _ready() -> void:
 	line.no_depth_test = true
 	line.visible = false
 	add_child(line)
-	animator.play("CharacterArmature|Idle")
+	animator.play("ual/phone")
 	animator.seek(randf() * animator.current_animation_length, true)
 	calm_left = randf_range(3.0, 7.0)
 	gesture_left = randf_range(4.0, 9.0)
@@ -125,10 +126,10 @@ func _phase(next: String) -> void:
 	line_left = 0.0
 	match next:
 		"calm":
-			animator.play("CharacterArmature|Idle", .2)
+			animator.play("ual/phone", .2)
 		"ping":
 			# The notification lands: a P1 ticket, assigned to them.
-			animator.play("CharacterArmature|Shoot_OneHanded", .15)
+			animator.play("ual/no", .15)
 			ElementFx.glyphs(self, global_position + Vector3.UP * 1.9, Color(1, .5, .35), ["P1 ASSIGNED"], .9, 0.0)
 		"convulse":
 			animator.play("CharacterArmature|RecieveHit", .08)
@@ -148,9 +149,9 @@ func _process(delta: float) -> void:
 		gesture_left -= delta
 		if gesture_left <= 0:
 			gesture_left = randf_range(6.0, 10.0)
-			animator.play("CharacterArmature|Shoot_OneHanded", .25)
+			animator.play("ual/talking", .25)
 		elif not animator.is_playing():
-			animator.play("CharacterArmature|Idle", .3)
+			animator.play("ual/phone", .3)
 		if is_instance_valid(player) and not said and player.global_position.distance_to(global_position) < 3.6:
 			said = true
 			line_left = 3.2

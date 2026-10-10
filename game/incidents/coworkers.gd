@@ -5,7 +5,8 @@ extends Node3D
 ## walks past. When a fight ends, the manager on the call takes the credit.
 
 const ROOT: String = "res://assets/characters/quaternius/"
-## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (PickUp
+const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
+## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
 const CAST: Array[Dictionary] = [
 	{"name": "Sleeper", "body": "casual2_male.fbx", "routine": "asleep", "at": Vector3(-9.0, 0, .87), "facing": PI,
@@ -16,7 +17,7 @@ const CAST: Array[Dictionary] = [
 		"line": "Yes, someone's on it. No, I don't know who.", "palette": [Color(.2, .22, .3), Color(.1, .1, .14), Color(.9, .72, .6), Color(.45, .36, .2)]},
 	{"name": "Facilities", "body": "worker_male.fbx", "routine": "fix", "at": Vector3(21.6, 0, 10.6), "facing": -1.04,
 		"line": "Ticket open since 2019. Today's the day. Probably.", "palette": [Color(.85, .45, .12), Color(.2, .3, .45), Color(.6, .4, .28), Color(.1, .08, .06)]},
-	{"name": "Standup", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-8.5, 0, -12.6), "facing": -.6, "gesture": "Shoot_OneHanded",
+	{"name": "Standup", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-8.5, 0, -12.6), "facing": -.6, "gesture": "ual/talking",
 		"line": "Yesterday: meetings. Today: meetings. Blockers: meetings.", "palette": [Color(.2, .55, .35), Color(.15, .14, .12), Color(.7, .5, .36), Color(.35, .2, .1)]},
 	{"name": "Intern", "body": "casual2_male.fbx", "routine": "carry", "at": Vector3(-5.2, 0, 12.6), "facing": -PI * .5, "route": Vector3(-6.8, 0, 0),
 		"line": "Is it normal to be on call on day one?", "palette": [Color(.95, .55, .2), Color(.18, .2, .3), Color(.55, .36, .25), Color(.12, .09, .07)]},
@@ -41,6 +42,8 @@ func _ready() -> void:
 		body.name = entry.name
 		add_child(body)
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
+		# The same rig as the engineer: his retargeted library (talking, phone, repairs).
+		animator.add_animation_library("ual", MOTION)
 		for clip in ["Idle", "Walk", "Walk_Carry", "PickUp"]:
 			animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
 		dress(body, entry.palette)
@@ -137,7 +140,8 @@ func _walk(someone: Dictionary, delta: float) -> void:
 		if someone.pause <= 0:
 			(someone.line as Label3D).text = someone.entry.line
 		elif not (someone.animator as AnimationPlayer).current_animation.ends_with("Victory"):
-			_play(someone, "Idle", .3, true)
+			# The manager takes a call between laps: "Yes, someone's on it."
+			_play(someone, "ual/phone" if someone.entry.name == "Manager" else "Idle", .3, true)
 		return
 	var goal: Vector3 = someone.entry.at + (someone.entry.route if someone.out else Vector3.ZERO)
 	var step: Vector3 = goal - body.position
@@ -175,14 +179,14 @@ func _routine(someone: Dictionary, instant: bool) -> void:
 					var index: int = skeleton.find_bone(bone)
 					skeleton.set_bone_pose_rotation(index, Quaternion(Vector3.RIGHT, .5) * skeleton.get_bone_pose_rotation(index))
 		"fix":
-			_play(someone, "PickUp", .3, true)
+			_play(someone, "ual/fixing", .3, true)
 		_:
 			_play(someone, "Idle", .3, true)
 
 
 func _play(someone: Dictionary, clip: String, blend: float, loop: bool) -> void:
 	var animator: AnimationPlayer = someone.animator
-	var name: String = "CharacterArmature|" + clip
+	var name: String = clip if clip.begins_with("ual/") else "CharacterArmature|" + clip
 	if animator.current_animation == name and (animator.is_playing() or not loop):
 		return
 	animator.play(name, blend)

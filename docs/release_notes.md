@@ -1,5 +1,31 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.24 — Better motion, a hero pose, a smaller dialogue (10 October 2026)
+
+Creator direction: get better assets (upgrade within free CC0 packs); the dialogue box was
+too big; the "talk" prompt should be creative and pretty.
+
+- **Quaternius Universal Animation Libraries 1 and 2 (CC0).** Downloaded from
+  OpenGameArt (no account) and retargeted onto the Quaternius office rig with a new
+  world-space retargeter in `tools/build_engineer_rig.gd` (each library's T-pose to the
+  body's rest, hips/spine damped on attacks so the big-headed body does not face-plant).
+  29 new clips: greatsword strikes and combo, sword block and dash, knockback, folded
+  arms, phone call, talking, sitting talk, kneeling repair, head-shake and nod, zombie
+  walk and scratch, sprint, jog, roll, death. All five office bodies share the rig, so
+  one library animates the engineer and everyone else.
+- **Life in the office.** Coworkers now talk with their hands while you talk to them
+  (and shake their heads at "No…"), the Manager takes calls between laps, Facilities
+  kneels at the microwave, Standup gestures at nobody, and every employee a wave is
+  hiding inside is on the phone until the P1 lands (then a head-shake, then the turn).
+- **Hero pose.** The finisher kill cam now shows the engineer arms folded, the Legacy
+  Monolith planted point-down beside him, while the kill falls apart behind him.
+- **Smaller dialogue.** The talk box is about a third smaller (narrower, tighter type,
+  compact reply rows with a slim highlight) and sits lower.
+- **A prettier talk prompt.** "E — TALK" is now a chat bubble over the person's head with
+  a cyan E keycap and a corporate verb plus their name ("SYNC UP WITH MORGAN", "TOUCH
+  BASE WITH", "CIRCLE BACK WITH", "GRAB 5 MIN WITH", "INTERRUPT"; "CHECK ON DANA" for the
+  ones about to turn), popping in and bobbing, gone the moment a fight starts.
+
 ## 0.2.23 — Force Rollback, omnislash (10 October 2026)
 
 Creator request: build the ultimate after Cloud's Omnislash.

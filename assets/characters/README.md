@@ -140,3 +140,11 @@ entry now describes the fallback scene; the playable engineer is the rig above.
   (`blocker_visual.tscn`, `meeting_invite_visual.tscn`, `scope_creep_visual.tscn`).
 - **The Variance:** a crown of three orbiting status screens (SUCCESS, FAILED,
   NOT FOUND) and a split cyan/red body, built by `variance.gd` on the record rig.
+
+## Animation libraries (0.2.24)
+
+`animations/ual1_standard.glb` and `animations/ual2_standard.glb` are Quaternius' Universal
+Animation Library 1 and 2, Standard editions (CC0 1.0; `License_UAL1.txt`, `License_UAL2.txt`),
+from OpenGameArt without an account. They use a different (UE-style / Rigify) skeleton;
+`tools/build_engineer_rig.gd` retargets the clips it lists onto the office rig by world-space
+rotation from each library's A_TPose, and bakes them into `game/player/engineer_animations.res`.

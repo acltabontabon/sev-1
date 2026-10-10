@@ -9,6 +9,8 @@ const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 
 const SPEED: float = 60.0
 const ACCENT: Color = Color(.35, .9, .95)
+static var ROW: StyleBoxEmpty
+static var ROW_FOCUS: StyleBoxFlat
 var tree: Dictionary = {}
 var node_id: String = ""
 var shown: float = 0.0
@@ -34,6 +36,18 @@ var hold_left: float = 0.0
 
 
 func _ready() -> void:
+	if ROW == null:
+		ROW = StyleBoxEmpty.new()
+		ROW.content_margin_left = 10
+		ROW.content_margin_top = 2
+		ROW.content_margin_bottom = 2
+		ROW_FOCUS = StyleBoxFlat.new()
+		ROW_FOCUS.bg_color = Color(ACCENT, .1)
+		ROW_FOCUS.border_color = ACCENT
+		ROW_FOCUS.border_width_left = 2
+		ROW_FOCUS.content_margin_left = 10
+		ROW_FOCUS.content_margin_top = 2
+		ROW_FOCUS.content_margin_bottom = 2
 	layer = 6
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	# Swallows stray clicks so they cannot recapture the mouse and unpause mid-talk.
@@ -43,10 +57,10 @@ func _ready() -> void:
 	add_child(shade)
 	panel = PanelContainer.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	panel.offset_left = -470
-	panel.offset_right = 470
-	panel.offset_top = -40
-	panel.offset_bottom = -40
+	panel.offset_left = -340
+	panel.offset_right = 340
+	panel.offset_top = -26
+	panel.offset_bottom = -26
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(.02, .035, .045, .94)
@@ -54,31 +68,31 @@ func _ready() -> void:
 	style.border_width_left = 4
 	style.border_width_top = 1
 	style.set_corner_radius_all(6)
-	style.set_content_margin_all(18)
-	style.content_margin_left = 24
+	style.set_content_margin_all(12)
+	style.content_margin_left = 18
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
+	column.add_theme_constant_override("separation", 5)
 	panel.add_child(column)
 	var plate: HBoxContainer = HBoxContainer.new()
 	plate.add_theme_constant_override("separation", 14)
 	column.add_child(plate)
-	name_label = _label(plate, "DisplayTitle", 34, Color(.95, .97, 1))
-	role_label = _label(plate, "Eyebrow", 14, ACCENT)
+	name_label = _label(plate, "DisplayTitle", 25, Color(.95, .97, 1))
+	role_label = _label(plate, "Eyebrow", 11, ACCENT)
 	role_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	text_label = _label(column, "Subhead", 21, Color(.88, .91, .94))
+	text_label = _label(column, "Subhead", 16, Color(.88, .91, .94))
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text_label.custom_minimum_size = Vector2(880, 0)
+	text_label.custom_minimum_size = Vector2(640, 0)
 	replies = VBoxContainer.new()
-	replies.add_theme_constant_override("separation", 4)
+	replies.add_theme_constant_override("separation", 0)
 	column.add_child(replies)
 	var bottom: HBoxContainer = HBoxContainer.new()
 	column.add_child(bottom)
-	footer = _label(bottom, "MonoLabel", 12, Color(.55, .62, .66))
+	footer = _label(bottom, "MonoLabel", 10, Color(.55, .62, .66))
 	footer.text = "1 · 2 · 3  REPLY     E  CONTINUE     ESC  LEAVE"
 	footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	toast = _label(bottom, "MonoLabel", 12, Color(1, .72, .4))
+	toast = _label(bottom, "MonoLabel", 10, Color(1, .72, .4))
 	speaker = AudioStreamPlayer.new()
 	speaker.bus = &"Voice"
 	add_child(speaker)
@@ -149,7 +163,11 @@ func _go(id: String) -> void:
 		button.text = "%d   %s" % [index + 1, list[index][0]]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.flat = true
-		button.add_theme_font_size_override("font_size", 18)
+		button.custom_minimum_size.y = 24
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			button.add_theme_stylebox_override(state, ROW)
+		button.add_theme_stylebox_override("focus", ROW_FOCUS)
+		button.add_theme_font_size_override("font_size", 14)
 		button.add_theme_color_override("font_color", Color(.75, .92, .95))
 		button.add_theme_color_override("font_hover_color", Color(1, 1, 1))
 		button.add_theme_color_override("font_focus_color", Color(1, 1, 1))
