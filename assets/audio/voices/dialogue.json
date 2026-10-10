@@ -866,19 +866,34 @@
       "beat_budget": 5.5
     },
     {
-      "id": "doc_premise",
+      "id": "doc_missing",
       "character": "NARRATOR",
-      "text": "Somewhere in production, a transaction has gone missing. And in this office, nothing stays missing quietly.",
-      "subtitle": "Somewhere in production, a transaction has gone missing. And in this office, nothing stays missing quietly.",
+      "text": "The missing transaction. Rarely seen. Never reconciled.",
+      "subtitle": "The missing transaction. Rarely seen. Never reconciled.",
       "voice_profile": "documentary",
       "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
-      "audio": "res://assets/audio/voices/doc_premise.ogg",
-      "trigger": "Something climbs out of the dashboard",
+      "audio": "res://assets/audio/voices/doc_missing.ogg",
+      "trigger": "Coworkers' heads turn in the dark",
       "priority": 3,
-      "fallback_duration": 7.5,
+      "fallback_duration": 5.5,
       "optional": false,
       "status": "generated",
-      "beat_budget": 7.5
+      "beat_budget": 5.5
+    },
+    {
+      "id": "doc_fascinating",
+      "character": "NARRATOR",
+      "text": "Fascinating.",
+      "subtitle": "Fascinating.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_fascinating.ogg",
+      "trigger": "Black, after the scream",
+      "priority": 3,
+      "fallback_duration": 2.0,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 2.0
     }
   ]
 }

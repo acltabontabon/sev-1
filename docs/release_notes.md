@@ -1,5 +1,24 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.37 — The missing transaction is here (11 October 2026)
+
+Creator request: the reveal before SEV-1 was a good idea, plainly executed; make it
+scary and funny, all out.
+
+- **Power down.** Rows of lights die with relay thunks; the floor sinks into the dark.
+- **Every screen in the office** goes black and asks the same thing: WHERE IS IT?
+- **The night shift turns.** In the dark, every coworker snaps round to stare at the
+  camera at once, and nobody moves again. The narrator, unbothered: "The missing
+  transaction. Rarely seen. Never reconciled." The screens answer: IT'S HERE.
+- **Lights-out flicker.** From behind his chair, the floor is seen only in flashes, and
+  The Variance is closer in every one: the far wall, mid-floor, two rows away.
+- **Behind you.** Close on his frozen face; in the dark behind him it rises over his
+  shoulder, red-lit, and screams "ANOTHER TICKET?! I'LL RECONCILE YOU!" Black. Silence.
+  The narrator: "…Fascinating."
+- Emergency lights slam on red, he stands with the Monolith, title. The opening is now
+  50.5 s (skippable after the first viewing). Two new narration lines replace the old
+  premise line.
+
 ## 0.2.36 — The tower at night (11 October 2026)
 
 Creator request: start with a dramatic shot of a building in the middle of the night,

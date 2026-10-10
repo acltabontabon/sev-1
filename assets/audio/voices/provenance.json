@@ -911,20 +911,36 @@
     "peak": 0.6375895142555237,
     "review_status": "candidate; human listening acceptance pending"
   },
-  "doc_premise": {
+  "doc_missing": {
     "provider": "local Kokoro",
     "model": "hexgrad/Kokoro-82M",
     "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
     "voice": "bm_george",
-    "generation_date": "2026-10-10T17:51:17.101612+00:00",
+    "generation_date": "2026-10-10T18:12:45.173245+00:00",
     "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
     "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
     "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
-    "fingerprint": "bf354fd2fbebdfb6bb5f5ded3c443b2e46c672abfe61ac29b3ccfd4b906a0ade",
-    "sha256": "eeaddbffa8b416bcff706892178e1934110f7cc70e185ba23c2c1cafffe87c87",
-    "master_sha256": "604ff9092170c3b8dbbc43d401cd4aec19a23141a950ad15990d03b4c4de379f",
-    "duration": 7.547458333333333,
-    "peak": 0.7412917017936707,
+    "fingerprint": "bfea6dbf9daf82c4b225d16ca6eadda38b8bafbf2aa731acd91c3743a60731c1",
+    "sha256": "dca7714498f2f8c4a542906b7615f13a2e50da7eeaba4251d3076d1da75b7154",
+    "master_sha256": "a787902346526de5af715ad1b65e83fb7eb1da412188eff8913e5f146e0a9037",
+    "duration": 4.287833333333333,
+    "peak": 0.5414456725120544,
+    "review_status": "candidate; human listening acceptance pending"
+  },
+  "doc_fascinating": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "bm_george",
+    "generation_date": "2026-10-10T18:12:45.552570+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "6029e7d0c6802219d844733aff2f85fc80b16095004429ea787e83fb5c7591b7",
+    "sha256": "a29454115297822dc2177baf40f8d9a6d47bd0c73510cf8d854bb9d11a9f6148",
+    "master_sha256": "e2eb1adf364cd50297a4004f558013f74f2c006e17fc82bd6c2e7e72998d2629",
+    "duration": 1.3324583333333333,
+    "peak": 0.7379988431930542,
     "review_status": "candidate; human listening acceptance pending"
   }
 }

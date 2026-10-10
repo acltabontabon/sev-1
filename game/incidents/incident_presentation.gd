@@ -9,7 +9,7 @@ const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
 ## Where the seated engineer's face is (rigged_engineer.SEATED_OFFSET lifts him onto the cushion).
 const FACE: Vector3 = Vector3(-2.5, 1.63, 9.92)
-const OPENING_LENGTH: float = 47.5
+const OPENING_LENGTH: float = 50.5
 ## Opening shots: start, camera from, camera to, look from, look to, field of view, and
 ## optionally an end field of view (or "dolly": the lens widens as the camera closes so
 ## the face holds its size while the room warps), then a dutch roll in degrees.
@@ -30,11 +30,18 @@ const SHOTS: Array = [
 	# Every ping at once: the lens widens as it closes on him.
 	[30.8, Vector3(-1.8743, 1.9429, 7.8342), Vector3(-2.2867, 1.7367, 9.2089), FACE, FACE, 26.0, "dolly"],
 	[35.6, Vector3(-1.82, 1.28, 9.5), Vector3(-1.92, 1.32, 9.62), FACE + Vector3(0, .02, 0), FACE, 38.0, 32.0, -7.0],
-	# Black. Then the lights go, and something climbs out of the dashboard.
+	# Black. Then the power goes, row by row.
 	[37.6, Vector3(-1.1, 1.85, 11.7), Vector3(-1.35, 1.95, 11.0), Vector3(-3.0, 2.0, -14.5), Vector3(-3.2, 2.1, -14.5), 46.0],
-	[40.0, Vector3(-1.55, .95, -8.0), Vector3(-1.95, 1.05, -8.9), Vector3(-4.1, 1.75, -14.6), Vector3(-4.1, 1.45, -13.8), 44.0, 40.0, -8.0],
-	[43.0, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
-	[44.6, Vector3(-2.25, 1.55, 12.4), Vector3(-2.1, 2.25, 13.5), Vector3(-2.6, 1.5, 6.0), Vector3(-2.6, 1.3, 4.0), 55.0],
+	# The night shift, in the dark, all looking at you.
+	[39.6, Vector3(-3.2, 1.45, 4.6), Vector3(-3.5, 1.4, 3.0), Vector3(-8.0, 1.0, -2.6), Vector3(-8.0, 1.0, -3.4), 56.0, 50.0, -3.0],
+	# From behind his chair, down the aisle: the flicker.
+	[41.6, Vector3(-1.75, 1.55, 11.9), Vector3(-1.78, 1.55, 11.75), Vector3(-1.6, 1.3, -6.0), Vector3(-1.6, 1.3, -6.0), 50.0, 46.0],
+	# Behind you.
+	[43.6, Vector3(-2.32, 1.6, 8.95), Vector3(-2.38, 1.6, 9.12), FACE + Vector3(0, .25, 0), FACE + Vector3(0, .3, 0), 44.0, 38.0, 4.0],
+	[44.75, Vector3(-2.32, 1.6, 8.95), Vector3(-2.32, 1.6, 8.95), FACE, FACE, 44.0],
+	# The lights slam back on. He stands. Title.
+	[45.9, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
+	[47.3, Vector3(-2.25, 1.55, 12.4), Vector3(-2.1, 2.25, 13.5), Vector3(-2.6, 1.5, 6.0), Vector3(-2.6, 1.3, 4.0), 55.0],
 ]
 ## Timed beats, fired once each as the opening clock crosses them.
 const BEATS: Array = [
@@ -44,7 +51,9 @@ const BEATS: Array = [
 	[28.9, "click", ""], [29.1, "alarm", ""], [29.8, "red_wave", ""],
 	[30.8, "pose", CHARACTER.Pose.ALERT], [30.8, "acknowledged", ""], [31.0, "storm", ""], [31.1, "say", "eta"], [31.2, "say", "leadership"],
 	[35.8, "say", "start"], [37.2, "blackout", ""],
-	[37.7, "flicker", ""], [37.9, "say", "doc_premise"], [40.0, "emerge", ""], [40.6, "boom", ""], [43.1, "pose", CHARACTER.Pose.ARMED], [45.0, "title", ""],
+	[37.7, "flicker", ""], [38.6, "screens", "WHERE IS IT?"], [39.2, "say", "doc_missing"], [39.6, "heads", ""],
+	[41.4, "screens", "IT'S HERE."], [43.6, "behind", ""], [44.3, "scream", ""], [45.0, "say", "doc_fascinating"],
+	[45.9, "lights", ""], [45.95, "pose", CHARACTER.Pose.ARMED], [47.6, "title", ""],
 ]
 ## The night shift, introduced like a heist crew: the camera whips to each, the world
 ## freezes and drains of colour, and a card slams in.
@@ -143,6 +152,15 @@ var crew_bar: ColorRect
 var crew_freeze: ColorRect
 var crew_from: Transform3D
 var crew_shown: int = -1
+## The reveal: every screen asks one question, the night shift turns, and the missing
+## transaction is seen only in flashes until it is right behind him.
+var screen_words: Array[Label3D] = []
+var screen_black: StandardMaterial3D
+var crew_facing: Dictionary = {}
+var demon: MonsterRig
+var base_exposure: float = 1.0
+const FLASHES: Array = [[41.8, Vector3(-1.2, 0, -12.0)], [42.5, Vector3(-1.5, 0, -3.5)], [43.15, Vector3(-2.0, 0, 4.5)]]
+const FLASH_LENGTH: float = .14
 const FREEZE_SHADER: String = """shader_type canvas_item;
 uniform sampler2D screen: hint_screen_texture, filter_linear;
 uniform float amount = 0.0;
@@ -418,6 +436,21 @@ func _ready() -> void:
 	emerging.add_child(menace)
 	incident.add_child(emerging)
 	emerging.hide()
+	base_exposure = incident.main.get_node("WorldEnvironment").environment.tonemap_exposure
+	demon = MonsterRig.create("variance", null)
+	demon.name = "OpeningVariance"
+	var glow_light: OmniLight3D = OmniLight3D.new()
+	glow_light.position = Vector3(0, 2.4, -1.0)
+	glow_light.light_color = Color(1, .12, .06)
+	glow_light.light_energy = 3.5
+	glow_light.omni_range = 5.0
+	demon.add_child(glow_light)
+	incident.add_child(demon)
+	demon.hide()
+	screen_black = StandardMaterial3D.new()
+	screen_black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	screen_black.albedo_color = Color(.01, .005, .005)
+	_build_screen_words()
 	var fragment_material: StandardMaterial3D = StandardMaterial3D.new()
 	fragment_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	fragment_material.albedo_color = Color(.3, .8, .85)
@@ -1288,6 +1321,14 @@ func _end_opening() -> void:
 	crew_shown = -1
 	crew_card.hide()
 	crew_freeze.hide()
+	for word in screen_words:
+		word.hide()
+	for body: Node3D in crew_facing:
+		if is_instance_valid(body):
+			body.rotation.y = crew_facing[body]
+	crew_facing.clear()
+	demon.hide()
+	incident.main.get_node("WorldEnvironment").environment.tonemap_exposure = base_exposure
 	if incident.coworkers != null:
 		incident.coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
 	card.scale = Vector2.ONE
@@ -1355,8 +1396,36 @@ func _fire(entry: Array) -> void:
 			desk.set_typing("Leadership is typing…")
 		"flicker":
 			sting(preload("res://assets/audio/sfx/light_relay.ogg"), -8)
-		"emerge":
-			emerging.show()
+		"screens":
+			_screens(entry[2])
+		"heads":
+			# Every one of them, at once, looking straight at you. Then nobody moves.
+			for someone: Dictionary in incident.coworkers.people:
+				var body: Node3D = someone.body
+				crew_facing[body] = body.rotation.y
+				var toward: Vector3 = SEAT - body.global_position
+				body.rotation.y = atan2(toward.x, toward.z)
+			incident.coworkers.process_mode = Node.PROCESS_MODE_DISABLED
+			sting(preload("res://assets/audio/sfx/glitch_a.ogg"), -6)
+			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)
+		"behind":
+			demon.show()
+			demon.rotation.y = 0.0
+			demon.animator.play(demon.clips.idle, 0.0)
+		"scream":
+			demon.animator.play(demon.clips.attack, .05)
+			var scream: AudioStreamPlayer = stings[0]
+			scream.stream = preload("res://assets/audio/voices/talk/bark_record_spot_0.ogg")
+			scream.volume_db = 2.0
+			scream.pitch_scale = .82
+			if DisplayServer.get_name() != "headless":
+				scream.play()
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -2)
+			shake = 1.4
+		"lights":
+			demon.hide()
+			sting(preload("res://assets/audio/sfx/light_relay.ogg"), -4)
+			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -6)
 			sting(preload("res://assets/audio/sfx/glitch_a.ogg"), -6)
 		"boom":
 			shake = 1.0
@@ -1405,8 +1474,16 @@ func _opening(time: float, delta: float) -> void:
 		crew_freeze.visible = true
 		(crew_freeze.material as ShaderMaterial).set_shader_parameter("amount", 0.0)
 	# Frame: fade from black, a hard beat of black after "Tangina naman.", letterbox.
-	fade.visible = time < 1.4 or (time >= 37.2 and time < 37.75)
-	fade.color.a = 1.0 - smoothstep(.2, 1.4, time) if time < 1.4 else 1.0 - smoothstep(37.6, 37.75, time)
+	fade.visible = time < 1.4 or (time >= 37.2 and time < 37.75) or (time >= 41.6 and time < 43.6) or (time >= 44.75 and time < 45.9)
+	if time < 1.4:
+		fade.color.a = 1.0 - smoothstep(.2, 1.4, time)
+	elif time < 37.75:
+		fade.color.a = 1.0 - smoothstep(37.6, 37.75, time)
+	elif time < 43.6:
+		# Near-total dark between flashes; the flashes are all you get.
+		fade.color.a = 0.0 if _flashing(time) else .9
+	else:
+		fade.color.a = 1.0
 	var bars: float = 66.0 * smoothstep(0, 1.0, time) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .2, time))
 	for side in [0, 1]:
 		letterbox[side].show()
@@ -1444,12 +1521,19 @@ func _opening(time: float, delta: float) -> void:
 	for order in range(6):
 		var light: int = [1, 0, 3, 2, 4, 5][order]
 		var start: float = 37.7 + order * .3
-		if time >= start and time < OPENING_LENGTH - 1.0:
+		if time >= start and time < 45.9:
 			var lit: bool = time < start + .5 and fmod(time - start, .14) < .06
-			pools[light].light_energy = pool_energy[light] * (1.0 if lit else .12)
-			incident.room.get_node("Diffuser%d" % light).material_override = null if lit else dark
+			var flash: bool = _flashing(time)
+			pools[light].light_energy = pool_energy[light] * (1.4 if flash else (1.0 if lit else (.12 if time < 41.6 else 0.0)))
+			incident.room.get_node("Diffuser%d" % light).material_override = null if lit or flash else dark
+		elif time >= 45.9 and time < OPENING_LENGTH - 1.0:
+			# Emergency power: red, and on all at once.
+			pools[light].light_color = Color(1, .22, .16)
+			pools[light].light_energy = pool_energy[light]
+			incident.room.get_node("Diffuser%d" % light).material_override = null
 	if time >= OPENING_LENGTH - 1.0:
 		_restore_lights()
+	_reveal(time, delta)
 	if time >= 38.2 and time < 40.2:
 		var states: Array[String] = ["SUCCESS", "FAILED", "NOT FOUND"]
 		var flip: int = int(time * 9.0) % 3
@@ -1482,6 +1566,79 @@ func _opening(time: float, delta: float) -> void:
 		card.pivot_offset = card.size * .5
 		card.scale = Vector2.ONE * lerpf(1.6, 1.0, ease(minf(1.0, since / .18), .4))
 		card.modulate.a = minf(1.0, since / .08) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .4, time))
+
+
+func _flashing(time: float) -> bool:
+	for flash: Array in FLASHES:
+		if time >= flash[0] and time < flash[0] + FLASH_LENGTH:
+			return true
+	return false
+
+
+## Every screen in the office goes black and says one thing.
+func _screens(text: String) -> void:
+	# The red wave is over: these screens belong to the question now.
+	wave_start = -1.0
+	for display in displays:
+		display.material_override = screen_black
+	for mesh in monitors:
+		mesh.material_override = screen_black
+	for word in screen_words:
+		word.text = text
+		word.show()
+	sting(preload("res://assets/audio/sfx/glitch_b.ogg"), -6)
+
+
+## One hidden word per office screen, made once at load (stable node counts on retry).
+func _build_screen_words() -> void:
+		for display in displays:
+			var word: Label3D = Label3D.new()
+			word.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
+			word.font_size = 64
+			word.outline_size = 0
+			word.modulate = Color(4.0, .35, .22)
+			word.shaded = false
+			word.double_sided = false
+			var facing: Vector3 = display.get_parent().global_basis.z.normalized()
+			add_child(word)
+			word.global_transform = Transform3D(Basis.looking_at(-facing), display.global_position + facing * .03)
+			word.pixel_size = display.mesh.get_aabb().size.x * .75 / (12.0 * 34.0)
+			word.hide()
+			screen_words.append(word)
+
+
+func _reveal(time: float, delta: float) -> void:
+	if time >= 41.6 and time < 43.6:
+		# Weeping angel: seen only in the flashes, closer every time.
+		var current: Array = []
+		for flash: Array in FLASHES:
+			if time >= flash[0]:
+				current = flash
+		demon.visible = _flashing(time)
+		if not current.is_empty():
+			demon.global_position = current[1]
+			demon.rotation.y = PI
+		if demon.visible and time - delta < current[0]:
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -7)
+			shake = .4
+	elif time >= 43.6 and time < 44.75:
+		# Behind you: it rises out of the dark over his shoulder.
+		demon.visible = true
+		var rise: float = smoothstep(43.6, 44.3, time)
+		demon.global_position = Vector3(-2.45, lerpf(-1.6, 0.0, rise), 11.15)
+		demon.rotation.y = 0.0
+	if demon.visible:
+		demon.animator.advance(delta)
+	# The power goes: the whole floor sinks into the dark (the flashes and the screens
+	# are all that cut through), then red emergency light for the hero.
+	var dark_level: float = 1.0
+	if time >= 38.0 and time < 45.9:
+		dark_level = lerpf(1.0, .4, smoothstep(38.0, 39.6, time))
+		if _flashing(time):
+			dark_level = 1.1
+	elif time >= 45.9 and time < OPENING_LENGTH - 1.0:
+		dark_level = .85
+	incident.main.get_node("WorldEnvironment").environment.tonemap_exposure = base_exposure * dark_level
 
 
 func _fly_in(time: float) -> void:
