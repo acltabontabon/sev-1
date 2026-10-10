@@ -348,7 +348,7 @@ func _say(someone: Dictionary, moment: String, mode: String = "quiet", variant: 
 	voice_until = start + int((length + VOICE_GAP) * 1000.0)
 	var turn: int = cue
 	var speak: Callable = func() -> void:
-		if turn != cue or (someone.dead and moment != "sorry"):
+		if turn != cue or (someone.dead and moment != "last"):
 			return
 		(someone.line as Label3D).text = text
 		someone.line_left = length
@@ -458,9 +458,9 @@ func _fall(someone: Dictionary, away: Vector3, quiet: bool = false) -> void:
 	if not quiet and incident != null and incident.get("presentation") != null:
 		var who: String = DIALOGUES.data().trees.get(someone.entry.name, {}).get("who", str(someone.entry.name).to_upper())
 		incident.presentation.casualty(body, who, CAVALRY[someone.slot][2], stamp)
-	# Their last words are for the engineer: sorry, and it's all on you now.
+	# Last words: denial, branding and paperwork to the very end.
 	if not quiet:
-		_say(someone, "sorry", "now", -1, .2)
+		_say(someone, "last", "now", -1, .2)
 	ElementFx.bolt(body, at - away.cross(Vector3.UP) * 1.2, at + away.cross(Vector3.UP) * 1.2, Color(1, .95, .8), .3, .1)
 	if someone.fate == "slice":
 		_slice(someone, away)

@@ -1,5 +1,19 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.41 — No apologies (11 October 2026)
+
+Creator feedback: the apologetic last words don't land; make them unhinged and funny.
+
+- The night shift no longer apologise or lean on the engineer as they die. Their last
+  words are denial, branding and paperwork to the very end:
+  - MORGAN: "Mark it GREEN on the status report! It's GREEN! IT'S GREEN!"
+  - NADIA: "Not dead! Just… degraded performance! All systems operational!"
+  - JUN: "Is my blood on brand?! TELL ME IT'S ON BRAND!"
+  - JO: "Does this count… for college credit?!"
+  - VAL: "Put my death in the deck! Make it a HOCKEY STICK!"
+- Five lines re-recorded in each coworker's existing voice blend; the old apology clips
+  are gone.
+
 ## 0.2.40 — One at a time (11 October 2026)
 
 Creator requests: in the vault, the night shift should be butchered one at a time while
