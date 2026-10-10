@@ -56,6 +56,19 @@ const CREW: Array = [
 	["Intern", "JO", "INTERN  ·  DAY ONE  ·  ON CALL", Color(1, .7, .3), Vector3(1.9, .15, .9)],
 ]
 const CREW_START: float = 8.6
+## The fly-in: one continuous move from the city at night, down the tower, through the
+## lit window and over the desks (Catmull-Rom through these [position, look-at] points).
+const FLY: Array = [
+	[Vector3(-210, 52, 110), Vector3(-14, 6, 0)],
+	[Vector3(-165, 38, 82), Vector3(-14, 5, 0)],
+	[Vector3(-118, 25, 54), Vector3(-14, 4, 0)],
+	[Vector3(-74, 13, 28), Vector3(-14, 3.4, .5)],
+	[Vector3(-40, 5.5, 10), Vector3(-14, 3.2, 1.0)],
+	[Vector3(-21, 3.3, 3.0), Vector3(-10, 3.0, 1.5)],
+	[Vector3(-15.5, 3.1, 1.8), Vector3(-6, 2.6, 2.0)],
+	[Vector3(-11.5, 3.0, 1.2), Vector3(-2, 1.8, 3.0)],
+	[Vector3(-7.0, 3.6, 2.0), Vector3(2, 1.2, 4.0)],
+]
 const CREW_EACH: float = 2.0
 ## The notification storm: more than anyone could read, and that is the point.
 const STORM: Array = [
@@ -1375,6 +1388,8 @@ func _opening(time: float, delta: float) -> void:
 		camera.fov = lerpf(shot[5], shot[6], weight)
 	if shot.size() > 7:
 		camera.rotate_object_local(Vector3.BACK, deg_to_rad(shot[7]))
+	if time < CREW_START:
+		_fly_in(time)
 	_crew_montage(time)
 	shake = maxf(0, shake - delta * 1.6)
 	if shake > 0:
@@ -1385,6 +1400,10 @@ func _opening(time: float, delta: float) -> void:
 		camera.global_transform = camera.global_transform.interpolate_with(target.global_transform, handover)
 		camera.fov = lerpf(camera.fov, target.fov, handover)
 	camera.make_current()
+	# The montage's freeze shader compiles under the fade-in, not on the first freeze.
+	if time < 1.0:
+		crew_freeze.visible = true
+		(crew_freeze.material as ShaderMaterial).set_shader_parameter("amount", 0.0)
 	# Frame: fade from black, a hard beat of black after "Tangina naman.", letterbox.
 	fade.visible = time < 1.4 or (time >= 37.2 and time < 37.75)
 	fade.color.a = 1.0 - smoothstep(.2, 1.4, time) if time < 1.4 else 1.0 - smoothstep(37.6, 37.75, time)
@@ -1463,6 +1482,27 @@ func _opening(time: float, delta: float) -> void:
 		card.pivot_offset = card.size * .5
 		card.scale = Vector2.ONE * lerpf(1.6, 1.0, ease(minf(1.0, since / .18), .4))
 		card.modulate.a = minf(1.0, since / .08) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .4, time))
+
+
+func _fly_in(time: float) -> void:
+	var u: float = smoothstep(0.0, 1.0, time / CREW_START) * (FLY.size() - 1)
+	var segment: int = mini(int(u), FLY.size() - 2)
+	var t: float = u - segment
+	var points: Array[Vector3] = []
+	var looks: Array[Vector3] = []
+	for offset in [-1, 0, 1, 2]:
+		var index: int = clampi(segment + offset, 0, FLY.size() - 1)
+		points.append(FLY[index][0])
+		looks.append(FLY[index][1])
+	var at: Vector3 = _catmull(points, t)
+	camera.global_position = at
+	camera.look_at(_catmull(looks, t))
+	camera.fov = lerpf(32.0, 55.0, smoothstep(.2, 1.0, time / CREW_START))
+
+
+func _catmull(p: Array[Vector3], t: float) -> Vector3:
+	var t2: float = t * t
+	return .5 * ((2.0 * p[1]) + (-p[0] + p[2]) * t + (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3]) * t2 + (-p[0] + 3.0 * p[1] - 3.0 * p[2] + p[3]) * t2 * t)
 
 
 ## Meet the night shift: whip to each coworker, freeze the world, slam their card.

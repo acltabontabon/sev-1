@@ -453,6 +453,10 @@ func _pulse(control: Control) -> void:
 
 
 ## The investigation as a board of three system cards: status first, then the fact.
+## Display type (titles, name cards) is all capitals; warming all of ASCII at 130–190 px
+## would cost seconds.
+const DISPLAY_SIZE: int = 80
+const DISPLAY_GLYPHS: String = " -·.,!?'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 ## Every character the interface and story text use.
 const GLYPHS: String = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•—–→←↓▼◆◇™…‘’“”×✓"
 
@@ -462,6 +466,8 @@ const GLYPHS: String = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUV
 ## the first kill stamp). Draw every combination in use once, all but invisibly, while
 ## the scene is still loading, then throw the samples away.
 func _warm_glyphs() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	var holder: Control = Control.new()
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.modulate.a = .004
@@ -480,11 +486,15 @@ func _warm_glyphs() -> void:
 			continue
 		seen[key] = true
 		var sample: Label = Label.new()
-		sample.text = GLYPHS
+		# Display sizes only ever set capitals, and big glyphs cost the most to draw.
+		sample.text = GLYPHS if size < DISPLAY_SIZE else DISPLAY_GLYPHS
 		sample.add_theme_font_override(&"font", font)
 		sample.add_theme_font_size_override(&"font_size", size)
 		sample.add_theme_constant_override(&"outline_size", outline)
 		holder.add_child(sample)
+		# A few styles a frame, under the opening's fade-in, instead of one long freeze.
+		if holder.get_child_count() % 4 == 0:
+			await get_tree().process_frame
 	# World text made on the fly (kill stamps, spell words, barks, markers, callouts):
 	# [font (null: the default), size, outline] as their scripts set them.
 	var spot: Node3D = Node3D.new()
@@ -500,8 +510,9 @@ func _warm_glyphs() -> void:
 			word.font = style[0]
 		word.font_size = style[1]
 		word.outline_size = style[2]
-		word.text = GLYPHS
+		word.text = GLYPHS if word.font_size < DISPLAY_SIZE else DISPLAY_GLYPHS
 		spot.add_child(word)
+		await get_tree().process_frame
 	await get_tree().process_frame
 	await get_tree().process_frame
 	holder.queue_free()

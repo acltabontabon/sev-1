@@ -31,7 +31,7 @@ var assisting: bool = false
 ## The player's chosen distance; battle pulls back a little on top of it.
 var base_length: float = 5.0
 ## Within this distance of the pivot the engineer fades so the view is not his head.
-@export var fade_distance: float = 2.4
+@export var fade_distance: float = 1.9
 var fade_meshes: Array[GeometryInstance3D] = []
 var faded: float = 0.0
 @onready var spring_arm: SpringArm3D = $SpringArm3D
@@ -71,6 +71,8 @@ func add_tremor(strength: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not $SpringArm3D/Camera3D.current:
+		_fade(0.0)
 	if get_tree().paused:
 		return
 	impulse = move_toward(impulse, 0, delta * impulse_decay)
@@ -82,7 +84,9 @@ func _physics_process(delta: float) -> void:
 	if reach < spring_arm.spring_length - .05:
 		spring_arm.spring_length = maxf(reach, min_distance * .5)
 	spring_arm.spring_length = lerpf(spring_arm.spring_length, base_length + .9 * battle, 1.0 - exp(-2.5 * delta))
-	_fade(clampf((fade_distance - reach) / (fade_distance - 1.0), 0.0, 1.0))
+	# Only the gameplay view fades him; cutscene cameras never should.
+	var playing: bool = $SpringArm3D/Camera3D.current and controls_active
+	_fade(clampf((fade_distance - reach) / (fade_distance - .9), 0.0, 1.0) if playing else 0.0)
 	_frame_fight(delta)
 	# Rotation only: never move the lens through the spring arm's collision plane.
 	# Tremor scales with impulse_degrees, so the Camera shake setting governs both.

@@ -1,5 +1,24 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.36 — The tower at night (11 October 2026)
+
+Creator request: start with a dramatic shot of a building in the middle of the night,
+smooth.
+
+- **Fly-in.** The opening now starts outside: a night city of curtain-wall towers, ours
+  dark but for a few stubborn lights and one glowing floor. One continuous spline move
+  descends the tower, passes through the window and glides over the desks into the crew
+  montage, under the narrator's first line. The tower, the city (46 towers) and their
+  windows come from one procedural shader (`game/rooms/office/facade.gdshader`); the
+  window view from inside the office is now that city too.
+- **Smooth.** Measured at 1080p on the M2 Pro: the fly-in runs at about 11 ms p95 and the
+  rest of the opening about 7 ms p95, with no frame over 35 ms after loading. Exterior
+  geometry casts no shadows; the montage's freeze shader compiles under the fade-in; the
+  text warm-up only warms capitals at display sizes and spreads over the fade-in (the
+  first frame had grown to seven seconds).
+- **Fix: the engineer looked translucent.** The close-camera fade ran during cutscenes;
+  it now applies only to the gameplay camera, and later (within 1.9 m).
+
 ## 0.2.35 — A cold open like a film (11 October 2026)
 
 Creator requests: tell the setup with cinema instead of text, unhinged; introduce the

@@ -80,6 +80,8 @@ color_ramp = SubResource("Grain")
     (OUT/f'{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n{header}{resources}\n[resource]\nalbedo_color = {col(color)}\nroughness = {rough}\nmetallic = {metallic}\n'+extra)
 for name in photos:
     (OUT/f'photo_{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n[ext_resource type="Texture2D" path="res://assets/environment/posters/{name}.jpg" id="1"]\n\n[resource]\nalbedo_texture = ExtResource("1")\nroughness = 0.6\nemission_enabled = true\nemission_texture = ExtResource("1")\nemission_energy_multiplier = 0.35\n')
+# The tower and the city at night: one procedural curtain-wall shader (facade.gdshader).
+(OUT/'facade.tres').write_text('[gd_resource type="ShaderMaterial" format=3]\n\n[ext_resource type="Shader" path="res://game/rooms/office/facade.gdshader" id="1"]\n\n[resource]\nshader = ExtResource("1")\n')
 # Poster titles: Cinzel Bold, tracked out like a framed corporate print.
 (OUT/'poster_title_font.tres').write_text('[gd_resource type="FontVariation" format=3]\n\n[ext_resource type="FontFile" path="res://assets/fonts/cinzel_variable.ttf" id="1"]\n\n[resource]\nbase_font = ExtResource("1")\nvariation_opentype = {2003265652: 700}\nspacing_glyph = 6\n')
 
@@ -108,7 +110,7 @@ class Scene:
             self.node('Mesh','MeshInstance3D',parent=path,props=f'mesh = {mesh}')
             shape=self.resource('BoxShape3D',f'size = {vec(size)}')
             self.node('Collision','CollisionShape3D',parent=path,props=f'shape = {shape}')
-        else: self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\n'+rotation+('cast_shadow = 0' if mat in ('glass','screen','cool','warm','alert','mint') else ''))
+        else: self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\n'+rotation+('cast_shadow = 0' if mat in ('glass','screen','cool','warm','alert','mint','facade') or name=='CityGround' else ''))
     def collider(self,name,pos,size,parent='.'):
         # Simplified collision envelope for imported or detailed props.
         path=self.node(name,'StaticBody3D',pos,parent)
@@ -241,11 +243,6 @@ for x in [-12,12]:
 for z in range(-14,16,4):
     s.box(f'Mullion{z}',(-13.75,3,z),(.16,5.2,.11),'metal')
     s.box(f'Beam{z}',(0,5.45,z),(27.5,.23,.16),'metal')
-    # Skyline glimpses between structural bays, entirely outside playable shell.
-    for j in range(3):
-        x=-19-j*4
-        s.box(f'Tower{z}_{j}',(x,1+j*1.1,z),(2.6,10+j*2,2.2),'black')
-        for k in range(4): s.box(f'CityLight{z}_{j}_{k}',(x+1.31,1+k*.8,z),(.01,.08,1.35),'city')
 # Reuse exact slope/deck collision dimensions from movement foundation.
 s.box('RaisedDeck',(8,.75,-7),(6,1.5,8),'stone',True)
 s.box('Ramp',(8,.70,0),(4,.18,6.18466),'stone',True,rot=(14.036,0,0))
@@ -564,5 +561,34 @@ s.node('Wordmark','Label3D',(0,0,.03),logo,'text = "SYNERGEX"\nfont = '+s.extern
 s.text('Tagline','WE PUT THE \'I\' IN TEAM\u2122',(0,-.4,.03),.0026,64,(.2,.88,1,1),parent=logo,face=SIGN_FONT)
 s.text('SmallPrint','Now with 30% fewer employees.',(0,-.66,.03),.0028,40,(.6,.68,.72,1),parent=logo,face=BODY_FONT)
 s.light('LogoWash',(-.3,5.0,14.7),(.75,.88,1),1.1,3.4)
+# ---------------------------------------------------------------- The tower at night
+# Our tower wraps the office floor (above every ceiling, below every floor, and out past
+# the west glass), so the opening can fly in from the city and through the window.
+for name,(x0,x1,y0,y1,z0,z1) in {
+        'TowerAbove': (-14.3, 28.5, 6.4, 92.0, -47.0, 25.0),
+        'TowerBelow': (-14.3, 28.5, -70.0, -.55, -47.0, 25.0),
+        'TowerNorth': (-14.3, -1.0, -.55, 6.4, -47.0, -16.2),
+        'TowerSouth': (-14.3, 14.3, -.55, 6.4, 16.2, 25.0)}.items():
+    s.box(name,((x0+x1)/2,(y0+y1)/2,(z0+z1)/2),(x1-x0,y1-y0,z1-z0),'facade')
+# The city: towers on every side, kept off the opening's flight line in from the west.
+import random
+city=random.Random(4759)
+flight=((-150.0,75.0),(-14.0,1.0))
+def off_flight(x,z,margin):
+    (ax,az),(bx,bz)=flight
+    t=max(0.0,min(1.0,((x-ax)*(bx-ax)+(z-az)*(bz-az))/((bx-ax)**2+(bz-az)**2)))
+    return math.hypot(x-(ax+t*(bx-ax)),z-(az+t*(bz-az)))>margin
+placed=0
+while placed<46:
+    angle=city.uniform(0,math.tau)
+    reach=city.uniform(55,260)
+    x=7+math.cos(angle)*reach
+    z=-10+math.sin(angle)*reach
+    w=city.uniform(14,30); d=city.uniform(14,30); h=city.uniform(30,150)
+    if not off_flight(x,z,w*.7+18) or (abs(x-7)<40 and abs(z+10)<45):
+        continue
+    s.box(f'CityTower{placed}',(x,-70+h/2,z),(w,h,d),'facade')
+    placed+=1
+s.box('CityGround',(7,-70.2,-10),(700,.4,700),'black')
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')
