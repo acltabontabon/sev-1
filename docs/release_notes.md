@@ -1,5 +1,26 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.40 — One at a time (11 October 2026)
+
+Creator requests: in the vault, the night shift should be butchered one at a time while
+the rest run around, so they are not all talking at once; a "RIGHT-SIZED" stamp was
+misplaced.
+
+- **The Variance takes them one at a time.** Whoever is up fights it close, on the side
+  the camera sees, and it turns to face them; everyone else runs panicked laps round the
+  vault, changing direction. Before the engineer walks in, the runners beg for help in
+  the gaps ("It's not in the runbook! HELP!"), the first time those lines are heard.
+- **One voice at a time.** Battle cries go in turn; pain cries and pleas wait for
+  silence; only last words cut anyone off. Each victim screams through their beating,
+  then goes down, then apologises; the next one is hit the moment the floor is theirs.
+  The massacre now runs on those turns (about 28 seconds to the fight, up from about 21)
+  instead of a fixed clock, with a five-second limit per victim.
+- **The casualty stamp** (OFFBOARDED, RIGHT-SIZED…) is stamped beside the name on the
+  card instead of floating mid-screen, and the casualty camera keeps clear of the
+  monster for the whole shot.
+- New checks: never two of them talking at once, and the rest stay out of reach while
+  one is being taken apart.
+
 ## 0.2.39 — The night shift goes in first (11 October 2026)
 
 Creator requests: the coworkers should fight the boss first and lose (some dismembered,

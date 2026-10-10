@@ -745,10 +745,23 @@ func _run() -> void:
 	await frames(3)
 	check(incident.presentation.beat_shot == "massacre" and not is_instance_valid(incident.boss), "walking into the vault starts the massacre before the fight")
 	# The casualty cams run on real time; frames here run faster than that.
-	var massacre_deadline: int = Time.get_ticks_msec() + 40000
+	var massacre_deadline: int = Time.get_ticks_msec() + 70000
+	var talking_at_once: int = 0
+	var crowded: bool = false
+	var night_shift: Node = incident.coworkers
 	while not is_instance_valid(incident.boss) and Time.get_ticks_msec() < massacre_deadline:
 		await frames(1)
+		var talking: int = 0
+		var prey: Dictionary = night_shift.victim()
+		for worker: Dictionary in night_shift.people:
+			if worker.charging or worker.dead:
+				talking += 1 if worker.line_left > 0.0 else 0
+				if worker.charging and not is_same(worker, prey) and not prey.is_empty() and prey.engaged:
+					crowded = crowded or worker.body.global_position.distance_to(incident.presentation.demon.global_position) < 3.0
+		talking_at_once = maxi(talking_at_once, talking)
 	check(incident.coworkers.cavalry_fallen() == 5 and is_instance_valid(incident.boss) and not incident.presentation.demon.visible, "all five fall, then the real Variance takes over")
+	check(talking_at_once == 1, "the night shift take turns: never two of them talking at once")
+	check(not crowded, "The Variance takes them one at a time while the rest run laps out of reach")
 	incident.coworkers.cavalry_in_headless = false
 	incident.presentation.killcam_in_headless = false
 	scene.reset_encounter()

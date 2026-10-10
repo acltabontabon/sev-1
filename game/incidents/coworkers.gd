@@ -24,6 +24,19 @@ const GORE_LAYER: int = 1 << 7
 static var cavalry_in_headless: bool = false
 var cavalry_target: Node3D
 var cavalry_clock: float = -1.0
+## The Variance takes them one at a time: the first still standing fights it up close, on
+## the side the cameras see, while the rest run screaming laps round the vault.
+const VICTIM_SPOT: Vector3 = Vector3(.85, 0, .53)
+const VICTIM_RANGE: float = 1.9
+const PANIC_RADIUS: float = 4.3
+const PANIC_SPEED: float = 4.2
+## One voice at a time, in real time (casualty cams slow the game, not the audio): a line
+## waits its turn or is dropped, and only last words cut anyone off.
+const VOICE_GAP: float = .15
+var voice_until: int = 0
+var speaking: AudioStreamPlayer3D
+## Bumped on restart and hush so a line queued for later never plays into the wrong scene.
+var cue: int = 0
 ## How far forward of the sofa's centre a sitter's hips rest.
 const SOFA_FORWARD: float = .12
 ## Office-chair correction for the sitting clip (the engineer's SEATED_OFFSET).
@@ -99,7 +112,8 @@ func _ready() -> void:
 		body.add_child(voice)
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
 			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0,
-			"charging": false, "doom": 0.0, "fate": "", "cried": false, "dead": false, "pieces": [], "slot": 0})
+			"charging": false, "doom": 0.0, "fate": "", "engaged": false, "lapping": false, "screams": 0, "orbit": 0.0, "spin": 1.0,
+			"dead": false, "pieces": [], "slot": 0})
 	reset()
 
 
@@ -143,6 +157,7 @@ func reset() -> void:
 	was_fighting = false
 	cavalry_target = null
 	cavalry_clock = -1.0
+	hush()
 	for index in range(people.size()):
 		var someone: Dictionary = people[index]
 		var body: Node3D = someone.body
@@ -157,7 +172,9 @@ func reset() -> void:
 		someone.pieces = []
 		someone.charging = false
 		someone.dead = false
-		someone.cried = false
+		someone.engaged = false
+		someone.lapping = false
+		someone.screams = 0
 		someone.fate = ""
 		body.show()
 		var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
@@ -186,10 +203,11 @@ func _process(delta: float) -> void:
 		someone.clock += delta
 		var body: Node3D = someone.body
 		var line: Label3D = someone.line
-		if player != null and not someone.said and player.global_position.distance_to(body.global_position) < 3.6:
+		if player != null and not someone.said and not someone.charging and not someone.dead and player.global_position.distance_to(body.global_position) < 3.6:
 			someone.said = true
 			someone.line_left = 3.2
-		someone.line_left = maxf(0.0, someone.line_left - delta)
+		# Lines time out in real time, like the voices they caption (kill cams slow the game).
+		someone.line_left = maxf(0.0, someone.line_left - delta / maxf(Engine.time_scale, .01))
 		line.modulate.a = minf(1.0, someone.line_left * 2.0)
 		line.outline_modulate.a = line.modulate.a
 		# Remarks stay out of cutscenes and kill cams.
@@ -216,13 +234,14 @@ func _process(delta: float) -> void:
 					_routine(someone, false)
 	if cavalry_clock >= 0.0:
 		cavalry_clock += delta
+		_panic_cries(delta)
 	if was_fighting and not fighting:
 		_applaud()
 	was_fighting = fighting
 
 
 ## The gate is open: the night shift sprints past the engineer down the corridor to take
-## on The Variance themselves. They fight it (badly, loudly) until the engineer arrives.
+## on The Variance themselves. It takes them on one at a time; the rest panic.
 func charge(target: Node3D) -> void:
 	if cavalry_clock >= 0.0 or (DisplayServer.get_name() == "headless" and not cavalry_in_headless):
 		return
@@ -236,13 +255,17 @@ func charge(target: Node3D) -> void:
 		someone.charging = true
 		someone.fate = CAVALRY[index][1]
 		someone.slot = index
-		someone.cried = false
-		someone.doom = randf_range(1.5, 3.5) + index * .7
+		someone.engaged = false
+		someone.lapping = false
+		someone.screams = 0
+		someone.doom = 0.0
+		someone.spin = 1.0 if index % 2 == 0 else -1.0
 		someone.line_left = 0.0
 		body.position = CAVALRY_ENTRY + Vector3((index - 2) * .9, 0, index * 1.1)
 		body.scale = Vector3.ONE * .62
 		_play(someone, "ual/sprint", .1, true)
-		_say(someone, "charge", "", .4 * index)
+		# Battle cries in turn, front of the pack first.
+		_say(someone, "charge", "queue")
 
 
 func cavalry_fallen() -> int:
@@ -253,19 +276,48 @@ func cavalry_standing() -> int:
 	return people.filter(func(someone: Dictionary) -> bool: return someone.charging).size()
 
 
-## The next of them goes down (for the arrival cutscene); "" when nobody is left.
-func fall_next() -> String:
+## Who The Variance is busy with: the first of them still standing.
+func victim() -> Dictionary:
 	for entry: Array in CAVALRY:
 		var someone: Dictionary = person(entry[0])
 		if not someone.is_empty() and someone.charging:
-			var centre: Vector3 = cavalry_target.global_position if is_instance_valid(cavalry_target) else someone.body.global_position
-			_fall(someone, (someone.body.global_position - centre).normalized())
-			return entry[0]
-	return ""
+			return someone
+	return {}
+
+
+## The victim has taken their beating and finished screaming about it: they can go.
+func victim_ready() -> bool:
+	var someone: Dictionary = victim()
+	return not someone.is_empty() and someone.engaged and someone.screams > 0 and Time.get_ticks_msec() >= voice_until
+
+
+## Cut everyone off and forget anything waiting to be said (the massacre takes the floor).
+func hush() -> void:
+	cue += 1
+	voice_until = 0
+	if is_instance_valid(speaking):
+		speaking.stop()
+	speaking = null
+	# Nobody has had their say yet: whoever is up next screams on camera.
+	for someone: Dictionary in people:
+		if someone.charging:
+			someone.line_left = 0.0
+			someone.screams = 0
+
+
+## The next of them goes down (for the arrival cutscene); "" when nobody is left.
+func fall_next() -> String:
+	var someone: Dictionary = victim()
+	if someone.is_empty():
+		return ""
+	var centre: Vector3 = cavalry_target.global_position if is_instance_valid(cavalry_target) else someone.body.global_position
+	_fall(someone, (someone.body.global_position - centre).normalized())
+	return someone.entry.name
 
 
 ## Everyone still standing goes down at once, without ceremony (skips and retries).
 func fall_all_now() -> void:
+	hush()
 	for entry: Array in CAVALRY:
 		var someone: Dictionary = person(entry[0])
 		if not someone.is_empty() and someone.charging:
@@ -275,22 +327,42 @@ func fall_all_now() -> void:
 			_fall(someone, (someone.body.global_position - centre).normalized(), true)
 
 
-func _say(someone: Dictionary, moment: String, shown: String, delay: float = 0.0, variant: int = -1) -> void:
+## A cavalry line, if it gets the floor. "quiet": only if nobody is talking. "queue": after
+## whoever is. "now": cuts them off (last words). Returns whether it will be said.
+func _say(someone: Dictionary, moment: String, mode: String = "quiet", variant: int = -1, delay: float = 0.0) -> bool:
+	var now: int = Time.get_ticks_msec()
+	if mode == "quiet" and now < voice_until:
+		return false
 	var talk: Dictionary = DIALOGUES.data().get("cavalry", {}).get(someone.entry.name, {})
-	var said: Variant = talk.get(moment, shown)
-	var text: String = str(said[variant % said.size()]) if said is Array else str(said)
-	var suffix: String = moment if not said is Array else "%s_%d" % [moment, variant % said.size()]
-	(someone.line as Label3D).text = text
-	someone.line_left = 2.4
-	var voice: AudioStreamPlayer3D = someone.body.get_node("Voice")
+	var said: Variant = talk.get(moment, "")
+	var pick: int = posmod(variant, said.size()) if said is Array else 0
+	var text: String = str(said[pick]) if said is Array else str(said)
+	var suffix: String = moment if not said is Array else "%s_%d" % [moment, pick]
 	var path: String = "res://assets/audio/voices/talk/cavalry_%s_%s.ogg" % [str(someone.entry.name).to_lower(), suffix]
-	if DisplayServer.get_name() == "headless" or not ResourceLoader.exists(path):
-		return
-	voice.stream = load(path)
-	if delay > 0.0:
-		get_tree().create_timer(delay, false).timeout.connect(voice.play)
-	else:
+	var stream: AudioStream = load(path) if ResourceLoader.exists(path) else null
+	# Timing comes from the recording even headless, so suites see the same turn-taking.
+	var length: float = stream.get_length() if stream != null else 1.6
+	if mode == "now":
+		hush()
+	var start: int = (maxi(now, voice_until) if mode == "queue" else now) + int(delay * 1000.0)
+	voice_until = start + int((length + VOICE_GAP) * 1000.0)
+	var turn: int = cue
+	var speak: Callable = func() -> void:
+		if turn != cue or (someone.dead and moment != "sorry"):
+			return
+		(someone.line as Label3D).text = text
+		someone.line_left = length
+		if DisplayServer.get_name() == "headless" or stream == null:
+			return
+		var voice: AudioStreamPlayer3D = someone.body.get_node("Voice")
+		voice.stream = stream
 		voice.play()
+		speaking = voice
+	if start > now:
+		get_tree().create_timer(float(start - now) / 1000.0, true, false, true).timeout.connect(speak)
+	else:
+		speak.call()
+	return true
 
 
 func _charge(someone: Dictionary, delta: float) -> void:
@@ -299,24 +371,51 @@ func _charge(someone: Dictionary, delta: float) -> void:
 		_play(someone, "Idle", .2, true)
 		return
 	var centre: Vector3 = cavalry_target.global_position
-	var angle: float = someone.slot * TAU / CAVALRY.size() + .4
-	var spot: Vector3 = centre + Vector3(sin(angle), 0, cos(angle)) * 2.6
+	var fighting: bool = is_same(someone, victim())
+	var spot: Vector3
+	if body.position.z > centre.z + 6.5:
+		# Through the vault door first, not the wall beside it.
+		spot = Vector3(centre.x + (someone.slot - 2) * .4, 0, centre.z + 6.0)
+	elif fighting:
+		spot = centre + VICTIM_SPOT.normalized() * VICTIM_RANGE
+	else:
+		# Panic: laps round the vault, changing their mind about which way is safer. The lap
+		# starts where they come in, never across the monster.
+		if not someone.lapping:
+			someone.lapping = true
+			someone.orbit = atan2(body.position.x - centre.x, body.position.z - centre.z)
+		someone.orbit += someone.spin * PANIC_SPEED / PANIC_RADIUS * delta
+		someone.doom -= delta
+		if someone.doom <= 0.0:
+			someone.doom = randf_range(1.6, 3.4)
+			someone.spin = -someone.spin if randf() < .5 else someone.spin
+		var lap: float = PANIC_RADIUS + sin(someone.clock * .8 + someone.slot) * .6
+		spot = centre + Vector3(sin(someone.orbit), 0, cos(someone.orbit)) * lap
 	spot.y = body.position.y
 	var step: Vector3 = spot - body.position
 	step.y = 0
 	var toward: Vector3 = centre - body.position
-	if step.length() > .25:
-		body.position += step.normalized() * minf(step.length(), CAVALRY_SPEED * delta)
-		body.rotation.y = lerp_angle(body.rotation.y, atan2(step.x, step.z), 1.0 - exp(-10.0 * delta))
+	if not fighting or step.length() > .25:
+		var speed: float = CAVALRY_SPEED if fighting or step.length() > 1.0 else PANIC_SPEED
+		body.position += step.normalized() * minf(step.length(), speed * delta) if step.length() > .01 else Vector3.ZERO
+		if step.length() > .01:
+			body.rotation.y = lerp_angle(body.rotation.y, atan2(step.x, step.z), 1.0 - exp(-10.0 * delta))
 		_play(someone, "ual/sprint", .15, true)
 		return
 	body.rotation.y = lerp_angle(body.rotation.y, atan2(toward.x, toward.z), 1.0 - exp(-10.0 * delta))
-	# In the ring: swing, get hit, howl about it, swing again.
+	if not someone.engaged:
+		someone.engaged = true
+		someone.doom = .3
+	# Up close: swing, get hit, scream about it (when nobody else is), swing again. A fresh
+	# victim is hit as soon as the floor is theirs.
 	someone.doom -= delta
+	if someone.screams == 0 and Time.get_ticks_msec() >= voice_until:
+		someone.doom = minf(someone.doom, .15)
 	if someone.doom <= 0.0:
-		someone.doom = randf_range(2.6, 4.6)
+		someone.doom = randf_range(1.3, 2.1)
 		someone.animator.play("CharacterArmature|RecieveHit", .05)
-		_say(someone, "pain", "", 0.0, randi())
+		if _say(someone, "pain", "quiet", randi()):
+			someone.screams += 1
 		ElementFx.flash(body, body.global_position + Vector3.UP * 1.0, Color(1, .3, .2), 2.0, 3.0, .12)
 		Blood.burst(incident if incident != null else self, body.global_position + Vector3.UP * 1.0, (body.global_position - centre).normalized() + Vector3.UP * .5, 14)
 		var hit: AudioStreamPlayer3D = body.get_node("Voice")
@@ -331,6 +430,17 @@ func _charge(someone: Dictionary, delta: float) -> void:
 			thud.finished.connect(thud.queue_free)
 	elif not someone.animator.is_playing() or someone.animator.assigned_animation == "ual/sprint":
 		someone.animator.play("CharacterArmature|Punch", .1)
+
+
+## Before the engineer walks in, whoever is running laps begs for help when there is a gap.
+func _panic_cries(delta: float) -> void:
+	if cavalry_standing() < 2 or Time.get_ticks_msec() < voice_until + 700 or randf() > delta * .8:
+		return
+	if incident != null and incident.get("presentation") != null and not incident.presentation.beat_shot.is_empty():
+		return
+	var runners: Array = people.filter(func(someone: Dictionary) -> bool: return someone.charging and not is_same(someone, victim()))
+	if not runners.is_empty():
+		_say(runners.pick_random(), "help", "quiet")
 
 
 ## One of the night shift meets The Variance.
@@ -350,7 +460,7 @@ func _fall(someone: Dictionary, away: Vector3, quiet: bool = false) -> void:
 		incident.presentation.casualty(body, who, CAVALRY[someone.slot][2], stamp)
 	# Their last words are for the engineer: sorry, and it's all on you now.
 	if not quiet:
-		_say(someone, "sorry", "", .2)
+		_say(someone, "sorry", "now", -1, .2)
 	ElementFx.bolt(body, at - away.cross(Vector3.UP) * 1.2, at + away.cross(Vector3.UP) * 1.2, Color(1, .95, .8), .3, .1)
 	if someone.fate == "slice":
 		_slice(someone, away)

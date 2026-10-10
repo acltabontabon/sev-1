@@ -159,13 +159,19 @@ var casualty_start: int = 0
 var casualty_side: float = 1.0
 var casualty_angle: float = 999.0
 const CASUALTY_SECONDS: float = 1.45
-## The vault, first time: the night shift is already in there, losing. Deaths on this
-## clock, then the engineer's entrance, then the fight.
-const MASSACRE_LENGTH: float = 13.5
-const MASSACRE_DEATHS: Array[float] = [1.2, 3.1, 5.0, 6.9, 8.8]
-const HERO_ENTRANCE: float = 10.4
+## The vault, first time: the night shift is already in there, losing, one at a time.
+## Each goes down once they have screamed through their beating (or after
+## MASSACRE_PATIENCE), then the engineer's entrance, then the fight. Its length is only
+## known once the last one falls; until then MASSACRE_LENGTH holds the boss back.
+const MASSACRE_LENGTH: float = 60.0
+const MASSACRE_FIRST: float = .8
+const MASSACRE_GAP: float = .5
+const MASSACRE_PATIENCE: float = 5.0
+const HERO_DELAY: float = 1.4
+const HERO_LENGTH: float = 3.1
 var massacre_time: float = 0.0
-var massacre_next: int = 0
+var massacre_last: float = 0.0
+var hero_at: float = -1.0
 var casualty_resume: String = ""
 var demon_swing: float = 0.0
 ## The reveal: every screen asks one question, the night shift turns, and the missing
@@ -877,7 +883,10 @@ func vault_entered() -> void:
 		beat_shot = "massacre"
 		boss_length = MASSACRE_LENGTH
 		massacre_time = 0.0
-		massacre_next = 0
+		massacre_last = 0.0
+		hero_at = -1.0
+		# Whatever they were shouting in the corridor stops: the vault has the floor.
+		incident.coworkers.hush()
 		incident.player.global_position = Vector3(9, .05, -26.8)
 		incident.player.velocity = Vector3.ZERO
 		return
@@ -1641,6 +1650,10 @@ func casualty(body: Node3D, who: String, epitaph: String, stamp: String) -> void
 	crew_name.text = who
 	crew_misery.text = epitaph
 	crew_stamp.text = stamp
+	crew_stamp.reset_size()
+	crew_stamp.pivot_offset = crew_stamp.size / 2.0
+	# Tilted about its centre, a long stamp's left end dips: lift it clear of the epitaph.
+	crew_stamp.position = Vector2(crew_name.position.x + crew_name.get_minimum_size().x + 24.0, 40.0 - crew_stamp.size.x * .14)
 	crew_bar.color = Color(1, .2, .15)
 	crew_name.add_theme_color_override("font_color", Color(1, .9, .85))
 	sting(preload("res://assets/audio/sfx/low_boom.ogg"), -4)
@@ -1668,39 +1681,46 @@ func _massacre_shot(delta: float) -> void:
 	player.narrative_hold = true
 	player.invulnerable_left = maxf(player.invulnerable_left, .3)
 	incident.main.get_node("HUD").visible = false
-	while massacre_next < MASSACRE_DEATHS.size() and massacre_time >= MASSACRE_DEATHS[massacre_next]:
-		massacre_next += 1
-		incident.coworkers.fall_next()
+	var crew: Node = incident.coworkers
+	if hero_at < 0.0:
+		var waited: float = massacre_time - massacre_last
+		var first: bool = crew.cavalry_fallen() == 0
+		if waited >= (MASSACRE_FIRST if first else MASSACRE_GAP) and (crew.victim_ready() or waited >= MASSACRE_PATIENCE):
+			massacre_last = massacre_time
+			crew.fall_next()
+		if crew.cavalry_standing() == 0:
+			hero_at = massacre_last + HERO_DELAY
+			boss_length = hero_at + HERO_LENGTH
 		if beat_shot != "massacre":
 			return
-	var bars: float = 54.0 * smoothstep(0.0, .4, massacre_time) * (1.0 - smoothstep(MASSACRE_LENGTH - .5, MASSACRE_LENGTH, massacre_time))
+	var bars: float = 54.0 * smoothstep(0.0, .4, massacre_time) * (1.0 - smoothstep(boss_length - .5, boss_length, massacre_time))
 	for side in [0, 1]:
 		letterbox[side].visible = bars > .5
 		letterbox[side].offset_top = 0.0 if side == 0 else -bars
 		letterbox[side].offset_bottom = bars if side == 0 else 0.0
 	var boss_at: Vector3 = demon.global_position
-	if massacre_time < HERO_ENTRANCE:
+	if hero_at < 0.0 or massacre_time < hero_at:
 		# From deep in the vault: the fight, the bodies, the door he will come through.
-		var drift: float = massacre_time / HERO_ENTRANCE
+		var drift: float = 1.0 - exp(-massacre_time / 8.0)
 		camera.global_position = Vector3(15.2, 3.4, -41.5).lerp(Vector3(14.0, 2.6, -40.0), drift)
 		camera.look_at(boss_at + Vector3.UP * 1.2)
 		camera.fov = 52.0
 	else:
 		# Hero entrance: over the monster's shoulder, he walks in over his colleagues.
-		var walk: float = smoothstep(HERO_ENTRANCE, HERO_ENTRANCE + 2.2, massacre_time)
+		var walk: float = smoothstep(hero_at, hero_at + 2.2, massacre_time)
 		player.global_position = Vector3(9, .05, -26.8).lerp(Vector3(9, .05, -30.4), walk)
 		player.visual.rotation.y = 0.0
-		if massacre_time - delta < HERO_ENTRANCE:
+		if massacre_time - delta < hero_at:
 			say("variance_intro")
 			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
-		var push: float = smoothstep(HERO_ENTRANCE, MASSACRE_LENGTH, massacre_time)
+		var push: float = smoothstep(hero_at, boss_length, massacre_time)
 		camera.global_position = boss_at + Vector3(1.5, 2.9, -1.7) + Vector3(0, -.6, 1.0) * push
 		camera.look_at(player.global_position + Vector3.UP * 1.25)
 		camera.fov = lerpf(40.0, 32.0, push)
 		camera.rotate_object_local(Vector3.BACK, deg_to_rad(-6.0 * (1.0 - push)))
-	if massacre_time >= MASSACRE_LENGTH:
+	if massacre_time >= boss_length:
 		beat_shot = ""
-		incident.boss_time = MASSACRE_LENGTH
+		incident.boss_time = boss_length
 		incident.spawn_delay = 0.0
 		for bar in letterbox:
 			bar.hide()
@@ -1712,15 +1732,26 @@ func _massacre_shot(delta: float) -> void:
 ## The first angle round them with a clear line: no wall, and not through the boss.
 func _clear_angle(at: Vector3) -> float:
 	var space: PhysicsDirectSpaceState3D = incident.get_world_3d().direct_space_state
-	var boss: Node3D = incident.boss if is_instance_valid(incident.boss) else null
+	# The real boss, or the vault's staged one (bigger, and right next to its victim).
+	var monsters: Array[Array] = []
+	if is_instance_valid(incident.boss):
+		monsters.append([incident.boss.global_position + Vector3.UP * 1.2, 1.1])
+	if demon.visible:
+		monsters.append([demon.global_position + Vector3.UP * 1.2, 1.8])
 	for step in range(12):
 		var angle: float = casualty_side * (.9 + step * TAU / 12.0)
 		var spot: Vector3 = at + Vector3(sin(angle), 0, cos(angle)) * 2.4 + Vector3.UP * -.35
 		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(at, spot + (spot - at).normalized() * .4, 1)).is_empty():
 			continue
-		if boss != null and Geometry3D.get_closest_point_to_segment(boss.global_position + Vector3.UP * 1.2, at, spot).distance_to(boss.global_position + Vector3.UP * 1.2) < 1.1:
-			continue
-		return angle
+		# Clear of it for the whole drift round them, not just where the shot starts.
+		var drifted: float = angle + casualty_side * CASUALTY_SECONDS * .35
+		var end: Vector3 = at + Vector3(sin(drifted), 0, cos(drifted)) * 2.4 + Vector3.UP * -.35
+		var blocked: bool = false
+		for monster: Array in monsters:
+			for camera_at: Vector3 in [spot, end]:
+				blocked = blocked or Geometry3D.get_closest_point_to_segment(monster[0], at, camera_at).distance_to(monster[0]) < monster[1]
+		if not blocked:
+			return angle
 	return casualty_side * .9
 
 
@@ -1944,6 +1975,12 @@ func _vault_demon(delta: float) -> void:
 	if is_instance_valid(incident.boss):
 		demon.hide()
 		return
+	# It only has eyes for whoever it is taking apart; then for the engineer.
+	var prey: Dictionary = incident.coworkers.victim()
+	var focus: Vector3 = prey.body.global_position if not prey.is_empty() else incident.player.global_position
+	var toward: Vector3 = focus - demon.global_position
+	if Vector2(toward.x, toward.z).length() > .3:
+		demon.rotation.y = lerp_angle(demon.rotation.y, atan2(-toward.x, -toward.z), 1.0 - exp(-5.0 * delta))
 	demon_swing -= delta
 	if demon_swing <= 0.0 and incident.coworkers.cavalry_standing() > 0:
 		demon_swing = randf_range(1.1, 1.8)
