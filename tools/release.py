@@ -12,7 +12,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 OUT = ROOT / "builds/releases" / VERSION
 LOGS = ROOT / "logs"
 APP = OUT / "SEV-1 Friday Deployment.app"
@@ -85,10 +85,10 @@ def main():
             raise SystemExit("Smoke probe did not report successful completion")
     for source, name in [("docs/testing.md", "TESTING.md"), ("docs/release_notes.md", "RELEASE_NOTES.md"), ("docs/asset_licenses.md", "ASSET_LICENSES.md"), ("THIRD_PARTY_NOTICES.txt", "THIRD_PARTY_NOTICES.txt"), ("docs/voices.md", "VOICES.md"), ("assets/audio/voices/provenance.json", "VOICE_PROVENANCE.json")]:
         shutil.copy2(ROOT / source, OUT / name)
-    archive = OUT / "SEV-1-Friday-Deployment-0.1.0-macOS.zip"
+    archive = OUT / f"SEV-1-Friday-Deployment-{VERSION}-macOS.zip"
     # Archive app plus tester documents; a fresh staging directory avoids stale files.
     with tempfile.TemporaryDirectory(prefix="sev1-package-") as temporary:
-        staging = Path(temporary) / "SEV-1-Friday-Deployment-0.1.0"
+        staging = Path(temporary) / f"SEV-1-Friday-Deployment-{VERSION}"
         staging.mkdir()
         run("stage", ["ditto", str(APP), str(staging / APP.name)])
         for name in ["TESTING.md", "RELEASE_NOTES.md", "ASSET_LICENSES.md", "THIRD_PARTY_NOTICES.txt", "VOICES.md", "VOICE_PROVENANCE.json"]:
@@ -96,7 +96,7 @@ def main():
         run("zip", ["ditto", "-c", "-k", "--keepParent", str(staging), str(archive)])
     with tempfile.TemporaryDirectory(prefix="sev1-unzip-") as temporary:
         run("unzip", ["ditto", "-x", "-k", str(archive), temporary])
-        unpacked = Path(temporary) / "SEV-1-Friday-Deployment-0.1.0" / APP.name
+        unpacked = Path(temporary) / f"SEV-1-Friday-Deployment-{VERSION}" / APP.name
         run("archive_signature", ["codesign", "--verify", "--deep", "--strict", str(unpacked)])
         if digest(unpacked / "Contents/MacOS" / executable.name) != digest(executable):
             raise SystemExit("Archived executable differs from tested build")

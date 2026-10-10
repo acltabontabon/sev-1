@@ -16,6 +16,11 @@ var boss_bar: ProgressBar
 var boss_state: Label
 var notice: PanelContainer
 var notice_text: Label
+var evidence: VBoxContainer
+const EVIDENCE: Array = [
+	["CORE LEDGER", "SUCCESS", "Signed receipt: the money was saved.", Color(.35, .95, .65)],
+	["LOAN MANAGEMENT", "FAILED", "Still waiting for a payment confirmation.", Color(1, .4, .3)],
+	["PAYMENT PROCESSING", "NOT FOUND", "Delivery log stops before arrival.", Color(1, .75, .3)]]
 var last_message: String = ""
 var message_age: float = 99.0
 const STATUS: Array[String] = ["NEW", "TRIAGE", "INVESTIGATING", "CONTAINING", "ESCALATED TO: YOU", "RESOLVED", "REOPENED"]
@@ -162,6 +167,7 @@ func _build_incident_hud() -> void:
 	notice_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	notice_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notice.add_child(notice_text)
+	_build_evidence()
 	$Controls.theme_type_variation = "Eyebrow"
 	$Controls.remove_theme_font_size_override("font_size")
 	$Controls.add_theme_font_size_override("font_size", 12)
@@ -235,6 +241,57 @@ func _process(delta: float) -> void:
 		$Margin/VBox/AttackState.text = "READY  /  LMB OR F   •   Q OR RMB TO DODGE"
 
 
+## The investigation as a board of three system cards: status first, then the fact.
+func _build_evidence() -> void:
+	evidence = VBoxContainer.new()
+	evidence.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	evidence.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	evidence.offset_left = -420
+	evidence.offset_right = 420
+	evidence.offset_top = -250
+	evidence.offset_bottom = -44
+	evidence.add_theme_constant_override("separation", 8)
+	add_child(evidence)
+	var title: Label = Label.new()
+	title.text = "EVIDENCE  ·  WHICH SYSTEM NEVER RECEIVED THE PAYMENT?  ·  PRESS 1 · 2 · 3"
+	title.theme_type_variation = "Eyebrow"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_color_override("font_color", Color(.75, .9, .95))
+	evidence.add_child(title)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	evidence.add_child(row)
+	for index in range(3):
+		var entry: Array = EVIDENCE[index]
+		var card: PanelContainer = PanelContainer.new()
+		card.theme_type_variation = "Card"
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var style: StyleBoxFlat = (ThemeDB.get_project_theme().get_stylebox("panel", "Card") as StyleBoxFlat).duplicate()
+		style.border_color = entry[3]
+		style.border_width_top = 4
+		card.add_theme_stylebox_override("panel", style)
+		row.add_child(card)
+		var column: VBoxContainer = VBoxContainer.new()
+		column.add_theme_constant_override("separation", 2)
+		card.add_child(column)
+		var system: Label = Label.new()
+		system.text = "%d   %s" % [index + 1, entry[0]]
+		system.theme_type_variation = "Eyebrow"
+		column.add_child(system)
+		var status_label: Label = Label.new()
+		status_label.text = entry[1]
+		status_label.theme_type_variation = "Headline"
+		status_label.add_theme_font_size_override("font_size", 34)
+		status_label.add_theme_color_override("font_color", entry[3])
+		column.add_child(status_label)
+		var fact: Label = Label.new()
+		fact.text = entry[2]
+		fact.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fact.add_theme_font_size_override("font_size", 15)
+		column.add_child(fact)
+	evidence.hide()
+
+
 func _refresh_incident(incident: Node) -> void:
 	var open_seconds: int = maxi(0, int(incident.elapsed - 13.4))
 	$Margin/VBox/Title.text = "INC-001  ·  SEV-1  ·  %s  ·  OPEN %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
@@ -290,7 +347,9 @@ func _refresh_incident(incident: Node) -> void:
 		$Margin.visible = false
 	$Controls.visible = $Margin.visible
 	vitals.visible = $Margin.visible
-	notice.visible = $Margin.visible and not incident.message.is_empty() and (message_age < 7.0 or (incident.stage == incident.Stage.INVESTIGATION and incident.inspected))
+	evidence.visible = $Margin.visible and incident.stage == incident.Stage.INVESTIGATION and incident.inspected and incident.near_console()
+	vitals.visible = vitals.visible and not evidence.visible
+	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < 7.0
 	boss_box.visible = boss_box.visible and $Margin.visible
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
 	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."

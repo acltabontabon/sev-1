@@ -4,6 +4,22 @@ const INCIDENT: PackedScene = preload("res://game/incidents/missing_transaction.
 const PREFERENCES: Script = preload("res://game/release/preferences.gd")
 const BACKDROP: PackedScene = preload("res://game/release/menu_backdrop.tscn")
 const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
+const KEYS: Array = [
+	[["W", "A", "S", "D"], "Move, relative to the camera"], [["MOUSE"], "Look  ·  wheel zooms"],
+	[["SHIFT"], "Sprint"], [["SPACE"], "Jump"],
+	[["LMB", "F"], "Attack  ·  press late in recovery to chain three hits"],
+	[["Q", "RMB"], "Dodge  ·  no direction dodges backward"],
+	[["E"], "Use: the console, the coffee machine, everything else"],
+	[["1", "2", "3"], "Choose evidence, change requests and replies"],
+	[["TAB"], "Skip the opening (after first viewing) or the boss arrival"],
+	[["R"], "Restart the incident"], [["ESC"], "Pause  ·  back"]]
+const FIELD_NOTES: Array[String] = [
+	"Orange arc: an attack is coming. Dodge aside, then counter during recovery.",
+	"Enemies arrive busy. Hit one before it notices you: Surprise Review, double damage.",
+	"The Blocker shields its friends. Hit it mid-cast, or take it down first.",
+	"Meeting zones start after a countdown. Leave the circle before it does.",
+	"Scope Creep grows if you ignore it. Any hit resets the clock.",
+	"The Variance only takes damage while OPEN. Trust the solid ◆."]
 var preferences: RefCounted = PREFERENCES.new()
 var session: Node3D
 var backdrop: Node3D
@@ -34,6 +50,8 @@ func _ready() -> void:
 	add_child(overlay)
 	surface = ColorRect.new()
 	surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	surface.material = ShaderMaterial.new()
+	surface.material.shader = preload("res://game/ui/frosted.gdshader")
 	overlay.add_child(surface)
 	# The title reads over the dark half of the office; the desk stays clear on the right.
 	var gradient: Gradient = Gradient.new()
@@ -53,6 +71,7 @@ func _ready() -> void:
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll.follow_focus = true
 	panel.add_child(scroll)
 	box = VBoxContainer.new()
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -89,8 +108,10 @@ func _layout(title_page: bool, report: bool = false) -> void:
 	vignette.visible = title_page
 	footer.visible = title_page
 	hint.visible = title_page
-	# Paused or reporting, the incident stays visible behind a dim glass panel.
+	# Paused or reporting, the incident stays visible behind frosted glass.
 	surface.color = Color(0, 0, 0, 0) if title_page else Color(.005, .01, .015, .62)
+	surface.material.set_shader_parameter("blur", 0.0 if title_page else (1.2 if report else 3.5))
+	surface.material.set_shader_parameter("tint", Color(.01, .015, .02, 0.0 if title_page else (.35 if report else .66)))
 	if title_page:
 		panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 		panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
@@ -224,9 +245,35 @@ func show_page(next: String) -> void:
 			_entry("Back to Desk", "Main menu", main_menu)
 			_entry("Attempt to Log Off", "Quit", open_logoff)
 		"logoff":
-			_label("SESSION  ·  END REQUESTED", 0, "Eyebrow")
-			_label("Attempt to log off?", 0, "Headline")
-			_label("You have 1 unresolved SEV-1.\nYour status will be set to: Away (Guilty).", 0, "Subhead")
+			var warning: HBoxContainer = HBoxContainer.new()
+			warning.add_theme_constant_override("separation", 14)
+			box.add_child(warning)
+			var sign: PanelContainer = PanelContainer.new()
+			var round: StyleBoxFlat = StyleBoxFlat.new()
+			round.bg_color = Color(1, .7, .2)
+			round.set_corner_radius_all(24)
+			sign.add_theme_stylebox_override("panel", round)
+			sign.custom_minimum_size = Vector2(48, 48)
+			sign.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			var bang: Label = Label.new()
+			bang.text = "!"
+			bang.theme_type_variation = "Headline"
+			bang.add_theme_color_override("font_color", Color(.06, .05, .03))
+			bang.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			bang.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			sign.add_child(bang)
+			warning.add_child(sign)
+			var words: VBoxContainer = VBoxContainer.new()
+			warning.add_child(words)
+			var asked: Label = Label.new()
+			asked.text = "SESSION  ·  END REQUESTED"
+			asked.theme_type_variation = "Eyebrow"
+			words.add_child(asked)
+			var question: Label = Label.new()
+			question.text = "Attempt to log off?"
+			question.theme_type_variation = "Headline"
+			words.add_child(question)
+			_label("You have 1 unresolved SEV-1.\nYour status will be set to: Away (Guilty).\nLeadership will be notified that you “stepped away”.", 0, "Subhead")
 			_space(12)
 			_entry("Log Off Anyway", "Quit the game", quit_game)
 			_entry("Stay", "Back", go_back)
@@ -249,9 +296,29 @@ func show_page(next: String) -> void:
 			_stamp("BLAMELESS" if won else "REOPENED", Color(.35, .95, .65) if won else Color(1, .45, .3), .7, Vector2(-250, 330), -.12)
 			_stamp("ASSIGNED: YOU", Color(1, .32, .2), 1.9, Vector2(-310, 470), .09)
 		"controls":
-			_label("WIKI  ·  LAST UPDATED: NEVER", 0, "Eyebrow")
+			_label("WIKI  ·  LAST UPDATED: NEVER  ·  3 PEOPLE FOUND THIS HELPFUL", 0, "Eyebrow")
 			_label("Onboarding Docs", 0, "Headline")
-			_label(CONTROLS, 0, "MonoLabel")
+			var grid: GridContainer = GridContainer.new()
+			grid.columns = 2
+			grid.add_theme_constant_override("h_separation", 18)
+			grid.add_theme_constant_override("v_separation", 5)
+			box.add_child(grid)
+			for entry: Array in KEYS:
+				var caps: HBoxContainer = HBoxContainer.new()
+				caps.custom_minimum_size.x = 200
+				caps.add_theme_constant_override("separation", 6)
+				for key_name: String in entry[0]:
+					caps.add_child(_keycap(key_name))
+				grid.add_child(caps)
+				var what: Label = Label.new()
+				what.text = entry[1]
+				what.add_theme_font_size_override("font_size", 17)
+				what.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+				grid.add_child(what)
+			_space(6)
+			_label("FIELD NOTES FROM THE PREVIOUS ON-CALL ENGINEER (LEFT THE COMPANY)", 0, "Eyebrow")
+			for note: String in FIELD_NOTES:
+				_label("—  " + note, 14, "Caption").add_theme_color_override("font_color", Color(.8, .86, .88))
 			_button("Back", go_back)
 		"settings":
 			_label("DEVICE POLICY  ·  HR IS NOT NOTIFIED", 0, "Eyebrow")
@@ -284,6 +351,29 @@ func show_page(next: String) -> void:
 			child.grab_focus()
 			break
 	quiet = false
+
+
+func _keycap(text: String) -> PanelContainer:
+	var cap: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(.12, .15, .17)
+	style.border_color = Color(.32, .4, .44)
+	style.set_border_width_all(1)
+	style.border_width_bottom = 3
+	style.set_corner_radius_all(5)
+	style.content_margin_left = 9
+	style.content_margin_right = 9
+	style.content_margin_top = 3
+	style.content_margin_bottom = 3
+	cap.add_theme_stylebox_override("panel", style)
+	var label: Label = Label.new()
+	label.text = text
+	label.theme_type_variation = "MonoLabel"
+	label.add_theme_font_size_override("font_size", 14)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.add_child(label)
+	cap.custom_minimum_size.x = 34
+	return cap
 
 
 ## A rubber stamp that lands on the postmortem after a beat, with a thump.

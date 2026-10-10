@@ -64,7 +64,23 @@ func _run() -> void:
 		sample()
 	report("menu")
 	await shot("menu_notice")
+	app.open_controls()
+	await frames(8)
+	await shot("page_controls")
+	app.go_back()
+	app.open_logoff()
+	await frames(8)
+	await shot("page_logoff")
+	app.go_back()
+	app.open_settings()
+	await frames(8)
+	await shot("page_settings")
+	app.go_back()
 	if only == "menu":
+		quit()
+		return
+	if only == "cast":
+		await cast()
 		quit()
 		return
 	if only == "finale":
@@ -287,5 +303,60 @@ func finale() -> void:
 	player.receive_damage(100000, Vector3.ZERO)
 	await live(4.0)
 	await shot("finale_postmortem_loss")
+	app.main_menu()
+	await frames(5)
+
+
+## Character lineup for art review: everyone engaged, idle, well lit, in a row.
+func cast() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.3)
+	incident._cleanup()
+	incident._enter(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 4)
+	player.visual.rotation.y = PI
+	var lineup: Array = [["record", -5.0], ["blocker", -2.6], ["invite", 2.6], ["scope", 5.0]]
+	for entry: Array in lineup:
+		var actor: CharacterBody3D = incident._spawn_entry([entry[0], "A1"], incident.alive)
+		actor.position = Vector3(entry[1], .05, 1.5)
+		actor.set_physics_process(false)
+		actor.visual.rotation.y = PI
+		if entry[0] == "scope":
+			actor.grow()
+	var boss: CharacterBody3D = load("res://game/enemies/incident.tscn").instantiate()
+	boss.set_script(load("res://game/incidents/variance.gd"))
+	boss.position = Vector3(0, .05, -2.2)
+	incident.add_child(boss)
+	incident.actors.append(boss)
+	boss.visual.rotation.y = PI
+	incident.presentation.feed.modulate.a = 0.0
+	var light: OmniLight3D = OmniLight3D.new()
+	light.position = Vector3(0, 3.5, 7)
+	light.omni_range = 16
+	light.light_energy = 2.2
+	app.session.add_child(light)
+	var camera: Camera3D = Camera3D.new()
+	app.session.add_child(camera)
+	camera.position = Vector3(0, 2.0, 8.6)
+	camera.look_at(Vector3(0, 1.5, 0))
+	camera.fov = 58
+	camera.make_current()
+	app.session.get_node("HUD").hide()
+	await live(1.5)
+	await shot("cast_front")
+	camera.position = Vector3(1.1, 1.9, 1.6)
+	camera.look_at(player.position + Vector3(0, 1.2, 0))
+	camera.fov = 40
+	player.visual.rotation.y = PI
+	await live(.4)
+	await shot("cast_engineer_back")
+	camera.position = Vector3(-.9, 1.75, 6.4)
+	camera.look_at(player.position + Vector3(0, 1.25, 0))
+	player.visual.rotation.y = PI
+	await live(.4)
+	await shot("cast_engineer_front")
 	app.main_menu()
 	await frames(5)

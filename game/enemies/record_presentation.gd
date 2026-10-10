@@ -20,6 +20,8 @@ func reset_pose() -> void:
 	position = Vector3.ZERO
 	details.rotation = Vector3.ZERO
 	details.position = Vector3.ZERO
+	details.get_node("Throbber").show()
+	details.get_node("Pages").show()
 	$Body.rotation = Vector3.ZERO
 	$LeftArm.rotation = Vector3.ZERO
 	$RightArm.rotation = Vector3.ZERO
@@ -38,6 +40,8 @@ func defeat() -> void:
 	$RightArm.rotation.z = .7
 	status_material.emission_energy_multiplier = 0
 	status_material.albedo_color = Color(.13, .16, .16)
+	details.get_node("Throbber").hide()
+	details.get_node("Pages").hide()
 
 
 func _physics_process(delta: float) -> void:
@@ -45,6 +49,10 @@ func _physics_process(delta: float) -> void:
 		return
 	clock += delta
 	_pose(delta)
+	# The commit never finishes: the halo keeps loading, the pages keep circling.
+	details.get_node("Throbber").rotation.y = -clock * 5.0
+	details.get_node("Pages").rotation.y = clock * .8
+	details.get_node("Pages").position.y = 1.55 + sin(clock * 1.7) * .08
 
 
 func _pose(delta: float) -> void:

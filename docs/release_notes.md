@@ -1,16 +1,121 @@
-# SEV-1: Friday Deployment — Vertical Slice v0.1
+# SEV-1: Friday Deployment — Playtest Build 0.2
+
+Version **0.2.0**, 10 October 2026 (Milestone 12, "Operation Corporate Hell"). Local
+macOS tester build; not creator-accepted, not notarized. This build answers the first
+external feedback on 0.1: plain presentation, a boring menu, no cinematic moments,
+weak comedy delivery, flat notifications, a small map, one enemy type and encounters
+that were really a series of duels. It improves Incident 001 only. No new chapter,
+currency, progression system, online service or runtime AI was added.
+
+## What changed since 0.1
+
+**First impression**
+- The title screen is the dark office at 16:59. The engineer works at a glowing
+  monitor while chat notifications land ("All systems operational." … "Except three.")
+  and they react. Menu entries carry corporate names with plain labels beside them:
+  Acknowledge Incident, Corporate Policy, Onboarding Docs, Legal Has Reviewed This,
+  Attempt to Log Off (one confirmation). Pause offers Resume Suffering.
+- A 36-second in-engine opening: Friday chat, a cursor on Log Off at 16:59:58, the
+  SEV-1 takeover at exactly 17:00, ETA and leadership messages, a held silence,
+  "Tangina naman.", lights dying toward Operations and a corrupted record stepping out
+  of the production dashboard. Skippable once this device has seen it in full; quick
+  retries keep a three-second version.
+- New typography (Barlow Condensed, Inter, JetBrains Mono) and a shared interface theme.
+
+**A bigger office with reasons to explore**
+- An east meeting wing (a corridor of drifting calendar invites, Meeting Room 3 and a
+  pantry), and a restricted server corridor behind a security gate leading to the server
+  vault, where The Variance now arrives once you walk in.
+- Pantry: the coffee machine grants 40 s of Temporary Motivation (+15% damage and speed)
+  and −10 Burnout once, then quotes the one-cup policy; the vending machine, microwave
+  and wellness poster each react. Photographed CC0 materials replace flat surfaces.
+
+**Encounters**
+- Several enemies at once in authored waves with a breather between them; at most two
+  wind up at a time, and they spread out, circle while waiting, flank and back off.
+- New archetypes: **The Blocker** shields nearby allies after a telegraphed cast (hit it
+  mid-cast or kill it); **The Meeting Invite** keeps its distance and books slowing,
+  draining meeting zones (step out before it starts); **Scope Creep** grows in reach,
+  damage and health every six seconds you ignore it (any hit resets it; a grown one is
+  "descoped" for Burnout relief).
+- Enemies arrive unaware and busy ("reconciling…", "in a meeting"); they notice you by
+  sight, by the noise of fighting or sprinting, or when a colleague flags you, and lose
+  you if you break line of sight. Hitting an unaware enemy is a Surprise Review (double
+  damage).
+- Optional **Quick Sync**: walk into Meeting Room 3 during the investigation and the
+  doors shut on "Can we take this offline?"; survive it for +30 health and −20 Burnout.
+- Escalating the dependency now returns it as a labeled Blocker.
+
+**Comedy and personality**
+- Speech arrives as cards in "Synergize", a fictional internal chat app: each sender has
+  a channel and small print; the engineer's lines are said out loud. 53 voiced lines
+  (31 new or rewritten), all subtitled.
+- A ticket-style HUD (status, open timer, objective), health and Burnout bars, a boss
+  bar and an evidence board of three system cards at the console.
+- Dialogs were redesigned to be read at a glance: upgrades are tilted change-request
+  tickets at an emergency Change Advisory Board (risk tag, one big benefit, a debt meter,
+  an "APPROVE?" stamp on focus); the management decision is a chat window with
+  Leadership's message and three reply bubbles with a Burnout meter; menus and dialogs
+  sit on frosted glass; Onboarding Docs shows keycaps and field notes; log off is a
+  proper warning dialog.
+- Writing pass: the status page stays green; "That would be reassuring if the money
+  wasn't missing"; leadership replies to each choice; "Special thanks to leadership." /
+  "I was the only one here."; a blameless postmortem assigned to you.
+
+**Characters**
+- The engineer now reads as a person: open charcoal hoodie, headphones around the neck,
+  bed hair, orange-soled sneakers and an "ON CALL (FOREVER)" sticky note on his back.
+  The Corrupted Record carries a loading halo that never finishes and orbiting ledger
+  pages; The Variance wears a crown of three status screens. Each new archetype has its
+  own silhouette.
+
+**Cinematics and audio**
+- Evidence push-in, a staged vault arrival that never takes control, slow motion on the
+  first sighting of each new archetype, and an ending camera behind a postmortem
+  document whose stamps land in sequence.
+- Original music beds (title, incident, boss) on a Music bus ducked under voice, with a
+  Music volume setting; CC0 interface and effect sounds.
+
+## Known issues and testing limits
+
+- **P0:** none reproduced across the automated incident, encounter, interface and
+  release lifecycle suites. Not a claim that every player action was tested.
+- **P1 — first-use hitches:** the cold first render now reaches about 360 ms (hidden by
+  the opening's fade from black) and first enemy spawns about 55 ms while shaders
+  compile. Steady play holds the 120 Hz display cap. See performance below.
+- **P1 — distribution:** ad-hoc signed, not notarized; recipient Macs may block launch.
+- **P2 — unverified by humans:** whether the opening pacing, jokes, chat cards and new
+  enemies are fun or funny; difficulty and balance with waves; the "Tangina naman."
+  pronunciation (English TTS with a phonetic override); the synthesized music mix.
+- **P2 — art:** the engineer and enemies remain native procedural models; a CC0 rig was
+  evaluated and declined (see asset inventory). Kenney props are tinted to fit.
+- **P3:** controller support, Windows runtime validation, remapping, later chapters.
+
+Performance (Apple M2 Pro / 16 GB, macOS 27, Godot 4.7.2, Forward+/Metal, MSAA 2×,
+SSAO, glow, fog, vsync on a 120 Hz display): menu, opening, every area and a five-enemy
+fight held about 120 FPS at 1920×1080 (p95 ≤ 10.8 ms). The staged three-path lifecycle probe at 1920×1080 sampled 5,940 frames: mean 128.2 FPS,
+median/p95/p99 7.57/9.33/10.59 ms, 15 frames over 16.7 ms (worst 365.7 ms at cold first
+render), peak 753 draw calls, tracked static/video memory 115/440 MiB. 0.1 measured
+133.5 FPS mean and a 176.5 ms worst frame on the same machine; the larger map and
+materials raise the cold-start and video-memory cost.
+
+Validation: 698 assertions across 15 headless suites plus import, every script parse and
+the voice manifest. Automated runs stage positions and sometimes raise health; they do
+not establish balance or fun.
+
+## Previous: Vertical Slice v0.1 (0.1.0)
 
 Version **0.1.0**, 10 October 2026. Local macOS tester candidate; creator acceptance
 and trusted public distribution are not complete. See the accompanying TESTING.md.
 
-## Playable
+### Playable
 
 Incident 001: The Missing Transaction combines Office After Hours, a skippable Friday
 opening, two authored encounters, console investigation, two temporary upgrades,
 Technical Debt, hit-driven Burnout, a corporate decision, The Variance, and contextual
 victory/defeat postmortems. Repeated runs reset all gameplay modifiers.
 
-## This release
+### That release
 
 - Title screen: SEV-1 / Works on My Machine; Start Incident, Controls, Settings, Quit,
   and credits. Existing mechanics and combat balance are preserved.
@@ -22,7 +127,7 @@ victory/defeat postmortems. Repeated runs reset all gameplay modifiers.
   validation/export/signature/smoke workflow. Windows preset is preparation only.
 - Ten application lifecycle checks supplement existing full incident/combat tests.
 
-## Known issues and testing limits
+### Known issues at 0.1
 
 - **P0:** none reproduced in automated incident/lifecycle coverage. This is not a
   claim that every possible player action has been tested.
@@ -56,6 +161,6 @@ Automated checks use staged positions and sometimes elevated health/controlled
 damage. Graphical rendering is inspected separately; human gameplay/audio acceptance
 remains open. No new floor, boss, progression, online service or runtime AI was added.
 
-## Milestone 11 voice candidate
+### Milestone 11 voice candidate
 
 Adds 22 prerecorded local Kokoro candidate clips, authored subtitles, separate Voice volume and saved subtitle preference. No runtime network or AI credentials. Voice candidate artifacts are isolated under `builds/releases/0.1.0-voices`; the previous tester package is preserved. Human casting, pronunciation, mixing and positional listening acceptance remain pending. See [voice evidence and listening route](voices.md).

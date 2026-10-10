@@ -77,6 +77,6 @@ func _run() -> void:
 
 func flavor_ok(buttons: Array[Button]) -> bool:
 	for index in range(3):
-		if not incident.upgrade_ui.FLAVOR[index] in buttons[index].text:
+		if not incident.upgrade_ui.FLAVOR[index] in incident.upgrade_ui.summary(index):
 			return false
 	return true

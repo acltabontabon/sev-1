@@ -95,3 +95,19 @@ holds to `character_presentation.gd` (seated typing, relaxed, frozen alert, slum
 glance, armed) that the menu and the opening stage. A coherent office-worker rig with
 combat and seated clips remains the recommended future upgrade behind the existing
 wrapper contract.
+
+## Milestone 12 identity pass
+
+Still original native geometry from `tools/build_characters.py`, no imports:
+
+- **Engineer:** charcoal open hoodie over the shirt and loose tie, hood bunched behind
+  the neck, over-ear headphones around the neck with glowing cups, bed-hair tufts, a
+  coffee stain, sneakers with orange soles, and a sticky note on his back reading
+  "ON CALL (FOREVER)" that the gameplay camera sees all run. The keyboard weapon gains a
+  red Esc key and a dangling cable.
+- **Corrupted Record:** a loading halo that never finishes, its own ledger pages
+  orbiting it, glowing fractures and a receipt hanging from its mouth.
+- **The Blocker, The Meeting Invite, Scope Creep:** new generated silhouettes
+  (`blocker_visual.tscn`, `meeting_invite_visual.tscn`, `scope_creep_visual.tscn`).
+- **The Variance:** a crown of three orbiting status screens (SUCCESS, FAILED,
+  NOT FOUND) and a split cyan/red body, built by `variance.gd` on the record rig.

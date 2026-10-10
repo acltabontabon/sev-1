@@ -558,7 +558,7 @@ func inspect_console() -> void:
 	if not inspected:
 		presentation.evidence_shot()
 	inspected = true
-	console_marker.text = "EVIDENCE OPEN\nChoose 1 / 2 / 3"
+	console_marker.text = "EVIDENCE OPEN"
 	objective = "Which system is missing the record? Press 1, 2, or 3."
 	message = "1  Core Ledger: SUCCESS — signed receipt confirms money was saved.\n2  Loan Management: FAILED — waiting for payment confirmation.\n3  Payment Processing: NOT FOUND — delivery log stops before arrival."
 

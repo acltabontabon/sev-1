@@ -42,6 +42,39 @@ material = SubResource("Record")
 size = Vector3(0.18, 0.63, 0.21)
 material = SubResource("Record")
 
+[sub_resource type="StandardMaterial3D" id="Pending"]
+albedo_color = Color(0.4, 0.95, 1, 1)
+metallic = 0.1
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.4, 0.95, 1, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Receipt"]
+albedo_color = Color(0.86, 0.85, 0.8, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Dot"]
+size = Vector3(0.07, 0.07, 0.07)
+material = SubResource("Pending")
+
+[sub_resource type="BoxMesh" id="Page"]
+size = Vector3(0.36, 0.012, 0.26)
+material = SubResource("Paper")
+
+[sub_resource type="BoxMesh" id="Crack"]
+size = Vector3(0.5, 0.018, 0.02)
+material = SubResource("Status")
+
+[sub_resource type="BoxMesh" id="ReceiptMesh"]
+size = Vector3(0.12, 0.5, 0.012)
+material = SubResource("Receipt")
+
+[sub_resource type="BoxMesh" id="ReceiptLine"]
+size = Vector3(0.09, 0.012, 0.014)
+material = SubResource("Status")
+
 [node name="RecordDetails" type="Node3D"]
 
 [node name="Head" type="MeshInstance3D" parent="."]
@@ -108,3 +141,121 @@ rotation = Vector3(0, 0, 0.06)
 position = Vector3(0.53, 1.28, 0.04)
 mesh = SubResource("Fragment")
 rotation = Vector3(0, 0.2, 0.22)
+
+[node name="Throbber" type="Node3D" parent="."]
+position = Vector3(0.17, 2.42, -0.07)
+
+
+[node name="Dot0" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(0.300, 0, 0.000)
+mesh = SubResource("Dot")
+scale = Vector3(0.50, 0.50, 0.50)
+
+[node name="Dot1" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(0.212, 0, 0.212)
+mesh = SubResource("Dot")
+scale = Vector3(0.57, 0.57, 0.57)
+
+[node name="Dot2" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(0.000, 0, 0.300)
+mesh = SubResource("Dot")
+scale = Vector3(0.64, 0.64, 0.64)
+
+[node name="Dot3" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(-0.212, 0, 0.212)
+mesh = SubResource("Dot")
+scale = Vector3(0.71, 0.71, 0.71)
+
+[node name="Dot4" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(-0.300, 0, 0.000)
+mesh = SubResource("Dot")
+scale = Vector3(0.78, 0.78, 0.78)
+
+[node name="Dot5" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(-0.212, 0, -0.212)
+mesh = SubResource("Dot")
+scale = Vector3(0.85, 0.85, 0.85)
+
+[node name="Dot6" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(-0.000, 0, -0.300)
+mesh = SubResource("Dot")
+scale = Vector3(0.92, 0.92, 0.92)
+
+[node name="Dot7" type="MeshInstance3D" parent="Throbber"]
+position = Vector3(0.212, 0, -0.212)
+mesh = SubResource("Dot")
+scale = Vector3(0.99, 0.99, 0.99)
+
+[node name="Pages" type="Node3D" parent="."]
+position = Vector3(0, 1.55, 0)
+
+
+[node name="Page0" type="MeshInstance3D" parent="Pages"]
+position = Vector3(0.750, 0.00, 0.000)
+mesh = SubResource("Page")
+rotation = Vector3(0.40, 0.000, 0.30)
+
+[node name="Page1" type="MeshInstance3D" parent="Pages"]
+position = Vector3(0.232, 0.25, 0.713)
+mesh = SubResource("Page")
+rotation = Vector3(0.50, 1.257, 0.18)
+
+[node name="Page2" type="MeshInstance3D" parent="Pages"]
+position = Vector3(-0.607, 0.00, 0.441)
+mesh = SubResource("Page")
+rotation = Vector3(0.60, 2.513, 0.06)
+
+[node name="Page3" type="MeshInstance3D" parent="Pages"]
+position = Vector3(-0.607, 0.25, -0.441)
+mesh = SubResource("Page")
+rotation = Vector3(0.70, 3.770, -0.06)
+
+[node name="Page4" type="MeshInstance3D" parent="Pages"]
+position = Vector3(0.232, 0.00, -0.713)
+mesh = SubResource("Page")
+rotation = Vector3(0.80, 5.027, -0.18)
+
+[node name="Crack" type="MeshInstance3D" parent="Slab0"]
+position = Vector3(0.08, 0.12, -0.235)
+mesh = SubResource("Crack")
+rotation = Vector3(0, 0, 0.35)
+
+[node name="Crack" type="MeshInstance3D" parent="Slab1"]
+position = Vector3(-0.08, 0.12, -0.235)
+mesh = SubResource("Crack")
+rotation = Vector3(0, 0, -0.35)
+
+[node name="Crack" type="MeshInstance3D" parent="Slab2"]
+position = Vector3(0.08, 0.12, -0.235)
+mesh = SubResource("Crack")
+rotation = Vector3(0, 0, 0.35)
+
+[node name="Crack" type="MeshInstance3D" parent="Slab3"]
+position = Vector3(-0.08, 0.12, -0.235)
+mesh = SubResource("Crack")
+rotation = Vector3(0, 0, -0.35)
+
+[node name="Receipt" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.04, -0.36, -0.17)
+mesh = SubResource("ReceiptMesh")
+rotation = Vector3(0.15, 0, 0.08)
+
+[node name="ReceiptLine0" type="MeshInstance3D" parent="Head/Receipt"]
+position = Vector3(0, 0.15, -0.008)
+mesh = SubResource("ReceiptLine")
+
+
+[node name="ReceiptLine1" type="MeshInstance3D" parent="Head/Receipt"]
+position = Vector3(0, 0.06, -0.008)
+mesh = SubResource("ReceiptLine")
+
+
+[node name="ReceiptLine2" type="MeshInstance3D" parent="Head/Receipt"]
+position = Vector3(0, -0.03, -0.008)
+mesh = SubResource("ReceiptLine")
+
+
+[node name="ReceiptLine3" type="MeshInstance3D" parent="Head/Receipt"]
+position = Vector3(0, -0.12, -0.008)
+mesh = SubResource("ReceiptLine")
+

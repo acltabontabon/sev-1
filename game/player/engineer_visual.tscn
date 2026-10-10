@@ -55,6 +55,39 @@ emission_enabled = true
 emission = Color(0.08, 0.62, 0.66, 1)
 emission_energy_multiplier = 0.7
 
+[sub_resource type="StandardMaterial3D" id="Hoodie"]
+albedo_color = Color(0.16, 0.17, 0.19, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Sole"]
+albedo_color = Color(1, 0.45, 0.18, 1)
+metallic = 0
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Sticky"]
+albedo_color = Color(0.98, 0.86, 0.3, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Stain"]
+albedo_color = Color(0.3, 0.17, 0.08, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Alarm"]
+albedo_color = Color(1, 0.2, 0.12, 1)
+metallic = 0.1
+roughness = 0.4
+emission_enabled = true
+emission = Color(1, 0.2, 0.12, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Cable"]
+albedo_color = Color(0.05, 0.05, 0.06, 1)
+metallic = 0.3
+roughness = 0.5
+
 [sub_resource type="BoxMesh" id="Torso"]
 size = Vector3(0.53, 0.56, 0.28)
 material = SubResource("Shirt")
@@ -82,11 +115,11 @@ radial_segments = 8
 material = SubResource("Trousers")
 
 [sub_resource type="CylinderMesh" id="Sleeve"]
-top_radius = 0.105
-bottom_radius = 0.085
+top_radius = 0.108
+bottom_radius = 0.088
 height = 1.0
 radial_segments = 8
-material = SubResource("Shirt")
+material = SubResource("Hoodie")
 
 [sub_resource type="CylinderMesh" id="Forearm"]
 top_radius = 0.074
@@ -180,6 +213,63 @@ material = SubResource("Ivory")
 [sub_resource type="BoxMesh" id="Hand"]
 size = Vector3(0.14, 0.17, 0.12)
 material = SubResource("Skin")
+
+[sub_resource type="BoxMesh" id="PanelMesh"]
+size = Vector3(0.17, 0.58, 0.31)
+material = SubResource("Hoodie")
+
+[sub_resource type="BoxMesh" id="BackMesh"]
+size = Vector3(0.55, 0.58, 0.05)
+material = SubResource("Hoodie")
+
+[sub_resource type="BoxMesh" id="HoodMesh"]
+size = Vector3(0.44, 0.17, 0.2)
+material = SubResource("Hoodie")
+
+[sub_resource type="TorusMesh" id="BandMesh"]
+inner_radius = 0.15
+outer_radius = 0.185
+rings = 24
+ring_segments = 10
+material = SubResource("Shoe")
+
+[sub_resource type="CylinderMesh" id="CupMesh"]
+top_radius = 0.085
+bottom_radius = 0.085
+height = 0.07
+radial_segments = 16
+material = SubResource("Shoe")
+
+[sub_resource type="TorusMesh" id="CupRing"]
+inner_radius = 0.062
+outer_radius = 0.08
+rings = 24
+ring_segments = 10
+material = SubResource("Accent")
+
+[sub_resource type="BoxMesh" id="TuftMesh"]
+size = Vector3(0.09, 0.1, 0.07)
+material = SubResource("Hair")
+
+[sub_resource type="BoxMesh" id="StickyMesh"]
+size = Vector3(0.17, 0.17, 0.012)
+material = SubResource("Sticky")
+
+[sub_resource type="BoxMesh" id="StainMesh"]
+size = Vector3(0.075, 0.055, 0.006)
+material = SubResource("Stain")
+
+[sub_resource type="BoxMesh" id="SoleMesh"]
+size = Vector3(0.19, 0.045, 0.34)
+material = SubResource("Sole")
+
+[sub_resource type="BoxMesh" id="EscMesh"]
+size = Vector3(0.08, 0.07, 0.075)
+material = SubResource("Alarm")
+
+[sub_resource type="BoxMesh" id="CableMesh"]
+size = Vector3(0.04, 0.04, 0.14)
+material = SubResource("Cable")
 
 [node name="Character" type="Node3D"]
 script = ExtResource("1")
@@ -604,3 +694,121 @@ mesh = SubResource("Rim")
 position = Vector3(0.206, 0.03, 0)
 mesh = SubResource("Rim")
 
+
+[node name="HoodiePanel-1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.2, 0, 0)
+mesh = SubResource("PanelMesh")
+
+
+[node name="Cup-1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.2, 0.33, -0.02)
+mesh = SubResource("CupMesh")
+rotation = Vector3(0, 0, 1.5708)
+
+[node name="CupGlow-1" type="MeshInstance3D" parent="Torso/Cup-1"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("CupRing")
+
+
+[node name="HoodiePanel1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0.2, 0, 0)
+mesh = SubResource("PanelMesh")
+
+
+[node name="Cup1" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0.2, 0.33, -0.02)
+mesh = SubResource("CupMesh")
+rotation = Vector3(0, 0, 1.5708)
+
+[node name="CupGlow1" type="MeshInstance3D" parent="Torso/Cup1"]
+position = Vector3(0, 0, 0)
+mesh = SubResource("CupRing")
+
+
+[node name="HoodieBack" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0, 0, 0.15)
+mesh = SubResource("BackMesh")
+
+
+[node name="Hood" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0, 0.31, 0.15)
+mesh = SubResource("HoodMesh")
+rotation = Vector3(-0.35, 0, 0)
+
+[node name="Headphones" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0, 0.33, -0.01)
+mesh = SubResource("BandMesh")
+rotation = Vector3(0.25, 0, 0)
+
+[node name="CoffeeStain" type="MeshInstance3D" parent="Torso"]
+position = Vector3(0.07, -0.12, -0.143)
+mesh = SubResource("StainMesh")
+
+
+[node name="StickyNote" type="MeshInstance3D" parent="Torso"]
+position = Vector3(-0.05, 0.06, 0.178)
+mesh = SubResource("StickyMesh")
+rotation = Vector3(0, 0, 0.12)
+
+[node name="StickyText" type="Label3D" parent="Torso/StickyNote"]
+position = Vector3(0, 0, 0.008)
+text = "ON CALL\n(FOREVER)"
+font_size = 24
+pixel_size = 0.0016
+modulate = Color(0.15, 0.12, 0.08, 1)
+outline_size = 0
+
+[node name="Tuft0" type="MeshInstance3D" parent="Head"]
+position = Vector3(-0.07, 0.2, -0.02)
+mesh = SubResource("TuftMesh")
+rotation = Vector3(0.3, 0.0, -0.5)
+
+[node name="Tuft1" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.05, 0.2, 0.03)
+mesh = SubResource("TuftMesh")
+rotation = Vector3(-0.2, 0.7, 0.4)
+
+[node name="Tuft2" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.0, 0.2, 0.08)
+mesh = SubResource("TuftMesh")
+rotation = Vector3(0.5, 1.4, 0.1)
+
+[node name="Tuft3" type="MeshInstance3D" parent="Head"]
+position = Vector3(0.09, 0.2, -0.06)
+mesh = SubResource("TuftMesh")
+rotation = Vector3(0.1, 2.0999999999999996, 0.7)
+
+[node name="Sole" type="MeshInstance3D" parent="LeftFoot"]
+position = Vector3(0, -0.06, -0.01)
+mesh = SubResource("SoleMesh")
+
+
+[node name="Sole" type="MeshInstance3D" parent="RightFoot"]
+position = Vector3(0, -0.06, -0.01)
+mesh = SubResource("SoleMesh")
+
+
+[node name="EscKey" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.141, 0.072, -0.405)
+mesh = SubResource("EscMesh")
+
+
+[node name="Cable0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.0, -0.02, 0.6)
+mesh = SubResource("CableMesh")
+rotation = Vector3(0.0, 0.0, 0)
+
+[node name="Cable1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.05, -0.06, 0.72)
+mesh = SubResource("CableMesh")
+rotation = Vector3(0.3, 0.25, 0)
+
+[node name="Cable2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.1, -0.1, 0.84)
+mesh = SubResource("CableMesh")
+rotation = Vector3(0.6, 0.5, 0)
+
+[node name="Cable3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.15000000000000002, -0.13999999999999999, 0.96)
+mesh = SubResource("CableMesh")
+rotation = Vector3(0.8999999999999999, 0.75, 0)

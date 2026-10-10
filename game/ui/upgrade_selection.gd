@@ -1,13 +1,21 @@
 extends CanvasLayer
 ## One persistent modal per incident; stays interactive while combat is paused.
-## Upgrades read as change requests; the management decision as a direct message.
+## Upgrades are change-request tickets on the Change Advisory Board's table; the
+## management decision is an urgent DM with three ways to answer. Each card keeps its
+## full plain-text summary in meta "summary" for accessibility and tests.
 signal selected(index: int)
 const FLAVOR: Array[String] = ["“Tests are just opinions.”", "“Slower. Safer. Somehow controversial.”", "“Nothing is more permanent.”"]
 const REPLIES: Array[String] = ["“Five minutes.”", "“I'll have a realistic estimate shortly.”", "“It's blocked on another team.”"]
+const RISK: Array = [["RISK: HIGH", Color(1, .38, .25)], ["RISK: LOW", Color(.35, .9, .6)], ["RISK: MEDIUM", Color(1, .72, .3)]]
+const BENEFITS: Array[String] = ["+35% damage", "−20% damage taken", "−25% dodge recovery"]
+const TILT: Array[float] = [-.022, .012, -.008]
 var panel: CenterContainer
 var shade: ColorRect
+var header: VBoxContainer
 var eyebrow: Label
 var heading: Label
+var subhead: Label
+var window_bar: PanelContainer
 var footer: Label
 var buttons: Array[Button] = []
 
@@ -16,34 +24,48 @@ func _ready() -> void:
 	layer = 5
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	shade = ColorRect.new()
-	shade.color = Color(.01, .015, .02, .82)
+	var frost: ShaderMaterial = ShaderMaterial.new()
+	frost.shader = preload("res://game/ui/frosted.gdshader")
+	frost.set_shader_parameter("blur", 3.5)
+	shade.material = frost
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
 	panel = CenterContainer.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	var box: VBoxContainer = VBoxContainer.new()
-	box.custom_minimum_size = Vector2(1000, 0)
-	box.add_theme_constant_override("separation", 14)
+	box.custom_minimum_size = Vector2(1060, 0)
+	box.add_theme_constant_override("separation", 16)
 	panel.add_child(box)
+	header = VBoxContainer.new()
+	header.add_theme_constant_override("separation", 4)
+	box.add_child(header)
+	window_bar = _window_bar()
+	header.add_child(window_bar)
 	eyebrow = Label.new()
 	eyebrow.theme_type_variation = "Eyebrow"
-	box.add_child(eyebrow)
+	header.add_child(eyebrow)
 	heading = Label.new()
 	heading.theme_type_variation = "Headline"
-	heading.add_theme_font_size_override("font_size", 34)
+	heading.add_theme_font_size_override("font_size", 40)
 	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(heading)
+	header.add_child(heading)
+	subhead = Label.new()
+	subhead.theme_type_variation = "Caption"
+	subhead.add_theme_font_size_override("font_size", 16)
+	subhead.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	header.add_child(subhead)
 	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 18)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_child(row)
 	for index in range(3):
 		var button: Button = Button.new()
-		button.custom_minimum_size = Vector2(324, 280)
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.add_theme_font_size_override("font_size", 16)
+		button.custom_minimum_size = Vector2(336, 392)
 		button.pressed.connect(_choose.bind(index))
+		button.focus_entered.connect(_lift.bind(button, true))
+		button.focus_exited.connect(_lift.bind(button, false))
+		button.mouse_entered.connect(button.grab_focus)
 		row.add_child(button)
 		buttons.append(button)
 	# Arrow keys walk the cards in either axis; Enter confirms.
@@ -55,33 +77,241 @@ func _ready() -> void:
 		buttons[index].focus_neighbor_left = previous
 		buttons[index].focus_neighbor_top = previous
 	footer = Label.new()
-	footer.theme_type_variation = "Caption"
+	footer.theme_type_variation = "Eyebrow"
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(footer)
 	close()
 
 
+func summary(index: int) -> String:
+	return buttons[index].get_meta("summary", "")
+
+
+func _window_bar() -> PanelContainer:
+	var bar: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(.07, .09, .11)
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.set_content_margin_all(8)
+	style.content_margin_left = 14
+	bar.add_theme_stylebox_override("panel", style)
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	bar.add_child(row)
+	for color: Color in [Color(1, .37, .34), Color(1, .74, .2), Color(.3, .8, .4)]:
+		var dot: PanelContainer = PanelContainer.new()
+		var round: StyleBoxFlat = StyleBoxFlat.new()
+		round.bg_color = color
+		round.set_corner_radius_all(6)
+		dot.add_theme_stylebox_override("panel", round)
+		dot.custom_minimum_size = Vector2(12, 12)
+		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(dot)
+	var name_label: Label = Label.new()
+	name_label.text = "   ◆ Synergize — Direct message — Leadership"
+	name_label.theme_type_variation = "MonoLabel"
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_color_override("font_color", Color(.6, .7, .74))
+	row.add_child(name_label)
+	return bar
+
+
+func _clear(button: Button) -> VBoxContainer:
+	for child: Node in button.get_children():
+		button.remove_child(child)
+		child.queue_free()
+	var margin: MarginContainer = MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 20)
+	button.add_child(margin)
+	var column: VBoxContainer = VBoxContainer.new()
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 8)
+	margin.add_child(column)
+	return column
+
+
+func _text(parent: Container, text: String, variation: String, size: int = 0, color: Color = Color(0, 0, 0, 0)) -> Label:
+	var label: Label = Label.new()
+	label.text = text
+	label.theme_type_variation = variation
+	if size > 0:
+		label.add_theme_font_size_override("font_size", size)
+	if color.a > 0:
+		label.add_theme_color_override("font_color", color)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(label)
+	return label
+
+
+func _pill(parent: Container, text: String, color: Color) -> void:
+	var pill: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(color, .16)
+	style.border_color = color
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(10)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 2
+	style.content_margin_bottom = 2
+	pill.add_theme_stylebox_override("panel", style)
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label: Label = Label.new()
+	label.text = text
+	label.theme_type_variation = "Eyebrow"
+	label.add_theme_color_override("font_color", color)
+	pill.add_child(label)
+	parent.add_child(pill)
+
+
+func _badge(parent: Container, number: int, color: Color) -> void:
+	var badge: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(17)
+	badge.add_theme_stylebox_override("panel", style)
+	badge.custom_minimum_size = Vector2(34, 34)
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label: Label = Label.new()
+	label.text = str(number)
+	label.theme_type_variation = "Subhead"
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", Color(.03, .04, .05))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.add_child(label)
+	parent.add_child(badge)
+
+
+## A meter that shows where a value is now and where this choice would put it.
+func _meter(parent: Container, now: float, after: float, limit: float, color: Color) -> void:
+	var holder: Control = Control.new()
+	holder.custom_minimum_size = Vector2(0, 10)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(holder)
+	for layer_index in range(2):
+		var bar: ProgressBar = ProgressBar.new()
+		bar.show_percentage = false
+		bar.max_value = limit
+		bar.value = after if layer_index == 0 else now
+		bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var back: StyleBoxFlat = StyleBoxFlat.new()
+		back.bg_color = Color(.1, .12, .14) if layer_index == 0 else Color(0, 0, 0, 0)
+		back.set_corner_radius_all(3)
+		var fill: StyleBoxFlat = StyleBoxFlat.new()
+		fill.bg_color = Color(color, .45) if layer_index == 0 else color
+		fill.set_corner_radius_all(3)
+		bar.add_theme_stylebox_override("background", back)
+		bar.add_theme_stylebox_override("fill", fill)
+		holder.add_child(bar)
+
+
+func _card_style(button: Button, fill: Color, accent: Color, radius: int) -> void:
+	for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var style: StyleBoxFlat = StyleBoxFlat.new()
+		style.bg_color = fill if state != "focus" else Color(0, 0, 0, 0)
+		if state in ["hover", "pressed"]:
+			style.bg_color = fill.lightened(.06)
+		style.set_corner_radius_all(radius)
+		style.set_border_width_all(1 if state == "normal" else 3)
+		style.border_color = Color(accent, .35) if state == "normal" else accent
+		button.add_theme_stylebox_override(state, style)
+
+
+func _stamp(button: Button, text: String, color: Color) -> void:
+	var stamp: Label = Label.new()
+	stamp.name = "Stamp"
+	stamp.text = text
+	stamp.theme_type_variation = "Headline"
+	stamp.add_theme_font_size_override("font_size", 34)
+	stamp.add_theme_color_override("font_color", Color(color, .85))
+	stamp.add_theme_constant_override("outline_size", 2)
+	stamp.add_theme_color_override("font_outline_color", color)
+	stamp.position = Vector2(170, 300)
+	stamp.rotation = -.2
+	stamp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stamp.visible = button.has_focus()
+	button.add_child(stamp)
+
+
+func _lift(button: Button, up: bool) -> void:
+	button.pivot_offset = button.custom_minimum_size * .5
+	var tween: Tween = button.create_tween()
+	tween.tween_property(button, "scale", Vector2.ONE * (1.04 if up else 1.0), .12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if button.has_node("Stamp"):
+		button.get_node("Stamp").visible = up
+
+
 func open(run: Node) -> void:
-	eyebrow.text = "CHANGE REQUEST  ·  CHOOSE ONE  ·  TECH DEBT %d / %d  ·  %s" % [run.debt, run.debt_limit, run.severity()]
-	heading.text = "Approve one shortcut. Every shortcut is approved."
-	footer.text = "1 / 2 / 3, arrows + Enter, or click  ·  R restarts  ·  This run only. Percentages are totals against base; lower Taken and Recovery are better."
+	window_bar.hide()
+	eyebrow.text = "CHANGE ADVISORY BOARD  ·  EMERGENCY SESSION  ·  QUORUM: YOU"
+	heading.text = "Approve one shortcut."
+	subhead.text = "Every shortcut is approved. Tech debt now %d / %d — %s. Choices last this run only." % [run.debt, run.debt_limit, run.severity()]
+	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   R RESTARTS THE RUN"
 	for index in range(3):
+		var button: Button = buttons[index]
+		var risk: Array = RISK[index]
+		button.text = ""
+		button.rotation = TILT[index]
+		_card_style(button, Color(.075, .085, .095, .98), risk[1], 6)
+		var column: VBoxContainer = _clear(button)
+		var top: HBoxContainer = HBoxContainer.new()
+		top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(top)
+		_badge(top, index + 1, risk[1])
+		top.get_child(0).size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var gap: Control = Control.new()
+		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(gap)
+		_pill(top, risk[0], risk[1])
+		_text(column, "CR-%04d  ·  FILED 17:%02d" % [412 + index * 37, 4 + index], "Eyebrow")
+		_text(column, run.TITLES[index], "Headline", 36)
+		_text(column, FLAVOR[index], "Caption", 16, Color(.72, .76, .8))
+		column.add_child(HSeparator.new())
+		_text(column, BENEFITS[index], "Headline", 30, Color(.55, 1, .8))
+		var after: int = clampi(run.debt + run.cost(index), 0, run.debt_limit)
+		_text(column, ("+%d tech debt" % run.cost(index)) if run.cost(index) > 0 else "No tech debt", "Subhead", 18, risk[1] if run.cost(index) > 0 else Color(.55, 1, .8))
+		_meter(column, run.debt, after, run.debt_limit, risk[1])
+		_text(column, "Debt %d → %d (%s)  ·  enemies +%d%% pursuit" % [run.debt, after, run.severity(after), roundi((run.pressure(after) - 1) * 100)], "MonoLabel", 12, Color(.65, .7, .74))
+		_text(column, run.modifier_summary(index), "MonoLabel", 12, Color(.65, .7, .74))
+		_stamp(button, "APPROVE?", risk[1])
 		var text: String = run.option_text(index)
-		buttons[index].text = text.insert(text.find("\n") + 1, FLAVOR[index] + "\n\n")
+		button.set_meta("summary", text.insert(text.find("\n") + 1, FLAVOR[index] + "\n\n"))
 	_show_choices()
 
 
 func _show_choices() -> void:
 	shade.show()
 	panel.show()
+	# Card contents are decoration: every click and hover belongs to the card itself.
+	for button in buttons:
+		for child: Node in button.find_children("*", "Control", true, false):
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for index in range(3):
+		var button: Button = buttons[index]
+		button.modulate.a = 0.0
+		var deal: Tween = button.create_tween()
+		deal.tween_interval(.06 * index)
+		deal.tween_property(button, "modulate:a", 1.0, .18)
 	buttons[0].grab_focus()
 
 
 func close() -> void:
 	shade.hide()
 	panel.hide()
+	# Closed modals hold no card content; each opening builds its cards fresh.
 	for button in buttons:
 		button.release_focus()
+		for child: Node in button.get_children():
+			button.remove_child(child)
+			child.queue_free()
 
 
 func _choose(index: int) -> void:
@@ -100,16 +330,38 @@ func _input(event: InputEvent) -> void:
 
 
 func open_corporate(run: Node, seconds: float) -> void:
-	eyebrow.text = "DIRECT MESSAGE  ·  LEADERSHIP  ·  1 UNREAD  ·  MARKED URGENT"
+	window_bar.show()
+	eyebrow.text = "LEADERSHIP  ·  17:04  ·  MARKED URGENT  ·  READ RECEIPTS ON"
 	heading.text = "“Quick one: can we fix this without making any changes? Also, ETA? I told the VP ‘shortly’.”"
+	subhead.text = "Leadership is waiting for your reply…"
+	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   CLEARING CONTAINMENT RELIEVES %d BURNOUT   ·   DEBT UNCHANGED" % run.containment_relief
 	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
 	var titles: Array[String] = ["Commit to Five Minutes", "Give a Realistic Estimate", "Escalate the Dependency"]
 	var consequences: Array[String] = [
-		"Clear containment in %ds for −%d bonus Burnout. Expiry: no penalty." % [roundi(seconds), run.commitment_reward],
+		"Optional %ds timer: beat it for −%d bonus Burnout. Missing it costs nothing." % [roundi(seconds), run.commitment_reward],
 		"Normal containment. No timer, no extra threats.",
-		"The dependency comes back: one extra Blocker in containment."]
+		"The dependency comes back as one extra Blocker."]
 	for index in range(3):
+		var button: Button = buttons[index]
 		var after: int = clampi(run.burnout + changes[index], 0, run.burnout_limit)
-		buttons[index].text = "%d  ·  %s\n%s\n\nBurnout %d → %d / %s (%+d now)\n%s\n\n%s" % [index + 1, REPLIES[index], titles[index], run.burnout, after, run.burnout_title(after), after - run.burnout, run.modifier_summary(-1, after), consequences[index]]
-	footer.text = "1 / 2 / 3, arrows + Enter, or click  ·  R restarts  ·  Clearing containment relieves %d Burnout, not health. Debt stays unchanged." % run.containment_relief
+		var tone: Color = [Color(1, .45, .3), Color(1, .75, .35), Color(.45, .85, 1)][run.burnout_band(after)]
+		button.text = ""
+		button.rotation = 0.0
+		_card_style(button, Color(.09, .2, .21, .97), Color(.45, .9, .85), 18)
+		var column: VBoxContainer = _clear(button)
+		var top: HBoxContainer = HBoxContainer.new()
+		top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(top)
+		_badge(top, index + 1, Color(.45, .9, .85))
+		var reply: Label = _text(top, "  YOU REPLY", "Eyebrow", 0, Color(.6, .9, .85))
+		reply.autowrap_mode = TextServer.AUTOWRAP_OFF
+		reply.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		_text(column, REPLIES[index], "Headline", 28)
+		_text(column, titles[index], "Caption", 15, Color(.7, .8, .82))
+		column.add_child(HSeparator.new())
+		_text(column, "Burnout %d → %d  ·  %s" % [run.burnout, after, run.burnout_title(after)], "Subhead", 18, tone)
+		_meter(column, run.burnout, after, run.burnout_limit, tone)
+		_text(column, consequences[index], "Caption", 15, Color(.82, .86, .88))
+		_stamp(button, "SEND?", Color(.45, .9, .85))
+		button.set_meta("summary", "%d   %s\n%s\nBurnout %d → %d / %s (%+d now)\n%s\n%s" % [index + 1, REPLIES[index], titles[index], run.burnout, after, run.burnout_title(after), after - run.burnout, run.modifier_summary(-1, after), consequences[index]])
 	_show_choices()

@@ -75,7 +75,7 @@ func verify_ui() -> void:
 	incident.run.change_burnout(29, "Preview fixture")
 	incident.choose_system(3)
 	await frames(3)
-	check("29 → 64 / PRESSURED" in incident.upgrade_ui.buttons[0].text and "Taken 90%" in incident.upgrade_ui.buttons[0].text, "management preview includes the immediate burnout band and combined defense")
+	check("29 → 64 / PRESSURED" in incident.upgrade_ui.summary(0) and "Taken 90%" in incident.upgrade_ui.summary(0), "management preview includes the immediate burnout band and combined defense")
 	for button in incident.upgrade_ui.buttons:
 		check(root.get_visible_rect().encloses(button.get_global_rect()), "management card fits inside the development viewport")
 	await key(KEY_DOWN)

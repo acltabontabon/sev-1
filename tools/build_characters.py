@@ -29,14 +29,27 @@ mat('Tie', '.16, .065, .055')
 mat('Ivory', '.72, .74, .67')
 mat('Metal', '.16, .20, .22', .65, .4)
 mat('Accent', '.08, .62, .66', .2, .4, True)
+# Milestone 12 identity: the on-call engineer's hoodie, headphones and loud soles.
+mat('Hoodie', '.16, .17, .19', 0, .95)
+mat('Sole', '1, .45, .18', 0, .6)
+mat('Sticky', '.98, .86, .3', 0, .9)
+mat('Stain', '.3, .17, .08', 0, .9)
+mat('Alarm', '1, .2, .12', .1, .4, True)
+mat('Cable', '.05, .05, .06', .3, .5)
 box('Torso', '.53, .56, .28', 'Shirt')
 box('Pelvis', '.42, .18, .27', 'Trousers')
 box('Belt', '.43, .045, .285', 'Shoe')
+def torus(name, inner, outer, material):
+    resources.append(f'[sub_resource type="TorusMesh" id="{name}"]\ninner_radius = {inner}\nouter_radius = {outer}\nrings = 24\nring_segments = 10\nmaterial = SubResource("{material}")\n')
+
+def cylinder(name, radius, height, material):
+    resources.append(f'[sub_resource type="CylinderMesh" id="{name}"]\ntop_radius = {radius}\nbottom_radius = {radius}\nheight = {height}\nradial_segments = 16\nmaterial = SubResource("{material}")\n')
+
 def limb(name, top, bottom, material):
     resources.append(f'[sub_resource type="CylinderMesh" id="{name}"]\ntop_radius = {top}\nbottom_radius = {bottom}\nheight = 1.0\nradial_segments = 8\nmaterial = SubResource("{material}")\n')
 limb('UpperLeg', .105, .086, 'Trousers')
 limb('Shin', .083, .067, 'Trousers')
-limb('Sleeve', .105, .085, 'Shirt')
+limb('Sleeve', .108, .088, 'Hoodie')
 limb('Forearm', .074, .057, 'Skin')
 box('CuffMesh', '.195, .075, .21', 'Cuff')
 box('Foot', '.18, .13, .32', 'Shoe')
@@ -91,6 +104,36 @@ for row in range(10):
 node('Spacebar', 'WeaponPivot/EscalationBlade', '0, .067, .48', 'Spacebar')
 for side in [-1,1]:
     node(f'Edge{side}', 'WeaponPivot/EscalationBlade', f'{side*.206}, .03, 0', 'Rim')
+box('PanelMesh', '.17, .58, .31', 'Hoodie')
+box('BackMesh', '.55, .58, .05', 'Hoodie')
+box('HoodMesh', '.44, .17, .2', 'Hoodie')
+torus('BandMesh', .15, .185, 'Shoe')
+cylinder('CupMesh', .085, .07, 'Shoe')
+torus('CupRing', .062, .08, 'Accent')
+box('TuftMesh', '.09, .1, .07', 'Hair')
+box('StickyMesh', '.17, .17, .012', 'Sticky')
+box('StainMesh', '.075, .055, .006', 'Stain')
+box('SoleMesh', '.19, .045, .34', 'Sole')
+box('EscMesh', '.08, .07, .075', 'Alarm')
+box('CableMesh', '.04, .04, .14', 'Cable')
+for side in [-1, 1]:
+    node(f'HoodiePanel{side}', 'Torso', f'{side*.2}, 0, 0', 'PanelMesh')
+    node(f'Cup{side}', 'Torso', f'{side*.2}, .33, -.02', 'CupMesh', 'rotation = Vector3(0, 0, 1.5708)')
+    node(f'CupGlow{side}', f'Torso/Cup{side}', '0, 0, 0', 'CupRing')
+node('HoodieBack', 'Torso', '0, 0, .15', 'BackMesh')
+node('Hood', 'Torso', '0, .31, .15', 'HoodMesh', 'rotation = Vector3(-.35, 0, 0)')
+node('Headphones', 'Torso', '0, .33, -.01', 'BandMesh', 'rotation = Vector3(.25, 0, 0)')
+node('CoffeeStain', 'Torso', '.07, -.12, -.143', 'StainMesh')
+# The note someone stuck on his back during standup. Nobody told him.
+node('StickyNote', 'Torso', '-.05, .06, .178', 'StickyMesh', 'rotation = Vector3(0, 0, .12)')
+nodes.append('[node name="StickyText" type="Label3D" parent="Torso/StickyNote"]\nposition = Vector3(0, 0, .008)\ntext = "ON CALL\\n(FOREVER)"\nfont_size = 24\npixel_size = .0016\nmodulate = Color(.15, .12, .08, 1)\noutline_size = 0\n')
+for index, (x, z, rx, rz) in enumerate([(-.07, -.02, .3, -.5), (.05, .03, -.2, .4), (.0, .08, .5, .1), (.09, -.06, .1, .7)]):
+    node(f'Tuft{index}', 'Head', f'{x}, .2, {z}', 'TuftMesh', f'rotation = Vector3({rx}, {index*.7}, {rz})')
+for side in ['Left', 'Right']:
+    node('Sole', side + 'Foot', '0, -.06, -.01', 'SoleMesh')
+node('EscKey', 'WeaponPivot/EscalationBlade', '-.141, .072, -.405', 'EscMesh')
+for index in range(4):
+    node(f'Cable{index}', 'WeaponPivot/EscalationBlade', f'{.05*index}, {-.02-.04*index}, {.6+.12*index}', 'CableMesh', f'rotation = Vector3({.3*index}, {.25*index}, 0)')
 header = '[gd_scene format=3]\n\n[ext_resource type="Script" path="res://game/player/character_presentation.gd" id="1"]\n\n'
 text = header+'\n'.join(resources)+'\n[node name="Character" type="Node3D"]\nscript = ExtResource("1")\n\n'+'\n'.join(nodes)
 (ROOT/'game/player/engineer_visual.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
@@ -115,6 +158,28 @@ for i in range(4):
 for side in [-1,1]:
     node('Leg'+str(side), pos=f'{side*.22}, .34, .04', mesh='Leg', extra=f'rotation = Vector3(0, 0, {side*.06})')
     node('Fragment'+str(side), pos=f'{side*.53}, 1.28, .04', mesh='Fragment', extra=f'rotation = Vector3(0, {side*.2}, {side*.22})')
+# Milestone 12: a transaction stuck mid-commit. A loading halo that never finishes,
+# its own pages orbiting it, glowing fractures, and a receipt it cannot swallow.
+mat('Pending', '.4, .95, 1', .1, .3, True)
+mat('Receipt', '.86, .85, .8', 0, .9)
+box('Dot', '.07, .07, .07', 'Pending')
+box('Page', '.36, .012, .26', 'Paper')
+box('Crack', '.5, .018, .02', 'Status')
+box('ReceiptMesh', '.12, .5, .012', 'Receipt')
+box('ReceiptLine', '.09, .012, .014', 'Status')
+node('Throbber', pos='.17, 2.42, -.07')
+for i in range(8):
+    angle = i * 6.28318 / 8
+    node(f'Dot{i}', 'Throbber', f'{.3*__import__("math").cos(angle):.3f}, 0, {.3*__import__("math").sin(angle):.3f}', 'Dot', f'scale = Vector3({.5+.07*i:.2f}, {.5+.07*i:.2f}, {.5+.07*i:.2f})')
+node('Pages', pos='0, 1.55, 0')
+for i in range(5):
+    angle = i * 6.28318 / 5
+    node(f'Page{i}', 'Pages', f'{.75*__import__("math").cos(angle):.3f}, {(i%2)*.25:.2f}, {.75*__import__("math").sin(angle):.3f}', 'Page', f'rotation = Vector3({.4+.1*i:.2f}, {angle:.3f}, {.3-.12*i:.2f})')
+for i in range(4):
+    node('Crack', 'Slab'+str(i), f'{(-1)**i*.08}, .12, -.235', 'Crack', f'rotation = Vector3(0, 0, {(-1)**i*.35})')
+node('Receipt', 'Head', '-.04, -.36, -.17', 'ReceiptMesh', 'rotation = Vector3(.15, 0, .08)')
+for i in range(4):
+    node(f'ReceiptLine{i}', 'Head/Receipt', f'0, {.15-.09*i:.2f}, -.008', 'ReceiptLine')
 text='[gd_scene format=3]\n\n'+'\n'.join(resources)+'\n[node name="RecordDetails" type="Node3D"]\n\n'+'\n'.join(nodes)
 (ROOT/'game/enemies/record_visual.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
 

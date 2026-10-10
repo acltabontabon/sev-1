@@ -112,7 +112,7 @@ func reset_enemy() -> void:
 	activity = ACTIVITIES[get_instance_id() % ACTIVITIES.size()]
 	collision_layer = 4
 	health_changed.emit(health)
-	label.text = "PRODUCTION INCIDENT  /  %d" % health
+	label.text = ""
 	reset_physics_interpolation()
 
 
