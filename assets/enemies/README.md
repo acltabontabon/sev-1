@@ -1,36 +1,42 @@
-# Enemy bodies (CC0)
+# Enemy bodies (Quaternius "Ultimate Monsters", CC0)
 
-Retrieved 10 October 2026 from OpenGameArt without an account. All are CC0 1.0
-(public domain dedication); attribution is voluntary
+Every enemy wears a model from Quaternius' **Ultimate Monsters** pack (50 animated
+monsters, glTF), CC0 1.0. The pack's official download is a public Google Drive folder
+linked from [quaternius.com](https://quaternius.com/packs/ultimatemonsters.html). On 10
+October 2026 that folder answered every request with "quota exceeded", so the files
+were retrieved without an account from a public GitHub repository that vendors the
+complete pack unchanged: [mika314/KitchenSink](https://github.com/mika314/KitchenSink)
+(`Assets/Ultimate Monsters/`, 50 glTF files plus the author's `License.txt`). That
+`License.txt` is copied here. It states CC0 1.0 Universal; its header names a different
+Quaternius pack ("Ultimate Platformer Pack"), apparently a reused template, and the
+pack page itself also states CC0. Attribution is voluntary
 ([THIRD_PARTY_NOTICES.txt](../../THIRD_PARTY_NOTICES.txt)). Files are unmodified apart
-from lowercase names; textures embedded in the GLB files are extracted by Godot's
-importer next to them. Everything is stored with Git LFS.
+from lowercase names, and are stored with Git LFS.
 
-| File | Source | Worn by |
+| File in `ultimate_monsters/` | Pack file | Worn by |
 | --- | --- | --- |
-| `quaternius/skeleton.fbx` | Quaternius, "LowPoly Animated Monsters", [OpenGameArt](https://opengameart.org/content/lowpoly-animated-monsters) | Corrupted Record (a zombie transaction that claws out of the floor) |
-| `quaternius/brute.glb` (`Enemy Large`) | Quaternius, "Ultimate Space Kit", [OpenGameArt](https://opengameart.org/node/155017) | The Blocker (carries the BLOCKED sign) |
-| `quaternius/bat.fbx` | "LowPoly Animated Monsters" | The Meeting Invite (invite card overhead) |
-| `quaternius/slime.fbx` | "LowPoly Animated Monsters" | Scope Creep (sticky notes plastered on it; grows) |
-| `quaternius/dragon.fbx` | "LowPoly Animated Monsters" | The Variance (3.4 m, crown of status screens) |
-| `bug/bug.glb` | CDmir, "Alien Bug Animated", [OpenGameArt](https://opengameart.org/content/alien-bug-animated) | BUG minions (one-hit swarms) |
+| `orc_skull.gltf` | `Big/glTF/Orc_Skull.gltf` | Corrupted Record (skull-faced, spiked club) |
+| `yeti.gltf` | `Big/glTF/Yeti.gltf` | The Blocker (carries the BLOCKED sign) |
+| `dragon.gltf` | `Flying/glTF/Dragon_Evolved.gltf` | The Meeting Invite (invite card overhead) |
+| `spiky_blob.gltf` | `Blob/glTF/GreenSpikyBlob.gltf` | Scope Creep (sticky notes on it; grows) |
+| `demon.gltf` | `Big/glTF/Demon.gltf` | The Variance (halo and horns: two truths at once; trident) |
+| `armabee.gltf` | `Flying/glTF/Armabee_Evolved.gltf` | BUG minions (one-hit swarms; a literal bug) |
 
-History: 0.2.2 used four mechs from Quaternius' "Animated Mech Pack". The creator
-said some enemies did not read as monsters, so 0.2.4 replaced them with the bodies
-above; the mech files left the tree. Also evaluated and not used: the "Textured Cute
-Monster Pack" (toy-like), the 2018 "Animated LowPoly Robot", and Quaternius' "Ultimate
-Monsters" (its Google Drive download was over quota on the day).
+History: 0.2.2 used Quaternius mechs; 0.2.4 used a mix of smaller CC0 packs (skeleton,
+alien brute, bat, slime, dragon, CDmir's alien bug) while this pack was unreachable.
+0.2.5 replaced all of them with this single pack so the cast shares one art style; the
+earlier files left the tree.
 
 **How they are used.** `game/enemies/monster_rig.gd` (`MonsterRig`) instances the model
-under each enemy's `Visual`, scales it to a set height (flying kinds hover), keeps the
-model's own materials and adds `corruption.gdshader` as an additive overlay pass: a
-faint rim in the archetype's colour, a bright charge while the attack winds up, a hit
-flash and a glow as the corpse sinks. Clips are played from the enemy's state: the
-skeleton's spawn while manifesting, locomotion from pursuit speed, the attack scrubbed
-so its impact frame lands at the end of the melee wind-up, hit on stagger, a cast
-clip for spells, then death (or, for a bug, a squash) and a sink through the floor.
-Nothing uses root motion and the rig never moves the body or deals damage. Setting
-`rig_kind = ""` on an enemy restores the native box geometry, kept as a fallback.
+under each enemy's `Visual` at a fixed scale (this pack shares one authoring scale, and
+skinned bounds understate the flyers), keeps the model's own materials and adds
+`corruption.gdshader` as an additive overlay pass: a faint rim in the archetype's colour,
+a bright charge while the attack winds up, a hit flash and a glow as the corpse sinks.
+Clips play from the enemy's state: locomotion from pursuit speed, the attack scrubbed so
+its impact frame lands at the end of the melee wind-up, hit on stagger, a cast clip for
+spells, then death and a sink through the floor. Nothing uses root motion; the rig never
+moves the body or deals damage. Setting `rig_kind = ""` on an enemy restores the native
+box geometry, kept as a fallback.
 
-**Limits.** Attack clips are stock bites, punches and swipes, so limbs do not trace
-the telegraph arc exactly. The slime, skeleton and bug have no hit-reaction clip.
+**Limits.** Attack clips are the pack's generic weapon swings, punches, bites and
+headbutts, so limbs do not trace the telegraph arc exactly.

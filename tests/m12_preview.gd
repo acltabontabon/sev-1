@@ -419,7 +419,7 @@ func cast() -> void:
 	incident._enter(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 4)
 	player.visual.rotation.y = PI
-	var lineup: Array = [["record", -5.0], ["blocker", -2.6], ["invite", 2.6], ["scope", 5.0], ["bug", 1.2]]
+	var lineup: Array = [["record", -5.0], ["blocker", -2.6], ["invite", 2.6], ["scope", 5.0], ["bug", 1.4]]
 	var cast_actors: Array[CharacterBody3D] = []
 	for entry: Array in lineup:
 		var actor: CharacterBody3D = incident._spawn_entry([entry[0], "A1"], incident.alive)
@@ -447,14 +447,6 @@ func cast() -> void:
 	camera.position = Vector3(0, 2.0, 8.6)
 	camera.look_at(Vector3(0, 1.5, 0))
 	camera.fov = 58
-	# The overtime crew: asleep at a desk, on another incident, on a call, fixing the vending machine.
-	var crew: Node3D = incident.coworkers
-	for pair: Array in [["coworkers_desks", Vector3(-4.6, 2.0, 3.6), Vector3(-8.0, .9, -1.5)], ["coworkers_manager", Vector3(3.0, 1.9, 9.5), crew.get_node("Manager").global_position + Vector3(0, 1.0, 0)], ["coworkers_pantry", Vector3(18.6, 1.9, 13.4), Vector3(21.6, 1.0, 10.4)]]:
-		camera.position = pair[1]
-		camera.look_at(pair[2])
-		player.global_position = pair[2] + Vector3(1.5, -.95, 1.5)
-		await live(.4)
-		await shot(pair[0])
 	camera.make_current()
 	app.session.get_node("HUD").hide()
 	await live(1.5)
@@ -469,6 +461,14 @@ func cast() -> void:
 		await live(.25)
 		await shot("cast_close_%s" % (lineup[index][0] if index < lineup.size() else "variance"))
 	camera.fov = 58
+	# The overtime crew: asleep at a desk, on another incident, on a call, fixing the vending machine.
+	var crew: Node3D = incident.coworkers
+	for pair: Array in [["coworkers_desks", Vector3(-4.6, 2.0, 3.6), Vector3(-8.0, .9, -1.5)], ["coworkers_manager", Vector3(3.0, 1.9, 9.5), crew.get_node("Manager").global_position + Vector3(0, 1.0, 0)], ["coworkers_pantry", Vector3(18.6, 1.9, 13.4), Vector3(21.6, 1.0, 10.4)]]:
+		camera.position = pair[1]
+		camera.look_at(pair[2])
+		player.global_position = pair[2] + Vector3(1.5, -.95, 1.5)
+		await live(.4)
+		await shot(pair[0])
 	camera.position = Vector3(1.1, 1.9, 1.6)
 	camera.look_at(player.position + Vector3(0, 1.2, 0))
 	camera.fov = 40

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bia58t88vf14g"
-path="res://.godot/imported/bug.glb-b583b9b541e49ba6296664d793c8ae1d.scn"
+uid="uid://cyy41x7vdga4b"
+path="res://.godot/imported/orc_skull.gltf-63845ac581d01459e70f8576f74271a8.scn"
 
 [deps]
 
-source_file="res://assets/enemies/bug/bug.glb"
-dest_files=["res://.godot/imported/bug.glb-b583b9b541e49ba6296664d793c8ae1d.scn"]
+source_file="res://assets/enemies/ultimate_monsters/orc_skull.gltf"
+dest_files=["res://.godot/imported/orc_skull.gltf-63845ac581d01459e70f8576f74271a8.scn"]
 
 [params]
 

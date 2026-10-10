@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dg21h3fnvj7kd"
-path="res://.godot/imported/brute.glb-99ceef6e6afd55bb4b3c78f840b9b9c7.scn"
+uid="uid://cs27xylhljt1o"
+path="res://.godot/imported/spiky_blob.gltf-dd34c812f02efaf3e1104f6ab29cb846.scn"
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/brute.glb"
-dest_files=["res://.godot/imported/brute.glb-99ceef6e6afd55bb4b3c78f840b9b9c7.scn"]
+source_file="res://assets/enemies/ultimate_monsters/spiky_blob.gltf"
+dest_files=["res://.godot/imported/spiky_blob.gltf-dd34c812f02efaf3e1104f6ab29cb846.scn"]
 
 [params]
 

@@ -5,28 +5,30 @@ extends Node3D
 ## moves the body, starts attacks or applies damage. Provenance: assets/enemies/README.md.
 
 const OVERLAY: Shader = preload("res://game/enemies/corruption.gdshader")
-## Per kind: model, standing height in metres, optional hover `lift`, and clip roles.
+## Per kind: model, standing height in metres (for labels and bars), model `scale` (the
+## Ultimate Monsters share one authoring scale; skinned bounds understate flyers), optional
+## hover `lift`, and clip roles.
 ## `impact` is the fraction of the attack clip where the blow lands; it is pinned to the
 ## end of the melee wind-up so the visible hit matches the damage frame.
 const KINDS: Dictionary = {
-	"record": {"model": "res://assets/enemies/quaternius/skeleton.fbx", "height": 2.0,
-		"idle": "Skeleton_Idle", "walk": "Skeleton_Running", "run": "Skeleton_Running", "attack": "Skeleton_Attack",
-		"impact": .5, "hit": "", "death": "Skeleton_Death", "cast": "", "spawn": "Skeleton_Spawn"},
-	"blocker": {"model": "res://assets/enemies/quaternius/brute.glb", "height": 2.5,
-		"idle": "Weapon", "walk": "Walk", "run": "Run", "attack": "Punch", "impact": .45,
+	"record": {"model": "res://assets/enemies/ultimate_monsters/orc_skull.gltf", "height": 2.1, "scale": .65,
+		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Weapon", "impact": .45,
+		"hit": "HitReact", "death": "Death", "cast": ""},
+	"blocker": {"model": "res://assets/enemies/ultimate_monsters/yeti.gltf", "height": 2.5, "scale": .88,
+		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Punch", "impact": .45,
 		"hit": "HitReact", "death": "Death", "cast": "Wave"},
-	"invite": {"model": "res://assets/enemies/quaternius/bat.fbx", "height": 1.5, "lift": 1.0,
-		"idle": "Bat_Flying", "walk": "Bat_Flying", "run": "Bat_Flying", "attack": "Bat_Attack", "impact": .5,
-		"hit": "Bat_Hit", "death": "Bat_Death", "cast": "Bat_Attack2"},
-	"scope": {"model": "res://assets/enemies/quaternius/slime.fbx", "height": .95,
-		"idle": "Slime_Idle", "walk": "Slime_Walk", "run": "Slime_Walk", "attack": "Slime_Attack", "impact": .5,
-		"hit": "", "death": "Slime_Death", "cast": ""},
-	"variance": {"model": "res://assets/enemies/quaternius/dragon.fbx", "height": 3.4, "lift": .5,
-		"idle": "Dragon_Flying", "walk": "Dragon_Flying", "run": "Dragon_Flying", "attack": "Dragon_Attack", "impact": .5,
-		"hit": "Dragon_Hit", "death": "Dragon_Death", "cast": "Dragon_Attack2"},
-	"bug": {"model": "res://assets/enemies/bug/bug.glb", "height": .62,
-		"idle": "Idle", "walk": "Run", "run": "Run", "attack": "Attack_000", "impact": .5,
-		"hit": "", "death": "", "cast": ""},
+	"invite": {"model": "res://assets/enemies/ultimate_monsters/dragon.gltf", "height": 1.8, "scale": .45, "lift": .4,
+		"idle": "Flying_Idle", "walk": "Fast_Flying", "run": "Fast_Flying", "attack": "Headbutt", "impact": .45,
+		"hit": "HitReact", "death": "Death", "cast": "Punch"},
+	"scope": {"model": "res://assets/enemies/ultimate_monsters/spiky_blob.gltf", "height": 1.1, "scale": .33,
+		"idle": "Idle", "walk": "Walk", "run": "Walk", "attack": "Bite_Front", "impact": .45,
+		"hit": "HitRecieve", "death": "Death", "cast": ""},
+	"variance": {"model": "res://assets/enemies/ultimate_monsters/demon.gltf", "height": 3.2, "scale": 1.0,
+		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Weapon", "impact": .45,
+		"hit": "HitReact", "death": "Death", "cast": "Wave"},
+	"bug": {"model": "res://assets/enemies/ultimate_monsters/armabee.gltf", "height": .75, "scale": .35, "lift": .2,
+		"idle": "Flying_Idle", "walk": "Fast_Flying", "run": "Fast_Flying", "attack": "Headbutt", "impact": .45,
+		"hit": "HitReact", "death": "Death", "cast": ""},
 }
 const LOOPING: Array[String] = ["idle", "walk", "run", "cast"]
 const ROLES: Array[String] = ["idle", "walk", "run", "attack", "hit", "death", "cast", "spawn"]
@@ -219,6 +221,8 @@ func _resolve(role: String) -> String:
 
 
 func _scale() -> float:
+	if spec.has("scale"):
+		return spec.scale
 	if not scales.has(kind):
 		var bounds_: AABB = AABB()
 		var first: bool = true

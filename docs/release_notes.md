@@ -1,5 +1,23 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.5 — One monster pack (10 October 2026)
+
+Creator ask: retry Quaternius' "Ultimate Monsters". Its official Drive link was still
+over quota, so the unchanged CC0 pack was taken from a public GitHub mirror (see
+[enemy provenance](../assets/enemies/README.md)). Every enemy now comes from that one
+pack, so the cast finally shares an art style:
+
+- **Corrupted Record:** a skull-faced orc with a spiked club.
+- **The Blocker:** a Yeti holding up the BLOCKED sign.
+- **The Meeting Invite:** an orange winged dragon with the invite overhead.
+- **Scope Creep:** a spiky green blob covered in sticky notes.
+- **The Variance:** a red demon with both a halo and horns, and a trident.
+- **BUG minions:** armoured bees (still one hit each).
+
+Behaviour, effects, freeze-frames and balance are unchanged from 0.2.4. Performance (M2
+Pro, 1280×720 preview): a five-enemy fight held 120.2 FPS mean (p95 9.5 ms, max 11.1 ms).
+Validation: 650 assertions across 15 headless suites.
+
 ## 0.2.4 — Monsters, minions, moves and the night shift (10 October 2026)
 
 Creator feedback on 0.2.3: freeze-frames on big impacts; monster effects that add

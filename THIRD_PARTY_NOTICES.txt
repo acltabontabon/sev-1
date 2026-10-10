@@ -2060,5 +2060,5 @@ Attribution is not required; credit is given voluntarily. Files, modifications a
 
 SEV-1 enemy bodies
 ------------------
-Enemy models and animations from Quaternius (quaternius.com): "LowPoly Animated Monsters" and "Ultimate Space Kit", and "Alien Bug Animated" by CDmir, all distributed on OpenGameArt.org under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
-Attribution is not required; credit is given voluntarily. Files and their use are listed in assets/enemies/README.md.
+Enemy models and animations from Quaternius (quaternius.com), "Ultimate Monsters", released under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
+Attribution is not required; credit is given voluntarily. Files, retrieval and use are listed in assets/enemies/README.md.
