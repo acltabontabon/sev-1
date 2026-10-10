@@ -407,6 +407,9 @@
     "record": [
       {
         "name": "DANA",
+        "wrong": "The ledger demanded a blood sample. I offered petty cash. It said my cash wasn't petty enough. Now it wants a finger AND a receipt!",
+        "snap": "I tried. The ledger rebooted me as a deductible expense. My left eye is a rounding error!",
+        "soon": "Stay there. I need to check whether you depreciate when you scream.",
         "team": "Accounts Receivable",
         "quip": "Reconciling since Tuesday.",
         "line": "The ledger said hi. Ledgers shouldn't talk.",
@@ -415,6 +418,9 @@
       },
       {
         "name": "RAJ",
+        "wrong": "I migrated the database into my chest. Zero latency! Every heartbeat drops a table. Please stop making me nervous.",
+        "snap": "The last reboot gave me a second spine. High availability. Both spines are the primary. They hate each other!",
+        "soon": "Don't leave. You're the only backup that still has legs.",
         "team": "Data Engineering",
         "quip": "Last commit message: “fix”.",
         "line": "The migration is fine. Mostly fine.",
@@ -423,6 +429,9 @@
       },
       {
         "name": "MIGUEL",
+        "wrong": "Cell B twelve contains my mother. She's asking why I don't visit. I merged her with Q three. She has never been so disappointed!",
+        "snap": "If I shut down, the spreadsheet inherits my body. It already changed my emergency contact to SUM!",
+        "soon": "Hold still. I'm dragging your soul down to fill the remaining rows.",
         "team": "Finance Ops",
         "quip": "47 spreadsheets open. Needs one more.",
         "line": "VLOOKUP is looking back at me. I think it's judging my formulas.",
@@ -431,6 +440,9 @@
       },
       {
         "name": "KIM",
+        "wrong": "I billed the moon. It refused to pay. So I repossessed Tuesday. You're welcome. Late fees start in your bones!",
+        "snap": "My eyelids are a subscription now. Blinking costs extra. Procurement says keep them open until death!",
+        "soon": "Your invoice is due. We accept cash, card, and whatever comes out when you crack.",
         "team": "Billing",
         "quip": "Has not blinked since 3 PM.",
         "line": "Invoices don't sleep. Neither do I.",
@@ -441,6 +453,9 @@
     "blocker": [
       {
         "name": "GRETA",
+        "wrong": "I swallowed the approval stamp. Every hiccup authorizes a funeral. HIC! Congratulations. Yours is expedited!",
+        "snap": "Absolutely not! My off switch is pending approval from my on switch. We have achieved perfect governance!",
+        "soon": "Leaving counts as a change. Put your feet back where the committee approved them.",
         "team": "Change Advisory Board",
         "quip": "Has concerns. Will raise them in a meeting.",
         "line": "Has this been approved? In writing?",
@@ -451,6 +466,9 @@
     "invite": [
       {
         "name": "TODD",
+        "wrong": "I booked a meeting inside your skeleton. Mandatory. Your ribs accepted. Your spine is tentative. I'll chase it!",
+        "snap": "We can reboot during the break. There is no break. I deleted lunch to improve attendance!",
+        "soon": "Don't run! I've attached the agenda to your tendons.",
         "team": "Program Management",
         "quip": "Calendar: 112% booked.",
         "line": "Got fifteen minutes? It's recurring.",
@@ -461,6 +479,9 @@
     "scope": [
       {
         "name": "PRIYA",
+        "wrong": "I need the office to give birth to another office. By Monday. With parking. The walls are already having contractions!",
+        "snap": "Great! While you're in there, add a third arm. One for delivery, one for alignment, one to strangle the deadline!",
+        "soon": "Wait! Your escape needs a premium tier. And teeth. Mostly teeth.",
         "team": "Product",
         "quip": "Just one tiny thing before launch.",
         "line": "Small ask. Teeny. Barely a requirement.",
@@ -469,6 +490,9 @@
       },
       {
         "name": "LEO",
+        "wrong": "We hit a million users! They're all inside me. The retention team welded my mouth shut. I'm speaking through the churn!",
+        "snap": "Shutdown is churn! Reboot is acquisition! I'll cut myself in half and report one hundred percent growth!",
+        "soon": "You can leave after you refer three friends. They don't need to be alive.",
         "team": "Growth",
         "quip": "Wants it viral by Monday.",
         "line": "What if it also did… everything?",

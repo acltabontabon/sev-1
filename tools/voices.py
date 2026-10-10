@@ -279,7 +279,7 @@ def talk_lines(talk):
                                         ('snap', talk['host_snap'].get(kind, 'Off. And on. Sure.'), key + '_turning'),
                                         ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
-                lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
+                lines.append({'id': f'host_{key}_{node}', 'text': person.get(node, text), 'voice_profile': profile})
     # The night shift charging into the boss fight, and what they scream on the way out.
     for name, moments in talk.get('cavalry', {}).items():
         for moment, text in moments.items():

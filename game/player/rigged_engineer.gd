@@ -266,7 +266,19 @@ func overtime_fade(seconds: float) -> void:
 	fade.chain().tween_callback(overtime.bind(false))
 
 
+var conversing: bool = false
+
+
 func _physics_process(delta: float) -> void:
+	if conversing:
+		clock += delta
+		crouch = 0.0
+		position = Vector3.ZERO
+		_loop("idle_casual", 1.0, .2, delta)
+		right_ik.active = false
+		left_ik.active = false
+		skeleton.advance(delta)
+		return
 	if overtime_on:
 		# Arcs crackle round him, and the light breathes with them.
 		overtime_crackle -= delta

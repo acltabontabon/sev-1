@@ -1305,6 +1305,7 @@ func talk(someone: Dictionary) -> void:
 	# The two of them keep breathing (and gesturing) while everything else waits.
 	talking.process_mode = Node.PROCESS_MODE_ALWAYS
 	player.get_node("Visual/Character").process_mode = Node.PROCESS_MODE_ALWAYS
+	player.get_node("Visual/Character").conversing = true
 	# Nobody wants a giant keyboard in the two-shot; it comes back with play.
 	player.get_node("Visual/Character").weapon.visible = false
 	if "talking" in talking:
@@ -1351,6 +1352,7 @@ func _end_talk() -> void:
 		if "talking" in talking:
 			talking.talking = false
 	player.get_node("Visual/Character").process_mode = Node.PROCESS_MODE_INHERIT
+	player.get_node("Visual/Character").conversing = false
 	player.get_node("Visual/Character").weapon.visible = true
 	var spoken_to: Node3D = talking
 	talk_with = {}

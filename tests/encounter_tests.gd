@@ -489,6 +489,14 @@ func _run() -> void:
 	incident.talk(someone)
 	await frames(2)
 	check(incident.dialogue.is_open() and incident.modal_pending() and paused, "talking opens the dialogue and holds the incident")
+	var talking_character: Node3D = player.get_node("Visual/Character")
+	var model_basis: Basis = talking_character.model.transform.basis
+	player.dodging = true
+	player.dodge_elapsed = 0.0
+	await frames(30)
+	check(talking_character.animator.current_animation == "rig/idle_casual" and talking_character.crouch == 0.0 and talking_character.position == Vector3.ZERO, "a paused dodge cannot crouch or roll the engineer during talk")
+	check(talking_character.model.transform.basis.is_equal_approx(model_basis), "talk preserves the engineer's model size")
+	player.dodging = false
 	check(incident.dialogue.speaker.stream != null and incident.dialogue.pace != incident.dialogue.SPEED, "every line is voiced and the text keeps pace with the voice")
 	var calm: int = incident.run.burnout
 	var standing: Vector3 = morgan.body.global_position
@@ -509,6 +517,7 @@ func _run() -> void:
 	incident.dialogue.choose(0)
 	await frames(2)
 	check(not incident.dialogue.is_open() and not incident.modal_pending() and not paused, "leaving the talk resumes play")
+	check(not talking_character.conversing, "leaving restores the normal character animation controller")
 	incident.talk(incident.talk_target())
 	check(incident.dialogue.node_id == "again", "a second visit opens differently")
 	incident.dialogue.close()

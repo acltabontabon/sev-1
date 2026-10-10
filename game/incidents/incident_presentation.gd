@@ -1023,8 +1023,8 @@ func begin_dialogue(speaker: Node3D, standing: bool) -> void:
 
 
 ## Shot / reverse shot, always from the same side of the pair: an establishing two-shot
-## to open, then over the engineer's shoulder or a close single on whoever is talking,
-## and a reverse over the speaker's shoulder when the engineer answers. Each line drifts
+## to open, then a two-shot or a close single on whoever is talking.
+## Side offsets keep the listener from obscuring the speaker. Each line drifts
 ## in slowly; walls pull the camera in.
 func dialogue_camera(who: String, time: float, line: int) -> void:
 	if not is_instance_valid(talk_speaker):
@@ -1034,33 +1034,36 @@ func dialogue_camera(who: String, time: float, line: int) -> void:
 	var toward: Vector3 = Vector3(to.x - from.x, 0, to.z - from.z)
 	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
 	var side: Vector3 = toward.cross(Vector3.UP).normalized()
-	var mine: Vector3 = from + Vector3.UP * 1.3
-	var theirs: Vector3 = to + Vector3.UP * (1.2 if talk_standing else .95)
+	var mine: Vector3 = from + Vector3.UP * 1.65
+	var theirs: Vector3 = to + Vector3.UP * (1.65 if talk_standing else 1.2)
 	var spot: Vector3
 	var look: Vector3
 	var lens: float = 44.0
 	if who == "you":
-		spot = to + toward * 2.3 + side * 1.35
-		spot.y = to.y + 1.75
-		look = mine - Vector3.UP * .4
+		spot = from + toward * .7 + side * 1.7 + Vector3.UP * 1.65
+		look = mine - Vector3.UP * .15
 		lens = 40.0
 	elif line == 1 and time < 1.6:
 		var middle: Vector3 = (from + to) * .5
-		spot = middle + side * 3.0 - toward * .4 + Vector3.UP * 1.55
-		look = (mine + theirs) * .5 - Vector3.UP * .45
+		spot = middle + side * 3.0 + Vector3.UP * 1.55
+		look = (mine + theirs) * .5 - Vector3.UP * .2
 		lens = 46.0
 	elif line % 2 == 1:
-		spot = from - toward * 2.1 + side * 1.15 + Vector3.UP * 1.75
-		look = theirs.lerp(mine, .3) - Vector3.UP * .55
+		spot = (from + to) * .5 + side * 3.0 + Vector3.UP * 1.75
+		look = theirs.lerp(mine, .3) - Vector3.UP * .2
 	else:
-		spot = from + toward * .45 + side * .5 + Vector3.UP * 1.3
-		look = theirs - Vector3.UP * .3
+		spot = to - toward * .7 + side * 1.7 + Vector3.UP * 1.65
+		look = theirs - Vector3.UP * .15
 		lens = 38.0
 	spot = look + (spot - look) * (1.0 - .08 * smoothstep(0.0, 5.0, time))
+	var desired_distance: float = look.distance_to(spot)
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(look, spot, 1)
 	var hit: Dictionary = incident.get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
 		spot = hit.position + (look - hit.position).normalized() * .25
+		# Preserve subject size when a wall shortens the shot's camera distance.
+		var distance_ratio: float = desired_distance / maxf(look.distance_to(spot), .25)
+		lens = minf(85.0, rad_to_deg(2.0 * atan(tan(deg_to_rad(lens) * .5) * distance_ratio)))
 	camera.global_position = spot
 	camera.look_at(look)
 	camera.fov = lens

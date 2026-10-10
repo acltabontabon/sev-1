@@ -45,9 +45,9 @@ static func host_tree(identity: Dictionary, kind: String) -> Dictionary:
 			["Are you okay?", "wrong", {}],
 			["Have you tried turning yourself off and on again?", "snap", {}],
 			["…I'll just go.", "soon", {}]]},
-		"snap": {"text": data().host_snap.get(kind, "Off. And on. Sure."), "replies": []},
-		"wrong": {"text": data().host_replies.get(kind, "Fine."), "replies": [["(Back away slowly.)", "soon", {}]]},
-		"soon": {"text": data().host_soon, "replies": []},
+		"snap": {"text": identity.get("snap", data().host_snap.get(kind, "Off. And on. Sure.")), "replies": []},
+		"wrong": {"text": identity.get("wrong", data().host_replies.get(kind, "Fine.")), "replies": [["(Back away slowly.)", "soon", {}]]},
+		"soon": {"text": identity.get("soon", data().host_soon), "replies": []},
 	}}
 
 
