@@ -341,12 +341,12 @@ func _enter(next: Stage) -> void:
 		Stage.ENCOUNTER_ONE:
 			wave_index = 0
 			remaining = stage_total()
-			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
+			objective = "1/3 · The Discrepancy"
 			_plant(0)
 			message = "The night shift is not okay.  •  Hit first: double damage."
 			light_target = 2.3
 		Stage.INVESTIGATION:
-			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
+			objective = "Investigate at OPERATIONS"
 			message = "DISCREPANCY CONFIRMED  •  The pantry still has coffee."
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_plant_sync()
@@ -354,7 +354,7 @@ func _enter(next: Stage) -> void:
 		Stage.ENCOUNTER_TWO:
 			wave_index = 0
 			remaining = stage_total()
-			objective = "2 / 3 — Contain the failed delivery. Clear the aggressive records."
+			objective = "2/3 · Contain the delivery"
 			# A meeting nobody attended adjourns; its attendees go home instead of
 			# twitching through containment like a due wave.
 			for host: Node3D in sync_hosts:
@@ -371,7 +371,7 @@ func _enter(next: Stage) -> void:
 			room.get_node("VaultGate").collision_layer = 0
 			spawn_delay = 9999.0
 			boss_triggered = false
-			objective = "3 / 3 — The Variance: enter the production core, north through the server corridor."
+			objective = "3/3 · The Variance"
 			message = "The original carries a solid ◆. Copies are hollow ◇."
 			_dashboard("FALSE\nPOSITIVES", "VERIFY BEFORE RESOLVING")
 		Stage.RESOLVED, Stage.FAILED:
@@ -826,23 +826,23 @@ func next_step() -> Dictionary:
 		Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO:
 			var near: CharacterBody3D = nearest_threat()
 			if near != null:
-				return {"text": "Hunt the threats. Hit them before they see you.", "point": near.global_position, "tag": "THREAT"}
+				return {"text": "Hunt them. Hit before they see you.", "point": near.global_position, "tag": "THREAT"}
 			if not alive.is_empty() or not pending.is_empty():
-				return {"text": "Fight! Dodge the orange arcs, strike after.", "point": none, "tag": ""}
+				return {"text": "Dodge the orange arcs, strike after.", "point": none, "tag": ""}
 			if armed and _strangest() != null:
-				return {"text": "A coworker is acting strange. Talk to them, or hit first.", "point": _strangest().global_position, "tag": "???"}
+				return {"text": "Talk to the strange coworker, or hit first.", "point": _strangest().global_position, "tag": "???"}
 			if wave_index >= waves().size():
-				return {"text": "Area clear. A change request is on its way.", "point": none, "tag": ""}
-			return {"text": "Catch your breath. The next wave is coming.", "point": none, "tag": ""}
+				return {"text": "Area clear.", "point": none, "tag": ""}
+			return {"text": "Catch your breath.", "point": none, "tag": ""}
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
 				return {"text": "Survive the Quick Sync.", "point": none, "tag": ""}
-			return {"text": "Inspect the console in Operations (press E there).", "point": CONSOLE_POSITION, "tag": "CONSOLE"}
+			return {"text": "Inspect the Operations console (E).", "point": CONSOLE_POSITION, "tag": "CONSOLE"}
 		Stage.BOSS:
 			if not boss_triggered:
-				return {"text": "Go north through the server corridor into the vault.", "point": room.get_node("SpawnPoints/VaultEntry").global_position, "tag": "VAULT"}
+				return {"text": "North, through the corridor, to the vault.", "point": room.get_node("SpawnPoints/VaultEntry").global_position, "tag": "VAULT"}
 			if is_instance_valid(boss) and boss.health > 0:
-				return {"text": "Defeat The Variance. Strike only while it is OPEN.", "point": none, "tag": ""}
+				return {"text": "Strike The Variance only while OPEN.", "point": none, "tag": ""}
 	return {}
 
 
@@ -1205,21 +1205,21 @@ func _strangest() -> Node3D:
 
 func encounter_status() -> String:
 	if armed and _strangest() != null:
-		return "Something is off with %d coworker%s • nearest %d m • they snap in %ds" % [hosts.size(), "" if hosts.size() == 1 else "s", roundi(_flat(_strangest().global_position)), maxi(0, ceili(armed_left))]
+		return "%d acting strange · %d m · snap in %ds" % [hosts.size(), roundi(_flat(_strangest().global_position)), maxi(0, ceili(armed_left))]
 	if quick_sync == "active":
-		return "Quick Sync in progress • %d attendee%s remaining" % [sync_alive.size(), "" if sync_alive.size() == 1 else "s"]
+		return "Quick Sync · %d left" % sync_alive.size()
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and nearest_threat() != null:
 		var near: CharacterBody3D = nearest_threat()
 		var distance: int = roundi(Vector2(near.global_position.x - player.global_position.x, near.global_position.z - player.global_position.z).length())
-		return "%d threat%s roaming the floor • nearest %d m" % [remaining, "" if remaining == 1 else "s", distance]
+		return "%d threat%s · nearest %d m" % [remaining, "" if remaining == 1 else "s", distance]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and wave_index >= waves().size() and alive.is_empty() and pending.is_empty():
-		return "Area clear • wave %d / %d" % [wave_index, waves().size()]
+		return "Area clear"
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
-		return "%d threat%s remaining • wave %d / %d%s" % [remaining, "" if remaining == 1 else "s", wave_index, waves().size(), " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
+		return "%d left · wave %d/%d%s" % [remaining, wave_index, waves().size(), " · next in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
 	if stage == Stage.BOSS and not boss_triggered:
-		return "The restricted gate is open. Follow the corridor north."
+		return "Gate open · head north"
 	if stage == Stage.BOSS and not is_instance_valid(active_enemy):
-		return "The Variance arrives in %ds" % maxi(1, ceili(spawn_delay))
+		return "Arriving in %ds" % maxi(1, ceili(spawn_delay))
 	return ""
 
 
@@ -1231,7 +1231,7 @@ func inspect_console() -> void:
 		presentation.evidence_shot()
 	inspected = true
 	console_marker.text = "EVIDENCE OPEN"
-	objective = "Which system is missing the record? Press 1, 2, or 3."
+	objective = "Which system lost it?  1 · 2 · 3"
 	message = "1  Core Ledger: SUCCESS — signed receipt confirms money was saved.\n2  Loan Management: FAILED — waiting for payment confirmation.\n3  Payment Processing: NOT FOUND — delivery log stops before arrival."
 
 
@@ -1402,7 +1402,7 @@ func choose_system(choice: int) -> void:
 		_offer_corporate()
 	elif choice in [1, 2]:
 		mistakes += 1
-		objective = "Core saved it; Loans is waiting. Which system never received it? Try again."
+		objective = "Not that one. Who never received it?  1 · 2 · 3"
 
 
 func _unhandled_input(event: InputEvent) -> void:

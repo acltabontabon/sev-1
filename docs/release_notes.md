@@ -1,5 +1,15 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.32 — A quieter top-left (11 October 2026)
+
+Creator request: trim the top-left text too.
+
+- The ticket header drops SEV-1 and OPEN (`INC-001 · TRIAGE · 02:14`); objectives are
+  the stage name (`1/3 · The Discrepancy`, `Investigate at OPERATIONS`); the status
+  line is a short tally (`2 acting strange · 22 m · snap in 43s`, `3 threats · nearest
+  22 m`, `6 left · wave 1/2 · next in 3s`, `Area clear`, `Gate open · head north`).
+- The NEXT line is shorter too, so it no longer runs under the chat cards.
+
 ## 0.2.31 — Notices are one line (11 October 2026)
 
 Creator report: the "night shift is not okay…" box at the start is too big, a wall of

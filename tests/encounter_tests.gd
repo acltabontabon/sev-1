@@ -133,7 +133,7 @@ func _run() -> void:
 	var nearest: float = INF
 	for foe: CharacterBody3D in incident.alive:
 		nearest = minf(nearest, Vector2(foe.global_position.x - player.global_position.x, foe.global_position.z - player.global_position.z).length())
-	check(first_area != "" and nearest > 10.0 and incident.beacon.visible and incident.encounter_status().contains("roaming the floor"), "the first wave breaks out away from the engineer, marked and roaming")
+	check(first_area != "" and nearest > 10.0 and incident.beacon.visible and incident.encounter_status().contains("nearest"), "the first wave breaks out away from the engineer, marked and roaming")
 	var sites: Dictionary = {}
 	for foe: CharacterBody3D in incident.alive:
 		sites[Vector2i(roundi(foe.home.x / 4.0), roundi(foe.home.z / 4.0))] = true

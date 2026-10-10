@@ -504,13 +504,13 @@ func _build_evidence() -> void:
 
 func _refresh_incident(incident: Node) -> void:
 	var open_seconds: int = maxi(0, int(incident.elapsed - 13.4))
-	$Margin/VBox/Title.text = "INC-001  ·  SEV-1  ·  %s  ·  OPEN %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
+	$Margin/VBox/Title.text = "INC-001  ·  %s  ·  %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
 	status.text = incident.objective
 	var progress: String = incident.encounter_status()
 	if not progress.is_empty():
 		status.text += "\n" + progress
 	if incident.stage == incident.Stage.INVESTIGATION and incident.inspected and not incident.near_console():
-		status.text = "Return to the OPERATIONS marker to select a record."
+		status.text = "Back to OPERATIONS to choose"
 	$Margin/VBox/Health.text = "YOU  %d / %d" % [player.health, player.max_health]
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy

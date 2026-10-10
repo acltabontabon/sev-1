@@ -84,7 +84,7 @@ func verify_ui() -> void:
 	await key(KEY_ENTER)
 	check(incident.corporate_choice == 1 and not paused, "management arrow navigation resumes the correct path")
 	await frames(3)
-	check("6 threats remaining" in hud.status.text and "arrival" in hud.status.text, "HUD explains encounter count and the scheduled arrival")
+	check("6 left" in hud.status.text and "next in" in hud.status.text, "HUD explains encounter count and the scheduled arrival")
 	check(incident.run.modifier_summary() in hud.find_child("Burnout", true, false).text, "HUD shows combined active modifiers")
 	await key(KEY_R)
 	await frames(3)
