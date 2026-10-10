@@ -641,8 +641,16 @@ No autoloads or frameworks were added; new behavior lives with its owners.
 - **Kill cams.** `presentation.kill_cam(subject, from, force, length)` runs a real-time
   `killcam` beat: impact punch-in, then a hero shot (the engineer turned to camera in
   `Pose.COOL`, the blade on `rigged_engineer.shoulder_transform()`), then a blend to the rig
-  camera; it drives `Engine.time_scale` and `AudioServer.playback_speed_scale` itself; `missing_transaction._on_record_died()`
-  calls it and, in a rendered game, delays the stage's upgrade offer by `upgrade_delay`.
+  camera, during which the engineer turns back and the blade blends from the floor to his
+  shoulder; it slows time through `ElementFx.slow_motion(&"killcam")` and drives
+  `AudioServer.playback_speed_scale` itself; `missing_transaction._on_record_died()`
+  calls it and, in a rendered game, offers the stage's upgrade `UPGRADE_BEAT` real seconds
+  after the kill cam ends (`upgrade_delay`, counted in real time).
+- **Run end.** `_finish()` holds the run for `ENDING_HOLD` real seconds after any kill cam
+  (the boss's finisher, the engineer's fall) with the tree running, then releases capture;
+  the front end shows the report only once capture is released. `hold_ending` is off in
+  headless suites unless a test opts in. The engineer's death clip keeps playing behind
+  the paused report.
 - **Kill feedback.** `missing_transaction._kill_feedback()` (every record and bug death,
   not the WONTFIX sweep) tracks `kill_streak`, pays FOCUS and calls
   `presentation.kill_pop()` (stamp, ring, flash, sounds; `HUD.show_streak()` banner). Each move `_shout()`s its callout
@@ -676,11 +684,14 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   on routines (asleep, sit, pace, carry, fix, stand with a periodic gesture). No collision. Each
   has one line shown when the engineer walks past; they cower while `battle_mode` is
   engaged and the manager claims credit when a fight ends. `reset()` restores them.
-- **Freeze-frames and framing.** `ElementFx.freeze()` drops `Engine.time_scale` for a
-  beat on big impacts (Blocker quake, Variance cataclysm, the engineer's finisher hit,
-  the boss's defeat) and a real-time timer restores it; the newest freeze owns the
-  restore, `release_freeze()` runs on reset, and headless suites skip it unless a test
-  opts in. `camera_rig.gd` pulls back slightly with `battle` and, once the mouse has
+- **Freeze-frames and slow motion.** `ElementFx` is the only writer of
+  `Engine.time_scale`. `freeze()` drops it for a beat on big impacts (Blocker quake,
+  Variance cataclysm, the engineer's finisher hit, the boss's defeat) and a real-time
+  timer ends it; the newest freeze owns the end. Longer slow motion (kill cam, Force
+  Rollback, first sighting) registers a named layer with `slow_motion(key, scale)`; the
+  slowest freeze or layer wins, so one effect ending hands back to the others instead of
+  snapping to full speed. `clear_slow_motion()` runs on reset, and headless suites skip
+  freezes unless a test opts in. `camera_rig.gd` pulls back slightly with `battle` and, once the mouse has
   rested `assist_delay` seconds mid-fight, eases toward `focus` (the battle director's
   weighted centre of nearby engaged enemies) outside a dead zone; any orbit input
   cancels it.

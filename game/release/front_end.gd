@@ -600,7 +600,8 @@ func _process(_delta: float) -> void:
 	if session != null and page.is_empty():
 		var incident: Node = session.get_node("Incident")
 		if incident.terminal():
-			show_page("report")
+			if not session.get_node("Player/CameraRig").controls_active:
+				show_page("report")
 		elif not incident.modal_pending() and not session.get_node("Player/CameraRig").controls_active:
 			show_page("pause")
 

@@ -249,6 +249,12 @@ func _lift(button: Button, up: bool) -> void:
 		button.get_node("Stamp").visible = up
 
 
+## Seconds after a modal opens during which choices are ignored (off in headless suites,
+## which press keys on the same frame).
+var input_guard: float = 0.0 if DisplayServer.get_name() == "headless" else .45
+var guard_left: float = 0.0
+
+
 func open(run: Node) -> void:
 	window_bar.hide()
 	eyebrow.text = "CHANGE ADVISORY BOARD  ·  EMERGENCY SESSION  ·  QUORUM: YOU"
@@ -288,6 +294,7 @@ func open(run: Node) -> void:
 
 
 func _show_choices() -> void:
+	guard_left = input_guard
 	shade.show()
 	panel.show()
 	# Card contents are decoration: every click and hover belongs to the card itself.
@@ -315,8 +322,14 @@ func close() -> void:
 
 
 func _choose(index: int) -> void:
-	if panel.visible:
+	# Cards arrive mid-fight: a jump (Space accepts) or an attack click aimed at the
+	# middle card must not sign anything before the deal-in finishes.
+	if panel.visible and guard_left <= 0.0:
 		selected.emit(index)
+
+
+func _process(delta: float) -> void:
+	guard_left = maxf(0.0, guard_left - delta)
 
 
 func _input(event: InputEvent) -> void:

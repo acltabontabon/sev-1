@@ -126,6 +126,8 @@ func _run() -> void:
 	player.invulnerable_left = 0
 	keep_running = false
 	player.receive_damage(100000, Vector3(0, 0, -2))
+	# The fall plays out (about 1.4 s) instead of snapping to the last frame.
+	await frames(100)
 	await grab("defeat")
 	print("composing")
 	player.camera_rig.set_capture(false)

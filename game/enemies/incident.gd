@@ -458,14 +458,15 @@ func _route(point: Vector3) -> Vector3:
 		var next: Vector3 = navigation.get_next_path_position() - global_position
 		direction = Vector3(next.x, 0, next.z).normalized()
 	if not direction.is_zero_approx():
-		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-direction.x, -direction.z), .2)
+		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-direction.x, -direction.z), 1.0 - exp(-12.0 * get_physics_process_delta_time()))
 	return direction
 
 
+## Turn toward a point quickly but visibly (noticing the engineer is a whip-round, not a pop).
 func _face(point: Vector3) -> void:
 	var planar: Vector3 = Vector3(point.x - global_position.x, 0, point.z - global_position.z)
 	if not planar.is_zero_approx():
-		visual.rotation.y = atan2(-planar.x, -planar.z)
+		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-planar.x, -planar.z), 1.0 - exp(-14.0 * get_physics_process_delta_time()))
 
 
 ## A slim health bar that only appears once the enemy has been hurt.

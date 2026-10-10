@@ -23,7 +23,9 @@ func _on_capture_changed(active: bool) -> void:
 func _on_player_died() -> void:
 	enemy.melee.cancel()
 	if has_node("Incident"):
+		# The incident lets the fall play out, then releases the mouse for the report.
 		$Incident.fail()
+		return
 	player.camera_rig.set_capture(false)
 
 

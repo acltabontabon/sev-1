@@ -216,6 +216,14 @@ func _run() -> void:
 	var frozen_scale: float = Engine.time_scale
 	await create_timer(.2, true, false, true).timeout
 	check(frozen_scale < .1 and Engine.time_scale == 1.0, "a freeze-frame stops the fight briefly and restores speed")
+	# Slow motion layers: a hit's freeze-frame inside the ultimate hands back to the crawl.
+	ElementFx.slow_motion(&"test", .2)
+	ElementFx.freeze(incident, .05)
+	var deepest: float = Engine.time_scale
+	await create_timer(.2, true, false, true).timeout
+	check(deepest < .1 and is_equal_approx(Engine.time_scale, .2), "a freeze-frame inside slow motion returns to the slow motion, not full speed")
+	ElementFx.slow_motion(&"test", 1.0)
+	check(Engine.time_scale == 1.0, "releasing the last slow motion restores normal speed")
 	ElementFx.freeze_in_headless = false
 	# Blocker: cast, refuse damage, interrupt, release on death.
 	await fresh_stage(incident.Stage.INVESTIGATION)
@@ -685,6 +693,36 @@ func _run() -> void:
 	check(character.position.distance_to(character.SEATED_OFFSET) < .03, "seated, the engineer sits up on the cushion and off the backrest")
 	character.story_pose = 0
 	check(incident.room.get_node("CalendarDrift").cards.all(func(card: Node3D) -> bool: return card.position.y > 2.9), "corridor invites drift under the ceiling, above the camera line")
+	# Each employee turns into the monster they were planted as, whoever set them off.
+	var planted_crew: Array = [incident._make_host("scope", Vector3(0, .05, 9)), incident._make_host("record", Vector3(1, .05, 9))]
+	incident.pending = [["record", "A2"], ["scope", "A4"]]
+	incident.pending_hosts = planted_crew.duplicate()
+	incident._match_hosts()
+	check(incident.pending[0][0] == "scope" and incident.pending[1][0] == "record", "the employee set off first becomes their own monster, not the wave's first")
+	incident.pending.clear()
+	incident.pending_hosts.clear()
+	for host: Node3D in planted_crew:
+		host.queue_free()
+	# Choice cards ignore input while they deal in (a jump or attack click mid-fight).
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	incident.upgrade_ui.input_guard = .45
+	incident._offer_upgrade(incident.Stage.ENCOUNTER_TWO)
+	await frames(2)
+	incident.upgrade_ui._choose(1)
+	check(incident.upgrade_pending and incident.run.choices.is_empty(), "a choice card ignores input the moment it opens")
+	await create_timer(.5, true, false, true).timeout
+	incident.upgrade_ui._choose(1)
+	check(not incident.upgrade_pending and incident.run.choices.size() == 1, "once dealt in, the card takes the choice")
+	incident.upgrade_ui.input_guard = 0.0
+	# The run's end plays out (finisher, fall) before the report pauses everything.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	incident.hold_ending = true
+	incident.fail()
+	await frames(3)
+	check(incident.terminal() and not paused and player.narrative_hold, "the run's end plays out before the report pauses the game")
+	await create_timer(incident.ENDING_HOLD + .3, true, false, true).timeout
+	check(paused and not player.camera_rig.controls_active, "the report follows once the ending has played")
+	incident.hold_ending = false
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

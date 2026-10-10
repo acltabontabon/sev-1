@@ -150,7 +150,8 @@ func _process(delta: float) -> void:
 		if gesture_left <= 0:
 			gesture_left = randf_range(6.0, 10.0)
 			animator.play("ual/talking", .25)
-		elif not animator.is_playing():
+		elif not animator.is_playing() or animator.current_animation == "ual/talking" and gesture_left < 3.0:
+			# Talking loops forever on its own; after a few seconds they're back on the phone.
 			animator.play("ual/phone", .3)
 		if is_instance_valid(player) and not said and player.global_position.distance_to(global_position) < 3.6:
 			said = true

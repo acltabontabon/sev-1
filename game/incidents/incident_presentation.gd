@@ -343,7 +343,8 @@ func reset_story() -> void:
 	beat_shot = ""
 	outbreak_actor = null
 	lower_third.hide()
-	Engine.time_scale = 1.0
+	ElementFx.clear_slow_motion()
+	slowmo_until = 0
 	release_camera()
 	short_opening = opening_seen
 	voice.clear(true)
@@ -864,7 +865,10 @@ func _killcam_shot() -> void:
 			camera.global_transform = camera.global_transform.interpolate_with(rig.global_transform, handover)
 			camera.fov = lerpf(camera.fov, rig.fov, handover)
 			scale = lerpf(scale, 1.0, handover)
-	Engine.time_scale = scale
+			# He turns back and shoulders the blade while the camera comes home.
+			character.story_pose = 0
+			player.visual.rotation.y = lerp_angle(killcam_turn, killcam_facing, handover)
+	ElementFx.slow_motion(&"killcam", scale)
 	AudioServer.playback_speed_scale = clampf(scale * 2.2, .5, 1.0)
 	camera.make_current()
 	killflash.visible = t < .22
@@ -878,7 +882,7 @@ func _killcam_shot() -> void:
 
 func _end_killcam() -> void:
 	beat_shot = ""
-	Engine.time_scale = 1.0
+	ElementFx.slow_motion(&"killcam", 1.0)
 	AudioServer.playback_speed_scale = 1.0
 	killflash.hide()
 	for bar in letterbox:
@@ -1069,7 +1073,7 @@ func _ending(delta: float) -> void:
 
 func slow_beat() -> void:
 	if DisplayServer.get_name() != "headless":
-		Engine.time_scale = .35
+		ElementFx.slow_motion(&"first_sighting", .35)
 		slowmo_until = Time.get_ticks_msec() + 350
 
 
@@ -1279,7 +1283,7 @@ func _opening(time: float, delta: float) -> void:
 func _process(delta: float) -> void:
 	if slowmo_until > 0 and Time.get_ticks_msec() >= slowmo_until:
 		slowmo_until = 0
-		Engine.time_scale = 1.0
+		ElementFx.slow_motion(&"first_sighting", 1.0)
 	_music(delta)
 	_ending(delta)
 	for fragment in fragments:

@@ -14,6 +14,8 @@ static var dust_material: StandardMaterial3D
 ## The latest freeze-frame; only its own timer restores speed, so nested freezes extend.
 static var freeze_token: int = 0
 static var freeze_until: int = 0
+static var freeze_scale: float = 1.0
+static var slow_layers: Dictionary[StringName, float] = {}
 ## Headless suites step frames, so freezes are off there unless a test opts in.
 static var freeze_in_headless: bool = false
 
@@ -282,25 +284,50 @@ static func flame_ring(emitter: Node, at: Vector3, radius: float, duration: floa
 
 
 ## Freeze-frame: the whole fight stops for a beat on a big impact. Real-time, nests,
-## and always restores normal speed.
+## and hands back to whatever slow motion is still running (or normal speed).
 static func freeze(emitter: Node, seconds: float, scale: float = .03) -> void:
 	if DisplayServer.get_name() == "headless" and not freeze_in_headless:
 		return
 	var until: int = Time.get_ticks_msec() + int(seconds * 1000.0)
-	if until <= freeze_until and Engine.time_scale < 1.0:
+	if until <= freeze_until:
 		return
 	freeze_until = until
 	freeze_token += 1
+	freeze_scale = scale
 	var token: int = freeze_token
-	Engine.time_scale = scale
+	_apply_time_scale()
 	emitter.get_tree().create_timer(seconds, true, false, true).timeout.connect(func() -> void:
 		if token == freeze_token:
-			Engine.time_scale = 1.0)
+			freeze_until = 0
+			_apply_time_scale())
 
 
 static func release_freeze() -> void:
 	freeze_until = 0
-	Engine.time_scale = 1.0
+	freeze_token += 1
+	_apply_time_scale()
+
+
+## Named slow motion (kill cam, ultimate, first sighting). The slowest active request
+## wins, so one effect ending never snaps another back to full speed. 1.0 releases.
+static func slow_motion(key: StringName, scale: float) -> void:
+	if scale >= 1.0:
+		slow_layers.erase(key)
+	else:
+		slow_layers[key] = scale
+	_apply_time_scale()
+
+
+static func clear_slow_motion() -> void:
+	slow_layers.clear()
+	release_freeze()
+
+
+static func _apply_time_scale() -> void:
+	var scale: float = freeze_scale if freeze_until > 0 else 1.0
+	for layer: float in slow_layers.values():
+		scale = minf(scale, layer)
+	Engine.time_scale = scale
 
 
 ## Screen tremor for the engineer's camera, fading with distance from the source.

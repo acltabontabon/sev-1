@@ -28,15 +28,24 @@ const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
 
 
 @export var model_scale: float = .64
-@export var stride_length: float = 1.25
-@export var run_reference_speed: float = 5.0
+## Ground speed the run clip's planted feet travel at rate 1.0 (measured: about 3 m/s);
+## playback scales from it so the feet stay planted instead of skating.
+@export var run_reference_speed: float = 3.4
 var story_pose: int = 0
 var sit: float = 0.0
 var crouch: float = 0.0
 ## 0..1, set by the incident's battle-mode director: eyes and keyboard light up.
 var battle: float = 0.0
 var clock: float = 0.0
-var phase: float = 0.0
+var phase: float = -1.0
+var step_clip: StringName = &""
+## 0..1: how far the blade has gone from the hand into the floor for the hero pose.
+var planted: float = 0.0
+## Attacks and specials snap the body's facing to the aim at once (hitboxes need it);
+## the model catches up over a few frames instead of flipping in one.
+var yaw_lag: float = 0.0
+var last_facing: float = 0.0
+const YAW_CATCH_UP: float = 22.0
 var previous_position: Vector3
 var actor: CharacterBody3D
 var hands: Array[Vector3] = DESK_HANDS.duplicate()
@@ -94,7 +103,12 @@ func _ready() -> void:
 
 
 func reset_pose() -> void:
-	phase = 0.0
+	if actor != null:
+		process_mode = Node.PROCESS_MODE_INHERIT
+	phase = -1.0
+	planted = 0.0
+	yaw_lag = 0.0
+	last_facing = get_parent().rotation.y if get_parent() != null else 0.0
 	clock = 0.0
 	crouch = 0.0
 	position = Vector3.ZERO
@@ -120,14 +134,21 @@ func reset_pose() -> void:
 
 
 func defeat() -> void:
-	# Reports pause immediately. Settle into the final death frame before the signal.
+	# The fall plays out before the report (headless suites settle on the last frame).
 	crouch = .48
 	held = 0.0
 	right_reach = 0.0
 	left_reach = 0.0
+	# Let go of the shoulder carry and the hero pose: the keyboard stays where it drops.
+	shoulder_rest = 0.0
+	planted = 0.0
 	trail.clear()
-	animator.play("rig/death", 0.0)
-	animator.seek(animator.current_animation_length, true)
+	animator.play("rig/death", .12)
+	animator.speed_scale = 1.0
+	# The report pauses the game; the fall keeps playing behind it.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	if DisplayServer.get_name() == "headless":
+		animator.seek(animator.current_animation_length, true)
 	# The keyboard clatters to the carpet beside the body.
 	weapon.position = Vector3(.45, .06, -.35)
 	weapon.rotation = Vector3(0, .5, 0)
@@ -191,6 +212,8 @@ func _physics_process(delta: float) -> void:
 		_solve(delta)
 		return
 	if actor.health <= 0:
+		if animator.current_animation == "rig/death":
+			animator.advance(delta)
 		return
 	var distance: float = Vector2(actor.global_position.x - previous_position.x, actor.global_position.z - previous_position.z).length()
 	previous_position = actor.global_position
@@ -198,19 +221,31 @@ func _physics_process(delta: float) -> void:
 		return
 	clock += delta
 	var speed: float = distance / maxf(delta, .001)
-	var old_half: int = int(phase * 2)
-	if actor.is_on_floor() and not actor.dodging:
-		phase = fmod(phase + distance / stride_length, 1.0)
-	if old_half != int(phase * 2) and speed > 1.0 and DisplayServer.get_name() != "headless":
-		actor.get_node("StepSound").pitch_scale = 1.04 if phase < .5 else .96
-		actor.get_node("StepSound").play()
+	# Omnislash blinks teleport; they are not a burst of running.
+	if actor.specials != null and actor.specials.omnislashing():
+		speed = 0.0
 	var target_crouch: float = .30 if actor.dodging and actor.dodge_elapsed < actor.dodge_duration else 0.0
 	crouch = move_toward(crouch, target_crouch, delta * 4.5)
 	if story_pose >= Pose.TYPING:
+		yaw_lag = 0.0
 		_staged(delta)
 	else:
 		_gameplay(speed, delta)
+	last_facing = get_parent().rotation.y
+	_footsteps(speed)
 	_solve(delta)
+
+
+## Steps land on the clip's footfalls (run and walk plant a foot at 0 and half-way).
+func _footsteps(speed: float) -> void:
+	var clip: StringName = animator.current_animation
+	var striding: bool = clip in [&"rig/run", &"rig/walk"] and actor.is_on_floor() and not actor.dodging
+	var now: float = animator.current_animation_position / maxf(animator.current_animation_length, .001) if striding else -1.0
+	if striding and phase >= 0.0 and int(phase * 2) != int(now * 2) and speed > 1.0 and DisplayServer.get_name() != "headless":
+		actor.get_node("StepSound").pitch_scale = 1.04 if now < .5 else .96
+		actor.get_node("StepSound").play()
+	phase = now if clip == step_clip else -1.0
+	step_clip = clip
 
 
 func _gameplay(speed: float, delta: float) -> void:
@@ -228,7 +263,7 @@ func _gameplay(speed: float, delta: float) -> void:
 	elif melee.attacking and actor.combo_index == 2 and melee.elapsed < melee.windup:
 		_scrub("jump", .25 + .3 * melee.elapsed / melee.windup, .05, delta)
 	elif speed > 2.6:
-		_loop("run", clampf(speed / run_reference_speed, .7, 1.7), .14, delta)
+		_loop("run", clampf(speed / run_reference_speed, .8, 1.9), .14, delta)
 	elif speed > .35:
 		_loop("walk", clampf(speed / 1.6, .6, 1.6), .14, delta)
 	else:
@@ -250,7 +285,11 @@ func _gameplay(speed: float, delta: float) -> void:
 		trail.emitting = false
 	held = move_toward(held, hold_goal, delta * (30.0 if hold_goal == 0.0 else 7.0))
 	right_reach = 1.0 - held
-	rotation.y = spin
+	var jump: float = angle_difference(last_facing, get_parent().rotation.y)
+	if absf(jump) > .9 and not (actor.specials != null and actor.specials.omnislashing()):
+		yaw_lag = wrapf(yaw_lag - jump, -PI, PI)
+	yaw_lag *= exp(-YAW_CATCH_UP * delta)
+	rotation.y = spin + yaw_lag
 	position = Vector3(0, lift, -lunge)
 	_turn("Head", Vector3.RIGHT, head_turn.x)
 	_turn("Head", Vector3.UP, head_turn.y)
@@ -473,15 +512,18 @@ func _solve(delta: float) -> void:
 	if shoulder_rest > 0.0:
 		right_target.position = shoulder_transform() * RIGHT_GRIP
 		right_pole.position = Vector3(.8, .2, .3)
-		right_ik.influence = maxf(right_ik.influence, shoulder_rest)
+		# Same easing as the weapon below, so hand and grip travel together.
+		right_ik.influence = maxf(right_ik.influence, smoothstep(0.0, 1.0, shoulder_rest))
 		right_ik.active = true
 	skeleton.advance(delta)
 	if held > 0.0:
 		weapon.transform = weapon.transform.interpolate_with(carry_transform(), held)
 	if shoulder_rest > 0.0:
 		weapon.transform = weapon.transform.interpolate_with(shoulder_transform(), smoothstep(0.0, 1.0, shoulder_rest))
-	if story_pose == Pose.COOL:
-		weapon.transform = planted_transform()
+	# The hero pose is a cut (planted at once); leaving it blends the blade back up.
+	planted = 1.0 if story_pose == Pose.COOL else move_toward(planted, 0.0, delta * 6.0)
+	if planted > 0.0:
+		weapon.transform = weapon.transform.interpolate_with(planted_transform(), smoothstep(0.0, 1.0, planted))
 	trail.sample()
 	_glow()
 

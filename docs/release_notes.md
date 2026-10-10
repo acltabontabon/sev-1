@@ -1,5 +1,47 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.25 — Smoother animation, progression and pacing (10 October 2026)
+
+Creator request: make sure animation, progression and pacing are smooth. An audit of
+the run and the rigs found these, now fixed:
+
+- **Slow motion no longer fights itself.** Freeze-frames, kill cams, Force Rollback and
+  first-sighting slow motion each set the game speed and each reset it to full on its
+  own timer, so a hit during the omnislash snapped the "world crawls" back to normal
+  after the first cut. They are now layers: the slowest wins and each one ending hands
+  back to the rest.
+- **The run's end plays out.** Killing The Variance or dying used to pause the game the
+  same frame, so the boss's finisher kill cam and the slow ending shot never played and
+  the engineer died by snapping to his corpse. The game now runs for two more seconds
+  after the kill cam (the fall plays, the keyboard drops to the carpet), then the report
+  opens; the fall keeps playing behind it.
+- **The change request arrives on cue.** It used to come about 1.6 s after the last kill
+  cam ended (slow motion stretched its timer) while the HUD claimed "the next wave is
+  coming". It now comes 0.6 s after the kill cam, and the HUD says the area is clear.
+- **No accidental choices.** Change-request and leadership cards ignore input for
+  0.45 s after they appear, so a jump (Space) or an attack click on the middle card
+  cannot sign anything mid-fight.
+- **The right monster comes out.** Setting off any employee but the wave's first could
+  pair the wrong monster with them (talk to Scope Creep's host, get a Corrupted Record).
+  Each employee now turns into their own.
+- **Loose ends.** Stray bugs close as WONTFIX when each wave clears (they kept the floor
+  "in battle" and blocked talking to the next wave's employees); a skipped Quick Sync's
+  attendees go home when containment starts instead of twitching like a due wave;
+  restarting mid-conversation no longer sets the wave off on the way out.
+- **Animation.** Run playback matches the clip's planted feet (less skating) and step
+  sounds land on the footfalls instead of eight times a second; attacks and specials no
+  longer flip the body in one frame (it whips round over a few frames while the hitbox
+  aims at once); the kill cam's exit turns him back and lifts the blade while the camera
+  blends home instead of snapping both under the gameplay camera; the omnislash shows
+  each cut landed rather than seven wind-ups; monsters staggered by specials play their
+  hit reaction instead of freezing on its first frame, turn toward the engineer instead
+  of popping, and no longer flicker between walk and run near the threshold; the
+  kneeling Facilities coworker keeps repairing instead of freezing after one pass;
+  talking gestures return to idle or the phone; cowering is not replayed every cycle.
+
+Not changed: the 45 s set-off fallback and the first-run 36 s opening (creator
+decisions); R still restarts instantly. Feel, timing and fun need a human playtest.
+
 ## 0.2.24 — Better motion, a hero pose, a smaller dialogue (10 October 2026)
 
 Creator direction: get better assets (upgrade within free CC0 packs); the dialogue box was

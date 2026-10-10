@@ -168,7 +168,7 @@ func _ready() -> void:
 
 func reset() -> void:
 	if omni_index >= 0:
-		Engine.time_scale = 1.0
+		ElementFx.slow_motion(&"omnislash", 1.0)
 		if player != null:
 			player.narrative_hold = false
 	omni_index = -1
@@ -282,7 +282,7 @@ func rollback() -> bool:
 	ElementFx.shockwave(player, at, ROLLBACK_COLOR, 2.0, .4)
 	# The world crawls; the engineer does not (the sequence runs on unscaled time).
 	if DisplayServer.get_name() != "headless":
-		Engine.time_scale = .2
+		ElementFx.slow_motion(&"omnislash", .2)
 	return true
 
 
@@ -297,7 +297,7 @@ func _omni_step() -> void:
 		_blink(omni_origin)
 		omnislash_step.emit(omni_origin, omni_origin, omni_index)
 		omni_index = -1
-		Engine.time_scale = 1.0
+		ElementFx.slow_motion(&"omnislash", 1.0)
 		player.narrative_hold = false
 		player.visual.rotation.y = player.camera_rig.rotation.y
 		player._start_step(2)
@@ -320,6 +320,10 @@ func _omni_step() -> void:
 		player.visual.rotation.y = atan2(-toward.x, -toward.z)
 	player.melee.cancel()
 	player._start_step(omni_index % 2)
+	# Blinks outpace the wind-up in crawling time: show each cut already landed (the
+	# follow-through) rather than a string of wind-ups. Past the active window, so the
+	# melee itself deals nothing extra.
+	player.melee.elapsed = player.melee.windup + player.melee.active_time
 	var mid: Vector3 = focus + Vector3.UP * 1.0
 	var across: Vector3 = toward.normalized().cross(Vector3.UP) if toward.length() > .01 else Vector3.RIGHT
 	var tilt: float = 1.0 if omni_index % 2 == 0 else -1.0

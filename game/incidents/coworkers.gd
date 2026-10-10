@@ -5,6 +5,8 @@ extends Node3D
 ## walks past. When a fight ends, the manager on the call takes the credit.
 
 const ROOT: String = "res://assets/characters/quaternius/"
+## How long a looping gesture (talking) runs before they settle back to idle.
+const GESTURE_SECONDS: float = 3.5
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 ## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
@@ -59,7 +61,7 @@ func _ready() -> void:
 		line.no_depth_test = true
 		body.add_child(line)
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
-			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0})
+			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0})
 	reset()
 
 
@@ -114,7 +116,10 @@ func _process(delta: float) -> void:
 			"stand":
 				_gesture(someone, delta)
 			_:
-				if fighting != was_fighting:
+				# The kneeling repair is a one-shot clip: start it over rather than freeze, and
+				# go back to it after a conversation.
+				var repairing: bool = someone.animator.is_playing() and someone.animator.assigned_animation == "ual/fixing"
+				if fighting != was_fighting or routine == "fix" and not repairing:
 					_routine(someone, false)
 	if was_fighting and not fighting:
 		_applaud()
@@ -157,11 +162,14 @@ func _walk(someone: Dictionary, delta: float) -> void:
 
 func _gesture(someone: Dictionary, delta: float) -> void:
 	someone.gesture_left -= delta
+	someone.gesture_hold = maxf(0.0, someone.gesture_hold - delta)
 	var animator: AnimationPlayer = someone.animator
 	if someone.gesture_left <= 0:
 		someone.gesture_left = randf_range(5.0, 8.0)
+		someone.gesture_hold = GESTURE_SECONDS
 		_play(someone, someone.entry.gesture, .25, false)
-	elif not animator.is_playing() or animator.current_animation.ends_with("Defeat"):
+	elif not animator.is_playing() or animator.current_animation.ends_with("Defeat") or someone.gesture_hold <= 0:
+		# Looping gestures (talking) never finish on their own: they get a few seconds.
 		_play(someone, "Idle", .3, true)
 
 
@@ -187,7 +195,9 @@ func _routine(someone: Dictionary, instant: bool) -> void:
 func _play(someone: Dictionary, clip: String, blend: float, loop: bool) -> void:
 	var animator: AnimationPlayer = someone.animator
 	var name: String = clip if clip.begins_with("ual/") else "CharacterArmature|" + clip
-	if animator.current_animation == name and (animator.is_playing() or not loop):
+	# A finished one-shot clears current_animation; assigned_animation remembers it, so a
+	# cower or gesture is not replayed every time it ends.
+	if animator.assigned_animation == name and (animator.is_playing() or not loop):
 		return
 	animator.play(name, blend)
 

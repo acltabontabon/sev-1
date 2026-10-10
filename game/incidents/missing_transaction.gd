@@ -63,8 +63,15 @@ var armed_left: float = 0.0
 var hover: Dictionary = {}
 var trigger_reason: String = ""
 var hr_cooldown: float = 0.0
-## A cleared stage waits a beat for its kill cam before the change request appears.
+## A cleared stage waits for its kill cam, then a beat, before the change request
+## appears. Counted in real time, so slow motion never stretches it.
 var upgrade_delay: float = 0.0
+const UPGRADE_BEAT: float = .6
+## The run's end plays out (the boss's kill cam, the engineer's fall) before the report.
+var ending_hold: float = 0.0
+const ENDING_HOLD: float = 2.0
+## Headless suites step frames and expect the report at once, unless a test opts in.
+var hold_ending: bool = DisplayServer.get_name() != "headless"
 ## Kill feedback: corporate death notices, and streaks for kills in quick succession.
 const STAMPS: Array[String] = ["CLOSED", "RESOLVED", "WONTFIX", "DEPRECATED", "OFFBOARDED", "SUNSET", "ARCHIVED", "MERGED", "ROLLED BACK", "RIGHT-SIZED"]
 const BUG_STAMPS: Array[String] = ["FIXED", "SQUASHED", "PATCHED", "NOT A BUG"]
@@ -215,6 +222,8 @@ func _ready() -> void:
 
 func reset_incident() -> void:
 	if dialogue.is_open():
+		# Restarting mid-conversation must not set the wave off on the way out.
+		armed = false
 		dialogue.close()
 	talked.clear()
 	_cleanup()
@@ -299,6 +308,7 @@ func _cleanup() -> void:
 	hover.clear()
 	trigger_reason = ""
 	upgrade_delay = 0.0
+	ending_hold = 0.0
 	kill_streak = 0
 	last_kill_at = -99.0
 	wave_area = ""
@@ -345,6 +355,12 @@ func _enter(next: Stage) -> void:
 			wave_index = 0
 			remaining = stage_total()
 			objective = "2 / 3 — Contain the failed delivery. Clear the aggressive records."
+			# A meeting nobody attended adjourns; its attendees go home instead of
+			# twitching through containment like a due wave.
+			for host: Node3D in sync_hosts:
+				if is_instance_valid(host):
+					host.queue_free()
+			sync_hosts.clear()
 			_plant(0)
 			message = "Payment Processing is missing the delivered record.\nCore saved it. Delivery stopped downstream. These records pursue faster."
 			console_marker.text = ""
@@ -366,6 +382,13 @@ func _enter(next: Stage) -> void:
 func _process(delta: float) -> void:
 	var spill: OmniLight3D = room.get_node("IncidentSpill")
 	spill.light_energy = move_toward(spill.light_energy, light_target + (0.0 if terminal() else run.band() * .35), delta * 1.2)
+	var real_delta: float = delta / maxf(Engine.time_scale, .01)
+	if terminal() and ending_hold > 0 and not get_tree().paused:
+		player.narrative_hold = true
+		if presentation.beat_shot != "killcam":
+			ending_hold = maxf(0.0, ending_hold - real_delta)
+			if ending_hold == 0:
+				player.camera_rig.set_capture(false)
 	if terminal() or get_tree().paused:
 		return
 	for point: Node3D in interactions.values():
@@ -390,8 +413,8 @@ func _process(delta: float) -> void:
 			player.move_multiplier = 1.0
 			run.apply_to(player)
 			message = "Motivation expired. Productivity returns to baseline."
-	if upgrade_delay > 0:
-		upgrade_delay = maxf(0.0, upgrade_delay - delta)
+	if upgrade_delay > 0 and presentation.beat_shot != "killcam":
+		upgrade_delay = maxf(0.0, upgrade_delay - real_delta)
 		if upgrade_delay == 0:
 			_offer_upgrade(upgrade_next)
 	if outbreak_left > 0:
@@ -510,6 +533,7 @@ func _spawn() -> void:
 		pending = waves()[wave_index].duplicate(true)
 		pending_hosts = hosts.duplicate()
 		hosts.clear()
+		_match_hosts()
 		var patient: Node3D = pending_hosts[0] if not pending_hosts.is_empty() and is_instance_valid(pending_hosts[0]) else null
 		if patient != null:
 			wave_area = patient.get_meta("area", "")
@@ -684,6 +708,24 @@ func _swung_at(host: Node3D) -> bool:
 
 
 ## Set off: this employee is the one the cutscene watches; the rest of the wave turns too.
+## Each employee turns into the monster they were planted as, whoever set the wave off.
+func _match_hosts() -> void:
+	var rest: Array = pending.duplicate()
+	var ordered: Array = []
+	for host: Node3D in pending_hosts:
+		var found: int = -1
+		if is_instance_valid(host):
+			for index in range(rest.size()):
+				if rest[index][0] == host.kind:
+					found = index
+					break
+		ordered.append(rest.pop_at(found) if found >= 0 else null)
+	for index in range(ordered.size()):
+		if ordered[index] == null and not rest.is_empty():
+			ordered[index] = rest.pop_front()
+	pending = ordered.filter(func(entry: Variant) -> bool: return entry != null) + rest
+
+
 func _break_out(host: Node3D, reason: String) -> void:
 	if not hosts.has(host):
 		return
@@ -789,6 +831,8 @@ func next_step() -> Dictionary:
 				return {"text": "Fight! Dodge the orange arcs, strike after.", "point": none, "tag": ""}
 			if armed and _strangest() != null:
 				return {"text": "A coworker is acting strange. Talk to them, or hit first.", "point": _strangest().global_position, "tag": "???"}
+			if wave_index >= waves().size():
+				return {"text": "Area clear. A change request is on its way.", "point": none, "tag": ""}
 			return {"text": "Catch your breath. The next wave is coming.", "point": none, "tag": ""}
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
@@ -1137,10 +1181,12 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 			var next: Stage = Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS
 			if outbreaks():
 				upgrade_next = next
-				upgrade_delay = presentation.KILLCAM_SECONDS + .35
+				upgrade_delay = UPGRADE_BEAT
 			else:
 				_offer_upgrade(next)
 		else:
+			# Stray bugs would keep the floor "in battle" and block talking to the next wave.
+			_close_bugs()
 			spawn_delay = wave_breather
 
 
@@ -1166,6 +1212,8 @@ func encounter_status() -> String:
 		var near: CharacterBody3D = nearest_threat()
 		var distance: int = roundi(Vector2(near.global_position.x - player.global_position.x, near.global_position.z - player.global_position.z).length())
 		return "%d threat%s roaming the floor • nearest %d m" % [remaining, "" if remaining == 1 else "s", distance]
+	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and wave_index >= waves().size() and alive.is_empty() and pending.is_empty():
+		return "Area clear • wave %d / %d" % [wave_index, waves().size()]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
 		return "%d threat%s remaining • wave %d / %d%s" % [remaining, "" if remaining == 1 else "s", wave_index, waves().size(), " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
 	if stage == Stage.BOSS and not boss_triggered:
@@ -1446,7 +1494,11 @@ func _finish() -> void:
 	report += "\n\nEngineer request: go home. Status: pending approval.\nCalendar: Retrospective — tomorrow, 09:00." if won else "\n\nCalendar: Your retrospective attendance is still required."
 	room.get_node("Clock").text = "FRIDAY / 17:00" if won else "FRIDAY / 16:59"
 	player.melee.cancel()
-	player.camera_rig.set_capture(false)
+	player.narrative_hold = true
+	if hold_ending and player.camera_rig.controls_active:
+		ending_hold = ENDING_HOLD
+	else:
+		player.camera_rig.set_capture(false)
 
 
 func _dashboard(title: String, detail: String) -> void:

@@ -87,6 +87,9 @@ var animator: AnimationPlayer
 var clips: Dictionary = {}
 var meshes: Array[MeshInstance3D] = []
 var cast_left: float = 0.0
+## The current stagger's full length: specials stagger far longer than a normal hit.
+var stagger_peak: float = 0.0
+var last_stagger: float = 0.0
 var dying: float = 0.0
 var base_scale: float = 1.0
 
@@ -231,19 +234,25 @@ func _physics_process(delta: float) -> void:
 		_scrub(clips.attack, time, .06, delta)
 	elif actor.stagger_left > 0 and clips.hit != "":
 		var length: float = animator.get_animation(clips.hit).length
-		_scrub(clips.hit, (1.0 - actor.stagger_left / maxf(actor.hit_reaction_duration, .01)) * length * .5, .05, delta)
+		# A fresh stagger (or a new hit during one) starts the reaction over.
+		if actor.stagger_left > last_stagger:
+			stagger_peak = actor.stagger_left
+		_scrub(clips.hit, (1.0 - actor.stagger_left / maxf(stagger_peak, .01)) * length * .5, .05, delta)
 	elif cast_left > 0 and clips.cast != "":
 		cast_left = maxf(0.0, cast_left - delta)
 		charge = .6
 		_loop(clips.cast, 1.0, .12, delta)
 	else:
 		var speed: float = Vector2(actor.velocity.x, actor.velocity.z).length()
-		if speed > 3.0 and clips.run != clips.walk:
+		# Separate thresholds up and down, so a pace near the line doesn't flicker clips.
+		var running: bool = animator.current_animation == clips.run
+		if speed > (2.6 if running else 3.4) and clips.run != clips.walk:
 			_loop(clips.run, clampf(speed / 4.5, .7, 1.6), .2, delta)
 		elif speed > .25:
 			_loop(clips.walk, clampf(speed / 2.2, .6, 1.8), .2, delta)
 		else:
 			_loop(clips.idle, 1.0, .25, delta)
+	last_stagger = actor.stagger_left
 	_shade(1.0 if actor.flash_left > 0 else 0.0, charge, 0.0)
 
 
