@@ -95,6 +95,10 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "omnislash":
+		await omnislash()
+		quit()
+		return
 	if only == "lineup":
 		await lineup()
 		quit()
@@ -298,6 +302,51 @@ func battle() -> void:
 		await process_frame
 		sample()
 	report("battle_mode_combat")
+	app.main_menu()
+	await frames(5)
+
+
+## Force Rollback, omnislash style: blinks, cuts, the return, the slam's hero shot.
+func omnislash() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.5)
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.feed.modulate.a = 0.0
+	player.global_position = Vector3(0, .05, 5)
+	player.camera_rig.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	var spare: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+	spare.position = Vector3(-9, .05, -12)
+	spare.reveal()
+	spare.set_physics_process(false)
+	for index in range(4):
+		var foe: CharacterBody3D = incident._spawn_entry([["record", "scope", "blocker", "record"][index], "A1"], incident.alive)
+		foe.position = Vector3(0, .05, 5) + Vector3(cos(index * 1.7), 0, sin(index * 1.7)) * 3.5
+		foe.reveal()
+		foe.max_health = 400
+		foe.health = 400
+		foe.set_physics_process(false)
+	await live(1.0)
+	player.specials.add_focus(100)
+	player.specials.rollback()
+	await live(.15)
+	await shot("omni_call")
+	var taken: Dictionary = {}
+	while player.specials.omnislashing():
+		var step: int = player.specials.omni_index
+		if step in [1, 3, 5] and not taken.has(step):
+			taken[step] = true
+			await live(.06)
+			await shot("omni_cut_%d" % step)
+		await process_frame
+	await live(.3)
+	await shot("omni_slam")
+	await live(.9)
+	await shot("omni_hero")
 	app.main_menu()
 	await frames(5)
 

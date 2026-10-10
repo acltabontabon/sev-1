@@ -1,5 +1,21 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.23 — Force Rollback, omnislash (10 October 2026)
+
+Creator request: build the ultimate after Cloud's Omnislash.
+
+- **FORCE ROLLBACK (V) is now an omnislash.** "FORCE… ROLLBACK!" and the world crawls
+  (the engineer does not: the sequence runs on unscaled time). He blinks between the
+  enemies within 9 m, seven times, each time appearing at a new angle around a target
+  and cutting through it (30 damage, stagger, crossed light slashes, a rising whoosh), a
+  streak of light marking every blink; with one enemy all seven cuts land on it from
+  seven directions. Every blink is a hard camera cut to a fresh tilted angle that
+  avoids walls and bystanders, letterboxed. Then he snaps back to where he started,
+  "git reset… HARD!", and slams (110 to everything within 7.5 m, shields dropped) into
+  the hero kill cam. Invulnerable throughout. Rolling back seven commits.
+- Coworker remarks hide during cutscenes and kill cams; the slam's particle cloud is
+  lighter so the hero shot reads.
+
 ## 0.2.22 — Softer lightning (10 October 2026)
 
 Creator feedback: the lightning effect was too edgy; make it soft and smooth.

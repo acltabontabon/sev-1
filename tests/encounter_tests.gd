@@ -520,8 +520,18 @@ func _run() -> void:
 	for foe: CharacterBody3D in [behind, beyond]:
 		foe.set_physics_process(false)
 	await frames(30)
-	check(player.specials.rollback() and player.specials.focus == 0, "V unleashes Force Rollback when FOCUS is full, spending all of it")
-	await frames(60)
+	var blinks: Array[Vector3] = []
+	var record_blink: Callable = func(at: Vector3, _target: Vector3, _index: int) -> void: blinks.append(at)
+	player.specials.omnislash_step.connect(record_blink)
+	var origin: Vector3 = player.global_position
+	check(player.specials.rollback() and player.specials.focus == 0 and player.narrative_hold, "V unleashes Force Rollback when FOCUS is full, spending all of it")
+	await frames(130)
+	player.specials.omnislash_step.disconnect(record_blink)
+	var spread: float = 0.0
+	for at: Vector3 in blinks:
+		spread = maxf(spread, at.distance_to(origin))
+	check(blinks.size() == player.specials.OMNI_SLASHES + 1 and spread > 1.0, "the omnislash blinks seven times around its targets, then back")
+	check(player.global_position.distance_to(origin) < .1 and not player.narrative_hold and not player.specials.omnislashing(), "the engineer lands back where he started, in control")
 	check(player.specials.last_call == "reset_hard", "the ultimate is called twice: on the leap and on the slam")
 	check(behind.health < behind.max_health and beyond.health == beyond.max_health, "Force Rollback hits everything around the engineer, nothing beyond its radius")
 	# Blame Shift: dash through a line, cutting and blaming everything passed.

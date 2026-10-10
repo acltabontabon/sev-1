@@ -5,8 +5,10 @@ extends Node
 ##
 ## REPLY ALL (C / middle mouse): an overhead cut throws a crescent blade 13 m forward
 ## that hits everyone in its path ("RE: RE: RE:") until a wall breaks it. 3.5 s cooldown.
-## FORCE ROLLBACK (V): the ultimate. Landed hits fill FOCUS; at 100 the engineer leaps,
-## time slows, and the slam rolls back everything within 7.5 m (shields included).
+## FORCE ROLLBACK (V): the ultimate, omnislash style. Landed hits fill FOCUS; at 100 the
+## world crawls while the engineer blinks between the enemies within 9 m for seven cuts
+## (rolling back seven commits), then returns to the centre and slams everything within
+## 7.5 m (shields included).
 ## BLAME SHIFT (X, or attack out of a dodge): a 7 m dash straight through enemies, cutting
 ## each one the instant it is passed and leaving it BLAMED: +30% damage taken for 4 s.
 ## The path flashes white on arrival. 2.5 s cooldown.
@@ -22,6 +24,9 @@ extends Node
 signal focus_changed(value: float)
 ## A move was called out loud (anime style): its name, and whether it is the ultimate.
 signal called(title: String, ultimate: bool)
+## Each blink of the Force Rollback omnislash: where the engineer appeared, the target,
+## and the slash number (OMNI_SLASHES is the return to the centre before the slam).
+signal omnislash_step(at: Vector3, target: Vector3, index: int)
 
 const WAVE_COOLDOWN: float = 3.5
 const WAVE_RANGE: float = 13.0
@@ -34,6 +39,13 @@ const ROLLBACK_RADIUS: float = 7.5
 const ROLLBACK_DAMAGE: int = 110
 const ROLLBACK_COLOR: Color = Color(.62, .5, 1)
 const FOCUS_PER_HIT: float = 9.0
+## Force Rollback, omnislash style: seven blinks between the enemies around the
+## engineer (one cut each), then back to the centre for the slam.
+const OMNI_SLASHES: int = 7
+const OMNI_RANGE: float = 9.0
+const OMNI_DAMAGE: int = 30
+const OMNI_LEAD: float = .4
+const OMNI_BEAT: float = .17
 const DASH_DISTANCE: float = 7.0
 const DASH_TIME: float = .2
 const DASH_COOLDOWN: float = 2.5
@@ -52,6 +64,11 @@ var wave_cooldown: float = 0.0
 var focus: float = 0.0
 ## The special waiting for its swing to land: "wave", "rollback" or empty.
 var queued: String = ""
+var omni_index: int = -1
+var omni_clock: float = 0.0
+var omni_origin: Vector3
+var omni_targets: Array[Node3D] = []
+var omni_last: Vector3
 var blades: Array[Dictionary] = []
 var dash_cooldown: float = 0.0
 var dash_left: float = 0.0
@@ -150,6 +167,12 @@ func _ready() -> void:
 
 
 func reset() -> void:
+	if omni_index >= 0:
+		Engine.time_scale = 1.0
+		if player != null:
+			player.narrative_hold = false
+	omni_index = -1
+	omni_targets.clear()
 	wave_cooldown = 0.0
 	queued = ""
 	dash_cooldown = 0.0
@@ -217,7 +240,7 @@ func _on_hit() -> void:
 func _can_act() -> bool:
 	return not player.narrative_hold and player.health > 0 and not player.dodging and player.is_on_floor() \
 		and player.hurt_left <= 0 and not player.melee.is_active() and player.hitstop_left <= 0 and queued.is_empty() \
-		and dash_left <= 0 and spin_left <= 0 and counter_left <= 0 and counter_recover <= 0
+		and dash_left <= 0 and spin_left <= 0 and counter_left <= 0 and counter_recover <= 0 and omni_index < 0
 
 
 func reply_all() -> bool:
@@ -238,24 +261,100 @@ func rollback() -> bool:
 		return false
 	player.melee.cancel()
 	player.clear_combo()
-	if not player._start_step(2):
-		return false
-	queued = "rollback"
 	add_focus(-100.0)
-	player.invulnerable_left = maxf(player.invulnerable_left, 1.4)
 	var at: Vector3 = player.global_position
+	omni_origin = at
+	omni_last = at
+	omni_targets.clear()
+	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+		var enemy: Node3D = candidate as Node3D
+		if enemy != null and enemy.get("health") != 0 and enemy.has_method("receive_damage") and enemy.global_position.distance_to(at) <= OMNI_RANGE:
+			omni_targets.append(enemy)
+	omni_targets.sort_custom(func(a: Node3D, b: Node3D) -> bool: return a.global_position.distance_to(at) < b.global_position.distance_to(at))
+	omni_index = 0
+	omni_clock = OMNI_LEAD
+	player.narrative_hold = true
+	player.invulnerable_left = maxf(player.invulnerable_left, 5.0)
+	player._start_step(2)
 	ElementFx.glyphs(player, at + Vector3.UP * 2.6, ROLLBACK_COLOR, ["FORCE ROLLBACK"], .9, 0.0)
 	_shout("rollback", "FORCE ROLLBACK", true)
 	ElementFx.motes(player, at + Vector3.UP * .4, ROLLBACK_COLOR, 30, 3.0, .8, 4.0, .16)
-	# The leap hangs in slow motion; the slam snaps time back.
-	ElementFx.freeze(player, .4, .3)
+	ElementFx.shockwave(player, at, ROLLBACK_COLOR, 2.0, .4)
+	# The world crawls; the engineer does not (the sequence runs on unscaled time).
+	if DisplayServer.get_name() != "headless":
+		Engine.time_scale = .2
 	return true
+
+
+func omnislashing() -> bool:
+	return omni_index >= 0
+
+
+## One blink: appear beside the next target at a new angle and cut through it.
+func _omni_step() -> void:
+	if omni_index >= OMNI_SLASHES:
+		# Back to the centre; the slam and its kill cam take it from here.
+		_blink(omni_origin)
+		omnislash_step.emit(omni_origin, omni_origin, omni_index)
+		omni_index = -1
+		Engine.time_scale = 1.0
+		player.narrative_hold = false
+		player.visual.rotation.y = player.camera_rig.rotation.y
+		player._start_step(2)
+		_slam()
+		return
+	var live: Array[Node3D] = omni_targets.filter(func(enemy: Node3D) -> bool: return is_instance_valid(enemy) and enemy.get("health") != 0)
+	var angle: float = omni_index * 2.39996 + randf_range(-.25, .25)
+	var around: Vector3 = Vector3(sin(angle), 0, cos(angle))
+	var target: Node3D = live[omni_index % live.size()] if not live.is_empty() else null
+	var focus: Vector3 = target.global_position if target != null else omni_origin + around * 2.5
+	var spot: Vector3 = focus + around * 1.5
+	spot.y = omni_origin.y
+	# Never blink into a wall: stop short of anything between the target and the spot.
+	var wall: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(focus + Vector3.UP, spot + Vector3.UP, 1))
+	if not wall.is_empty():
+		spot = Vector3(wall.position.x, omni_origin.y, wall.position.z) - around * .3
+	_blink(spot)
+	var toward: Vector3 = Vector3(focus.x - spot.x, 0, focus.z - spot.z)
+	if toward.length() > .01:
+		player.visual.rotation.y = atan2(-toward.x, -toward.z)
+	player.melee.cancel()
+	player._start_step(omni_index % 2)
+	var mid: Vector3 = focus + Vector3.UP * 1.0
+	var across: Vector3 = toward.normalized().cross(Vector3.UP) if toward.length() > .01 else Vector3.RIGHT
+	var tilt: float = 1.0 if omni_index % 2 == 0 else -1.0
+	ElementFx.bolt(player, mid - across * 1.4 + Vector3.UP * .7 * tilt, mid + across * 1.4 - Vector3.UP * .7 * tilt, Color(.85, .8, 1), .35, .1)
+	ElementFx.flash(player, mid, ROLLBACK_COLOR, 2.5, 4.0, .12)
+	if target != null:
+		ElementFx.shards(player, mid, ROLLBACK_COLOR, 4, 5.0, .3, toward.normalized())
+		if _strike(target, OMNI_DAMAGE, spot, "slice"):
+			if target.has_method("apply_hitstop"):
+				target.apply_hitstop(.05)
+			if "stagger_left" in target:
+				target.stagger_left = .6
+	whoosh.stream = WHOOSH.reply_all
+	whoosh.pitch_scale = 1.0 + omni_index * .06
+	if DisplayServer.get_name() != "headless":
+		whoosh.play()
+	player.camera_rig.add_impulse(.5)
+	omnislash_step.emit(spot, focus, omni_index)
+	omni_index += 1
+
+
+## Vanish here, appear there: a streak of light between the two.
+func _blink(to: Vector3) -> void:
+	var from: Vector3 = player.global_position
+	ElementFx.bolt(player, from + Vector3.UP * 1.0, to + Vector3.UP * 1.0, ROLLBACK_COLOR, .3, .07)
+	ElementFx.motes(player, from + Vector3.UP * .8, ROLLBACK_COLOR, 10, 2.0, .4, 0.0, .14)
+	player.global_position = to
+	player.velocity = Vector3.ZERO
+	omni_last = to
 
 
 ## Blame Shift: allowed out of a dodge (that is the point), never mid-special.
 func blame_shift() -> bool:
 	if dash_cooldown > 0 or player.narrative_hold or player.health <= 0 or player.hurt_left > 0 or not player.is_on_floor() \
-			or not queued.is_empty() or dash_left > 0 or spin_left > 0:
+			or not queued.is_empty() or dash_left > 0 or spin_left > 0 or omni_index >= 0:
 		return false
 	player.dodging = false
 	player.melee.cancel()
@@ -483,6 +582,11 @@ func _tick_spin(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if omni_index >= 0:
+		omni_clock -= delta / maxf(Engine.time_scale, .01)
+		if omni_clock <= 0:
+			omni_clock = OMNI_BEAT
+			_omni_step()
 	wave_cooldown = maxf(0.0, wave_cooldown - delta)
 	dash_cooldown = maxf(0.0, dash_cooldown - delta)
 	spin_cooldown = maxf(0.0, spin_cooldown - delta)
@@ -600,7 +704,7 @@ func _slam() -> void:
 	ElementFx.quake(player, at, ROLLBACK_COLOR, ROLLBACK_RADIUS * .8, 1.2)
 	ElementFx.cracks(player, at, ROLLBACK_COLOR, 4.0, 11, 1.8)
 	ElementFx.flash(player, at + Vector3.UP * 1.2, ROLLBACK_COLOR, 6.0, 10.0, .45)
-	ElementFx.motes(player, at + Vector3.UP * .5, ROLLBACK_COLOR, 60, 9.0, 1.0, 3.0, .2)
+	ElementFx.motes(player, at + Vector3.UP * .5, ROLLBACK_COLOR, 22, 9.0, .8, 3.0, .11)
 	ElementFx.glyphs(player, at + Vector3.UP * 3.0, Color(1, 1, 1), ["git reset --hard"], 1.4, 0.0)
 	_shout("reset_hard", "GIT RESET --HARD", true)
 	ElementFx.tremor(player, at, 1.4, 16.0)

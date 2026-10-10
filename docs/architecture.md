@@ -603,7 +603,9 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   wave's first member so the cutscene watches it. `next_step()` returns tag `???`.
 - **Special moves.** `game/player/special_moves.gd` (child of the player): `reply_all()`
   and `rollback()` start combo steps 0 and 2 for the body and fire on the swing's active
-  frame; the wave is a top-level crescent swept against the `enemies` group each tick
+  frame (except `rollback()`, the omnislash: `_omni_step()` on unscaled time blinks the
+  player between `omni_targets` and emits `omnislash_step`, which the presentation turns
+  into hard camera cuts avoiding walls and bodies (`_blocks_view()`), then `_slam()`); the wave is a top-level crescent swept against the `enemies` group each tick
   (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
   `blame_shift()` drives `player.dash_velocity` (the player skips normal movement and
   drops enemy collision while it is set) and cuts each enemy near the swept segment the

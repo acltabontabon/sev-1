@@ -99,7 +99,8 @@ func _process(delta: float) -> void:
 		someone.line_left = maxf(0.0, someone.line_left - delta)
 		line.modulate.a = minf(1.0, someone.line_left * 2.0)
 		line.outline_modulate.a = line.modulate.a
-		line.visible = line.modulate.a > .01
+		# Remarks stay out of cutscenes and kill cams.
+		line.visible = line.modulate.a > .01 and (incident == null or incident.presentation == null or incident.presentation.beat_shot.is_empty())
 		var routine: String = someone.entry.routine
 		if fighting and routine != "asleep" and routine != "sit":
 			_play(someone, "Defeat", .25, false)

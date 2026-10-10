@@ -158,6 +158,7 @@ func _ready() -> void:
 	add_child(pinger)
 	voice.line_started.connect(_on_line_started)
 	incident.player.specials.called.connect(_on_move_called)
+	incident.player.specials.omnislash_step.connect(_on_omnislash_step)
 	music = AudioStreamPlayer.new()
 	music.bus = &"Music"
 	music.volume_db = -60
@@ -451,6 +452,68 @@ func kill_pop(actor: CharacterBody3D, stamp: String, minor: bool, streak: int) -
 		if streak > STREAKS.size() - 1:
 			title = "RESTRUCTURING ×%d" % streak
 		incident.main.get_node("HUD").show_streak(title, streak)
+
+
+## The omnislash: a hard cut to a fresh angle on every blink, framing the engineer and
+## the cut. The return to the centre ends it; the slam's kill cam follows.
+var omni_last_ms: int = 0
+
+
+func _on_omnislash_step(at: Vector3, target: Vector3, index: int) -> void:
+	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+		return
+	if index >= incident.player.specials.OMNI_SLASHES:
+		if beat_shot == "omnislash":
+			beat_shot = ""
+			killflash.hide()
+		return
+	if not beat_shot.is_empty() and beat_shot != "omnislash":
+		return
+	beat_shot = "omnislash"
+	omni_last_ms = Time.get_ticks_msec()
+	var middle: Vector3 = (at + target) * .5 + Vector3.UP * 1.0
+	var line: Vector3 = Vector3(target.x - at.x, 0, target.z - at.z)
+	line = line.normalized() if line.length() > .1 else Vector3.FORWARD
+	# Alternate sides, heights and distances so every cut reads as a new shot.
+	var height: float = [.2, 1.6, -.3, 1.1, .5, 2.0, -.1][index % 7]
+	var reach: float = [3.4, 4.2, 2.8, 3.8, 3.0, 4.6, 3.2][index % 7]
+	var spot: Vector3 = middle
+	# Alternate sides; skip angles that pass through a wall or a bystander's body.
+	for attempt in range(6):
+		var sign: float = (1.0 if (index + attempt) % 2 == 0 else -1.0)
+		var turn: float = attempt * .5
+		var side: Vector3 = line.cross(Vector3.UP).normalized().rotated(Vector3.UP, turn) * sign
+		spot = middle + side * reach - line * (.6 if index % 3 == 0 else -.4) + Vector3.UP * height
+		var hit: Dictionary = incident.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(middle, spot, 1))
+		if not hit.is_empty():
+			spot = hit.position + (middle - hit.position).normalized() * .3
+		if not _blocks_view(spot, middle):
+			break
+	camera.global_position = spot
+	camera.look_at(middle)
+	camera.rotate_object_local(Vector3.BACK, deg_to_rad([6.0, -9.0, 4.0, -5.0, 10.0, -7.0, 3.0][index % 7]))
+	camera.fov = 44.0
+	camera.make_current()
+	killflash.visible = true
+	killflash.color = Color(.85, .8, 1, .18)
+	incident.main.get_node("HUD").visible = false
+	for side_bar in [0, 1]:
+		letterbox[side_bar].visible = true
+		letterbox[side_bar].offset_top = 0.0 if side_bar == 0 else -54.0
+		letterbox[side_bar].offset_bottom = 54.0 if side_bar == 0 else 0.0
+
+
+func _omnislash_shot() -> void:
+	camera.make_current()
+	incident.main.get_node("HUD").visible = false
+	killflash.color.a = maxf(0.0, killflash.color.a - .02)
+	# Safety: never strand the camera if the sequence stops early (reset, death).
+	if Time.get_ticks_msec() - omni_last_ms > 900 or not incident.player.specials.omnislashing():
+		beat_shot = ""
+		killflash.hide()
+		for bar in letterbox:
+			bar.hide()
+		release_camera()
 
 
 ## The ultimate's slam gets its own kill cam, on the engineer.
@@ -826,6 +889,29 @@ func _end_killcam() -> void:
 	release_camera()
 
 
+## True when someone (coworker, host or monster; none have camera collision) stands
+## between the camera and the action, or the camera would sit inside them.
+func _blocks_view(spot: Vector3, focus: Vector3) -> bool:
+	var bodies: Array[Node3D] = []
+	if incident.coworkers != null:
+		for someone: Dictionary in incident.coworkers.people:
+			bodies.append(someone.body)
+	for host: Node3D in incident.hosts + incident.sync_hosts:
+		if is_instance_valid(host):
+			bodies.append(host)
+	for other: CharacterBody3D in incident.alive + incident.sync_alive + incident.bugs:
+		if is_instance_valid(other) and other.health > 0:
+			bodies.append(other)
+	for body in bodies:
+		var at: Vector3 = body.global_position + Vector3.UP * 1.0
+		if at.distance_to(focus) < 1.3:
+			continue
+		var closest: Vector3 = Geometry3D.get_closest_point_to_segment(at, spot, focus)
+		if at.distance_to(closest) < .7:
+			return true
+	return false
+
+
 ## True when a bystander (no collision, so rays miss them) would stand in the shot.
 func _crowds_shot(from: Vector3, to: Vector3, actor: Node3D) -> bool:
 	var bodies: Array[Node3D] = []
@@ -858,6 +944,8 @@ func _beats(delta: float) -> void:
 	beat_time += delta
 	var rig: Camera3D = incident.player.get_node("CameraRig/SpringArm3D/Camera3D")
 	match beat_shot:
+		"omnislash":
+			_omnislash_shot()
 		"killcam":
 			_killcam_shot()
 		"outbreak":
