@@ -90,6 +90,8 @@ var blamed_left: float = 0.0
 ## "barks" (spot, idle, attack, hurt, death) in a speech bubble and positional audio.
 ## One bark at a time across the floor (deaths may interrupt), and a pause per monster.
 static var next_bark_ms: int = 0
+## Last words always come, but a mass kill lets them out one at a time, not all at once.
+static var last_words_ms: int = 0
 var bark_cooldown: float = 0.0
 var idle_bark_left: float = 0.0
 var bubble: Label3D
@@ -275,7 +277,7 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 	if health > 0:
 		bark("hurt", .3)
 	else:
-		bark("death", .8, true)
+		bark("death", 1.0, true)
 	flash_left = hit_flash_duration
 	stagger_left = hit_reaction_duration
 	knockback = (global_position - Vector3(source.x, global_position.y, source.z)).normalized() * knockback_speed
@@ -635,6 +637,10 @@ func bark(moment: String, chance: float = 1.0, urgent: bool = false) -> bool:
 	var now: int = Time.get_ticks_msec()
 	if not urgent and now < next_bark_ms:
 		return false
+	if moment == "death":
+		if now - last_words_ms < 650:
+			return false
+		last_words_ms = now
 	var lines: Array = preload("res://game/incidents/dialogues.gd").data().get("barks", {}).get(rig_kind, {}).get(moment, [])
 	if lines.is_empty():
 		return false

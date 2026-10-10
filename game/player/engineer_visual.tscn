@@ -214,6 +214,57 @@ material = SubResource("Ivory")
 size = Vector3(0.14, 0.17, 0.12)
 material = SubResource("Skin")
 
+[sub_resource type="StandardMaterial3D" id="Iron"]
+albedo_color = Color(0.12, 0.12, 0.13, 1)
+metallic = 0.8
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Steel"]
+albedo_color = Color(0.42, 0.44, 0.46, 1)
+metallic = 0.9
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Leather"]
+albedo_color = Color(0.09, 0.055, 0.035, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="MonolithBlade"]
+size = Vector3(0.44, 0.09, 1.72)
+material = SubResource("Iron")
+
+[sub_resource type="BoxMesh" id="MonolithTip"]
+size = Vector3(0.32, 0.09, 0.32)
+material = SubResource("Iron")
+
+[sub_resource type="StandardMaterial3D" id="EdgeGlow"]
+albedo_color = Color(0.4, 0.43, 0.45, 1)
+metallic = 0.9
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.08, 0.62, 0.66, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="BoxMesh" id="MonolithEdge"]
+size = Vector3(0.035, 0.1, 1.72)
+material = SubResource("EdgeGlow")
+
+[sub_resource type="BoxMesh" id="MonolithGuard"]
+size = Vector3(0.56, 0.12, 0.1)
+material = SubResource("Iron")
+
+[sub_resource type="BoxMesh" id="MonolithGrip"]
+size = Vector3(0.075, 0.075, 0.46)
+material = SubResource("Leather")
+
+[sub_resource type="BoxMesh" id="MonolithPommel"]
+size = Vector3(0.11, 0.11, 0.1)
+material = SubResource("Steel")
+
+[sub_resource type="BoxMesh" id="MonolithKey"]
+size = Vector3(0.075, 0.03, 0.07)
+material = SubResource("Ivory")
+
 [sub_resource type="BoxMesh" id="PanelMesh"]
 size = Vector3(0.17, 0.58, 0.31)
 material = SubResource("Hoodie")
@@ -470,229 +521,179 @@ mesh = SubResource("CuffMesh")
 position = Vector3(0.38, 0.91, -0.02)
 rotation = Vector3(-0.5, 0, 0)
 
+[node name="Pommel" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(0, 0, 0.02)
+mesh = SubResource("MonolithPommel")
+
+
 [node name="Grip" type="MeshInstance3D" parent="WeaponPivot"]
-position = Vector3(0, 0, -0.22)
-mesh = SubResource("Grip")
+position = Vector3(0, 0, -0.25)
+mesh = SubResource("MonolithGrip")
+
+
+[node name="Guard" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(0, 0, -0.5)
+mesh = SubResource("MonolithGuard")
 
 
 [node name="EscalationBlade" type="MeshInstance3D" parent="WeaponPivot"]
-position = Vector3(0, 0, -0.93)
-mesh = SubResource("Keyboard")
+position = Vector3(0, 0, -1.4)
+mesh = SubResource("MonolithBlade")
 
+
+[node name="Tip" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.04, 0, -0.86)
+mesh = SubResource("MonolithTip")
+rotation = Vector3(0, 0.62, 0)
 
 [node name="Key0_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, -0.40499999999999997)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.6)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key0_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, -0.40499999999999997)
-mesh = SubResource("Key")
-
-
-[node name="Key0_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, -0.40499999999999997)
-mesh = SubResource("Key")
-
-
-[node name="Key0_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, -0.40499999999999997)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.6)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key1_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, -0.315)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.5)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key1_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, -0.315)
-mesh = SubResource("Key")
-
-
-[node name="Key1_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, -0.315)
-mesh = SubResource("Key")
-
-
-[node name="Key1_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, -0.315)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.5)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key2_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, -0.22499999999999998)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.4)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key2_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, -0.22499999999999998)
-mesh = SubResource("Key")
-
-
-[node name="Key2_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, -0.22499999999999998)
-mesh = SubResource("Key")
-
-
-[node name="Key2_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, -0.22499999999999998)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.4)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key3_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, -0.135)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.30000000000000004)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key3_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, -0.135)
-mesh = SubResource("Key")
-
-
-[node name="Key3_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, -0.135)
-mesh = SubResource("Key")
-
-
-[node name="Key3_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, -0.135)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.30000000000000004)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key4_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, -0.045)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.2)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key4_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, -0.045)
-mesh = SubResource("Key")
-
-
-[node name="Key4_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, -0.045)
-mesh = SubResource("Key")
-
-
-[node name="Key4_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, -0.045)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.2)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key5_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, 0.045)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, -0.10000000000000002)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key5_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, 0.045)
-mesh = SubResource("Key")
-
-
-[node name="Key5_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, 0.045)
-mesh = SubResource("Key")
-
-
-[node name="Key5_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, 0.045)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, -0.10000000000000002)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key6_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, 0.135)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, 0.0)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key6_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, 0.135)
-mesh = SubResource("Key")
-
-
-[node name="Key6_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, 0.135)
-mesh = SubResource("Key")
-
-
-[node name="Key6_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, 0.135)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, 0.0)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key7_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, 0.22499999999999998)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, 0.1)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key7_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, 0.22499999999999998)
-mesh = SubResource("Key")
-
-
-[node name="Key7_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, 0.22499999999999998)
-mesh = SubResource("Key")
-
-
-[node name="Key7_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, 0.22499999999999998)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, 0.1)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key8_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, 0.315)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, 0.2)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key8_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, 0.315)
-mesh = SubResource("Key")
-
-
-[node name="Key8_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, 0.315)
-mesh = SubResource("Key")
-
-
-[node name="Key8_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, 0.315)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, 0.2)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key9_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.14100000000000001, 0.067, 0.40499999999999997)
-mesh = SubResource("Key")
+position = Vector3(-0.05, 0.06, 0.3)
+mesh = SubResource("MonolithKey")
 
 
 [node name="Key9_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.047, 0.067, 0.40499999999999997)
-mesh = SubResource("Key")
+position = Vector3(0.05, 0.06, 0.3)
+mesh = SubResource("MonolithKey")
 
 
-[node name="Key9_2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.047, 0.067, 0.40499999999999997)
-mesh = SubResource("Key")
+[node name="Key10_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.05, 0.06, 0.4)
+mesh = SubResource("MonolithKey")
 
 
-[node name="Key9_3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.14100000000000001, 0.067, 0.40499999999999997)
-mesh = SubResource("Key")
+[node name="Key10_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.05, 0.06, 0.4)
+mesh = SubResource("MonolithKey")
 
 
-[node name="Spacebar" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0, 0.067, 0.48)
-mesh = SubResource("Spacebar")
+[node name="Key11_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.05, 0.06, 0.5)
+mesh = SubResource("MonolithKey")
 
 
-[node name="Edge-1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.206, 0.03, 0)
-mesh = SubResource("Rim")
+[node name="Key11_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.05, 0.06, 0.5)
+mesh = SubResource("MonolithKey")
 
 
-[node name="Edge1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.206, 0.03, 0)
-mesh = SubResource("Rim")
+[node name="Key12_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.05, 0.06, 0.6000000000000001)
+mesh = SubResource("MonolithKey")
+
+
+[node name="Key12_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.05, 0.06, 0.6000000000000001)
+mesh = SubResource("MonolithKey")
+
+
+[node name="Key13_0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(-0.05, 0.06, 0.7000000000000001)
+mesh = SubResource("MonolithKey")
+
+
+[node name="Key13_1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
+position = Vector3(0.05, 0.06, 0.7000000000000001)
+mesh = SubResource("MonolithKey")
+
+
+[node name="Edge-1" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(-0.22, 0, -1.4)
+mesh = SubResource("MonolithEdge")
+
+
+[node name="Edge1" type="MeshInstance3D" parent="WeaponPivot"]
+position = Vector3(0.22, 0, -1.4)
+mesh = SubResource("MonolithEdge")
 
 
 [node name="HoodiePanel-1" type="MeshInstance3D" parent="Torso"]
@@ -789,26 +790,26 @@ mesh = SubResource("SoleMesh")
 
 
 [node name="EscKey" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(-0.141, 0.072, -0.405)
+position = Vector3(0, 0.06, -0.78)
 mesh = SubResource("EscMesh")
 
 
-[node name="Cable0" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.0, -0.02, 0.6)
+[node name="Cable0" type="MeshInstance3D" parent="WeaponPivot/Grip"]
+position = Vector3(0.0, 0.05, 0.15)
 mesh = SubResource("CableMesh")
-rotation = Vector3(0.0, 0.0, 0)
+rotation = Vector3(0, 0.0, 1.5708)
 
-[node name="Cable1" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.05, -0.06, 0.72)
+[node name="Cable1" type="MeshInstance3D" parent="WeaponPivot/Grip"]
+position = Vector3(0.02, 0.05, 0.04999999999999999)
 mesh = SubResource("CableMesh")
-rotation = Vector3(0.3, 0.25, 0)
+rotation = Vector3(0, 0.6, 1.5708)
 
-[node name="Cable2" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.1, -0.1, 0.84)
+[node name="Cable2" type="MeshInstance3D" parent="WeaponPivot/Grip"]
+position = Vector3(0.0, 0.05, -0.05000000000000002)
 mesh = SubResource("CableMesh")
-rotation = Vector3(0.6, 0.5, 0)
+rotation = Vector3(0, 1.2, 1.5708)
 
-[node name="Cable3" type="MeshInstance3D" parent="WeaponPivot/EscalationBlade"]
-position = Vector3(0.15000000000000002, -0.13999999999999999, 0.96)
+[node name="Cable3" type="MeshInstance3D" parent="WeaponPivot/Grip"]
+position = Vector3(0.02, 0.05, -0.15000000000000005)
 mesh = SubResource("CableMesh")
-rotation = Vector3(0.8999999999999999, 0.75, 0)
+rotation = Vector3(0, 1.7999999999999998, 1.5708)

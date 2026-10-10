@@ -636,8 +636,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   particles (alpha, billboarded, gravity), `splat()` drops a Decal with a generated splat
   texture onto the floor below a point (capped, fading). `MonsterRig._slice()` calls all
   three; the incident's `_cleanup()` clears the `blood` group.
-- **Kill cams.** `presentation.kill_cam(subject, from, force)` runs a real-time `killcam`
-  beat (slow motion through `ElementFx.freeze`); `missing_transaction._on_record_died()`
+- **Kill cams.** `presentation.kill_cam(subject, from, force, length)` runs a real-time
+  `killcam` beat: impact punch-in, then a hero shot (the engineer turned to camera in
+  `Pose.COOL`, the blade on `rigged_engineer.shoulder_transform()`), then a blend to the rig
+  camera; it drives `Engine.time_scale` and `AudioServer.playback_speed_scale` itself; `missing_transaction._on_record_died()`
   calls it and, in a rendered game, delays the stage's upgrade offer by `upgrade_delay`.
 - **Kill feedback.** `missing_transaction._kill_feedback()` (every record and bug death,
   not the WONTFIX sweep) tracks `kill_streak`, pays FOCUS and calls

@@ -99,8 +99,15 @@ var corridor_lights: Array[OmniLight3D] = []
 var corridor_leds: Array[MeshInstance3D] = []
 var alert_material: Material = preload("res://game/rooms/office/alert.tres")
 ## Finisher kill cam: a beat of slow motion from a low side angle, then straight back.
-const KILLCAM_SECONDS: float = .85
+const KILLCAM_SECONDS: float = 1.9
 var killcam_in_headless: bool = false
+var killcam_length: float = KILLCAM_SECONDS
+var killcam_punch: Vector3
+var killcam_victim: Vector3
+var killcam_roll: float = 0.0
+var killcam_turn: float = 0.0
+var killcam_facing: float = 0.0
+var killcam_hero: bool = false
 var killcam_ready: int = 0
 var killcam_start: int = 0
 var killcam_from: Vector3
@@ -329,6 +336,9 @@ func _caption_layout(cinematic: bool) -> void:
 
 
 func reset_story() -> void:
+	if beat_shot == "killcam":
+		_end_killcam()
+	AudioServer.playback_speed_scale = 1.0
 	beat_shot = ""
 	outbreak_actor = null
 	lower_third.hide()
@@ -447,7 +457,7 @@ func kill_pop(actor: CharacterBody3D, stamp: String, minor: bool, streak: int) -
 func _on_move_called(title: String, ultimate: bool) -> void:
 	if ultimate and title.begins_with("GIT RESET"):
 		var player: Node3D = incident.player
-		kill_cam(player.global_position, player.global_position + player.camera_rig.global_basis.z * 4.0, true)
+		kill_cam(player.global_position, player.global_position + player.camera_rig.global_basis.z * 4.0, true, 2.4)
 
 
 func sound(path: String) -> void:
@@ -704,9 +714,12 @@ func dialogue_camera(who: String, time: float, line: int) -> void:
 	camera.make_current()
 
 
-## A finisher: cut to a low side angle on `subject`, drop into slow motion for a moment,
-## flash, and hand straight back. `force` ignores the cooldown (last kills, the boss).
-func kill_cam(subject: Vector3, from: Vector3, force: bool = false) -> bool:
+## A finisher, in three beats on real time: an instant of near-freeze punched in on the
+## kill (tilted, flash, boom); then the hero shot: a low angle in front of the engineer,
+## who has turned his back on it with the keyboard on his shoulder while it comes apart
+## behind him in slow motion (sound slows too); then a blend back to the gameplay camera.
+## `force` ignores the cooldown (last kills, the boss, the ultimate).
+func kill_cam(subject: Vector3, from: Vector3, force: bool = false, length: float = KILLCAM_SECONDS) -> bool:
 	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
 		return false
 	if not beat_shot.is_empty() or incident.modal_pending() or incident.terminal() and not force:
@@ -714,48 +727,103 @@ func kill_cam(subject: Vector3, from: Vector3, force: bool = false) -> bool:
 	var now: int = Time.get_ticks_msec()
 	if not force and now < killcam_ready:
 		return false
-	killcam_ready = now + 7000
-	var toward: Vector3 = Vector3(subject.x - from.x, 0, subject.z - from.z)
-	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
-	var side: Vector3 = toward.cross(Vector3.UP).normalized()
-	var look: Vector3 = subject + Vector3.UP * .9
+	killcam_ready = now + 9000
+	killcam_length = length
+	var player: CharacterBody3D = incident.player
+	var hero: Vector3 = player.global_position
+	var axis: Vector3 = Vector3(subject.x - hero.x, 0, subject.z - hero.z)
+	if axis.length() < .5:
+		# The kill is the engineer himself (the ultimate): face the camera's way.
+		axis = -player.camera_rig.global_basis.z
+		axis.y = 0
+	axis = axis.normalized() if axis.length() > .01 else Vector3.FORWARD
+	var head: Vector3 = hero + Vector3.UP * 1.2
 	var space: PhysicsDirectSpaceState3D = incident.get_world_3d().direct_space_state
-	for sign in [1.0, -1.0]:
-		var spot: Vector3 = look + side * sign * 4.4 - toward * 2.2 - Vector3.UP * .25
-		if space.intersect_ray(PhysicsRayQueryParameters3D.create(look, spot, 1)).is_empty() or sign < 0:
-			killcam_from = spot
-			killcam_to = look + side * sign * 3.6 - toward * 1.4 - Vector3.UP * .1
+	var sides: Array = [1.0, -1.0] if rng.randf() < .5 else [-1.0, 1.0]
+	var side: Vector3 = axis.cross(Vector3.UP).normalized() * sides[0]
+	for sign: float in sides:
+		var across: Vector3 = axis.cross(Vector3.UP).normalized() * sign
+		var spot: Vector3 = head - axis * 3.4 + across * 1.3 - Vector3.UP * .5
+		if space.intersect_ray(PhysicsRayQueryParameters3D.create(head, spot, 1)).is_empty():
+			side = across
 			break
-	killcam_look = look
+	killcam_victim = subject + Vector3.UP * 1.0
+	killcam_punch = killcam_victim - axis * 2.8 + side * 1.7 + Vector3.UP * .45
+	killcam_from = head - axis * 3.4 + side * 1.3 - Vector3.UP * .5
+	killcam_to = head - axis * 2.7 + side * 1.0 - Vector3.UP * .42
+	killcam_look = hero + Vector3.UP * 1.0 + axis * .6
+	killcam_roll = deg_to_rad(8.0) * sides[0]
+	killcam_turn = atan2(axis.x, axis.z)
+	killcam_facing = player.visual.rotation.y
 	beat_shot = "killcam"
 	killcam_start = now
-	ElementFx.freeze(self, KILLCAM_SECONDS, .14)
-	sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)
+	killcam_hero = false
+	ElementFx.release_freeze()
+	sting(preload("res://assets/audio/sfx/low_boom.ogg"), -5)
 	return true
 
 
 func _killcam_shot() -> void:
 	var t: float = (Time.get_ticks_msec() - killcam_start) / 1000.0
-	if t >= KILLCAM_SECONDS:
-		beat_shot = ""
-		killflash.hide()
-		for bar in letterbox:
-			bar.hide()
-		release_camera()
+	var length: float = killcam_length
+	var player: CharacterBody3D = incident.player
+	var character: Node3D = player.get_node("Visual/Character")
+	if t >= length:
+		_end_killcam()
 		return
 	incident.main.get_node("HUD").visible = false
-	var weight: float = smoothstep(0.0, KILLCAM_SECONDS, t)
-	camera.global_position = killcam_from.lerp(killcam_to, weight)
-	camera.look_at(killcam_look)
-	camera.fov = lerpf(44.0, 38.0, weight)
+	player.narrative_hold = true
+	player.invulnerable_left = maxf(player.invulnerable_left, .3)
+	var rig: Camera3D = player.get_node("CameraRig/SpringArm3D/Camera3D")
+	var scale: float
+	if t < .16:
+		# Beat 1: the impact, all but frozen.
+		scale = .03
+		camera.global_position = killcam_punch
+		camera.look_at(killcam_victim)
+		camera.rotate_object_local(Vector3.BACK, killcam_roll)
+		camera.fov = 40.0
+	else:
+		if not killcam_hero:
+			# Cut to the hero: he has already turned his back on it.
+			killcam_hero = true
+			player.visual.rotation.y = killcam_turn
+			character.story_pose = CHARACTER.Pose.COOL
+			sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -6)
+		var u: float = smoothstep(.16, length - .45, t)
+		scale = lerpf(.07, .4, u)
+		camera.global_position = killcam_from.lerp(killcam_to, u)
+		camera.look_at(killcam_look)
+		camera.rotate_object_local(Vector3.BACK, killcam_roll * .5 * (1.0 - u))
+		camera.fov = lerpf(50.0, 44.0, u)
+		var handover: float = smoothstep(length - .45, length, t)
+		if handover > 0:
+			camera.global_transform = camera.global_transform.interpolate_with(rig.global_transform, handover)
+			camera.fov = lerpf(camera.fov, rig.fov, handover)
+			scale = lerpf(scale, 1.0, handover)
+	Engine.time_scale = scale
+	AudioServer.playback_speed_scale = clampf(scale * 2.2, .5, 1.0)
 	camera.make_current()
-	killflash.visible = t < .2
-	killflash.color.a = maxf(0.0, .55 - t * 3.0)
-	var bars: float = 48.0 * smoothstep(0.0, .08, t) * (1.0 - smoothstep(KILLCAM_SECONDS - .12, KILLCAM_SECONDS, t))
+	killflash.visible = t < .22
+	killflash.color.a = maxf(0.0, .3 - t * 1.6)
+	var bars: float = 54.0 * smoothstep(0.0, .1, t) * (1.0 - smoothstep(length - .3, length, t))
 	for side in [0, 1]:
 		letterbox[side].visible = bars > .5
 		letterbox[side].offset_top = 0.0 if side == 0 else -bars
 		letterbox[side].offset_bottom = bars if side == 0 else 0.0
+
+
+func _end_killcam() -> void:
+	beat_shot = ""
+	Engine.time_scale = 1.0
+	AudioServer.playback_speed_scale = 1.0
+	killflash.hide()
+	for bar in letterbox:
+		bar.hide()
+	if killcam_hero:
+		incident.player.visual.rotation.y = killcam_facing
+	killcam_hero = false
+	release_camera()
 
 
 ## True when a bystander (no collision, so rays miss them) would stand in the shot.
@@ -888,7 +956,7 @@ func _outbreak_shot(delta: float, rig: Camera3D) -> void:
 
 ## Terminal: the camera leaves the engineer slowly while the postmortem is read.
 func _ending(delta: float) -> void:
-	if not incident.terminal():
+	if not incident.terminal() or beat_shot == "killcam":
 		return
 	if beat_shot != "ending":
 		beat_shot = "ending"
@@ -1130,6 +1198,9 @@ func _process(delta: float) -> void:
 		fragment.visible = false
 	if not sequence.is_empty() and voice.current_line.is_empty() and voice.queue.is_empty() and not voice.suspended:
 		say(sequence.pop_front())
+	# A finisher plays out even over the end of the incident (the boss's last blow).
+	if beat_shot == "killcam" and not get_tree().paused and (incident.terminal() or incident.modal_pending()):
+		_killcam_shot()
 	var visible_play: bool = not get_tree().paused and not incident.terminal() and not incident.modal_pending()
 	panel.visible = visible_play and line_left > 0
 	feed.visible = visible_play

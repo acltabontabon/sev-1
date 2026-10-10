@@ -8,7 +8,7 @@ extends Node3D
 ## During a swing the keyboard follows an authored arc in character space and two-bone IK
 ## pulls the arms onto its grip, so the visible strike always matches the damage window.
 
-enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED }
+enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, COOL }
 const SEATED: Array[int] = [Pose.TYPING, Pose.ALERT, Pose.SLUMP, Pose.SIP, Pose.RELAX, Pose.GLANCE]
 const ANIMATIONS: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 ## Weapon space: where each fist closes on the grip.
@@ -25,6 +25,7 @@ const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .8, -.5), Vector3(.13, .8, -.5
 ## The sitting clip was authored for a lower stool set further back: seated, the body
 ## shifts up onto the cushion and forward off the backrest so the chair never cuts it.
 const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
+
 
 @export var model_scale: float = .64
 @export var stride_length: float = 1.25
@@ -49,6 +50,7 @@ var held: float = 1.0
 var right_reach: float = 0.0
 var left_reach: float = 0.0
 var standing_left: float = 0.0
+var shoulder_rest: float = 0.0
 var was_seated: bool = false
 var skeleton: Skeleton3D
 var animator: AnimationPlayer
@@ -133,6 +135,19 @@ func defeat() -> void:
 
 
 ## Where the keyboard sits when the right fist simply holds it.
+## The hero pose: the blade resting on the right shoulder, pointing back and up.
+func shoulder_transform() -> Transform3D:
+	# Guts-style: the blade stands edge-on, its lower edge resting on the outer right
+	# shoulder and the flat facing sideways; it runs back, up and a little outward (clear
+	# of the big head), the grip low in front of the chest.
+	var along: Vector3 = Vector3(.25, .5, .83).normalized()
+	var basis: Basis = Basis.looking_at(along, Vector3.RIGHT)
+	var edge: Vector3 = Vector3(.43, 1.27, .02)
+	# Width (local X) points up: lift the centre line half a blade above the resting edge.
+	var center: Vector3 = edge + basis.x * .22
+	return Transform3D(basis, center - along * .75)
+
+
 func carry_transform() -> Transform3D:
 	var to_character: Transform3D = global_transform.affine_inverse() * skeleton.global_transform
 	var fist: Transform3D = (to_character * skeleton.get_bone_global_pose(bones["Fist.R"])).orthonormalized()
@@ -386,6 +401,11 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.04, 0)
 			target_lean = 0.0
 			reach = 0.0
+		Pose.COOL:
+			# Turned away from the mess, chin down, keyboard on the shoulder.
+			look = Vector2(.2, -.35)
+			target_lean = -.05
+			reach = 0.0
 	# Hands on the desk stay on the desk while the body is lifted onto the cushion.
 	var on_desk: Array[bool] = [story_pose != Pose.SLUMP and story_pose != Pose.RELAX, story_pose in [Pose.TYPING, Pose.ALERT, Pose.GLANCE]]
 	for side in [0, 1]:
@@ -426,9 +446,21 @@ func _solve(delta: float) -> void:
 	left_ik.influence = clampf(left_reach, 0, 1)
 	right_ik.active = right_ik.influence > .001
 	left_ik.active = left_ik.influence > .001
+	# The Monolith rests on the right shoulder whenever it is not swinging (and in the
+	# finisher's hero pose); the right hand goes up to hold it there.
+	var resting: bool = story_pose == Pose.COOL or (story_pose < Pose.TYPING and actor != null and actor.melee != null \
+		and not actor.melee.attacking and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
+	shoulder_rest = move_toward(shoulder_rest, 1.0 if resting else 0.0, delta * (5.0 if resting else 12.0))
+	if shoulder_rest > 0.0:
+		right_target.position = shoulder_transform() * RIGHT_GRIP
+		right_pole.position = Vector3(.8, .2, .3)
+		right_ik.influence = maxf(right_ik.influence, shoulder_rest)
+		right_ik.active = true
 	skeleton.advance(delta)
 	if held > 0.0:
 		weapon.transform = weapon.transform.interpolate_with(carry_transform(), held)
+	if shoulder_rest > 0.0:
+		weapon.transform = weapon.transform.interpolate_with(shoulder_transform(), smoothstep(0.0, 1.0, shoulder_rest))
 	trail.sample()
 	_glow()
 
@@ -440,7 +472,7 @@ func _glow() -> void:
 	var hue: Color = Color.from_hsv(fmod(clock * .35, 1.0), .75, 1.0)
 	for material in rim_materials:
 		material.emission = Color(.08, .62, .66).lerp(hue, battle)
-		material.emission_energy_multiplier = .7 + 2.3 * battle
+		material.emission_energy_multiplier = .25 + 2.6 * battle
 
 
 func _scrub(clip: String, time: float, blend: float, delta: float) -> void:

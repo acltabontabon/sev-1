@@ -866,7 +866,8 @@ func _update_beacon() -> void:
 	if beacon == null:
 		return
 	var step: Dictionary = next_step()
-	if step.is_empty() or step.tag == "" or not (step.point as Vector3).is_finite():
+	# Cutscenes and kill cams play clean: no waypoint floating through the shot.
+	if step.is_empty() or step.tag == "" or not (step.point as Vector3).is_finite() or not presentation.beat_shot.is_empty():
 		beacon.hide()
 		return
 	var point: Vector3 = step.point
@@ -1108,8 +1109,7 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal():
 		return
 	if actor == boss:
-		presentation.kill_cam(actor.global_position, player.global_position, true)
-		ElementFx.freeze(self, .3, .05)
+		presentation.kill_cam(actor.global_position, player.global_position, true, 2.8)
 		enemies_defeated += 1
 		_enter(Stage.RESOLVED)
 		return

@@ -3,8 +3,8 @@ extends MeshInstance3D
 ## two points on the weapon each physics tick and fades the oldest samples out.
 
 @export var samples: int = 14
-@export var base_offset: Vector3 = Vector3(0, 0, -.38)
-@export var tip_offset: Vector3 = Vector3(0, 0, -1.47)
+@export var base_offset: Vector3 = Vector3(0, 0, -.6)
+@export var tip_offset: Vector3 = Vector3(0, 0, -2.3)
 var color: Color = Color(.3, .95, 1)
 var emitting: bool = false
 var points: Array[PackedVector3Array] = []

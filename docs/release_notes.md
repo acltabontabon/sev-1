@@ -1,5 +1,33 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.21 — The Legacy Monolith, hero finishers, clearer monsters (10 October 2026)
+
+Creator feedback on 0.2.20: the finishers were too fast; make them dramatic and
+cinematic with better angles and a cool protagonist (Cloud's Omnislash noted for the
+ultimate); a broadsword carried like Guts', resting edge-on on the shoulder without
+clipping; funny unhinged last words; monster voices too distorted to understand.
+
+- **The Legacy Monolith.** The keyboard grew into a slab of a broadsword taller than the
+  engineer (dark iron, two rows of keys down the flat, a red Esc near the tip, the cable
+  wrapped round the grip, faint cyan edges that flare in battle). Out of a swing he
+  carries it Guts-style: edge-on, the lower edge resting on the outer right shoulder,
+  flat facing out, grip low in front of the chest. Checked from front, sides, back and
+  above for clipping against the oversized head. The swing trail follows the longer
+  blade. Combat reach and damage are unchanged.
+- **Hero finishers.** The kill cam is now ~1.9 s in three beats on real time: an instant
+  of near-freeze on a tilted angle of the kill with a flash and a boom; then the hero
+  shot, a low angle in front of the engineer, who has turned his back on it, sword on
+  his shoulder, while it comes apart behind him in slow motion (sound slows with time);
+  then a smooth blend back into the gameplay camera. The boss gets 2.8 s and plays over
+  the ending; the ultimate's slam 2.4 s. Waypoints hide during cutscenes.
+- **Last words.** Every monster now speaks as it dies (mass kills let them out one at a
+  time), from a bigger pool: "Don't… cc me… in hell…", "I never… even got… the pizza
+  party…", "Sorry… I have… a hard stop…", "Let's… circle back… in the afterlife…", "Was
+  I… ever… in the roadmap…", "Fine… merge it… I don't care anymore…".
+- **Readable monsters.** The bark chain is gentler: a slight warble, the growl a fifth
+  below kept well under the words, mild saturation, no bit crusher, less pitch drop.
+  59 lines regenerated; still unheard candidates.
+
 ## 0.2.20 — Monsters losing it (10 October 2026)
 
 Creator feedback on 0.2.19: the monsters should sound like monsters losing their minds.

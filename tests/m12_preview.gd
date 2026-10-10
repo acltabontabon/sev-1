@@ -393,8 +393,10 @@ func finishers() -> void:
 	player.specials.reply_all()
 	while incident.presentation.beat_shot != "killcam":
 		await live(.01)
-	await live(.2)
-	await shot("finisher_killcam")
+	for mark: Array in [[.08, "finisher_killcam_impact"], [.7, "finisher_killcam"], [1.35, "finisher_killcam_hero"]]:
+		while incident.presentation.beat_shot == "killcam" and (Time.get_ticks_msec() - incident.presentation.killcam_start) / 1000.0 < mark[0]:
+			await process_frame
+		await shot(mark[1])
 	while incident.presentation.beat_shot == "killcam":
 		await live(.02)
 	await live(.05)

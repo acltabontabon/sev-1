@@ -95,15 +95,30 @@ for side in ['Left', 'Right']:
     node(side+'Foot', pos=f'{x}, .10, -.06', mesh='Foot')
     node(side+'Hand', mesh='Hand')
     node(side+'Cuff', mesh='CuffMesh')
+# The Legacy Monolith: a keyboard grown into a slab of a broadsword, taller than the man
+# who carries it. Pommel at the pivot; the blade runs down -Z to an angled chisel tip.
+mat('Iron', '.12, .12, .13', .8, .55)
+mat('Steel', '.42, .44, .46', .9, .3)
+mat('Leather', '.09, .055, .035', 0, .9)
+box('MonolithBlade', '.44, .09, 1.72', 'Iron')
+box('MonolithTip', '.32, .09, .32', 'Iron')
+resources.append('[sub_resource type="StandardMaterial3D" id="EdgeGlow"]\nalbedo_color = Color(.4, .43, .45, 1)\nmetallic = .9\nroughness = .3\nemission_enabled = true\nemission = Color(.08, .62, .66, 1)\nemission_energy_multiplier = .25\n')
+box('MonolithEdge', '.035, .1, 1.72', 'EdgeGlow')
+box('MonolithGuard', '.56, .12, .1', 'Iron')
+box('MonolithGrip', '.075, .075, .46', 'Leather')
+box('MonolithPommel', '.11, .11, .1', 'Steel')
+box('MonolithKey', '.075, .03, .07', 'Ivory')
 node('WeaponPivot', pos='.38, .91, -.02', extra='rotation = Vector3(-.5, 0, 0)')
-node('Grip', 'WeaponPivot', '0, 0, -.22', 'Grip')
-node('EscalationBlade', 'WeaponPivot', '0, 0, -.93', 'Keyboard')
-for row in range(10):
-    for col in range(4):
-        node(f'Key{row}_{col}', 'WeaponPivot/EscalationBlade', f'{(col-1.5)*.094}, .067, {(row-4.5)*.09}', 'Key')
-node('Spacebar', 'WeaponPivot/EscalationBlade', '0, .067, .48', 'Spacebar')
+node('Pommel', 'WeaponPivot', '0, 0, .02', 'MonolithPommel')
+node('Grip', 'WeaponPivot', '0, 0, -.25', 'MonolithGrip')
+node('Guard', 'WeaponPivot', '0, 0, -.5', 'MonolithGuard')
+node('EscalationBlade', 'WeaponPivot', '0, 0, -1.4', 'MonolithBlade')
+node('Tip', 'WeaponPivot/EscalationBlade', '.04, 0, -.86', 'MonolithTip', 'rotation = Vector3(0, .62, 0)')
+for row in range(14):
+    for col in range(2):
+        node(f'Key{row}_{col}', 'WeaponPivot/EscalationBlade', f'{(col-.5)*.1}, .06, {(row-6.5)*.1 + .05}', 'MonolithKey')
 for side in [-1,1]:
-    node(f'Edge{side}', 'WeaponPivot/EscalationBlade', f'{side*.206}, .03, 0', 'Rim')
+    node(f'Edge{side}', 'WeaponPivot', f'{side*.22}, 0, -1.4', 'MonolithEdge')
 box('PanelMesh', '.17, .58, .31', 'Hoodie')
 box('BackMesh', '.55, .58, .05', 'Hoodie')
 box('HoodMesh', '.44, .17, .2', 'Hoodie')
@@ -131,9 +146,10 @@ for index, (x, z, rx, rz) in enumerate([(-.07, -.02, .3, -.5), (.05, .03, -.2, .
     node(f'Tuft{index}', 'Head', f'{x}, .2, {z}', 'TuftMesh', f'rotation = Vector3({rx}, {index*.7}, {rz})')
 for side in ['Left', 'Right']:
     node('Sole', side + 'Foot', '0, -.06, -.01', 'SoleMesh')
-node('EscKey', 'WeaponPivot/EscalationBlade', '-.141, .072, -.405', 'EscMesh')
+node('EscKey', 'WeaponPivot/EscalationBlade', '0, .06, -.78', 'EscMesh')
+# The keyboard's cable, wrapped round the grip like a lanyard.
 for index in range(4):
-    node(f'Cable{index}', 'WeaponPivot/EscalationBlade', f'{.05*index}, {-.02-.04*index}, {.6+.12*index}', 'CableMesh', f'rotation = Vector3({.3*index}, {.25*index}, 0)')
+    node(f'Cable{index}', 'WeaponPivot/Grip', f'{.02*(index%2)}, {.05}, {.15-.1*index}', 'CableMesh', f'rotation = Vector3(0, {.6*index}, 1.5708)')
 header = '[gd_scene format=3]\n\n[ext_resource type="Script" path="res://game/player/character_presentation.gd" id="1"]\n\n'
 text = header+'\n'.join(resources)+'\n[node name="Character" type="Node3D"]\nscript = ExtResource("1")\n\n'+'\n'.join(nodes)
 (ROOT/'game/player/engineer_visual.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
