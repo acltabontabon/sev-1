@@ -720,10 +720,17 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   which plays the duel with the staged monster and calls `final_blow()` on the hidden
   real boss to slice it (severing limbs on the staged monster first and mirroring that on
   the real one); the RESOLVED ending then runs `all_hands.gd` (death, receipts, cent,
-  memorial, desk, the walk out with memories, street, window; then Monday's postmortem,
+  memorial, tear close-up, desk sword placement and belongings pickup, the walk out
+  with recalled coffee/lunch/gossip conversations, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
   SubViewport, its tiles fed by small cameras on off-map sets) on real time before the report, which then gets the victory lines. Each
-  cutscene restores what it touched and TAB ends it. The postmortem's VP proposes AI
+  cutscene restores what it touched and TAB ends it. The aftermath uses temporary
+  bone attachments for the tear and carried box, local cinematic hand targets for
+  prop contacts, and a parked copy of the sword. `Dialogues.remembered_lines` stores
+  the exact ordinary take heard this run; reset clears it while shuffled take bags
+  continue across retries. Memory clips play sequentially with matching captions;
+  the mourning WAV loops locally through the departure. `tests/finale_tests.gd`
+  checks recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
   replacements; the engineer objects before the note-taker records unanimous consent.
   Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting
   exit use shot cues rather than numeric step positions, so dialogue additions retain

@@ -172,6 +172,30 @@ boss; its reply eases back into the playable fight. The entire entrance remains
 skippable with TAB. This presentation adds about 12 seconds and no combat stat buff.
 The creator still needs to accept the emotional buildup, voice and hair silhouette.
 
+### Incident 001 aftermath (implemented prototype, 11 October 2026)
+
+After the duel and the five memorial shots, the engineer looks down at JO and the
+camera moves to his face as one tear rolls down his cheek. The original mourning
+theme begins during the memorial and continues through the rainy departure. Back at
+his workstation he sets down the Legacy Monolith, stands, and collects a small box
+with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays on the desk;
+he leaves the office unarmed with his personal effects.
+
+Faint, warm memories recall the five as people: coffee invitations, lunch plans and
+ridiculous gossip. “Tell me something normal” in their living conversations cycles
+three locally prerecorded takes per coworker. The walk recalls the exact take heard
+this run; an unvisited coworker supplies a shuffled take. Memory audio is sequential,
+with captions that respect the subtitle preference. The walk accommodates complete
+clips; TAB skips and R clears the props and this run's recalled lines. Hand contacts,
+stand-up motion and prop movement are blended; the box stays upright as he walks.
+Explicit cinematic gait matches the eased travel pace, including slow movement below
+the gameplay idle threshold and street shots without a physics floor update.
+Monday's existing postmortem follows the night.
+
+Human checkpoint: judge the tear's visibility, smooth hand/prop contacts, stand-up and
+walk transitions, voice/music balance, and whether ordinary memories make the loss
+land. This is a source refinement; the packaged 0.2.45 build predates it.
+
 ## Proposed ending
 
 After The Root Cause falls, production stabilizes and the office returns to normal. A company-wide message thanks leadership for the resolution. The protagonist earns “Exceeds Expectations,” with a 0% salary increase, and finally leaves. A final notification announces “Monday, 9:00 AM — Sprint Planning.” Credits.
@@ -185,8 +209,8 @@ response, including the original. Pat and Morgan also vary their repeat-visit gr
 Takes preserve the same reply choices, character role and Burnout effects. Each visited
 node cycles its voiced takes in shuffled order before repeating, including across
 incident retries within one application session; a new application session starts fresh.
-The variations are authored and prerecorded locally. Planted employees, story cinematics
-and fixed combat callouts retain their current lines.
+The variations are authored and prerecorded locally. Planted employees, fixed combat callouts retain their current lines. The Incident 001 aftermath reuses
+ordinary coworker conversations as described above.
 
 Playtest checkpoint: press E near a coworker, try the same reply on repeat visits or
 after R to retry, and listen for new lines with matching captions. Judge whether the

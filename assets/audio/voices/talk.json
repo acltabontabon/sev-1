@@ -725,6 +725,11 @@
               "Can I go home?",
               "home",
               {}
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
@@ -816,11 +821,35 @@
               "Sorry.",
               "",
               {}
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
             "Any progress? I've changed the channel name to Mission Control. Please deliver a mission we can control.",
             "Quick update: leadership loves our response. They haven't seen the response. I showed them the font."
+          ]
+        },
+        "good_days": {
+          "text": "Coffee run? My treat. Put it under leadership development. We are developing the ability to leave this fucking room.",
+          "text_variants": [
+            "Lunch downstairs? No agenda. If I say synergy, you have my permission to throw a bread roll at me.",
+            "Gossip: the board bought a meditation app. It sends push notifications telling you to stop looking at your phone."
+          ],
+          "replies": [
+            [
+              "I'm in. Five minutes.",
+              "",
+              {}
+            ],
+            [
+              "After this, lunch is on me.",
+              "",
+              {}
+            ]
           ]
         }
       },
@@ -979,6 +1008,11 @@
               "What's in the box?",
               "swag",
               {}
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
@@ -1018,6 +1052,25 @@
           "replies": [
             [
               "Welcome aboard.",
+              "",
+              {}
+            ]
+          ]
+        },
+        "good_days": {
+          "text": "Coffee? I remembered your order. Black, no sugar, expression of a man being hunted for sport.",
+          "text_variants": [
+            "Lunch on Monday? You promised to show me the cheap noodle place. I put it in my calendar. Just us.",
+            "Office gossip: the forbidden fridge yogurt is from twenty nineteen. I named it Kevin. Kevin has more tenure than me."
+          ],
+          "replies": [
+            [
+              "I'm in. Five minutes.",
+              "",
+              {}
+            ],
+            [
+              "After this, lunch is on me.",
               "",
               {}
             ]
@@ -1225,6 +1278,11 @@
                 "burnout": -3,
                 "note": "Solidarity"
               }
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
@@ -1253,6 +1311,25 @@
         "coffee": {
           "text": "Coffee stopped working on me in 2021. I still drink it, out of respect. Like visiting a grave.",
           "replies": []
+        },
+        "good_days": {
+          "text": "Coffee? I saved you the good mug. The other one says rockstar. Nobody deserves that before breakfast.",
+          "text_variants": [
+            "Lunch? We can sit outside and watch pigeons fight over a chip. Finally, an incident with a clear owner.",
+            "Come here. The anonymous culture survey has our names in the filename. Stealth mode, brought to you by absolute fucking geniuses."
+          ],
+          "replies": [
+            [
+              "I'm in. Five minutes.",
+              "",
+              {}
+            ],
+            [
+              "After this, lunch is on me.",
+              "",
+              {}
+            ]
+          ]
         }
       }
     },
@@ -1274,6 +1351,11 @@
               "Please don't.",
               "deck",
               {}
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
@@ -1294,6 +1376,25 @@
           "replies": [
             [
               "It isn't.",
+              "",
+              {}
+            ]
+          ]
+        },
+        "good_days": {
+          "text": "Coffee break. Actual break. If anybody follows us with a laptop, we are calling animal control.",
+          "text_variants": [
+            "Lunch is on me. No work talk. I want to hear something stupid. Tell me about your terrible first band.",
+            "Do not tell anyone. The executive retreat was an escape room. They paid extra to have the intern solve it."
+          ],
+          "replies": [
+            [
+              "I'm in. Five minutes.",
+              "",
+              {}
+            ],
+            [
+              "After this, lunch is on me.",
               "",
               {}
             ]
@@ -1322,6 +1423,11 @@
                 "burnout": -3,
                 "note": "Permission to leave"
               }
+            ],
+            [
+              "Tell me something normal.",
+              "good_days",
+              {}
             ]
           ],
           "text_variants": [
@@ -1342,6 +1448,25 @@
           "replies": [
             [
               "Ship it.",
+              "",
+              {}
+            ]
+          ]
+        },
+        "good_days": {
+          "text": "Coffee with me? I drew a little skull on yours. Relax. It is latte art, not a prediction.",
+          "text_variants": [
+            "Lunch. Real plates. No screens. You can tell me about your day without ranking its fucking severity.",
+            "Gossip? The rebrand cost a million. Same logo, two pixels left. I moved it back. Nobody fucking noticed."
+          ],
+          "replies": [
+            [
+              "I'm in. Five minutes.",
+              "",
+              {}
+            ],
+            [
+              "After this, lunch is on me.",
               "",
               {}
             ]

@@ -226,6 +226,7 @@ func reset_incident() -> void:
 		armed = false
 		dialogue.close()
 	talked.clear()
+	preload("res://game/incidents/dialogues.gd").remembered_lines.clear()
 	_cleanup()
 	decision_pending = false
 	corporate_choice = -1

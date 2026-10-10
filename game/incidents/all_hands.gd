@@ -6,10 +6,11 @@ extends Node3D
 ##              bloody, as his Unpaid Overtime slowly burns out; a receipt drifts down.
 ##  "cent"      close on it: the missing transaction, $0.01, cost: 5 staff (the narrator).
 ##  "memorial"  In Memoriam: a glide past each of the five where they fell.
-##  "desk"      back at his desk: a new ticket. He stands up.
+##  "grief"     a last look at JO; a tear rolls down the engineer's cheek.
+##  "desk"      back at his desk: he collects his mug and personal effects.
 ##  "exit"      he walks out across the dark floor to a sad theme; the five come back as
-##              fading memories at desks along his way, each a whisper of what they said
-##              to him tonight; the motion lights click off behind him.
+##              fading memories at desks along his way, ordinary coffee/lunch/gossip
+##              fragments with matching quiet captions; the motion lights click off behind him.
 ##  "street"    midnight, street level, rain: he walks out of the tower and away.
 ##  "window"    up in the one lit window: five silhouettes watching him go. The narrator.
 ##  "resolved"  INCIDENT 001 — RESOLVED.
@@ -22,6 +23,7 @@ extends Node3D
 const ROOT: String = "res://assets/characters/quaternius/"
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 const CREW = preload("res://game/incidents/coworkers.gd")
+const DIALOGUES = preload("res://game/incidents/dialogues.gd")
 ## In Memoriam, in the order they fell.
 const MEMORIAL: Array = [
 	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "His calendar is still full."],
@@ -31,7 +33,7 @@ const MEMORIAL: Array = [
 	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Her deck will be presented by someone else."]]
 const MEMORIAL_EACH: float = 2.4
 ## The way out: their memories at desks along his path, doing what they did ([who, where,
-## clip, facing]); each whispers the first thing they said to him tonight.
+## clip, facing]); each recalls an ordinary conversation with him.
 const MEMORIES: Array = [
 	["Manager", Vector3(-1.2, 0, 13.4), "ual/phone", PI],
 	["SRE", Vector3(.2, 0, 9.7), "ual/interact", 0.0],
@@ -76,6 +78,17 @@ var fade: ColorRect
 var titles: Label
 var memorial_name: Label
 var memorial_line: Label
+var memory_caption: Label
+var tear_anchor: Node3D
+var tear: MeshInstance3D
+var belongings: Node3D
+var carry_anchor: Node3D
+var belongings_from: Vector3
+var exit_duration: float = EXIT_SECONDS
+var weapon_was_visible: bool
+var parked_sword: Node3D
+var sword_from: Transform3D
+var sword_rest: Transform3D
 
 
 func _init(presentation: Node) -> void:
@@ -94,11 +107,15 @@ func start() -> void:
 		ledger.append([screen, screen.text, screen.modulate])
 	desk_texts = [story.desk.alarm_title.text, story.desk.alarm_detail.text]
 	saved_attributes = story.camera.attributes
+	weapon_was_visible = character.weapon.visible
 	focus = CameraAttributesPractical.new()
 	story.camera.attributes = focus
 	mourn = AudioStreamPlayer.new()
 	mourn.bus = &"Music"
-	mourn.stream = load("res://assets/audio/music/mourning.wav")
+	var theme: AudioStreamWAV = load("res://assets/audio/music/mourning.wav").duplicate()
+	theme.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	theme.loop_end = int(theme.get_length() * theme.mix_rate)
+	mourn.stream = theme
 	add_child(mourn)
 	player.global_position = VAULT_AT
 	player.velocity = Vector3.ZERO
@@ -109,6 +126,7 @@ func start() -> void:
 func _beat(next: String) -> void:
 	beat = next
 	beat_at = clock
+	character.story_walk_speed = 0.0
 	focus.dof_blur_far_enabled = false
 	focus.dof_blur_near_enabled = false
 	match beat:
@@ -131,8 +149,18 @@ func _beat(next: String) -> void:
 		"memorial":
 			memorial_name.show()
 			memorial_line.show()
+			_start_mourning()
+		"grief":
+			memorial_name.hide()
+			memorial_line.hide()
+			var fallen: Vector3 = _fallen_at("Intern")
+			player.global_position = fallen + Vector3(0, .05, 1.15)
+			player.visual.rotation.y = 0.0
+			character.story_pose = character.Pose.LOOK_DOWN
+			character.weapon.hide()
+			_build_tear()
 		"desk":
-			# Back at his desk. A new ticket.
+			# The machine still wants something. He takes only what belongs to him.
 			memorial_name.hide()
 			memorial_line.hide()
 			if is_instance_valid(snow):
@@ -144,24 +172,25 @@ func _beat(next: String) -> void:
 			player.visual.rotation.y = 0.0
 			character.story_pose = character.Pose.TYPING
 			character.sit = 1.0
+			tear_anchor.hide()
+			_build_belongings()
+			_park_sword()
 			story.desk.alarm_title.text = "SEV-2  ·  COFFEE MACHINE DOWN"
 			story.desk.alarm_detail.text = "Owner: YOU  ·  Due: Now  ·  Leadership is aware"
 			story.desk.set_live(true)
 			story.desk.alarm(true)
 			story.sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -4)
 		"exit":
+			character.story_hand_targets.clear()
 			character.story_pose = 0
 			character.sit = 0.0
 			player.global_position = EXIT_PATH[0]
-			if DisplayServer.get_name() != "headless":
-				mourn.volume_db = -30.0
-				mourn.play()
-				mourn.create_tween().tween_property(mourn, "volume_db", -8.0, 2.5)
 			_summon_memories()
 		"street":
 			# A cut to the street: rain, a sodium lamp, the tower going up into the dark.
 			for memory: Dictionary in memories:
 				memory.body.hide()
+			memory_caption.hide()
 			_exposure(.5)
 			story._restore_lights()
 			_stage_street()
@@ -184,6 +213,7 @@ func _beat(next: String) -> void:
 			# Monday: he has showered. He has not slept. The gold is long gone.
 			_unbloody()
 			character.overtime(false)
+			belongings.hide()
 		"monday":
 			titles.hide()
 			_exposure(.9)
@@ -208,6 +238,8 @@ func tick(delta: float) -> bool:
 	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card", "resolved", "next"]
 	var camera: Camera3D = story.camera
 	var engineer: Vector3 = player.global_position
+	if is_instance_valid(belongings) and beat != "desk":
+		belongings.global_transform = _carry_transform()
 	match beat:
 		"death":
 			# Low, looking up: it comes apart; the ledger behind it reconciles.
@@ -264,17 +296,44 @@ func tick(delta: float) -> bool:
 			memorial_name.modulate.a = alpha
 			memorial_line.modulate.a = alpha
 			if t >= MEMORIAL_EACH * MEMORIAL.size():
+				_beat("grief")
+		"grief":
+			# First his colleague, then the face of someone who cannot fix this.
+			var head: Vector3 = tear_anchor.global_position
+			if t < 2.2:
+				camera.global_position = engineer + Vector3(.7, 1.5, .6)
+				camera.look_at(_fallen_at("Intern") + Vector3.UP * .3)
+				camera.fov = 42.0
+			else:
+				camera.global_position = head + Vector3(.45, .2, -2.0).lerp(Vector3(.35, .15, -1.7), smoothstep(2.2, 6.5, t))
+				camera.look_at(head + Vector3(0, .15, -.08))
+				camera.fov = 40.0
+			tear.position.y = .21 - .14 * smoothstep(2.6, 6.6, t)
+			tear.scale = Vector3(.75, lerpf(.6, 1.7, smoothstep(2.2, 6.0, t)), .65)
+			if t >= 7.0:
 				_beat("desk")
 		"desk":
-			# Over his shoulder at the new ticket. He just looks at it.
-			camera.global_position = story.SEAT + Vector3(-.75, 1.55, 1.15) + Vector3(.1, -.05, -.2) * minf(1.0, t / 3.0)
-			camera.look_at(story.MONITOR)
-			camera.fov = 40.0
-			if t >= 3.0:
+			parked_sword.global_transform = sword_from.interpolate_with(sword_rest, smoothstep(0.0, 1.7, t))
+			character.story_pose = character.Pose.GLANCE if t < 2.5 else character.Pose.ARMED
+			character.sit = 1.0 - smoothstep(2.5, 4.0, t)
+			var box_hand: Vector3 = character.to_global(Vector3(-.35, .72, -.06))
+			var carried: Transform3D = Transform3D(Basis.IDENTITY, box_hand + Vector3(0, -.22, 0))
+			belongings.global_position = belongings_from.lerp(carried.origin, smoothstep(3.4, 5.2, t))
+			belongings.global_basis = Basis.IDENTITY.slerp(carried.basis, smoothstep(3.4, 5.2, t))
+			var left: Vector3 = character.to_local(belongings.global_position + Vector3.UP * .22)
+			var right: Vector3 = character.to_local(parked_sword.global_position)
+			character.story_hand_targets.assign([
+				Vector3(-.28, .55, .08).lerp(left, smoothstep(2.6, 3.4, t)),
+				right.lerp(Vector3(.32, .7, .03), smoothstep(1.7, 2.6, t))])
+			camera.global_position = story.SEAT + Vector3(1.6, 1.55, -.45)
+			camera.look_at(belongings.global_position + Vector3.UP * .2)
+			camera.fov = 42.0
+			if t >= 6.0:
 				_beat("exit")
 		"exit":
 			# Out across the floor, slowly, past them; each light goes out behind him.
-			var walk: float = minf(1.0, t / EXIT_SECONDS)
+			var walk: float = _walk_progress(t, exit_duration)
+			character.story_walk_speed = _walk_speed(t, exit_duration, EXIT_PATH[0].distance_to(EXIT_PATH[1]))
 			player.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], walk)
 			var heading: Vector3 = EXIT_PATH[1] - EXIT_PATH[0]
 			player.visual.rotation.y = atan2(-heading.x, -heading.z)
@@ -282,21 +341,22 @@ func tick(delta: float) -> bool:
 				if pool.light_energy > 0.0 and pool.global_position.x < engineer.x - 1.8 and absf(pool.global_position.z - engineer.z) < 6.0:
 					pool.light_energy = 0.0
 					story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -14)
-			_haunt(real)
-			if t < EXIT_SECONDS * .55:
+			_haunt(t)
+			if t < exit_duration * .55:
 				# Side on, a little ahead of him: the memories pass between us.
-				camera.global_position = engineer + Vector3(1.6, 1.35, -3.4)
+				camera.global_position = engineer + Vector3(-2.4, 2.4, -1.1)
 				camera.look_at(engineer + Vector3(.8, 1.0, 0))
 				camera.fov = 46.0
 			else:
 				camera.global_position = engineer - heading.normalized() * 3.6 + Vector3(0, 1.5, .5)
 				camera.look_at(engineer + Vector3.UP * 1.0 + heading.normalized() * 2.0)
 				camera.fov = 48.0
-			if t >= EXIT_SECONDS:
+			if t >= exit_duration:
 				_beat("street")
 		"street":
 			# Low across the wet street, the tower behind him; he walks out of frame.
-			var walk: float = minf(1.0, t / STREET_SECONDS)
+			var walk: float = _walk_progress(t, STREET_SECONDS)
+			character.story_walk_speed = _walk_speed(t, STREET_SECONDS, STREET_PATH[0].distance_to(STREET_PATH[1]))
 			player.global_position = STREET_PATH[0].lerp(STREET_PATH[1], walk)
 			camera.global_position = Vector3(-28.0, -69.25, 11.8) + Vector3(.6, .15, -.4) * walk
 			camera.look_at(Vector3(-18.0, -67.4, 6.0) + Vector3(0, 2.5, 0) * smoothstep(.6, 1.0, walk))
@@ -351,6 +411,9 @@ func finish(epilogue: bool = true) -> void:
 	character.overtime(false)
 	character.story_pose = 0
 	character.sit = 0.0
+	character.story_hand_targets.clear()
+	character.story_walk_speed = 0.0
+	character.weapon.visible = weapon_was_visible
 	player.global_position = VAULT_AT
 	_unbloody()
 	story._restore_lights()
@@ -374,7 +437,7 @@ func finish(epilogue: bool = true) -> void:
 	memories.clear()
 	if is_instance_valid(meeting):
 		meeting.finish()
-	for node: Node in props + [fade, titles, memorial_name, memorial_line]:
+	for node: Node in props + [fade, titles, memorial_name, memorial_line, memory_caption]:
 		if is_instance_valid(node):
 			node.queue_free()
 	props.clear()
@@ -405,8 +468,135 @@ func _unbloody() -> void:
 	bloodied.clear()
 
 
+func _start_mourning() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	mourn.volume_db = -30.0
+	mourn.play()
+	mourn.create_tween().tween_property(mourn, "volume_db", -10.0, 3.0)
+
+
+## Small wet geometry attached to the animated head, rather than a screen-space icon.
+func _build_tear() -> void:
+	var unit: float = 1.0 / character.skeleton.global_basis.get_scale().x
+	tear_anchor = character._attach("Head", unit)
+	props.append(tear_anchor.get_parent())
+	tear = MeshInstance3D.new()
+	var drop: SphereMesh = SphereMesh.new()
+	drop.radius = .014
+	drop.height = .028
+	tear.mesh = drop
+	var water: StandardMaterial3D = StandardMaterial3D.new()
+	water.albedo_color = Color(.7, .85, .93, .85)
+	water.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	water.roughness = .05
+	water.metallic = .35
+	tear.material_override = water
+	tear.position = Vector3(.18, .21, .325)
+	tear.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	tear_anchor.add_child(tear)
+	var fill: OmniLight3D = OmniLight3D.new()
+	fill.position = Vector3(.5, .2, -.8)
+	fill.light_color = Color(.72, .8, 1)
+	fill.light_energy = .7
+	fill.omni_range = 2.0
+	tear_anchor.add_child(fill)
+
+
+## A small cardboard box: his laptop, his mug and JO's handwritten lunch reminder.
+func _build_belongings() -> void:
+	belongings = Node3D.new()
+	incident.add_child(belongings)
+	props.append(belongings)
+	belongings_from = story.SEAT + Vector3(.65, .86, -.85)
+	belongings.global_position = belongings_from
+	var cardboard: StandardMaterial3D = StandardMaterial3D.new()
+	cardboard.albedo_color = Color(.48, .33, .2)
+	cardboard.roughness = .95
+	_box_part(Vector3(.42, .02, .3), Vector3.ZERO, cardboard)
+	for side: float in [-1.0, 1.0]:
+		_box_part(Vector3(.02, .22, .3), Vector3(side * .21, .11, 0), cardboard)
+		_box_part(Vector3(.42, .22, .02), Vector3(0, .11, side * .15), cardboard)
+	var laptop: StandardMaterial3D = StandardMaterial3D.new()
+	laptop.albedo_color = Color(.13, .15, .17)
+	laptop.metallic = .5
+	_box_part(Vector3(.27, .3, .025), Vector3(-.055, .18, .045), laptop)
+	var mug: MeshInstance3D = MeshInstance3D.new()
+	var cup: CylinderMesh = CylinderMesh.new()
+	cup.top_radius = .05
+	cup.bottom_radius = .045
+	cup.height = .12
+	mug.mesh = cup
+	var ceramic: StandardMaterial3D = StandardMaterial3D.new()
+	ceramic.albedo_color = Color(.85, .83, .75)
+	ceramic.roughness = .25
+	mug.material_override = ceramic
+	mug.position = Vector3(.12, .12, -.065)
+	belongings.add_child(mug)
+	var note: Label3D = Label3D.new()
+	note.text = "MONDAY LUNCH?\n— JO"
+	note.font = preload("res://assets/fonts/barlow_condensed_semibold.ttf")
+	note.font_size = 32
+	note.pixel_size = .0011
+	note.modulate = Color(.98, .88, .59)
+	note.outline_size = 0
+	note.position = Vector3(0, .115, -.162)
+	note.rotation.y = PI
+	belongings.add_child(note)
+	var unit: float = 1.0 / character.skeleton.global_basis.get_scale().x
+	var hand: Node3D = character._attach("Fist.L", unit)
+	carry_anchor = Node3D.new()
+	hand.add_child(carry_anchor)
+	props.append(hand.get_parent())
+
+
+func _carry_transform() -> Transform3D:
+	return Transform3D(Basis(Vector3.UP, player.visual.rotation.y), carry_anchor.global_position + Vector3(0, -.22, 0))
+
+
+## Integral of a .6-second smooth velocity ramp: feet and travel start/stop together.
+func _walk_progress(time: float, length: float) -> float:
+	var t: float = clampf(time, 0.0, length)
+	var ramp: float = .6
+	var distance: float
+	if t < ramp:
+		distance = t * t * t / (ramp * ramp) - .5 * pow(t, 4) / pow(ramp, 3)
+	elif t > length - ramp:
+		var remaining: float = length - t
+		distance = length - ramp - (pow(remaining, 3) / pow(ramp, 2) - .5 * pow(remaining, 4) / pow(ramp, 3))
+	else:
+		distance = t - ramp * .5
+	return distance / (length - ramp)
+
+
+func _walk_speed(time: float, length: float, distance: float) -> float:
+	return maxf(.001, distance / (length - .6) * smoothstep(0.0, .6, time) * (1.0 - smoothstep(length - .6, length, time)))
+
+
+## A real copy remains on the workstation; the carried blade stays hidden outside.
+func _park_sword() -> void:
+	parked_sword = character.weapon.duplicate()
+	incident.add_child(parked_sword)
+	props.append(parked_sword)
+	parked_sword.show()
+	sword_rest = Transform3D(Basis.from_euler(Vector3(0, -PI * .5, 0)), story.SEAT + Vector3(-.65, .86, -.55))
+	sword_from = Transform3D(sword_rest.basis, sword_rest.origin + Vector3(0, .22, .28))
+	parked_sword.global_transform = sword_from
+
+
+func _box_part(size: Vector3, at: Vector3, material: Material) -> void:
+	var part: MeshInstance3D = MeshInstance3D.new()
+	var shape: BoxMesh = BoxMesh.new()
+	shape.size = size
+	part.mesh = shape
+	part.material_override = material
+	part.position = at
+	belongings.add_child(part)
+
+
 ## The five, as he remembers them tonight: pale, translucent, at desks along his way.
 func _summon_memories() -> void:
+	var cue: float = .7
 	for entry: Array in MEMORIES:
 		var cast: Dictionary = {}
 		for member: Dictionary in CREW.CAST:
@@ -420,41 +610,42 @@ func _summon_memories() -> void:
 		var ghost: StandardMaterial3D = StandardMaterial3D.new()
 		ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		ghost.albedo_color = Color(.72, .86, 1.0, 0.0)
+		ghost.albedo_color = Color(.84, .79, .69, 0.0)
 		for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
 			(mesh as MeshInstance3D).material_override = ghost
 			(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		animator.add_animation_library("ual", MOTION)
 		animator.play(entry[2])
-		var whisper: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		var remembered: Dictionary = DIALOGUES.memory(entry[0])
+		var whisper: AudioStreamPlayer = AudioStreamPlayer.new()
 		whisper.bus = &"Voice"
-		whisper.stream = load("res://assets/audio/voices/talk/talk_%s_a.ogg" % str(entry[0]).to_lower())
-		whisper.pitch_scale = .94
-		whisper.unit_size = 4.0
-		whisper.position.y = 1.4
+		whisper.stream = load(DIALOGUES.audio(remembered.clip))
+		whisper.volume_db = -10.0
 		body.add_child(whisper)
-		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false, "glow": 0.0})
+		var length: float = whisper.stream.get_length()
+		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false,
+			"cue": cue, "length": length, "text": remembered.text, "who": DIALOGUES.tree(entry[0]).who})
+		cue += length + .9
+	exit_duration = maxf(EXIT_SECONDS, cue + .7)
 
 
-## Each memory comes up as he nears it, whispers, and fades once he has passed.
-func _haunt(delta: float) -> void:
+## One intelligible fragment at a time. A memory vanishes after its line, not mid-word.
+func _haunt(time: float) -> void:
+	memory_caption.hide()
 	for memory: Dictionary in memories:
-		var body: Node3D = memory.body
-		var along: float = player.global_position.x - body.global_position.x
-		var near: bool = along > -2.6 and along < 1.4
-		memory.glow = move_toward(memory.glow, .42 if near else 0.0, delta * (.5 if near else .3))
-		memory.ghost.albedo_color.a = memory.glow
-		if near and not memory.seen:
+		var within: float = time - float(memory.cue)
+		var length: float = memory.length
+		var alpha: float = smoothstep(-.4, .4, within) * (1.0 - smoothstep(length, length + .7, within))
+		memory.ghost.albedo_color.a = alpha * .14
+		if within >= 0.0 and not memory.seen:
 			memory.seen = true
 			if DisplayServer.get_name() != "headless":
-				var whisper: AudioStreamPlayer3D = memory.whisper
-				whisper.volume_db = -6.0
-				whisper.play()
-				var hush: Tween = whisper.create_tween()
-				hush.tween_interval(1.8)
-				hush.tween_property(whisper, "volume_db", -40.0, 1.6)
-				hush.tween_callback(whisper.stop)
+				memory.whisper.play()
+		if within >= 0.0 and within < length and story.voice.subtitles_enabled:
+			memory_caption.text = "%s · remembered\n%s" % [memory.who, memory.text]
+			memory_caption.modulate.a = smoothstep(0.0, .3, within) * (1.0 - smoothstep(length - .3, length, within))
+			memory_caption.show()
 
 
 func _boss_at() -> Vector3:
@@ -671,6 +862,21 @@ func _build_ui() -> void:
 	# In Memoriam: quiet white type, bottom left, no box.
 	memorial_name = _memorial(72, -300, 110)
 	memorial_line = _memorial(28, -205, 114)
+	memory_caption = Label.new()
+	memory_caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	memory_caption.offset_top = -160
+	memory_caption.offset_bottom = -65
+	memory_caption.offset_left = 160
+	memory_caption.offset_right = -160
+	memory_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	memory_caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	memory_caption.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_semibold.ttf"))
+	memory_caption.add_theme_font_size_override("font_size", 27)
+	memory_caption.add_theme_color_override("font_color", Color(.85, .82, .75))
+	memory_caption.add_theme_constant_override("outline_size", 5)
+	memory_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	memory_caption.hide()
+	story.add_child(memory_caption)
 
 
 func _memorial(size: int, top: float, left: float) -> Label:

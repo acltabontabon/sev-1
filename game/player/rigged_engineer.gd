@@ -32,6 +32,10 @@ const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
 ## playback scales from it so the feet stay planted instead of skating.
 @export var run_reference_speed: float = 3.4
 var story_pose: int = 0
+## Local cinematic prop contacts, in character space. Empty during gameplay.
+var story_hand_targets: Array[Vector3] = []
+## Staged travel has no move_and_slide floor update; its pace drives the walk clip.
+var story_walk_speed: float = 0.0
 var sit: float = 0.0
 var crouch: float = 0.0
 ## 0..1, set by the incident's battle-mode director: eyes and keyboard light up.
@@ -116,6 +120,8 @@ func _ready() -> void:
 
 
 func reset_pose() -> void:
+	story_hand_targets.clear()
+	story_walk_speed = 0.0
 	if actor != null:
 		process_mode = Node.PROCESS_MODE_INHERIT
 	phase = -1.0
@@ -335,6 +341,8 @@ func _physics_process(delta: float) -> void:
 		return
 	clock += delta
 	var speed: float = distance / maxf(delta, .001)
+	if story_walk_speed > 0.0:
+		speed = story_walk_speed
 	# Omnislash blinks teleport; they are not a burst of running.
 	if actor.specials != null and actor.specials.omnislashing():
 		speed = 0.0
@@ -372,14 +380,14 @@ func _gameplay(speed: float, delta: float) -> void:
 		_scrub("roll", clampf(actor.dodge_elapsed / total, 0, 1) * .92, .05, delta)
 	elif actor.hurt_left > 0:
 		_scrub("hit", (1.0 - actor.hurt_left / maxf(actor.hurt_duration, .01)) * .35, .04, delta)
-	elif not actor.is_on_floor():
+	elif not actor.is_on_floor() and story_walk_speed <= 0.0:
 		_scrub("jump", .45, .12, delta)
 	elif melee.attacking and actor.combo_index == 2 and melee.elapsed < melee.windup:
 		_scrub("jump", .25 + .3 * melee.elapsed / melee.windup, .05, delta)
 	elif speed > 2.6:
 		_loop("run", clampf(speed / run_reference_speed, .8, 1.9), .14, delta)
-	elif speed > .35:
-		_loop("walk", clampf(speed / 1.6, .6, 1.6), .14, delta)
+	elif speed > .35 or story_walk_speed > 0.0:
+		_loop("walk", clampf(speed / 1.6, .08 if story_walk_speed > 0.0 else .6, 1.6), .25 if story_walk_speed > 0.0 else .14, delta)
 	else:
 		_loop("idle", 1.0, .2, delta)
 	spin = 0.0
@@ -645,13 +653,18 @@ func _solve(delta: float) -> void:
 		left_target.position = weapon.transform * LEFT_GRIP if not story_pose in SEATED else hands[0]
 		right_pole.position = Vector3(.75, .35, .55)
 		left_pole.position = Vector3(-.75, .35, .55)
+	if story_hand_targets.size() == 2 and actor != null and actor.narrative_hold:
+		left_target.position = story_hand_targets[0]
+		right_target.position = story_hand_targets[1]
+		left_reach = 1.0
+		right_reach = 1.0
 	right_ik.influence = clampf(right_reach, 0, 1)
 	left_ik.influence = clampf(left_reach, 0, 1)
 	right_ik.active = right_ik.influence > .001
 	left_ik.active = left_ik.influence > .001
 	# The Monolith rests on the right shoulder whenever it is not swinging; the right hand
 	# goes up to hold it there.
-	var resting: bool = (story_pose < Pose.TYPING and actor != null and actor.melee != null \
+	var resting: bool = (weapon.visible and story_pose < Pose.TYPING and actor != null and actor.melee != null \
 		and not actor.melee.attacking and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
 	shoulder_rest = move_toward(shoulder_rest, 1.0 if resting else 0.0, delta * (5.0 if resting else 12.0))
 	if shoulder_rest > 0.0:

@@ -300,3 +300,14 @@ runtime gates remain open. This milestone does not establish a new performance c
   The local audition reel is `builds/voice_auditions.wav`, ordered Engineer,
   Management, Production, Variance, Narrator, Postmortem, with one-second gaps.
   Individual auditions can be recreated with the command above.
+
+### Ordinary memories (11 October 2026 source refinement)
+
+MORGAN, NADIA, JUN, JO and VAL each gain three authored “good_days” takes about
+coffee, lunch or gossip, plus three shared engineer reply clips (18 new assets). They
+use the existing locked stock voice blends and local generator, with license, source
+hash and generation metadata in `assets/audio/voices/talk/provenance.json`. No outside
+reference recordings or runtime synthesis. The ending recalls the take heard this run,
+or draws a take for an unvisited coworker. Memory clips use the Voice bus at −10 dB
+and play one at a time; the existing original mourning theme loops on the Music bus.
+Human acting and mix acceptance remain pending.

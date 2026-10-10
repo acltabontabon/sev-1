@@ -1,5 +1,23 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — The things they left behind (11 October 2026)
+
+- After the memorial, a last look at JO leads to a held face close-up with a tear.
+  The original sad theme starts earlier, during the memorial, and continues outside.
+- At his workstation, the engineer sets down his sword and collects his laptop, mug
+  and JO's “MONDAY LUNCH?” reminder in a box. The sword remains at his station.
+- Five faint memories recall ordinary coffee, lunch and gossip, including the exact
+  conversation heard this run. Fifteen new coworker takes and three engineer replies
+  are locally generated stock Kokoro voices, with provenance in `talk/provenance.json`.
+  They are also playable through “Tell me something normal” in living conversations.
+- Sequential complete memory clips, subtitle preferences, blended hand contacts and
+  stand-up motion; the carried box stays upright. Cinematic travel now drives a
+  matching walk cycle, fixing slow-exit idle sliding and airborne-pose freezes;
+  starts and stops ease over 0.6 seconds. TAB and R clean up all added props.
+- `tests/finale_tests.gd` checks the aftermath; `tests/finale_preview.gd` renders its
+  checkpoints. Human pacing, animation and listening acceptance remain open. The
+  packaged 0.2.45 build predates this source refinement.
+
 ## Source update — The AI backfill pitch (11 October 2026)
 
 Creator feedback: make the postmortem dialogue funnier and more unhinged, with someone
@@ -19,7 +37,6 @@ suggesting AI replacements for the fallen crew.
 - The night, memorial and combat are preserved. Human acceptance of acting and joke
   timing remains open. Replay just the meeting with
   `sh tools/godot.sh --path . --script tests/postmortem_preview.gd`.
-
 
 ## Source update — Unpaid Overtime buildup (11 October 2026)
 

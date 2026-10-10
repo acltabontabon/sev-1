@@ -92,6 +92,14 @@ The packaged 0.2.45 build predates this refinement. In a normal run, reach the v
 TAB skips the cinematic and R retries the episode. Review the pacing, shout and hair
 silhouette; visual inspection and automated checks do not establish the emotional payoff.
 
+For the revised ending (duel through departure and Monday), run
+`sh tools/godot.sh --path . --script tests/cutscene_preview.gd -- --finale`.
+For rendered grief, sword placement, pickup and memory checkpoints, run
+`sh tools/godot.sh --path . --script tests/finale_preview.gd`. In a normal run, use E
+with MORGAN, NADIA, JUN, JO or VAL and choose “Tell me something normal”; win the
+boss fight to hear that conversation recalled. Review the tear, animation transitions
+and sad-theme mix. TAB skips; R retries. These source changes are not in the existing ZIP.
+
 `play.command` is the source-project Finder launcher and requires the pinned engine.
 The packaged `.app` does not. F5 opens the title screen; F6 can run the standalone
 incident scene or `game/main.tscn` combat lab. Those regression scenes retain the

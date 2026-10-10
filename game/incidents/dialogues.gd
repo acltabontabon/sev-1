@@ -17,6 +17,8 @@ static var cache: Dictionary = {}
 ## Session-local bags survive incident retries; targeting a coworker never consumes one.
 static var variation_bags: Dictionary = {}
 static var last_variations: Dictionary = {}
+## The ending recalls the exact ordinary conversation heard during this run.
+static var remembered_lines: Dictionary = {}
 
 
 ## Choose text and its matching clip only when a line is actually shown.
@@ -38,8 +40,17 @@ static func line(talk: Dictionary, node_id: String) -> Dictionary:
 	var take: int = int(bag.pop_back())
 	variation_bags[clip] = bag
 	last_variations[clip] = take
-	return {"text": node.text if take == 0 else variants[take - 1],
+	var chosen: Dictionary = {"text": node.text if take == 0 else variants[take - 1],
 		"clip": clip if take == 0 else "%s_variant_%d" % [clip, take]}
+	if node_id == "good_days":
+		remembered_lines[clip] = chosen.duplicate()
+	return chosen
+
+
+static func memory(name: String) -> Dictionary:
+	var talk: Dictionary = tree(name)
+	var clip: String = talk.voice + "good_days"
+	return remembered_lines[clip].duplicate() if remembered_lines.has(clip) else line(talk, "good_days")
 
 
 static func data() -> Dictionary:
