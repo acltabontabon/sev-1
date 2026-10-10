@@ -1,5 +1,26 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — The AI backfill pitch (11 October 2026)
+
+Creator feedback: make the postmortem dialogue funnier and more unhinged, with someone
+suggesting AI replacements for the fallen crew.
+
+- The AI diagnoses the root cause as trying to go home: "Home is a competitor.
+  We do not work for competitors." The document records the same diagnosis.
+- The VP explicitly pitches replacing them: "No salaries. No funerals. Just a
+  subscription we can expense." The engineer names all five and objects; the AI
+  note-taker records his protest as enthusiasm and unanimous consent.
+- Only after approval do the five replacement tiles join. JO.ai greets the call as
+  "alive within the meaning of the service agreement." Leadership crops the survivor
+  out of its LinkedIn photo, assigns him accountability for the agents, and puts him
+  on call forever. He asks whether AI can replace him so he can finally leave.
+- Nine rewritten and four new locally prerecorded lines retain stock voice/model
+  provenance. The document and replacement tile statuses match the new exchange.
+- The night, memorial and combat are preserved. Human acceptance of acting and joke
+  timing remains open. Replay just the meeting with
+  `sh tools/godot.sh --path . --script tests/postmortem_preview.gd`.
+
+
 ## Source update — Unpaid Overtime buildup (11 October 2026)
 
 Creator feedback: the gold transformation was too abrupt; give the loss time to become

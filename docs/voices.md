@@ -28,6 +28,13 @@ Kokoro controls voice and speed; delivery prose is an editorial/listening guide,
 an emotional prompt sent to the model. Short utterances need particular listening
 attention, as noted in the upstream voice catalog.
 
+Postmortem dialogue update (11 October 2026): nine revised clips and four new lines
+(`pm_pitch`, `pm_objection`, `pm_consent`, `pm_agent`) stage the AI replacement pitch,
+the engineer's objection, its misrecording as consent, and the replacement intern's
+welcome. Existing stock executive, management, protagonist and postmortem profiles
+are retained; fingerprints, checksums and rights are in `voices/provenance.json`.
+These remain candidate performances awaiting human listening and comedic timing review.
+
 ## Casting
 
 | Role | Stock voice | Language | Speed | Delivery / processing |

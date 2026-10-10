@@ -6,7 +6,8 @@ extends Node3D
 ## People on a Peloton, the AI note-taker, and his own self-view. The postmortem types
 ## itself out: root cause, an engineer was present; impact, one cent and five "resource
 ## attrition events"; what went well, leadership. Corrective action three backfills the
-## night shift with AI, and five cheerful agents with their names join the call. A
+## night shift with AI after the VP pitches it, the engineer objects, and the note-taker
+## misrecords consent. Five agents with their names join; JO.ai greets the call. A
 ## screenshot for LinkedIn (his tile blacked out), on call this weekend, meeting ended.
 ## Presentation only, on real time.
 
@@ -28,34 +29,37 @@ const TILES: Array = [
 	["VP of Alignment", "off", "camera off · muted"],
 	["Head of People · Peloton", "people", ""],
 	["ENGI-NOTES AI", "notes", "taking notes"],
-	["MORGAN.ai", "agent", "Escalating… 100%"],
-	["NADIA.ai", "agent", "On call 24/7/365 · no pager required"],
-	["JUN.ai", "agent", "Generated 400 logos"],
-	["JO.ai", "agent", "Unpaid. Forever. Thrilled!"],
-	["VAL.ai", "agent", "Deck ready: 2,000 slides"],
+	["MORGAN.ai", "agent", "Escalating to another AI"],
+	["NADIA.ai", "agent", "On call forever · no pager"],
+	["JUN.ai", "agent", "Six fingers. 400 logos."],
+	["JO.ai", "agent", "Alive per service agreement"],
+	["VAL.ai", "agent", "2,000 slides. Zero answers."],
 	["You", "you", ""]]
 const DOC: Array[String] = [
 	"BLAMELESS POSTMORTEM — INC-001\nStatus: blameless ✓\n\n",
-	"ROOT CAUSE: An engineer was present.\nCONTRIBUTING FACTOR: The engineer continued to be present.\n\n",
+	"ROOT CAUSE: Attempted to go home.\nCONTRIBUTING FACTOR: Home is a competitor.\n\n",
 	"IMPACT: $0.01 (recovered) · 5 resource attrition events\n\n",
 	"WHAT WENT WELL: Leadership.\n",
-	"WHAT WENT WRONG: The engineer.\n\n",
-	"CORRECTIVE ACTIONS\n 1. Engineer to write this postmortem (done, by AI)\n 2. Engineer to be less present\n",
-	" 3. Backfill the night shift with AI (5 agents)\n\nOWNER: You    DUE: Yesterday"]
+	"WHAT WENT WRONG: The engineer survived.\n\n",
+	"CORRECTIVE ACTIONS\n 1. Record objection as enthusiastic consent\n 2. Engineer to own all AI mistakes\n",
+	" 3. Replace the night shift with AI (5 agents)\n\nOWNER: You    DUE: Yesterday"]
 ## The meeting, step by step: [line ("" for none), shot, how much of DOC is out, the
 ## least it holds on screen].
 const STEPS: Array = [
-	["postmortem", "glass", 1, 3.2],
+	["", "glass", 1, 2.4],
+	["allhands_ceo", "tile:0", 1, 1.0],
 	["pm_root", "screen", 2, 1.0],
 	["pm_impact", "screen", 3, 1.0],
-	["allhands_ceo", "tile:0", 4, 1.0],
-	["allhands_vp", "him", 5, 1.0],
+	["allhands_vp", "screen", 4, 1.0],
 	["allhands_people", "tile:2", 5, 1.0],
-	["postmortem_owner", "screen", 6, 1.0],
+	["pm_pitch", "screen", 5, 1.0],
+	["pm_objection", "him_close", 5, 1.2],
+	["pm_consent", "tile:3", 6, 1.0],
 	["pm_backfill", "screen", 7, 1.0],
+	["pm_agent", "tile:7", 7, 1.0],
 	["", "him_close", 7, 2.4],
 	["allhands_photo", "screen", 7, 1.0],
-	["", "screen", 7, 4.0],
+	["", "photo", 7, 4.0],
 	["allhands_oncall", "him", 7, 1.0],
 	["allhands_engineer", "him_close", 7, 1.2],
 	["", "pullout", 7, 4.5]]
@@ -104,14 +108,14 @@ func _next() -> void:
 	var entry: Array = STEPS[step]
 	if not str(entry[0]).is_empty():
 		story.say(entry[0])
-	match step:
-		10:
+	match str(entry[1]):
+		"photo":
 			_screenshot()
-		11:
+		"him":
 			ElementFx.slow_motion(&"photo", 1.0)
 			story.crew_freeze.hide()
 			card.hide()
-		13:
+		"pullout":
 			ended.show()
 
 
@@ -130,7 +134,7 @@ func tick(real: float) -> bool:
 	doc_shown = minf(float(target), doc_shown + real * 55.0)
 	doc.visible_characters = int(doc_shown)
 	# The agents join one by one while the AI announces them.
-	if step == 7 and agents_joined < 5 and t > .9 + agents_joined * .75:
+	if str(entry[0]) == "pm_backfill" and agents_joined < 5 and t > .9 + agents_joined * .75:
 		tiles[4 + agents_joined].show()
 		agents_joined += 1
 		story.sting(preload("res://assets/audio/sfx/chat_ping_soft.ogg"), -6)
@@ -178,7 +182,7 @@ func _shot(kind: String, t: float) -> void:
 			camera.global_position = Vector3(17.2, 1.75, -13.4) + Vector3(.2, 0, .3) * minf(1.0, t / 4.0)
 			camera.look_at(Vector3(23.0, 1.5, -8.6))
 			camera.fov = 52.0
-		"screen":
+		"screen", "photo":
 			camera.global_position = Vector3(24.4 + minf(t, 6.0) * .03, 2.0, -8.75)
 			camera.look_at(SCREEN_AT)
 			camera.fov = 46.0

@@ -2349,7 +2349,9 @@ func _process(delta: float) -> void:
 	if beat_shot == "killcam" and not get_tree().paused and (incident.terminal() or incident.modal_pending()):
 		_killcam_shot()
 	var visible_play: bool = not get_tree().paused and not incident.terminal() and not incident.modal_pending()
-	panel.visible = visible_play and line_left > 0
+	# The finale owns its caption visibility, including the Monday call.
+	if beat_shot != "all_hands":
+		panel.visible = visible_play and line_left > 0
 	feed.visible = visible_play and not beat_shot in ["massacre", "casualty"]
 	if visible_play:
 		feed.tick(delta)

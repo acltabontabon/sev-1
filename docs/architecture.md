@@ -723,7 +723,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   memorial, desk, the walk out with memories, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
   SubViewport, its tiles fed by small cameras on off-map sets) on real time before the report, which then gets the victory lines. Each
-  cutscene restores what it touched and TAB ends it.
+  cutscene restores what it touched and TAB ends it. The postmortem's VP proposes AI
+  replacements; the engineer objects before the note-taker records unanimous consent.
+  Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting
+  exit use shot cues rather than numeric step positions, so dialogue additions retain
+  their timing.
 - **Freeze-frames and slow motion.** `ElementFx` is the only writer of
   `Engine.time_scale`. `freeze()` drops it for a beat on big impacts (Blocker quake,
   Variance cataclysm, the engineer's finisher hit, the boss's defeat) and a real-time

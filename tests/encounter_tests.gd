@@ -781,6 +781,14 @@ func _run() -> void:
 		await frames(1)
 	check(is_instance_valid(party) and party.beat == "memorial" and not player.get_node("Visual/Character").overtime_on \
 		and incident.room.get_node("LedgerText1").text == "SUCCESS", "the boss comes apart, the ledger reconciles, the overtime burns out, and the dead are remembered")
+	party._beat("grief")
+	incident.presentation.voice.clear()
+	incident.presentation.say("pm_pitch")
+	await frames(2)
+	incident.presentation._process(.001)
+	check(incident.presentation.panel.visible and incident.presentation.caption.text == incident.presentation.voice.subtitle \
+		and incident.presentation.voice.lines.pm_pitch.subtitle in incident.presentation.caption.text,
+		"finale dialogue captions remain visible after the presentation updates")
 	await key(KEY_TAB)
 	await create_timer(.7, true, false, true).timeout
 	check(not is_instance_valid(party) and paused, "TAB ends the all-hands and the report follows")
@@ -795,7 +803,18 @@ func _run() -> void:
 	var meeting: Node3D = load("res://game/incidents/postmortem_call.gd").new(incident.presentation)
 	incident.presentation.add_child(meeting)
 	meeting.start()
-	meeting.step = 6
+	var backfill_step: int = -1
+	for index in range(meeting.STEPS.size()):
+		if meeting.STEPS[index][0] == "pm_pitch" or meeting.STEPS[index][0] == "pm_objection":
+			meeting.step = index - 1
+			meeting._next()
+			meeting.tick(.1)
+			check(meeting.agents_joined == 0 and meeting.tiles.slice(4, 9).all(func(tile: Control) -> bool: return not tile.visible),
+				"replacement agents stay hidden during the proposal and the engineer's objection")
+		if meeting.STEPS[index][0] == "pm_backfill":
+			backfill_step = index
+	incident.presentation.voice.clear()
+	meeting.step = backfill_step - 1
 	meeting._next()
 	var joining: int = Time.get_ticks_msec() + 10000
 	while meeting.agents_joined < 5 and Time.get_ticks_msec() < joining:
@@ -803,6 +822,14 @@ func _run() -> void:
 		await frames(1)
 	check(meeting.agents_joined == 5 and meeting.tiles.slice(4, 9).all(func(tile: Control) -> bool: return tile.visible) and "AI" in meeting.doc.text,
 		"the postmortem backfills the night shift with five AI agents on the call")
+	incident.presentation.voice.clear()
+	for index in range(meeting.STEPS.size()):
+		if meeting.STEPS[index][1] == "photo":
+			meeting.step = index - 1
+			meeting._next()
+	check(meeting.card.visible and is_equal_approx(Engine.time_scale, .02), "the expanded meeting still captures the leadership photo")
+	meeting._next()
+	check(not meeting.card.visible and is_equal_approx(Engine.time_scale, 1.0), "the on-call assignment releases the photo freeze")
 	meeting.finish()
 	await frames(3)
 	check(scene.find_children("*", "", true, false).size() == before_call, "the postmortem call leaves nothing behind")
