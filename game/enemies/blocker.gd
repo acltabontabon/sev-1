@@ -140,7 +140,7 @@ func _physics_process(delta: float) -> void:
 			shield_cast.emit(allies.size())
 		return
 	cast_cooldown -= delta
-	if cast_cooldown <= 0 and not melee.attacking and stagger_left <= 0 and not allies_in_range().is_empty():
+	if cast_cooldown <= 0 and awareness == Awareness.ENGAGED and not melee.attacking and stagger_left <= 0 and not allies_in_range().is_empty():
 		casting = 0.0
 		cast_damage = 0
 		ring.show()

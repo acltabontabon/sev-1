@@ -58,6 +58,8 @@ func _run() -> void:
 	incident._enter(incident.Stage.ENCOUNTER_ONE)
 	incident._spawn()
 	var foe: CharacterBody3D = incident.active_enemy
+	# Arithmetic fixture: an engaged foe, so no surprise-review bonus applies.
+	foe.engage()
 	foe.position = Vector3(0, .05, 3.4)
 	foe.set_physics_process(false)
 	player.position = Vector3(0, .05, 5)

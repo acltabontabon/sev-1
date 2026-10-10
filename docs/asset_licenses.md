@@ -45,5 +45,9 @@ without an account on 10 October 2026 and reviewed in the running game.
 | 16 interface/effect sounds | Kenney Interface Sounds, Impact Sounds, UI Audio, Sci-Fi Sounds; CC0 1.0 | [assets/audio/sfx](../assets/audio/sfx/README.md) |
 | 7 PBR material sets (1K) | ambientCG and Poly Haven; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md) |
 | 8 pantry props | Kenney Furniture Kit; CC0 1.0, tinted at load | [assets/environment/kenney_furniture](../assets/environment/kenney_furniture/README.md) |
+| 3 music beds | Original synthesis (`tools/build_music.py`) | [assets/audio/music](../assets/audio/music/README.md) |
 
 Kenney's furniture chair and round table were evaluated and rejected as toy-like. Mixamo and Freesound remain excluded because they require accounts.
+
+A CC0 rigged character was evaluated and not imported; see
+[character evaluation](../assets/characters/README.md#milestone-12-rig-evaluation-10-october-2026).

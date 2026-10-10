@@ -1,4 +1,13 @@
-[gd_resource type="AudioBusLayout" format=3]
+[gd_resource type="AudioBusLayout" load_steps=2 format=3]
+
+[sub_resource type="AudioEffectCompressor" id="VoiceDuck"]
+resource_name = "VoiceDuck"
+threshold = -28.0
+ratio = 5.0
+attack_us = 8000.0
+release_ms = 450.0
+sidechain = &"Voice"
+
 [resource]
 bus/0/name = &"Master"
 bus/0/solo = false
@@ -18,3 +27,11 @@ bus/2/mute = false
 bus/2/bypass_fx = false
 bus/2/volume_db = 0.0
 bus/2/send = &"Master"
+bus/3/name = &"Music"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = 0.0
+bus/3/send = &"Master"
+bus/3/effect/0/effect = SubResource("VoiceDuck")
+bus/3/effect/0/enabled = true

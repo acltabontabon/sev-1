@@ -140,6 +140,7 @@ func reset_incident() -> void:
 	player.move_multiplier = 1.0
 	player.zone_multiplier = 1.0
 	quick_sync = "idle"
+	noticed_stage = -1
 	seen_kinds.clear()
 	wave_index = 0
 	_reset_doors()
@@ -379,6 +380,8 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	var actor: CharacterBody3D = RECORD.instantiate()
 	if ARCHETYPES[kind] != null:
 		actor.set_script(ARCHETYPES[kind])
+	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
+	actor.starts_aware = is_same(group, sync_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
 	actor.position = spawn_site(entry[1])
 	actor.detection_distance = 50
@@ -408,6 +411,22 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	elif stage == Stage.ENCOUNTER_ONE:
 		presentation.say("enemy")
 	return actor
+
+
+var noticed_stage: int = -1
+
+
+## First sighting in a stage: the system files the engineer as the owner.
+func on_enemy_noticed(_actor: Node) -> void:
+	if noticed_stage == stage:
+		return
+	noticed_stage = stage
+	presentation.say("spotted")
+	message = "@here Engineer detected in production. Ticket assigned to: you."
+
+
+func on_surprise(_actor: Node) -> void:
+	presentation.say("surprise")
 
 
 ## At most a few enemies wind up at once, so a crowd reads as a sequence of tells.
@@ -536,6 +555,8 @@ func inspect_console() -> void:
 	if stage != Stage.INVESTIGATION or not near_console():
 		return
 	presentation.say("evidence_open")
+	if not inspected:
+		presentation.evidence_shot()
 	inspected = true
 	console_marker.text = "EVIDENCE OPEN\nChoose 1 / 2 / 3"
 	objective = "Which system is missing the record? Press 1, 2, or 3."
@@ -676,7 +697,7 @@ func _finish() -> void:
 	report += "\nBurnout: %d — %s\nManagement: %s\nCommitment: %s" % [run.burnout, run.burnout_title(), corporate_title(), challenge_result]
 	report += "\nPeak Burnout: %d • Enemies defeated: %d\nBoss: %s" % [run.peak_burnout, enemies_defeated, "Eliminated" if won else ("Encountered — unresolved" if boss_encountered else "Not encountered")]
 	report += "\n\nTime: %d:%02d    Investigation retries: %d\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, mistakes]
-	report += "\n\nEngineer: Can I go home now?\nCalendar: Retrospective — tomorrow, 09:00." if won else "\n\nCalendar: Your retrospective attendance is still required."
+	report += "\n\nEngineer request: go home. Status: pending approval.\nCalendar: Retrospective — tomorrow, 09:00." if won else "\n\nCalendar: Your retrospective attendance is still required."
 	room.get_node("Clock").text = "FRIDAY / 17:00" if won else "FRIDAY / 16:59"
 	player.melee.cancel()
 	player.camera_rig.set_capture(false)

@@ -2,7 +2,7 @@ extends RefCounted
 ## Device preferences only; never serialize incident state or run modifiers.
 ## Exception: opening_seen records that this device watched the opening once, which
 ## unlocks skipping it. It carries no run progress.
-const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1, "opening_seen": false}
+const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "music": 0.6, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1, "opening_seen": false}
 var values: Dictionary = DEFAULTS.duplicate()
 var path: String = "user://settings.cfg"
 
@@ -33,7 +33,7 @@ func save_settings() -> Error:
 
 
 func apply(scene: Node = null) -> void:
-	for bus_name: String in ["Master", "Effects", "Voice"]:
+	for bus_name: String in ["Master", "Effects", "Voice", "Music"]:
 		var index: int = AudioServer.get_bus_index(bus_name)
 		if index >= 0:
 			var gain: float = values[bus_name.to_lower()]

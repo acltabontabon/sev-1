@@ -102,7 +102,9 @@ func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
 	if health <= 0 or hitstop_left > 0:
 		return
-	unhit += delta
+	# It only grows while it is actually working on you.
+	if awareness == Awareness.ENGAGED:
+		unhit += delta
 	if unhit >= growth_seconds:
 		grow()
 	# Final stage alternates its jab with a full spin: stop chasing, start leaving.

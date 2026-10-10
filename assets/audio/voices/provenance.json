@@ -814,5 +814,37 @@
     "duration": 2.0321666666666665,
     "peak": 0.6382192373275757,
     "review_status": "candidate; human listening acceptance pending"
+  },
+  "spotted": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "af_kore",
+    "generation_date": "2026-10-09T23:57:36.156503+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/intercom",
+    "fingerprint": "6f3dcada2b5efa3b5ffbad114341e16653083ec2ff8a86c56d7313bacf90415a",
+    "sha256": "1edfc640b17550015cfd520d8aad4ac77e01e2ed8a2e8d7ab40a8f61916ad28e",
+    "master_sha256": "fdd57a4c4013b8fa732265514e5121cabaf51eb9f5fe2a00a8f4eb0fc8aecee8",
+    "duration": 2.802208333333333,
+    "peak": 0.7897264361381531,
+    "review_status": "candidate; human listening acceptance pending"
+  },
+  "surprise": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "am_michael",
+    "generation_date": "2026-10-09T23:57:36.575673+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "253dced73f1887309b92928f9588909a5bdb9d8f39f91bd6b874c85bf5c3c398",
+    "sha256": "c4146515c4ec7d58bebb82e32406874ebaf734aa96a699a279d95c729f383932",
+    "master_sha256": "e6250d726fb9e8a1815e3d5c4c6b6638496e0c90a49bdbe742e62efe2b618aae",
+    "duration": 1.5177916666666667,
+    "peak": 0.687366247177124,
+    "review_status": "candidate; human listening acceptance pending"
   }
 }

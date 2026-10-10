@@ -16,9 +16,13 @@ func fresh_stage(next: int) -> void:
 	await frames(2)
 
 
-func spawn(kind: String, at: Vector3) -> CharacterBody3D:
+func spawn(kind: String, at: Vector3, aware: bool = true) -> CharacterBody3D:
 	var actor: CharacterBody3D = incident._spawn_entry([kind, "A1"], incident.alive)
 	actor.position = at
+	actor.home = at
+	actor.wander_target = at
+	if aware:
+		actor.engage()
 	return actor
 
 
@@ -139,6 +143,52 @@ func _run() -> void:
 	check(incident.stage_total() == 7 and incident.waves().back().back()[0] == "blocker", "escalated dependency returns as one extra Blocker")
 	incident.stage = incident.Stage.INVESTIGATION
 	incident.corporate_choice = -1
+	# Awareness: arrivals idle until they see, hear or are told.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 11)
+	var idler: CharacterBody3D = spawn("record", Vector3(0, .05, -6), false)
+	check(idler.awareness == idler.Awareness.MANIFESTING, "waves materialize before they act")
+	await frames(10)
+	idler.visual.rotation.y = 0.0
+	await frames(110)
+	check(idler.awareness == idler.Awareness.UNAWARE and idler.global_position.distance_to(Vector3(0, .05, -6)) < 3.2, "an unaware record busies itself near its arrival instead of chasing")
+	var hp_before: int = idler.health
+	idler.receive_damage(20, player.position)
+	check(hp_before - idler.health == 40 and idler.awareness == idler.Awareness.ENGAGED, "a surprise hit lands double and engages")
+	var watcher: CharacterBody3D = spawn("record", Vector3(-3, .05, 1), false)
+	var colleague: CharacterBody3D = spawn("record", Vector3(-6, .05, -1), false)
+	await frames(70)
+	player.position = Vector3(0, .05, 8)
+	# Stroll the watcher a meter toward the engineer (facing them); the colleague away.
+	watcher.wander_target = watcher.global_position + (player.position - watcher.global_position).normalized()
+	colleague.wander_target = colleague.global_position + Vector3(0, 0, -1)
+	for still: CharacterBody3D in [watcher, colleague]:
+		still.wander_left = 99.0
+	for wait in range(60):
+		if watcher.awareness != watcher.Awareness.UNAWARE and colleague.awareness != colleague.Awareness.UNAWARE:
+			break
+		await frames(1)
+	check(watcher.awareness in [watcher.Awareness.NOTICING, watcher.Awareness.ENGAGED], "a record that faces the engineer within range notices")
+	check(colleague.awareness in [colleague.Awareness.NOTICING, colleague.Awareness.ENGAGED], "noticing alerts colleagues within ten meters")
+	check(incident.presentation.seen.has("spotted"), "the first sighting files a spotted alert")
+	var listener: CharacterBody3D = spawn("record", Vector3(5, .05, 6), false)
+	await frames(70)
+	listener.visual.rotation.y = PI * .5
+	player.request_attack()
+	await frames(20)
+	check(listener.awareness != listener.Awareness.UNAWARE, "attacking within earshot is heard even behind its back")
+	var bored: CharacterBody3D = spawn("record", Vector3(12, .05, -12), false)
+	bored.patience = 1.5
+	await frames(180)
+	check(bored.awareness != bored.Awareness.UNAWARE, "an ignored arrival is assigned to the engineer after its patience runs out")
+	# Engaged pursuers lose a hidden engineer and search the last known spot.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var seeker: CharacterBody3D = spawn("record", Vector3(-1, .05, -6))
+	seeker.move_speed = .4
+	player.position = Vector3(22.6, .05, 8)
+	seeker.last_seen = Vector3(0, .05, 0)
+	await frames(60 * 7)
+	check(seeker.awareness == seeker.Awareness.SEARCHING or seeker.awareness == seeker.Awareness.UNAWARE, "losing sight for long enough turns pursuit into a search")
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

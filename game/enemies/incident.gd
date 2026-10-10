@@ -5,6 +5,10 @@ signal health_changed(value: int)
 signal died
 
 enum State { IDLE, APPROACH, TELEGRAPH, ATTACK, RECOVER, REACT, DEAD }
+## Incident arrivals are not omniscient: they materialize, go about their "work",
+## and only commit once they see, hear or are told about the engineer.
+enum Awareness { MANIFESTING, UNAWARE, NOTICING, ENGAGED, SEARCHING }
+const ACTIVITIES: Array[String] = ["RECONCILING…", "IN A MEETING", "OOO (NOT REALLY)", "WAITING ON QA", "UPDATING THE TICKET", "LOW BATTERY", "SYNCING…", "REFRESHING DASHBOARD"]
 
 @export var max_health: int = 100
 @export var move_speed: float = 2.4
@@ -33,6 +37,25 @@ var blocked_cooldown: float = 0.0
 @export_range(0, 3) var separation: float = 1.4
 ## Archetypes move relative to the encounter's base pursuit speed.
 var speed_scale: float = 1.0
+## Lab opponents and bosses are always hunting; incident waves start unaware.
+@export var starts_aware: bool = true
+@export var sight_range: float = 14.0
+@export_range(30, 360) var sight_fov: float = 140.0
+## Unaware this long, the incident assigns the engineer to them anyway.
+@export var patience: float = 14.0
+var awareness: Awareness = Awareness.ENGAGED
+var awareness_left: float = 0.0
+var unaware_time: float = 0.0
+var sense_left: float = 0.0
+var lost_left: float = 0.0
+var last_seen: Vector3
+var home: Vector3
+var wander_target: Vector3
+var wander_left: float = 0.0
+var orbit_sign: float = 1.0
+var backoff_left: float = 0.0
+var was_attacking: bool = false
+var activity: String = ""
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
 @onready var melee: Node3D = $Visual/Melee
@@ -77,6 +100,16 @@ func reset_enemy() -> void:
 	visual.reset_pose()
 	tell.hide()
 	drop_shield()
+	awareness = Awareness.ENGAGED if starts_aware else Awareness.MANIFESTING
+	awareness_left = .9
+	unaware_time = 0.0
+	lost_left = 0.0
+	backoff_left = 0.0
+	home = global_position
+	wander_target = home
+	last_seen = home
+	orbit_sign = 1.0 if get_instance_id() % 2 == 0 else -1.0
+	activity = ACTIVITIES[get_instance_id() % ACTIVITIES.size()]
 	collision_layer = 4
 	health_changed.emit(health)
 	label.text = "PRODUCTION INCIDENT  /  %d" % health
@@ -89,6 +122,14 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 	if shield_left > 0:
 		show_blocked()
 		return false
+	if awareness != Awareness.ENGAGED and awareness != Awareness.NOTICING:
+		# Surprise code review: the first hit on an unaware record lands double.
+		amount *= 2
+		label.text = "SURPRISE REVIEW ×2"
+		awareness_left = 0.0
+		engage(source, true)
+		if get_parent().has_method("on_surprise"):
+			get_parent().on_surprise(self)
 	health = maxi(health - amount, 0)
 	health_changed.emit(health)
 	flash_left = hit_flash_duration
@@ -107,6 +148,148 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 		label.text = "INCIDENT RESOLVED"
 		died.emit()
 	return true
+
+
+## Commit to the engineer now; optionally pass the word to nearby colleagues.
+func engage(seen: Vector3 = Vector3.INF, propagate: bool = false) -> void:
+	if health <= 0:
+		return
+	var was: Awareness = awareness
+	awareness = Awareness.ENGAGED
+	lost_left = 0.0
+	if seen != Vector3.INF:
+		last_seen = seen
+	elif is_instance_valid(target):
+		last_seen = target.global_position
+	if propagate and was != Awareness.ENGAGED:
+		_alert_allies()
+
+
+## The beat of realizing: turn, flag it, tell the team. Then the chase.
+func notice(propagate: bool = true) -> void:
+	if health <= 0 or awareness in [Awareness.NOTICING, Awareness.ENGAGED]:
+		return
+	awareness = Awareness.NOTICING
+	awareness_left = randf_range(.45, .7)
+	label.text = "ASSIGNED TO YOU"
+	if DisplayServer.get_name() != "headless":
+		var ping: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		ping.stream = preload("res://assets/audio/sfx/chat_ping_soft.ogg")
+		ping.bus = &"Effects"
+		ping.volume_db = -4
+		ping.pitch_scale = randf_range(.9, 1.15)
+		add_child(ping)
+		ping.play()
+		ping.finished.connect(ping.queue_free)
+	if propagate:
+		_alert_allies()
+	if get_parent().has_method("on_enemy_noticed"):
+		get_parent().on_enemy_noticed(self)
+
+
+func _alert_allies() -> void:
+	for other: Node in get_tree().get_nodes_in_group("enemies"):
+		if other != self and other is CharacterBody3D and other.has_method("notice") and other.global_position.distance_to(global_position) < 10.0:
+			other.notice(false)
+
+
+## Sight in a forward cone with line of sight, hearing for loud actions, touch.
+func _senses() -> bool:
+	if not is_instance_valid(target) or target.health <= 0:
+		return false
+	var offset: Vector3 = target.global_position - global_position
+	var distance: float = Vector2(offset.x, offset.z).length()
+	if distance < 2.2:
+		return true
+	if (target.melee.attacking and distance < 9.0) or (target.dodging and distance < 6.0) or (Vector2(target.velocity.x, target.velocity.z).length() > 6.5 and distance < 7.0):
+		return true
+	if distance > sight_range:
+		return false
+	var facing: Vector3 = Vector3(-sin(visual.rotation.y), 0, -cos(visual.rotation.y))
+	if facing.dot(Vector3(offset.x, 0, offset.z).normalized()) < cos(deg_to_rad(sight_fov * .5)):
+		return false
+	return _line_of_sight()
+
+
+func _line_of_sight() -> bool:
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 1.5, target.global_position + Vector3.UP * 1.5, 1)
+	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
+## Advances awareness; returns the movement wish for non-engaged behavior,
+## or null when the enemy is engaged and the combat steering should run.
+func _awareness(delta: float) -> Variant:
+	sense_left -= delta
+	var sensing: bool = sense_left <= 0
+	if sensing:
+		sense_left = .2
+	match awareness:
+		Awareness.MANIFESTING:
+			awareness_left -= delta
+			visual.scale = Vector3(1, 1, 1) * (1.0 - .25 * absf(sin(awareness_left * 40.0)) * awareness_left)
+			if awareness_left <= 0:
+				visual.scale = Vector3.ONE
+				awareness = Awareness.UNAWARE
+			return Vector3.ZERO
+		Awareness.NOTICING:
+			awareness_left -= delta
+			_face(target.global_position)
+			if awareness_left <= 0:
+				engage()
+			return Vector3.ZERO
+		Awareness.UNAWARE:
+			unaware_time += delta
+			if (sensing and _senses()) or unaware_time > patience:
+				notice()
+				return Vector3.ZERO
+			# Busywork: drift between nearby spots at a stroll.
+			wander_left -= delta
+			if wander_left <= 0 or global_position.distance_to(wander_target) < .5:
+				wander_left = randf_range(2.5, 4.5)
+				var angle: float = randf() * TAU
+				wander_target = home + Vector3(cos(angle), 0, sin(angle)) * randf_range(.5, 2.5)
+			return _route(wander_target) * .3
+		Awareness.SEARCHING:
+			if sensing and _senses():
+				notice()
+				return Vector3.ZERO
+			awareness_left -= delta
+			if global_position.distance_to(last_seen) > 1.0 and awareness_left > 2.5:
+				return _route(last_seen) * .7
+			visual.rotation.y += delta * 1.6 * orbit_sign
+			if awareness_left <= 0:
+				home = global_position
+				unaware_time = 0.0
+				awareness = Awareness.UNAWARE
+			return Vector3.ZERO
+	# Engaged: keep a memory of where the engineer was; long losses become a search.
+	if sensing and not starts_aware:
+		if _line_of_sight():
+			last_seen = target.global_position
+			lost_left = 0.0
+		else:
+			lost_left += .2
+			if lost_left > 5.0 and global_position.distance_to(target.global_position) > 9.0:
+				awareness = Awareness.SEARCHING
+				awareness_left = 7.0
+	return null
+
+
+func _route(point: Vector3) -> Vector3:
+	var direction: Vector3 = Vector3(point.x - global_position.x, 0, point.z - global_position.z).normalized()
+	if NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:
+		navigation.target_position = point
+		var next: Vector3 = navigation.get_next_path_position() - global_position
+		direction = Vector3(next.x, 0, next.z).normalized()
+	if not direction.is_zero_approx():
+		visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-direction.x, -direction.z), .2)
+	return direction
+
+
+func _face(point: Vector3) -> void:
+	var planar: Vector3 = Vector3(point.x - global_position.x, 0, point.z - global_position.z)
+	if not planar.is_zero_approx():
+		visual.rotation.y = atan2(-planar.x, -planar.z)
 
 
 ## A slim health bar that only appears once the enemy has been hurt.
@@ -239,33 +422,60 @@ func _physics_process(delta: float) -> void:
 	_update_state()
 	knockback = knockback.move_toward(Vector3.ZERO, delta * 18.0)
 	var direction: Vector3 = Vector3.ZERO
-	if is_instance_valid(target) and target.health > 0:
+	var pace: float = 1.0
+	var wish: Variant = _awareness(delta) if is_instance_valid(target) and target.health > 0 else Vector3.ZERO
+	if wish != null:
+		direction = wish
+		pace = direction.length()
+		direction = direction.normalized()
+		if state == State.IDLE and not direction.is_zero_approx():
+			state = State.APPROACH
+	elif is_instance_valid(target) and target.health > 0:
 		var offset: Vector3 = target.global_position - global_position
 		var planar: Vector3 = Vector3(offset.x, 0, offset.z)
-		if state == State.IDLE and planar.length() < detection_distance:
+		var distance: float = planar.length()
+		# After a swing, step back out of the engineer's counter instead of standing in it.
+		if was_attacking and not melee.attacking and not starts_aware:
+			backoff_left = .55
+		was_attacking = melee.attacking
+		backoff_left = maxf(0, backoff_left - delta)
+		if state == State.IDLE and distance < detection_distance:
 			visual.rotation.y = atan2(-planar.x, -planar.z)
-			if planar.length() <= attack_distance and absf(offset.y) < 0.7:
+			var allowed: bool = not get_parent().has_method("request_attack") or get_parent().request_attack(self)
+			if distance <= attack_distance and absf(offset.y) < 0.7:
 				var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, target.global_position + Vector3.UP, 1)
 				# A crowd takes turns: the incident caps simultaneous telegraphs.
-				var allowed: bool = not get_parent().has_method("request_attack") or get_parent().request_attack(self)
 				if allowed and get_world_3d().direct_space_state.intersect_ray(query).is_empty():
 					melee.start()
 					state = State.TELEGRAPH
 			# Being close through furniture is not an attack opportunity: keep routing.
 			if state != State.TELEGRAPH:
 				state = State.APPROACH
-				direction = planar.normalized()
-				# The office has furniture; use its baked routes without changing attacks.
-				if NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:
-					navigation.target_position = target.global_position
-					var next: Vector3 = navigation.get_next_path_position() - global_position
-					direction = Vector3(next.x, 0, next.z).normalized()
-				direction = (direction + _separation()).normalized()
+				if backoff_left > 0:
+					direction = -planar.normalized()
+					pace = .6
+				elif not allowed and distance < 3.6 and not starts_aware:
+					# Waiting for a turn: circle at a respectful distance instead of queueing in place.
+					var tangent: Vector3 = planar.normalized().cross(Vector3.UP) * orbit_sign
+					direction = (tangent + planar.normalized() * (distance - 2.8) * .8).normalized()
+					pace = .55
+				else:
+					# Approach from staggered angles so a wave surrounds rather than stacks.
+					var goal: Vector3 = target.global_position
+					if distance > 4.0 and not starts_aware:
+						goal += (-planar.normalized()).rotated(Vector3.UP, orbit_sign * .6) * 2.2
+					direction = planar.normalized()
+					# The office has furniture; use its baked routes without changing attacks.
+					if NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:
+						navigation.target_position = goal
+						var next: Vector3 = navigation.get_next_path_position() - global_position
+						direction = Vector3(next.x, 0, next.z).normalized()
+					direction = (direction + _separation()).normalized()
 	# Enemies do not collide with each other; a constant gentle spread keeps a
 	# crowd readable even while it stands and swings.
 	var spread: Vector3 = _separation() * 1.2
-	velocity.x = direction.x * move_speed + knockback.x + spread.x
-	velocity.z = direction.z * move_speed + knockback.z + spread.z
+	velocity.x = direction.x * move_speed * pace + knockback.x + spread.x
+	velocity.z = direction.z * move_speed * pace + knockback.z + spread.z
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 22.0 * delta
 	move_and_slide()
 	tell.visible = state == State.TELEGRAPH
@@ -273,7 +483,14 @@ func _physics_process(delta: float) -> void:
 		# The warning shows the full damage reach from the first wind-up frame.
 		tell.scale = Vector3.ONE
 	# Overhead text is reserved for states the arc cannot show.
-	label.text = "STAGGERED" if state == State.REACT else ""
+	if awareness == Awareness.NOTICING or label.text == "SURPRISE REVIEW ×2" and stagger_left > 0:
+		pass
+	elif awareness == Awareness.UNAWARE and is_instance_valid(target) and target.global_position.distance_to(global_position) < 12.0:
+		label.text = activity
+	elif awareness == Awareness.SEARCHING:
+		label.text = "LOOKING FOR AN OWNER…"
+	else:
+		label.text = "STAGGERED" if state == State.REACT else ""
 	if blocked_cooldown > 0 or shield_left > 0:
 		label.text = "BLOCKED" if blocked_cooldown > 0 else "PROTECTED"
 	if global_position.y < -8:

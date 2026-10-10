@@ -82,6 +82,16 @@ var dark: Material = preload("res://game/rooms/office/black.tres")
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var feed: Control
 var pinger: AudioStreamPlayer
+var music: AudioStreamPlayer
+var music_track: String = ""
+const TRACKS: Dictionary = {"tension": preload("res://assets/audio/music/tension_bed.wav"), "boss": preload("res://assets/audio/music/boss_pulse.wav")}
+## Short authored camera moments during play: [kind, elapsed]. Never during combat.
+var beat_shot: String = ""
+var beat_time: float = 0.0
+var ending_from: Transform3D
+var slowmo_until: int = 0
+var vault_lights: Array[OmniLight3D] = []
+var vault_energy: Array[float] = []
 ## Lines that must follow each other without competing for the bounded voice queue.
 var sequence: Array[String] = []
 var corridor_lights: Array[OmniLight3D] = []
@@ -120,6 +130,10 @@ func _ready() -> void:
 	pinger.volume_db = -14
 	add_child(pinger)
 	voice.line_started.connect(_on_line_started)
+	music = AudioStreamPlayer.new()
+	music.bus = &"Music"
+	music.volume_db = -60
+	add_child(music)
 	title = Label.new()
 	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	title.offset_left = -450
@@ -209,6 +223,8 @@ func _ready() -> void:
 		pool_energy.append(pools[index].light_energy)
 	for index in range(4):
 		corridor_lights.append(incident.room.get_node("CorridorLight%d" % index))
+		vault_lights.append(incident.room.get_node("VaultLight%d" % index))
+		vault_energy.append(vault_lights[index].light_energy)
 	for rack: Node in incident.room.get_children():
 		if str(rack.name).begins_with("CorridorRack"):
 			corridor_leds.append(rack.get_node("Leds"))
@@ -264,6 +280,8 @@ func _caption_layout(cinematic: bool) -> void:
 
 
 func reset_story() -> void:
+	beat_shot = ""
+	Engine.time_scale = 1.0
 	release_camera()
 	short_opening = opening_seen
 	voice.clear(true)
@@ -299,6 +317,8 @@ func _restore_lights() -> void:
 
 
 func _restore_corridor() -> void:
+	for index in range(vault_lights.size()):
+		vault_lights[index].light_energy = vault_energy[index]
 	incident.room.get_node("QuickSyncLight").light_energy = 1.6
 	incident.room.get_node("ProjectorGlow").light_energy = 0.0
 	for light in corridor_lights:
@@ -357,6 +377,8 @@ func sting(stream: AudioStream, volume: float = -10.0) -> void:
 
 
 func release_camera() -> void:
+	if beat_shot == "ending":
+		beat_shot = ""
 	incident.player.narrative_hold = false
 	incident.player.get_node("Visual/Character").story_pose = 0
 	incident.main.get_node("HUD").visible = true
@@ -436,6 +458,8 @@ func introduce(kind: String, actor: Node3D) -> void:
 		say(INTRODUCTIONS[kind])
 	elif kind == "record" and incident.stage == incident.Stage.ENCOUNTER_ONE:
 		say("enemy")
+	if kind != "record":
+		slow_beat()
 	var card: Label3D = Label3D.new()
 	card.text = "%s\n%s" % [actor.title, actor.motto]
 	card.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -471,6 +495,115 @@ func vault_entered() -> void:
 	voice.clear()
 	say("variance_intro")
 	sound("res://assets/audio/boss_arrival.wav")
+	beat_shot = "vault"
+	beat_time = 0.0
+
+
+## Evidence opens: a short push onto the wall where three systems disagree.
+func evidence_shot() -> void:
+	if beat_shot.is_empty() and not incident.modal_pending():
+		beat_shot = "evidence"
+		beat_time = 0.0
+		camera.global_transform = incident.player.get_node("CameraRig/SpringArm3D/Camera3D").global_transform
+
+
+func _beats(delta: float) -> void:
+	if beat_shot.is_empty():
+		return
+	beat_time += delta
+	var rig: Camera3D = incident.player.get_node("CameraRig/SpringArm3D/Camera3D")
+	match beat_shot:
+		"evidence":
+			if incident.modal_pending() or incident.stage != incident.Stage.INVESTIGATION or beat_time > 2.6:
+				beat_shot = ""
+				release_camera()
+				return
+			incident.player.narrative_hold = true
+			var close: Transform3D = Transform3D(Basis.looking_at(Vector3(0, .1, -1)), Vector3(-1.7, 2.3, -11.6))
+			var weight: float = smoothstep(0, .9, beat_time) * (1.0 - smoothstep(2.0, 2.6, beat_time))
+			camera.global_transform = rig.global_transform.interpolate_with(close, weight)
+			camera.fov = lerpf(rig.fov, 50.0, weight)
+			camera.make_current()
+		"vault":
+			# Arrival without taking control: lights fail in order, a frame, a surge.
+			var arrive: float = boss_length
+			for index in range(vault_lights.size()):
+				var out: bool = beat_time > .3 + index * .35 and beat_time < arrive
+				vault_lights[index].light_energy = vault_energy[index] * (.05 if out else (2.2 if beat_time < arrive + .6 else 1.0))
+			var bars: float = 44.0 * smoothstep(0, .5, beat_time) * (1.0 - smoothstep(arrive + .8, arrive + 1.4, beat_time))
+			for side in [0, 1]:
+				letterbox[side].visible = bars > .5
+				letterbox[side].offset_top = 0.0 if side == 0 else -bars
+				letterbox[side].offset_bottom = bars if side == 0 else 0.0
+			var ledger: Array[String] = ["SUCCESS", "FAILED", "NOT FOUND"]
+			for index in range(3):
+				incident.room.get_node("LedgerText%d" % index).text = ledger[(index + int(beat_time * 6.0)) % 3] if beat_time < arrive else ledger[index]
+			if is_instance_valid(incident.boss) and beat_time - delta < arrive + .05 and beat_time >= arrive + .05:
+				incident.player.camera_rig.add_impulse(1.0)
+			if beat_time > arrive + 1.6:
+				beat_shot = ""
+				for bar in letterbox:
+					bar.hide()
+
+
+## Terminal: the camera leaves the engineer slowly while the postmortem is read.
+func _ending(delta: float) -> void:
+	if not incident.terminal():
+		return
+	if beat_shot != "ending":
+		beat_shot = "ending"
+		beat_time = 0.0
+		ending_from = incident.player.get_node("CameraRig/SpringArm3D/Camera3D").global_transform
+		for bar in letterbox:
+			bar.hide()
+	beat_time += delta
+	var won: bool = incident.stage == incident.Stage.RESOLVED
+	var at: Vector3 = incident.player.global_position
+	var away: Vector3 = ending_from.origin - at
+	away.y = 0
+	away = away.normalized() if not away.is_zero_approx() else Vector3.BACK
+	var orbit: Vector3 = away.rotated(Vector3.UP, beat_time * (.05 if won else -.035))
+	var goal: Vector3 = at + orbit * (7.5 if won else 3.4) + Vector3.UP * (4.2 if won else 1.2)
+	var weight: float = smoothstep(0, 4.0, beat_time)
+	camera.global_position = ending_from.origin.lerp(goal, weight)
+	camera.look_at(at + Vector3.UP * (1.0 if won else .6))
+	camera.fov = 52.0
+	camera.make_current()
+
+
+func slow_beat() -> void:
+	if DisplayServer.get_name() != "headless":
+		Engine.time_scale = .35
+		slowmo_until = Time.get_ticks_msec() + 350
+
+
+func _music(delta: float) -> void:
+	var desired: String = "tension"
+	var level: float = -11.0
+	if incident.terminal():
+		desired = ""
+	elif incident.stage == incident.Stage.ALERT:
+		desired = "tension" if short_opening or incident.stage_time > 32.0 else ""
+	elif incident.stage == incident.Stage.BOSS and incident.boss_triggered:
+		desired = "boss"
+		level = -9.0
+	elif incident.stage == incident.Stage.INVESTIGATION:
+		level = -17.0
+	if get_tree().paused and not incident.terminal():
+		level -= 8.0
+	if DisplayServer.get_name() == "headless":
+		music_track = desired
+		return
+	if desired != music_track:
+		music.volume_db = move_toward(music.volume_db, -60.0, delta * 45.0)
+		if music.volume_db <= -55.0:
+			music_track = desired
+			music.stop()
+			if not desired.is_empty():
+				music.stream = TRACKS[desired]
+				music.play()
+	else:
+		music.volume_db = move_toward(music.volume_db, level, delta * 12.0)
 
 
 func used(key: String) -> void:
@@ -648,6 +781,11 @@ func _opening(time: float, delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if slowmo_until > 0 and Time.get_ticks_msec() >= slowmo_until:
+		slowmo_until = 0
+		Engine.time_scale = 1.0
+	_music(delta)
+	_ending(delta)
 	for fragment in fragments:
 		fragment.visible = false
 	if not sequence.is_empty() and voice.current_line.is_empty() and voice.queue.is_empty() and not voice.suspended:
@@ -664,6 +802,7 @@ func _process(delta: float) -> void:
 	if not ambient.playing and DisplayServer.get_name() != "headless":
 		ambient.play()
 	_environment(delta)
+	_beats(delta)
 	var time: float = incident.stage_time
 	if incident.stage == incident.Stage.ALERT:
 		if short_opening:

@@ -52,7 +52,10 @@ func _physics_process(delta: float) -> void:
 	stagger_left = maxf(0.0, stagger_left - delta)
 	knockback = knockback.move_toward(Vector3.ZERO, delta * 18.0)
 	var direction: Vector3 = Vector3.ZERO
-	if is_instance_valid(target) and target.health > 0:
+	var wish: Variant = _awareness(delta) if is_instance_valid(target) and target.health > 0 else Vector3.ZERO
+	if wish != null:
+		direction = wish
+	elif is_instance_valid(target) and target.health > 0:
 		var offset: Vector3 = target.global_position - global_position
 		var planar: Vector3 = Vector3(offset.x, 0, offset.z)
 		var distance: float = planar.length()
@@ -75,12 +78,15 @@ func _physics_process(delta: float) -> void:
 			zone_requested.emit(Vector3(target.global_position.x, global_position.y, target.global_position.z))
 	velocity.x = direction.x * move_speed + knockback.x
 	velocity.z = direction.z * move_speed + knockback.z
+	if wish != null and awareness != Awareness.NOTICING:
+		label.text = activity if awareness == Awareness.UNAWARE else "LOOKING FOR AN OWNER…"
 	velocity.y = 0.0 if is_on_floor() else velocity.y - 22.0 * delta
 	move_and_slide()
 	# Hovering card: a slow bob and a little tilt toward its invitee.
 	details.position.y = sin(clock * 2.0) * .12
 	details.rotation.z = sin(clock * 1.3) * .08
-	var booking: bool = zone_cooldown < 1.2
-	label.text = "BOOKING…" if booking else ""
+	var booking: bool = zone_cooldown < 1.2 and wish == null
+	if wish == null:
+		label.text = "BOOKING…" if booking else ""
 	if blocked_cooldown > 0 or shield_left > 0:
 		label.text = "BLOCKED" if blocked_cooldown > 0 else "PROTECTED"

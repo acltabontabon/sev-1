@@ -769,6 +769,34 @@
       "fallback_duration": 2.0,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "spotted",
+      "character": "PRODUCTION SYSTEM",
+      "text": "Engineer detected in production. Assigning ticket.",
+      "subtitle": "Engineer detected in production. Assigning ticket.",
+      "voice_profile": "production",
+      "direction": "Measured authority. Flat certainty, clear consonants.",
+      "audio": "res://assets/audio/voices/spotted.ogg",
+      "trigger": "First enemy notices the engineer in a stage",
+      "priority": 2,
+      "fallback_duration": 2.8,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "surprise",
+      "character": "ENGINEER",
+      "text": "Surprise code review.",
+      "subtitle": "Surprise code review.",
+      "voice_profile": "protagonist",
+      "direction": "Conversational, exhausted, competent. Dry sarcasm; never announce the punchline.",
+      "audio": "res://assets/audio/voices/surprise.ogg",
+      "trigger": "First hit on an unaware enemy",
+      "priority": 1,
+      "fallback_duration": 1.6,
+      "optional": true,
+      "status": "generated"
     }
   ]
 }

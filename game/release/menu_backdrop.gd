@@ -66,6 +66,8 @@ func _ready() -> void:
 	_place_camera(0.0)
 	if DisplayServer.get_name() != "headless":
 		$Ambience.play()
+		$Music.stream = preload("res://assets/audio/music/menu_pad.wav")
+		$Music.play()
 
 
 func _place_camera(time: float) -> void:

@@ -67,6 +67,10 @@ func _run() -> void:
 	if only == "menu":
 		quit()
 		return
+	if only == "finale":
+		await finale()
+		quit()
+		return
 	if only == "ui":
 		await ui_pass()
 		quit()
@@ -232,5 +236,56 @@ func ui_pass() -> void:
 		app.session.get_node("Player/CameraRig").controls_active = true
 		await process_frame
 	await shot("ui_boss")
+	app.main_menu()
+	await frames(5)
+
+
+func live(seconds: float) -> void:
+	var end: int = Time.get_ticks_msec() + int(seconds * 1000)
+	while Time.get_ticks_msec() < end:
+		if app.session != null and app.page.is_empty():
+			app.session.get_node("Player/CameraRig").controls_active = true
+		await process_frame
+
+
+## Phase F beats: evidence push, vault arrival, both postmortems behind the ending shot.
+func finale() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.skip()
+	await live(.3)
+	incident._cleanup()
+	incident._enter(incident.Stage.INVESTIGATION)
+	player.position = incident.CONSOLE_POSITION + Vector3(0, .05, 2.0)
+	incident.inspect_console()
+	await live(1.1)
+	await shot("finale_evidence")
+	await live(2.0)
+	incident.choose_system(3)
+	incident.choose_corporate(1)
+	app.resume_incident()
+	incident._cleanup()
+	incident._enter(incident.Stage.BOSS)
+	player.position = Vector3(9, .05, -29.5)
+	player.camera_rig.reset_view()
+	await live(1.0)
+	player.position = Vector3(9, .05, -31.2)
+	await live(2.0)
+	await shot("finale_vault_arrival")
+	await live(4.5)
+	await shot("finale_vault_manifest")
+	incident.boss.exposed = true
+	incident.boss.receive_damage(100000, player.position)
+	await live(4.0)
+	await shot("finale_postmortem_win")
+	app.restart_incident()
+	await live(1.0)
+	player.invulnerable_left = 0
+	player.receive_damage(100000, Vector3.ZERO)
+	await live(4.0)
+	await shot("finale_postmortem_loss")
 	app.main_menu()
 	await frames(5)

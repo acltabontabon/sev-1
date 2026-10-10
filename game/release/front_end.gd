@@ -20,6 +20,7 @@ var save_notice: Label
 var report_subtitle: Label
 var ui_sound: AudioStreamPlayer
 var quiet: bool = false
+var stamps: Array[Label] = []
 
 
 func _ready() -> void:
@@ -84,7 +85,7 @@ func _corner_label(preset: int, text: String) -> Label:
 	return label
 
 
-func _layout(title_page: bool) -> void:
+func _layout(title_page: bool, report: bool = false) -> void:
 	vignette.visible = title_page
 	footer.visible = title_page
 	hint.visible = title_page
@@ -97,6 +98,15 @@ func _layout(title_page: bool) -> void:
 		panel.offset_right = 72 + 640
 		panel.offset_top = 44
 		panel.offset_bottom = -64
+	elif report:
+		# The postmortem is a document on the right; the ending shot stays visible left.
+		surface.color = Color(.005, .01, .015, .25)
+		panel.remove_theme_stylebox_override("panel")
+		panel.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+		panel.offset_left = -640
+		panel.offset_right = -36
+		panel.offset_top = 36
+		panel.offset_bottom = -36
 	else:
 		panel.remove_theme_stylebox_override("panel")
 		panel.set_anchors_preset(Control.PRESET_CENTER)
@@ -181,7 +191,10 @@ func show_page(next: String) -> void:
 		return
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	_layout(page == "main")
+	_layout(page == "main", page == "report")
+	for stamp: Label in stamps:
+		stamp.queue_free()
+	stamps.clear()
 	quiet = true
 	match page:
 		"main":
@@ -218,16 +231,23 @@ func show_page(next: String) -> void:
 			_entry("Log Off Anyway", "Quit the game", quit_game)
 			_entry("Stay", "Back", go_back)
 		"report":
-			_label(session.get_node("Incident").report.replace("\n\n", "\n"), 17, "MonoLabel")
-			report_subtitle = _label("", 19)
-			report_subtitle.custom_minimum_size.y = 68
+			var incident: Node = session.get_node("Incident")
+			var won: bool = incident.stage == incident.Stage.RESOLVED
+			_label("POSTMORTEM  ·  INC-001  ·  BLAMELESS FORMAT  ·  v1 (final) (2)", 0, "Eyebrow")
+			_label("Incident 001 — %s" % ("Resolved" if won else "Reopened"), 0, "Headline")
+			# Actions first: the document can be long, the way out never is.
 			var actions: HBoxContainer = HBoxContainer.new()
-			actions.add_theme_constant_override("separation", 12)
+			actions.add_theme_constant_override("separation", 10)
 			box.add_child(actions)
 			for entry: Array in [["Restart Incident", restart_incident], ["Back to Desk", main_menu], ["Attempt to Log Off", open_logoff]]:
 				var button: Button = _button(entry[0], entry[1])
 				button.reparent(actions)
 				button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			report_subtitle = _label("", 17)
+			report_subtitle.custom_minimum_size.y = 52
+			_label(incident.report.replace("\n\n", "\n"), 13, "MonoLabel")
+			_stamp("BLAMELESS" if won else "REOPENED", Color(.35, .95, .65) if won else Color(1, .45, .3), .7, Vector2(-250, 330), -.12)
+			_stamp("ASSIGNED: YOU", Color(1, .32, .2), 1.9, Vector2(-310, 470), .09)
 		"controls":
 			_label("WIKI  ·  LAST UPDATED: NEVER", 0, "Eyebrow")
 			_label("Onboarding Docs", 0, "Headline")
@@ -239,6 +259,7 @@ func show_page(next: String) -> void:
 			_slider("Master volume", "master", 0, 1, .05)
 			_slider("Effects & office ambience", "effects", 0, 1, .05)
 			_slider("Voice volume", "voice", 0, 1, .05)
+			_slider("Music volume", "music", 0, 1, .05)
 			_toggle("Subtitles", "subtitles")
 			_slider("Mouse sensitivity", "sensitivity", .2, 3, .1)
 			_slider("Camera shake", "shake", 0, 1, .1)
@@ -263,6 +284,31 @@ func show_page(next: String) -> void:
 			child.grab_focus()
 			break
 	quiet = false
+
+
+## A rubber stamp that lands on the postmortem after a beat, with a thump.
+func _stamp(text: String, color: Color, delay: float, at: Vector2, tilt: float) -> void:
+	var stamp: Label = Label.new()
+	stamp.text = text
+	stamp.theme_type_variation = "Headline"
+	stamp.add_theme_font_size_override("font_size", 46)
+	stamp.add_theme_color_override("font_color", color)
+	stamp.add_theme_constant_override("outline_size", 3)
+	stamp.add_theme_color_override("font_outline_color", color)
+	stamp.position = Vector2(surface.size.x + at.x, at.y)
+	stamp.rotation = tilt
+	stamp.pivot_offset = Vector2(120, 30)
+	stamp.modulate.a = 0.0
+	stamp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	surface.add_child(stamp)
+	stamps.append(stamp)
+	var land: Tween = stamp.create_tween()
+	land.tween_interval(delay)
+	land.tween_callback(func() -> void:
+		stamp.scale = Vector2.ONE * 2.2
+		_play(preload("res://assets/audio/sfx/heavy_impact.ogg")))
+	land.tween_property(stamp, "modulate:a", .9, .08)
+	land.parallel().tween_property(stamp, "scale", Vector2.ONE, .14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _slider(title: String, key: String, low: float, high: float, step: float) -> void:

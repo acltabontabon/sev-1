@@ -35,6 +35,8 @@ func _run() -> void:
 	incident._spawn()
 	# The containment wave opens with a Blocker; measure the plain record behind it.
 	var foe: CharacterBody3D = incident.alive[1]
+	# Arithmetic fixture: an engaged foe, so no surprise-review bonus applies.
+	foe.engage()
 	foe.position = Vector3(0, .05, 3.4)
 	foe.set_physics_process(false)
 	await frames(5)

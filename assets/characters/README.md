@@ -77,3 +77,21 @@ movement can still slide. Arms follow a procedural grip with approximate joints;
 there is no finger rig. Death sets a settled pose immediately because incident reports
 pause immediately; there is no animated fall. No heavy-attack input was introduced;
 the existing third combo step is the finisher. Creative acceptance needs a human run.
+
+## Milestone 12 rig evaluation (10 October 2026)
+
+The creator approved trying a CC0 rigged character in Phase F. Evaluated, not imported:
+
+- Kenney Animated Characters (Protagonists), CC0, direct download: one `characterMedium`
+  rig with only `idle`, `run` and `jump` clips. No attacks, dodge, hit, death or
+  seated/typing motion, so combat, the menu desk and the opening would all still need
+  the native procedural poses on a body that no longer matches them.
+- Quaternius Universal Animation Library and modular characters, CC0: distributed only
+  through an itch.io purchase flow, which was not automated.
+- Mixamo: excluded; it requires an account.
+
+Decision: keep the native engineer. Milestone 12 instead added authored full-body
+holds to `character_presentation.gd` (seated typing, relaxed, frozen alert, slump, sip,
+glance, armed) that the menu and the opening stage. A coherent office-worker rig with
+combat and seated clips remains the recommended future upgrade behind the existing
+wrapper contract.
