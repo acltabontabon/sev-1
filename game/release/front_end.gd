@@ -3,13 +3,15 @@ extends Node
 const INCIDENT: PackedScene = preload("res://game/incidents/missing_transaction.tscn")
 const PREFERENCES: Script = preload("res://game/release/preferences.gd")
 const BACKDROP: PackedScene = preload("res://game/release/menu_backdrop.tscn")
-const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Hotfix Wave: long slash through a line\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
+const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Hotfix Wave: long slash through a line\nX / dodge + attack Hot Swap: dash through, cut on arrival\nZ                  Merge Conflict: fire whirlwind\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
 const KEYS: Array = [
 	[["W", "A", "S", "D"], "Move, relative to the camera"], [["MOUSE"], "Look  ·  wheel zooms"],
 	[["SHIFT"], "Sprint"], [["SPACE"], "Jump"],
 	[["LMB", "F"], "Attack  ·  press late in recovery to chain three hits"],
 	[["Q", "RMB"], "Dodge  ·  no direction dodges backward"],
 	[["C", "MMB"], "Hotfix Wave  ·  a long slash that cuts through a line of enemies"],
+	[["X"], "Hot Swap  ·  dash through enemies, cut them all on arrival (or attack out of a dodge)"],
+	[["Z"], "Merge Conflict  ·  a fire whirlwind that drags enemies in"],
 	[["V"], "Force Rollback  ·  ultimate; landing hits fills FOCUS"],
 	[["E"], "Use: the console, the coffee machine, everything else"],
 	[["1", "2", "3"], "Choose evidence, change requests and replies"],

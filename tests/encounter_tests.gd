@@ -522,9 +522,43 @@ func _run() -> void:
 	check(player.specials.rollback(), "V unleashes Force Rollback when FOCUS is full")
 	await frames(60)
 	check(behind.health < behind.max_health and beyond.health == beyond.max_health and player.specials.focus < 10, "Force Rollback hits everything around the engineer, nothing beyond its radius, and spends FOCUS")
+	# Hot Swap: dash through a line, everything passed is cut a beat later.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 6)
+	player.camera_rig.rotation.y = 0.0
+	await frames(4)
+	var passed: Array[CharacterBody3D] = [spawn("record", Vector3(0, .05, 3.5), false), spawn("record", Vector3(.6, .05, 1.0), false)]
+	for foe: CharacterBody3D in passed:
+		foe.set_physics_process(false)
+	var start_z: float = player.global_position.z
+	check(player.specials.dash_slash(), "X dashes")
+	check(not player.specials.dash_slash(), "the dash has a cooldown")
+	await frames(16)
+	check(start_z - player.global_position.z > 5.0 and passed.all(func(foe: CharacterBody3D) -> bool: return foe.health == foe.max_health), "the engineer goes straight through; nobody is cut yet")
+	await frames(30)
+	check(passed.all(func(foe: CharacterBody3D) -> bool: return foe.health < foe.max_health) and player.dash_velocity == Vector3.ZERO, "on arrival everything passed is cut at once")
+	player.specials.dash_cooldown = 0.0
+	await frames(40)
+	player.request_dodge()
+	await frames(2)
+	check(player.specials.dash_slash() and not player.dodging, "attacking out of a dodge turns it into the dash slash")
+	await frames(60)
+	# Merge Conflict: a whirlwind that hits everything around, several times.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 5)
+	await frames(4)
+	var ring: Array[CharacterBody3D] = [spawn("record", Vector3(2, .05, 5), true), spawn("record", Vector3(-1.5, .05, 6.5), true)]
+	for foe: CharacterBody3D in ring:
+		foe.max_health = 1000
+		foe.health = 1000
+		foe.set_physics_process(false)
+	check(player.specials.merge_conflict(), "Z starts the whirlwind")
+	check(not player.specials.merge_conflict(), "the whirlwind has a cooldown")
+	await frames(roundi(player.specials.SPIN_TIME * 60) + 10)
+	check(ring.all(func(foe: CharacterBody3D) -> bool: return foe.max_health - foe.health >= player.specials.SPIN_DAMAGE * 3), "the whirlwind hits everything around the engineer again and again")
 	scene.reset_encounter()
 	await frames(2)
-	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty(), "restart clears FOCUS, cooldowns and blades")
+	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty() and player.specials.dash_cooldown == 0 and player.specials.spin_left == 0, "restart clears FOCUS, cooldowns and blades")
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	# Minimap, seating and the corridor invites.
 	var minimap: Control = scene.get_node("HUD/Minimap")

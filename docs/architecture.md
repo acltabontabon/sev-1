@@ -605,6 +605,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   and `rollback()` start combo steps 0 and 2 for the body and fire on the swing's active
   frame; the wave is a top-level crescent swept against the `enemies` group each tick
   (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
+  `dash_slash()` drives `player.dash_velocity` (the player skips normal movement and
+  drops enemy collision while it is set), marks enemies near the swept segment and cuts
+  them `DASH_SHEATHE` after arrival; `merge_conflict()` repeats combo step 1 and pulses
+  radial damage with an inward knockback.
 - **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one
   2D mesh once and draws it player-centred, rotated with the camera, with threats,
   patrol sight fans, people and the NEXT step pinned to the rim.

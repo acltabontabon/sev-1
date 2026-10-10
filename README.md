@@ -3,7 +3,7 @@
 **Works on My Machine.** A cinematic third-person corporate-nightmare action game.
 The system is down. Management is watching. You're the only engineer online.
 
-**Playtest Build 0.2 / version 0.2.11** (Milestone 12, "Operation Corporate Hell") is a
+**Playtest Build 0.2 / version 0.2.12** (Milestone 12, "Operation Corporate Hell") is a
 local macOS tester build that answers the first external feedback on 0.1. It is not
 creator-accepted or notarized. No known P0 gameplay failure was reproduced; first-use
 hitches and human acceptance of fun, comedy, voice and music remain open. See the
@@ -11,8 +11,8 @@ hitches and human acceptance of fun, comedy, voice and music remain open. See th
 
 ## Play
 
-Unzip `SEV-1-Friday-Deployment-0.2.11-macOS.zip` and open **SEV-1 Friday Deployment.app**.
-No Godot installation is needed. Local outputs are under `builds/releases/0.2.11/`.
+Unzip `SEV-1-Friday-Deployment-0.2.12-macOS.zip` and open **SEV-1 Friday Deployment.app**.
+No Godot installation is needed. Local outputs are under `builds/releases/0.2.12/`.
 The build is ad-hoc signed; recipient Macs may require explicit approval. Keep the
 included license notices with the app. Apple Silicon/macOS is the initial test platform;
 Intel, Windows and the declared macOS 14 minimum are not runtime-validated.
@@ -33,6 +33,8 @@ See the [tester guide and feedback questions](docs/testing.md).
 | Left mouse / F | Light attack; press late in recovery for the three-hit chain |
 | Q / right mouse | Dodge in movement direction; backward when stationary |
 | C / middle mouse | Hotfix Wave: a long slash that cuts through a line of enemies (3.5 s cooldown) |
+| X (or attack during a dodge) | Hot Swap: dash 7 m through enemies; everything passed is cut on arrival (2.5 s cooldown) |
+| Z | Merge Conflict: a steerable fire whirlwind that drags nearby enemies in (6 s cooldown) |
 | V | Force Rollback: ultimate slam around you, when the FOCUS bar is full |
 | E | Use: the OPERATIONS console, the coffee machine and other pantry objects |
 | 1 / 2 / 3 | Select evidence or an upgrade/corporate response |

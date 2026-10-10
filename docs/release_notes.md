@@ -1,5 +1,22 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.12 — A dash slash and a whirlwind (10 October 2026)
+
+Creator feedback on 0.2.11: more special moves, like a dash slash.
+
+- **HOT SWAP (X, or attack during a dodge).** A 7 m dash straight through enemies
+  (invulnerable, through bodies, stopped short of walls). Everything passed is marked;
+  a beat after the engineer lands and flourishes, all of it is cut at once (55 damage
+  each, crossed white slashes, a freeze-frame). A gold wall of light traces the path and
+  flashes white on the cut. 2.5 s cooldown. Dodge-into-attack makes it a combo tool.
+- **MERGE CONFLICT (Z).** A steerable fire whirlwind for 1.4 s: the spinning backhand on
+  repeat, four pulses that hit everything within 3 m and drag it inward. 6 s cooldown.
+- The FOCUS line in the vitals card now shows all three cooldowns (C · X · Z); the
+  controls page, key hints and README list every move.
+
+Validation: 713 assertions across 15 headless suites (new checks: the dash goes through
+and cuts on arrival, its cooldown, dodge-into-dash, and the whirlwind's repeated hits).
+
 ## 0.2.11 — Set them off yourself, and two special moves (10 October 2026)
 
 Creator feedback on 0.2.10: the outbreak camera was too close; monsters should be

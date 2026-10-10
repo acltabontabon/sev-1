@@ -342,6 +342,37 @@ func specials() -> void:
 	await shot("special_rollback_slam")
 	await live(.5)
 	await shot("special_rollback_after")
+	# Hot Swap through a fresh line, then Merge Conflict among a ring.
+	player.global_position = Vector3(0, .05, 7)
+	player.camera_rig.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	for at: Vector3 in [Vector3(0, .05, 3.5), Vector3(.8, .05, 1.5), Vector3(-.6, .05, -.5)]:
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = at
+		foe.reveal()
+		foe.set_physics_process(false)
+	await live(.8)
+	player.specials.dash_slash()
+	await live(.1)
+	await shot("special_dash_through")
+	while player.specials.cut_left <= 0 and player.specials.dash_left > 0:
+		await live(.01)
+	await live(.12)
+	await shot("special_dash_arrive")
+	while player.specials.cut_left > 0:
+		await live(.01)
+	await live(.05)
+	await shot("special_dash_cut")
+	await live(1.0)
+	player.global_position = Vector3(3, .05, 4)
+	for index in range(4):
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = Vector3(3, .05, 4) + Vector3(cos(index * 1.6), 0, sin(index * 1.6)) * 2.2
+		foe.reveal()
+	await live(.3)
+	player.specials.merge_conflict()
+	await live(.5)
+	await shot("special_spin")
 	app.main_menu()
 	await frames(5)
 
