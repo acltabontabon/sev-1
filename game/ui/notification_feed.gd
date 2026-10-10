@@ -4,6 +4,9 @@ extends Control
 ## lines are said out loud, so they get a different, unboxed treatment.
 
 const LIMIT: int = 3
+## Corporate channels collect reactions while you read; nobody replies.
+const REACTORS: Array[String] = ["MANAGEMENT", "LEADERSHIP", "PEOPLE OPERATIONS", "INCIDENT CHANNEL", "PRODUCT", "STATUS PAGE"]
+const REACTIONS: Array[String] = ["+1", "eyes", "pray", "rocket", "fire"]
 const LINGER: float = 2.2
 ## Speaker: initials, color, channel, small print.
 const SENDERS: Dictionary = {
@@ -114,6 +117,17 @@ func _chat_card(character: String, text: String, time: String) -> Control:
 		foot.theme_type_variation = "Caption"
 		foot.add_theme_font_size_override("font_size", 12)
 		body.add_child(foot)
+	if character in REACTORS:
+		var chip: Label = Label.new()
+		chip.name = "Reactions"
+		chip.theme_type_variation = "MonoLabel"
+		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_color_override("font_color", sender[1].lightened(.3))
+		panel.set_meta("reaction", REACTIONS[(text.length() + character.length()) % REACTIONS.size()])
+		panel.set_meta("count", 1)
+		panel.set_meta("next", .6)
+		chip.text = "[ %s  1 ]" % panel.get_meta("reaction")
+		body.add_child(chip)
 	return panel
 
 
@@ -154,6 +168,16 @@ func _layout() -> void:
 
 
 func tick(delta: float) -> void:
+	for card: Control in cards:
+		var chip: Label = card.find_child("Reactions", true, false)
+		if chip == null:
+			continue
+		var next: float = card.get_meta("next") - delta
+		if next <= 0:
+			card.set_meta("count", card.get_meta("count") + 1 + card.get_meta("count") / 4)
+			next = randf_range(.35, .9)
+			chip.text = "[ %s  %d ]   [ seen  %d ]" % [card.get_meta("reaction"), card.get_meta("count"), card.get_meta("count") * 3 + 4]
+		card.set_meta("next", next)
 	for card: Control in cards.duplicate():
 		var left: float = card.get_meta("expires") - delta
 		card.set_meta("expires", left)

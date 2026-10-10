@@ -5,12 +5,11 @@
 [ext_resource type="Script" uid="uid://cmld3rtlwvreb" path="res://game/ui/playtest_hud.gd" id="3"]
 [ext_resource type="PackedScene" path="res://game/enemies/incident.tscn" id="4"]
 [ext_resource type="Script" uid="uid://dpixbatgb4k5e" path="res://game/main.gd" id="5"]
+[ext_resource type="Texture2D" path="res://assets/environment/hdri/hansaplatz_2k.hdr" id="9"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
-sky_top_color = Color(0.025, 0.055, 0.09, 1)
-sky_horizon_color = Color(0.2, 0.3, 0.34, 1)
-ground_bottom_color = Color(0.04, 0.06, 0.08, 1)
-ground_horizon_color = Color(0.2, 0.3, 0.34, 1)
+[sub_resource type="PanoramaSkyMaterial" id="SkyMaterial"]
+panorama = ExtResource("9")
+energy_multiplier = 0.2
 
 [sub_resource type="Sky" id="Sky"]
 sky_material = SubResource("SkyMaterial")

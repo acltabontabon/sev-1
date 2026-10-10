@@ -220,7 +220,19 @@ func show_page(next: String) -> void:
 	match page:
 		"main":
 			_label("INCIDENT 001  ·  THE MISSING TRANSACTION", 0, "Eyebrow")
-			_label("SEV-1", 128, "DisplayTitle").add_theme_constant_override("line_spacing", -30)
+			var logo: Label = _label("SEV-1", 128, "DisplayTitle")
+			logo.add_theme_constant_override("line_spacing", -30)
+			# A faint alarm scanline keeps sweeping the logo, like a monitor that knows.
+			var scan: ColorRect = ColorRect.new()
+			scan.color = Color(1, .25, .15, .45)
+			scan.size = Vector2(300, 2)
+			scan.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			logo.add_child(scan)
+			var sweep: Tween = scan.create_tween().set_loops()
+			sweep.tween_property(scan, "position:y", 150.0, 2.6).from(14.0).set_trans(Tween.TRANS_SINE)
+			sweep.tween_property(scan, "modulate:a", 0.0, .3)
+			sweep.tween_interval(1.4)
+			sweep.tween_property(scan, "modulate:a", 1.0, .01)
 			var bar: ColorRect = ColorRect.new()
 			bar.color = Color(1, .3, .17)
 			bar.custom_minimum_size = Vector2(132, 5)
@@ -292,6 +304,16 @@ func show_page(next: String) -> void:
 				button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			report_subtitle = _label("", 17)
 			report_subtitle.custom_minimum_size.y = 52
+			_label("IMPACT", 0, "Eyebrow")
+			_report_meter("Tech debt at close", incident.run.debt, incident.run.debt_limit, Color(1, .55, .25), incident.run.severity())
+			_report_meter("Peak Burnout", incident.run.peak_burnout, incident.run.burnout_limit, Color(1, .4, .3), incident.run.burnout_title(incident.run.peak_burnout))
+			_report_meter("Threats reconciled", incident.enemies_defeated, maxi(incident.enemies_defeated, 12), Color(.4, .9, .85), "of the incident")
+			_label("TIMELINE", 0, "Eyebrow")
+			var events: PackedStringArray = []
+			for entry: Array in incident.timeline:
+				events.append("%02d:%02d   %s" % [int(entry[0]) / 60, int(entry[0]) % 60, entry[1]])
+			_label("\n".join(events) if not events.is_empty() else "No events recorded.", 13, "MonoLabel").add_theme_color_override("font_color", Color(.78, .88, .9))
+			_label("DETAILS", 0, "Eyebrow")
 			_label(incident.report.replace("\n\n", "\n"), 13, "MonoLabel")
 			_stamp("BLAMELESS" if won else "REOPENED", Color(.35, .95, .65) if won else Color(1, .45, .3), .7, Vector2(-250, 330), -.12)
 			_stamp("ASSIGNED: YOU", Color(1, .32, .2), 1.9, Vector2(-310, 470), .09)
@@ -374,6 +396,37 @@ func _keycap(text: String) -> PanelContainer:
 	cap.add_child(label)
 	cap.custom_minimum_size.x = 34
 	return cap
+
+
+func _report_meter(title: String, value: int, limit: int, color: Color, note: String) -> void:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	box.add_child(row)
+	var name_label: Label = Label.new()
+	name_label.text = title
+	name_label.custom_minimum_size.x = 170
+	name_label.add_theme_font_size_override("font_size", 14)
+	row.add_child(name_label)
+	var bar: ProgressBar = ProgressBar.new()
+	bar.show_percentage = false
+	bar.max_value = maxi(limit, 1)
+	bar.value = value
+	bar.custom_minimum_size = Vector2(200, 10)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var back: StyleBoxFlat = StyleBoxFlat.new()
+	back.bg_color = Color(.1, .12, .14)
+	back.set_corner_radius_all(3)
+	var fill: StyleBoxFlat = StyleBoxFlat.new()
+	fill.bg_color = color
+	fill.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("background", back)
+	bar.add_theme_stylebox_override("fill", fill)
+	row.add_child(bar)
+	var number: Label = Label.new()
+	number.text = "%d  %s" % [value, note]
+	number.theme_type_variation = "MonoLabel"
+	number.add_theme_font_size_override("font_size", 13)
+	row.add_child(number)
 
 
 ## A rubber stamp that lands on the postmortem after a beat, with a thump.

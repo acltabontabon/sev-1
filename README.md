@@ -91,7 +91,7 @@ engine caches, logs, and local template downloads are ignored. See
 ## Validation
 
 Resource import, every script parse and the voice manifest pass, along with 15 headless
-suites (698 assertions): movement/combat/navigation, incident progression, upgrades,
+suites (633 assertions): movement/combat/navigation, incident progression, upgrades,
 debt, Burnout, corporate paths, narrative, release lifecycle, voice, the expanded office,
 the enemy roster and awareness, and the interface. The new release checks perform ten start/pause/decision/report/reset/
 menu cycles with stable actor cleanup. Existing full simulations use real melee and

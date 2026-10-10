@@ -17,6 +17,13 @@ var boss_state: Label
 var notice: PanelContainer
 var notice_text: Label
 var evidence: VBoxContainer
+var debt_bar: ProgressBar
+var debt_value: Label
+var banner: PanelContainer
+var banner_text: Label
+var last_stage: int = -1
+var last_debt: int = 0
+var last_burnout: int = 0
 const EVIDENCE: Array = [
 	["CORE LEDGER", "SUCCESS", "Signed receipt: the money was saved.", Color(.35, .95, .65)],
 	["LOAN MANAGEMENT", "FAILED", "Still waiting for a payment confirmation.", Color(1, .4, .3)],
@@ -109,7 +116,7 @@ func _build_incident_hud() -> void:
 	vitals.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	vitals.offset_left = 24
 	vitals.offset_right = 470
-	vitals.offset_top = -196
+	vitals.offset_top = -222
 	vitals.offset_bottom = -24
 	vitals.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(vitals)
@@ -120,6 +127,9 @@ func _build_incident_hud() -> void:
 	health_value = _row(column, "YOU", health_bar)
 	burnout_bar = _bar(Color(1, .7, .3), 250)
 	burnout_value = _row(column, "BURNOUT", burnout_bar)
+	debt_bar = _bar(Color(1, .55, .25), 250)
+	debt_value = _row(column, "TECH DEBT", debt_bar)
+	_build_banner()
 	for node_name: String in ["Debt", "Burnout"]:
 		var label: Label = $Margin/VBox.get_node(node_name)
 		label.reparent(column)
@@ -241,6 +251,48 @@ func _process(delta: float) -> void:
 		$Margin/VBox/AttackState.text = "READY  /  LMB OR F   •   Q OR RMB TO DODGE"
 
 
+## A full-width incident banner for the moments the whole office should hear.
+func _build_banner() -> void:
+	banner = PanelContainer.new()
+	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	banner.offset_top = 0
+	banner.offset_bottom = 54
+	add_child(banner)
+	banner_text = Label.new()
+	banner_text.theme_type_variation = "Headline"
+	banner_text.add_theme_font_size_override("font_size", 26)
+	banner_text.add_theme_color_override("font_color", Color.WHITE)
+	banner_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	banner.add_child(banner_text)
+	banner.hide()
+
+
+func flash_banner(text: String, color: Color, seconds: float = 3.6) -> void:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(color, .92)
+	style.set_content_margin_all(10)
+	style.border_color = color.lightened(.4)
+	style.border_width_bottom = 3
+	banner.add_theme_stylebox_override("panel", style)
+	banner_text.text = text
+	banner.show()
+	banner.modulate.a = 1.0
+	banner.position.y = -60
+	var slide: Tween = banner.create_tween()
+	slide.tween_property(banner, "position:y", 0.0, .25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	slide.tween_interval(seconds)
+	slide.tween_property(banner, "modulate:a", 0.0, .5)
+	slide.tween_callback(banner.hide)
+
+
+func _pulse(control: Control) -> void:
+	control.pivot_offset = control.size * .5
+	var beat: Tween = control.create_tween()
+	beat.tween_property(control, "scale", Vector2(1.0, 1.6), .08)
+	beat.tween_property(control, "scale", Vector2.ONE, .25).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+
 ## The investigation as a board of three system cards: status first, then the fact.
 func _build_evidence() -> void:
 	evidence = VBoxContainer.new()
@@ -317,6 +369,34 @@ func _refresh_incident(incident: Node) -> void:
 	burnout_bar.max_value = incident.run.burnout_limit
 	burnout_bar.value = incident.run.burnout
 	burnout_value.text = "%d  %s" % [incident.run.burnout, incident.run.burnout_title()]
+	debt_bar.max_value = incident.run.debt_limit
+	debt_bar.value = incident.run.debt
+	debt_value.text = "%d  %s" % [incident.run.debt, incident.run.severity()]
+	if incident.run.debt != last_debt:
+		last_debt = incident.run.debt
+		_pulse(debt_bar)
+	if incident.run.burnout != last_burnout:
+		last_burnout = incident.run.burnout
+		_pulse(burnout_bar)
+	if incident.stage != last_stage:
+		var previous: int = last_stage
+		last_stage = incident.stage
+		if previous != -1:
+			# The ticket header slides in fresh whenever the incident changes status.
+			$Margin.modulate.a = 0.0
+			$Margin.position.x = -40
+			var slide: Tween = $Margin.create_tween().set_parallel()
+			slide.tween_property($Margin, "modulate:a", 1.0, .35)
+			slide.tween_property($Margin, "position:x", 32.0, .35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		match incident.stage:
+			incident.Stage.ENCOUNTER_ONE:
+				flash_banner("SEV-1 DECLARED   ·   INC-001 PAYMENTS   ·   PAGING: YOU", Color(.72, .08, .05))
+			incident.Stage.INVESTIGATION:
+				flash_banner("DISCREPANCY CONFIRMED   ·   INVESTIGATE AT OPERATIONS", Color(.1, .32, .4), 2.6)
+			incident.Stage.ENCOUNTER_TWO:
+				flash_banner("CONTAINMENT AUTHORIZED   ·   OWNER: YOU", Color(.62, .25, .05), 2.6)
+			incident.Stage.BOSS:
+				flash_banner("ESCALATED TO: YOU   ·   PRODUCTION CORE OPEN   ·   GO NORTH", Color(.4, .1, .55), 3.2)
 	(burnout_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = [Color(.55, .85, 1), Color(1, .72, .3), Color(1, .38, .25)][incident.run.burnout_band()]
 	buff.text = incident.buff_text()
 	buff.visible = not buff.text.is_empty()
@@ -328,7 +408,7 @@ func _refresh_incident(incident: Node) -> void:
 		boss_state.text = "OPEN — STRIKE NOW" if boss.exposed else "SHIELDED — EVADE"
 	var debt_label: Label = find_child("Debt", true, false)
 	var burnout_label: Label = find_child("Burnout", true, false)
-	debt_label.text = "TECH DEBT %d / %d  ·  %s  ·  enemies pursue +%d%%" % [incident.run.debt, incident.run.debt_limit, incident.run.severity(), roundi((incident.run.pressure() - 1) * 100)]
+	debt_label.text = "Debt effect: enemies pursue +%d%% faster" % roundi((incident.run.pressure() - 1) * 100)
 	var run: Node = incident.run
 	burnout_label.text = "Burnout: your damage +%d%% · risk +%d%%   %s" % [roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
 	burnout_label.modulate = [Color(.75, .85, .9), Color(1, .85, .55), Color(1, .65, .5)][run.burnout_band()]
@@ -347,6 +427,8 @@ func _refresh_incident(incident: Node) -> void:
 		$Margin.visible = false
 	$Controls.visible = $Margin.visible
 	vitals.visible = $Margin.visible
+	if not $Margin.visible:
+		banner.hide()
 	evidence.visible = $Margin.visible and incident.stage == incident.Stage.INVESTIGATION and incident.inspected and incident.near_console()
 	vitals.visible = vitals.visible and not evidence.visible
 	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < 7.0

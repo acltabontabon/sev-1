@@ -28,7 +28,8 @@ currency, progression system, online service or runtime AI was added.
   vault, where The Variance now arrives once you walk in.
 - Pantry: the coffee machine grants 40 s of Temporary Motivation (+15% damage and speed)
   and −10 Burnout once, then quotes the one-cup policy; the vending machine, microwave
-  and wellness poster each react. Photographed CC0 materials replace flat surfaces.
+  and wellness poster each react. Photographed CC0 materials replace flat surfaces, and a
+  CC0 night-city panorama now sits outside the windows.
 
 **Encounters**
 - Several enemies at once in authored waves with a breather between them; at most two
@@ -50,14 +51,18 @@ currency, progression system, online service or runtime AI was added.
 - Speech arrives as cards in "Synergize", a fictional internal chat app: each sender has
   a channel and small print; the engineer's lines are said out loud. 53 voiced lines
   (31 new or rewritten), all subtitled.
-- A ticket-style HUD (status, open timer, objective), health and Burnout bars, a boss
-  bar and an evidence board of three system cards at the console.
+- A ticket-style HUD (status, open timer, objective) that slides in when the incident
+  changes status, health/Burnout/Debt bars that pulse on change, a boss bar, a
+  full-width alert banner at key moments (SEV-1 declared, containment, escalation) and
+  an evidence board of three system cards at the console. Corporate chat cards collect
+  reactions live while you read them.
 - Dialogs were redesigned to be read at a glance: upgrades are tilted change-request
   tickets at an emergency Change Advisory Board (risk tag, one big benefit, a debt meter,
   an "APPROVE?" stamp on focus); the management decision is a chat window with
   Leadership's message and three reply bubbles with a Burnout meter; menus and dialogs
   sit on frosted glass; Onboarding Docs shows keycaps and field notes; log off is a
-  proper warning dialog.
+  proper warning dialog. The postmortem adds impact meters and an incident timeline
+  recorded from your run (coffee, Quick Sync, what you told Leadership, the vault).
 - Writing pass: the status page stays green; "That would be reassuring if the money
   wasn't missing"; leadership replies to each choice; "Special thanks to leadership." /
   "I was the only one here."; a blameless postmortem assigned to you.
@@ -80,9 +85,11 @@ currency, progression system, online service or runtime AI was added.
 
 - **P0:** none reproduced across the automated incident, encounter, interface and
   release lifecycle suites. Not a claim that every player action was tested.
-- **P1 — first-use hitches:** the cold first render now reaches about 360 ms (hidden by
-  the opening's fade from black) and first enemy spawns about 55 ms while shaders
-  compile. Steady play holds the 120 Hz display cap. See performance below.
+- **P1 — first-use hitches:** the cold first render reaches about 360–400 ms (hidden by
+  the opening's fade from black). In the real flow (opening, then the first wave) the
+  worst first-wave frame measured about 28–35 ms; drawing enemy looks early during the
+  opening was tried and measured no improvement, so it was not kept. Steady play holds
+  the 120 Hz display cap. See performance below.
 - **P1 — distribution:** ad-hoc signed, not notarized; recipient Macs may block launch.
 - **P2 — unverified by humans:** whether the opening pacing, jokes, chat cards and new
   enemies are fun or funny; difficulty and balance with waves; the "Tangina naman."
@@ -99,7 +106,7 @@ render), peak 753 draw calls, tracked static/video memory 115/440 MiB. 0.1 measu
 133.5 FPS mean and a 176.5 ms worst frame on the same machine; the larger map and
 materials raise the cold-start and video-memory cost.
 
-Validation: 698 assertions across 15 headless suites plus import, every script parse and
+Validation: 633 assertions across 15 headless suites plus import, every script parse and
 the voice manifest. Automated runs stage positions and sometimes raise health; they do
 not establish balance or fun.
 

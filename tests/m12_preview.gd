@@ -360,3 +360,4 @@ func cast() -> void:
 	await shot("cast_engineer_front")
 	app.main_menu()
 	await frames(5)
+

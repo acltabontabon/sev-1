@@ -4,12 +4,11 @@
 [ext_resource type="PackedScene" path="res://game/rooms/office/office_after_hours.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://game/player/engineer_visual.tscn" id="3"]
 [ext_resource type="AudioStream" path="res://assets/audio/office_air.wav" id="4"]
+[ext_resource type="Texture2D" path="res://assets/environment/hdri/hansaplatz_2k.hdr" id="9"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
-sky_top_color = Color(0.015, 0.03, 0.055, 1)
-sky_horizon_color = Color(0.1, 0.16, 0.2, 1)
-ground_bottom_color = Color(0.02, 0.03, 0.04, 1)
-ground_horizon_color = Color(0.1, 0.16, 0.2, 1)
+[sub_resource type="PanoramaSkyMaterial" id="SkyMaterial"]
+panorama = ExtResource("9")
+energy_multiplier = 0.12
 
 [sub_resource type="Sky" id="Sky"]
 sky_material = SubResource("SkyMaterial")

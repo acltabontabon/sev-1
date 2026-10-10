@@ -77,6 +77,8 @@ var wave_index: int = 0
 var zones: Array[Node3D] = []
 var corpses: Dictionary = {}
 var seen_kinds: Dictionary = {}
+## Postmortem timeline: [elapsed seconds, event], recorded as the run happens.
+var timeline: Array = []
 var quick_sync: String = "idle"
 var actors: Array[Node3D] = []
 var copies: Array[Node3D] = []
@@ -140,6 +142,7 @@ func reset_incident() -> void:
 	player.move_multiplier = 1.0
 	player.zone_multiplier = 1.0
 	quick_sync = "idle"
+	timeline.clear()
 	noticed_stage = -1
 	seen_kinds.clear()
 	wave_index = 0
@@ -207,6 +210,7 @@ func _enter(next: Stage) -> void:
 		return
 	stage = next
 	stage_time = 0
+	log_event(["", "Incident declared; first records arrive", "Discrepancy confirmed; investigation opened", "Containment started", "Escalated to: you (production core opened)", "Resolved", "Reopened: engineer offline"][stage])
 	spawn_delay = 2.0
 	match stage:
 		Stage.ENCOUNTER_ONE:
@@ -217,7 +221,7 @@ func _enter(next: Stage) -> void:
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
-			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED • The east wing pantry still has coffee."
+			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED • East wing: the pantry still has coffee; Meeting Room 3 has an ongoing sync."
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
 		Stage.ENCOUNTER_TWO:
@@ -296,9 +300,15 @@ func _process(delta: float) -> void:
 				actor.queue_free()
 
 
+func log_event(text: String) -> void:
+	if not text.is_empty():
+		timeline.append([elapsed, text])
+
+
 func trigger_boss() -> void:
 	if stage != Stage.BOSS or boss_triggered:
 		return
+	log_event("Entered the vault; The Variance manifested")
 	boss_triggered = true
 	boss_time = 0
 	spawn_delay = presentation.boss_length
@@ -475,6 +485,7 @@ func in_quick_sync() -> bool:
 
 func _start_quick_sync() -> void:
 	quick_sync = "active"
+	log_event("Pulled into a Quick Sync (15 min)")
 	for entry: Array in [["QuickSyncDoorA", -8.75], ["QuickSyncDoorB", -7.25]]:
 		var door: StaticBody3D = room.get_node(entry[0])
 		door.position.z = entry[1]
@@ -487,6 +498,7 @@ func _start_quick_sync() -> void:
 
 func _end_quick_sync() -> void:
 	quick_sync = "done"
+	log_event("Quick Sync survived; action items: none")
 	for entry: Array in [["QuickSyncDoorA", -10.25], ["QuickSyncDoorB", -5.75]]:
 		var door: StaticBody3D = room.get_node(entry[0])
 		door.position.z = entry[1]
@@ -577,6 +589,7 @@ func use(key: String) -> void:
 		"coffee":
 			coffee_cups += 1
 			if coffee_cups == 1:
+				log_event("One coffee (policy maximum)")
 				coffee_left = coffee_seconds
 				run.motivation = coffee_bonus
 				player.move_multiplier = 1.0 + coffee_bonus
@@ -781,6 +794,7 @@ func _offer_corporate() -> void:
 func choose_corporate(index: int) -> void:
 	if not decision_pending or terminal() or index < 0 or index > 2:
 		return
+	log_event("Told Leadership: " + ["“Five minutes.”", "“A realistic estimate, shortly.”", "“It's blocked on another team.”"][index])
 	corporate_choice = index
 	decision_pending = false
 	upgrade_ui.close()

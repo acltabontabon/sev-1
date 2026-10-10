@@ -20,6 +20,8 @@ func _run() -> void:
 	story.skip_unlocked = true
 	story.skip()
 	await frames(4)
+	check(hud.banner.visible and "SEV-1 DECLARED" in hud.banner_text.text, "declaring the incident raises the full-width alert banner")
+	check(incident.timeline.size() == 1 and "declared" in incident.timeline[0][1], "the postmortem timeline records the declaration")
 	check(story.sequence == ["status_except"] and incident.voice.current_line == "status_ok", "the status page claim and its correction are queued as one joke")
 	check(feed.cards.size() == 1 and "All systems operational." in feed.cards[0].find_child("Message", true, false).text, "a spoken corporate line arrives as a chat card")
 	await frames(150)
@@ -44,6 +46,9 @@ func _run() -> void:
 	player.health = 40
 	incident.run.burnout = 75
 	await frames(3)
+	incident.run.debt = 45
+	await frames(2)
+	check(hud.debt_bar.value == 45 and "FRAGILE" in hud.debt_value.text, "the debt bar tracks Technical Debt and its band")
 	check(hud.health_bar.value == 40 and hud.burnout_bar.value == 75 and "OVERLOADED" in hud.burnout_value.text, "vitals bars track health and Burnout")
 	check("INVESTIGATING" in scene.get_node("HUD/Margin/VBox/Title").text, "the ticket header names the incident's status")
 	check(not hud.boss_box.visible, "no boss bar without a boss")
