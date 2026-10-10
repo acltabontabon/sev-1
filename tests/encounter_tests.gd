@@ -776,6 +776,23 @@ func _run() -> void:
 	scene.reset_encounter()
 	await frames(3)
 	check(scene.find_children("*", "", true, false).size() <= quiet_nodes + 2 and incident.room.get_node("LedgerText1").text != "SUCCESS", "a restart leaves no leadership, cards or reconciled ledger behind")
+	# Monday's postmortem: corrective action three fills the call with the five as AI agents,
+	# and the meeting leaves nothing behind.
+	var before_call: int = scene.find_children("*", "", true, false).size()
+	var meeting: Node3D = load("res://game/incidents/postmortem_call.gd").new(incident.presentation)
+	incident.presentation.add_child(meeting)
+	meeting.start()
+	meeting.step = 6
+	meeting._next()
+	var joining: int = Time.get_ticks_msec() + 10000
+	while meeting.agents_joined < 5 and Time.get_ticks_msec() < joining:
+		meeting.tick(1.0 / 60.0)
+		await frames(1)
+	check(meeting.agents_joined == 5 and meeting.tiles.slice(4, 9).all(func(tile: Control) -> bool: return tile.visible) and "AI" in meeting.doc.text,
+		"the postmortem backfills the night shift with five AI agents on the call")
+	meeting.finish()
+	await frames(3)
+	check(scene.find_children("*", "", true, false).size() == before_call, "the postmortem call leaves nothing behind")
 	# The vault, first time: the night shift is already fighting The Variance, falls in
 	# front of the engineer, and the real fight starts after; a restart brings them back.
 	await fresh_stage(incident.Stage.INVESTIGATION)

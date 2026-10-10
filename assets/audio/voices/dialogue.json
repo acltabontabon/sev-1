@@ -1112,6 +1112,48 @@
       "fallback_duration": 4.5,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "pm_root",
+      "character": "POSTMORTEM AI",
+      "text": "Root cause: an engineer was present.",
+      "subtitle": "Root cause: an engineer was present.",
+      "voice_profile": "postmortem",
+      "direction": "Precise, polite compliance. Emotionally indifferent.",
+      "audio": "res://assets/audio/voices/pm_root.ogg",
+      "trigger": "The postmortem names the root cause",
+      "priority": 2,
+      "fallback_duration": 2.6,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "pm_impact",
+      "character": "POSTMORTEM AI",
+      "text": "Impact: one cent, recovered. Five resource attrition events.",
+      "subtitle": "Impact: one cent, recovered. Five resource attrition events.",
+      "voice_profile": "postmortem",
+      "direction": "Precise, polite compliance. Emotionally indifferent.",
+      "audio": "res://assets/audio/voices/pm_impact.ogg",
+      "trigger": "The postmortem states the impact",
+      "priority": 2,
+      "fallback_duration": 4.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "pm_backfill",
+      "character": "POSTMORTEM AI",
+      "text": "Corrective action three: backfill the night shift with AI. Five agents onboarded. No pagers required.",
+      "subtitle": "Corrective action three: backfill the night shift with AI. Five agents onboarded. No pagers required.",
+      "voice_profile": "postmortem",
+      "direction": "Precise, polite compliance. Emotionally indifferent.",
+      "audio": "res://assets/audio/voices/pm_backfill.ogg",
+      "trigger": "The postmortem replaces the night shift with AI",
+      "priority": 2,
+      "fallback_duration": 5.5,
+      "optional": false,
+      "status": "generated"
     }
   ]
 }

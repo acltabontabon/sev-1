@@ -14,25 +14,14 @@ extends Node3D
 ##  "window"    up in the one lit window: five silhouettes watching him go. The narrator.
 ##  "resolved"  INCIDENT 001 — RESOLVED.
 ## Monday (leadership slept through all of it):
-##  "card"      MONDAY, 9:00 AM. Statue unveiling. Attendance mandatory.
-##  "arrival".. the lobby under the SYNERGEX logo: a covered statue, leadership, an audience
-##              of one (him, cleaned up). The curtain drops on a bronze Chief Synergy
-##              Officer standing on The Variance ("WHO SLEW THE VARIANCE · FROM HOME, ON
-##              MUTE"). Self-thanks, a mandatory fun day, a photo for LinkedIn that crops
-##              him out (the real frame, cropped), on call this weekend; the stream ends.
+##  "card"      MONDAY, 9:00 AM. Blameless postmortem. Attendance mandatory.
+##  "monday"    the postmortem call in the Quick Sync room (postmortem_call.gd).
 ##  "next"      NEXT: INCIDENT 002.
 ## Presentation only, on real time (the photo freezes the world, not the scene). TAB skips.
 
 const ROOT: String = "res://assets/characters/quaternius/"
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 const CREW = preload("res://game/incidents/coworkers.gd")
-## Leadership: body, palette (shirt, pants, skin, hair), and where they stand by the statue.
-const LEADERSHIP: Array = [
-	["suit_male.fbx", [Color(.12, .12, .14), Color(.1, .1, .12), Color(.86, .66, .52), Color(.55, .5, .45)], Vector3(1.5, 0, 13.5)],
-	["suit_female.fbx", [Color(.55, .1, .2), Color(.12, .1, .14), Color(.5, .33, .24), Color(.12, .08, .06)], Vector3(-2.1, 0, 13.5)],
-	["casual2_female.fbx", [Color(.95, .85, .4), Color(.3, .32, .38), Color(.78, .58, .45), Color(.6, .35, .2)], Vector3(2.9, 0, 13.3)]]
-const STATUE_AT: Vector3 = Vector3(-.3, 0, 14.6)
-const PLAQUE: String = "IN HONOUR OF\nBRENT FAIRWEATHER\nCHIEF SYNERGY OFFICER\nWHO SLEW THE VARIANCE\nFRIDAY, 11:58 PM\n(FROM HOME, ON MUTE)"
 ## In Memoriam, in the order they fell.
 const MEMORIAL: Array = [
 	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "His calendar is still full."],
@@ -52,10 +41,7 @@ const MEMORIES: Array = [
 ## What used to play the moment it died, now the epilogue over the report.
 const VICTORY_LINES: Array[String] = ["victory_thanks", "victory", "postmortem", "postmortem_owner"]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
-const ENGINEER_AT: Vector3 = Vector3(-.3, .05, 10.2)
-## At the far end of the line for the photo, at the very edge of the frame (cropped).
-const PHOTO_EDGE: Vector3 = Vector3(3.6, .05, 13.2)
-const WALK_SPEED: float = 1.25
+const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
 const EXIT_PATH: Array[Vector3] = [Vector3(-2.5, .05, 11.4), Vector3(5.6, .05, 11.8)]
 const EXIT_SECONDS: float = 9.0
 ## The street at the foot of the tower (its west face), and his way away from it.
@@ -63,7 +49,6 @@ const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 5.0), Vector3(-23.0,
 const STREET_SECONDS: float = 7.5
 ## The office's west window, where the night shift stands to watch him go.
 const WINDOW: Vector3 = Vector3(-13.3, .05, 2.0)
-const POST: String = "Humbled to share that I personally resolved a SEV-1 this weekend. Proud to unveil a small token of our team's gratitude.\n\nGrateful for our people. Thank you to everyone who made this possible (me).\n\n#leadership #courage #fromhome #grateful"
 ## Every line the same width (monospace), so a centred block reads as a printed column.
 const RECEIPT: String = "  SYNERGEX PAYMENTS  \nFRI 23:58   VAULT 01\n- - - - - - - - - - \nTXN           000001\nSTATUS         FOUND\nAMOUNT         $0.01\n- - - - - - - - - - \nCOST         5 STAFF\n- - - - - - - - - - \n THANK YOU FOR YOUR \n     SACRIFICE      "
 
@@ -75,23 +60,18 @@ var beat: String = ""
 var beat_at: float = 0.0
 var clock: float = 0.0
 var done: bool = false
-var leaders: Array[Dictionary] = []
 var memories: Array[Dictionary] = []
 var props: Array[Node] = []
 var receipt: Node3D
 var receipt_from: Vector3
 var snow: CPUParticles3D
-var spot: SpotLight3D
-var live: Label3D
-var curtain: MeshInstance3D
+var meeting: Node3D
 var mourn: AudioStreamPlayer
 var focus: CameraAttributesPractical
 var saved_attributes: CameraAttributes
 var ledger: Array[Array] = []
 var desk_texts: Array[String] = []
 var bloodied: Array[MeshInstance3D] = []
-var card: PanelContainer
-var photo: TextureRect
 var fade: ColorRect
 var titles: Label
 var memorial_name: Label
@@ -196,54 +176,20 @@ func _beat(next: String) -> void:
 			titles.show()
 			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did."
 		"card":
-			titles.text = "MONDAY, 9:00 AM\nSTATUE UNVEILING  ·  ATTENDANCE MANDATORY"
+			titles.text = "MONDAY, 9:00 AM\nBLAMELESS POSTMORTEM  ·  ATTENDANCE MANDATORY"
 			if mourn.playing:
 				var out: Tween = mourn.create_tween()
 				out.tween_property(mourn, "volume_db", -40.0, 1.8)
 				out.tween_callback(mourn.stop)
-			# Monday: he has showered. He has not slept.
+			# Monday: he has showered. He has not slept. The gold is long gone.
 			_unbloody()
-		"arrival":
-			_stage_unveiling()
+			character.overtime(false)
+		"monday":
 			titles.hide()
-			story.say("allhands_ceo")
-			for ping in range(6):
-				get_tree().create_timer(ping * .22, false).timeout.connect(story.sting.bind(preload("res://assets/audio/sfx/chat_ping.ogg"), -12))
-		"unveil":
-			# The curtain comes down on him: bronze, on top of it.
-			var drop: Tween = curtain.create_tween()
-			drop.tween_interval(.25)
-			drop.tween_property(curtain, "scale:y", .03, .55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-			drop.parallel().tween_property(curtain, "position:y", .05, .55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-			get_tree().create_timer(.8, false).timeout.connect(_ta_da)
-		"thanks":
-			story.say("allhands_vp")
-		"fun_day":
-			story.say("allhands_people")
-		"pose":
-			# A cut: he has been waved to the far end of the line.
-			player.global_position = PHOTO_EDGE
-			player.visual.rotation.y = PI
-			for leader: Dictionary in leaders:
-				leader.animator.play("ual/victory", .2)
-			story.say("allhands_photo")
-		"photo":
-			_snap()
-		"leave":
-			ElementFx.slow_motion(&"photo", 1.0)
-			story.crew_freeze.hide()
-			card.hide()
-			live.text = "■  STREAM ENDED  ·  0 WATCHING"
-			live.modulate = Color(.6, .6, .65)
-			story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -2)
-			player.global_position = ENGINEER_AT
-			player.visual.rotation.y = PI
-			for leader: Dictionary in leaders:
-				leader.going = true
-				leader.spot = leader.spot - Vector3(7.0, 0, 0)
-			story.say("allhands_oncall")
-		"alone":
-			story.say("allhands_engineer")
+			_exposure(.9)
+			meeting = POSTMORTEM.new(story)
+			add_child(meeting)
+			meeting.start()
 		"next":
 			titles.text = "NEXT: INCIDENT 002\nMONDAY, 9:05 AM"
 
@@ -260,7 +206,6 @@ func tick(delta: float) -> bool:
 	player.narrative_hold = true
 	story.caption.text = story.voice.subtitle
 	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card", "resolved", "next"]
-	_walk(delta)
 	var camera: Camera3D = story.camera
 	var engineer: Vector3 = player.global_position
 	match beat:
@@ -374,66 +319,10 @@ func tick(delta: float) -> bool:
 			fade.color.a = 1.0
 			titles.modulate.a = smoothstep(0.0, .35, t) * (1.0 - smoothstep(1.9, 2.3, t))
 			if t >= 2.4:
-				_beat("arrival")
-		"arrival":
-			# Behind him, low: one man, a covered statue in a spotlight, leadership beaming.
+				_beat("monday")
+		"monday":
 			fade.color.a = 1.0 - smoothstep(0.0, .7, t)
-			camera.global_position = Vector3(-2.6, 1.7, 7.4) + Vector3(.3, 0, .8) * minf(1.0, t / 6.0)
-			camera.look_at(STATUE_AT + Vector3(.6, 1.4, 0))
-			camera.fov = 46.0
-			_focus_near(1.6)
-			if t >= 4.0 and quiet:
-				_beat("unveil")
-		"unveil":
-			# Low and slow up the statue as the cloth comes down; then the plaque.
-			if t < 2.6:
-				var rise: float = smoothstep(.2, 2.6, t)
-				camera.global_position = STATUE_AT + Vector3(.9, .4 + rise * .5, -3.2)
-				camera.look_at(STATUE_AT + Vector3.UP * lerpf(1.2, 2.6, rise))
-				camera.fov = 40.0
-			else:
-				camera.global_position = STATUE_AT + Vector3(.2, .7, -2.6)
-				camera.look_at(STATUE_AT + Vector3(0, .55, -.71))
-				camera.fov = 26.0
-			if t >= 5.0:
-				_beat("thanks")
-		"thanks":
-			# Her, in the light, the statue over her shoulder.
-			camera.global_position = Vector3(-1.2, 1.45, 11.4)
-			camera.look_at(Vector3(-2.1, 1.15, 13.5))
-			camera.fov = 34.0
-			_focus_far(2.6)
-			if t >= 1.0 and quiet:
-				_beat("fun_day")
-		"fun_day":
-			# The reverse, from the stage: the whole audience, small, under the statue's gaze.
-			camera.global_position = STATUE_AT + Vector3(.6, 2.6, -.9)
-			camera.look_at(engineer + Vector3.UP * .9)
-			camera.fov = 40.0
-			if t >= 1.0 and quiet:
-				_beat("pose")
-		"pose":
-			_photo_framing(camera)
-			if t >= 1.0 and quiet:
-				_beat("photo")
-		"photo":
-			_photo_framing(camera)
-			if t >= 4.2:
-				_beat("leave")
-		"leave":
-			# Close on him, low, as they walk off behind him.
-			camera.global_position = engineer + Vector3(-.45, 1.15, 1.35)
-			camera.look_at(engineer + Vector3.UP * 1.45)
-			camera.fov = 36.0
-			_focus_far(1.8)
-			if t >= 1.2 and quiet:
-				_beat("alone")
-		"alone":
-			# Low behind him, looking up past him at it.
-			camera.global_position = engineer + Vector3(.5, .7, -1.6)
-			camera.look_at(STATUE_AT + Vector3.UP * 2.4)
-			camera.fov = 44.0
-			if t >= 1.4 and quiet:
+			if not meeting.tick(real):
 				_beat("next")
 		"next":
 			fade.show()
@@ -479,12 +368,13 @@ func finish(epilogue: bool = true) -> void:
 		story.desk.alarm_detail.text = desk_texts[1]
 	# The report follows straight on; the orbit it usually waits for has been had.
 	incident.ending_hold = minf(incident.ending_hold, .3)
-	for group: Array[Dictionary] in [leaders, memories]:
-		for someone: Dictionary in group:
-			if is_instance_valid(someone.body):
-				someone.body.queue_free()
-		group.clear()
-	for node: Node in props + [card, fade, titles, memorial_name, memorial_line]:
+	for memory: Dictionary in memories:
+		if is_instance_valid(memory.body):
+			memory.body.queue_free()
+	memories.clear()
+	if is_instance_valid(meeting):
+		meeting.finish()
+	for node: Node in props + [fade, titles, memorial_name, memorial_line]:
 		if is_instance_valid(node):
 			node.queue_free()
 	props.clear()
@@ -760,209 +650,8 @@ func _stage_window() -> void:
 	props.append(warm)
 
 
-## Monday in the lobby: a statue under red velvet in a spotlight, a LIVE sign, leadership
-## either side of it, and him, cleaned up, the whole audience.
-func _stage_unveiling() -> void:
-	story.desk.alarm(false)
-	character.sit = 0.0
-	character.story_pose = 0
-	player.global_position = ENGINEER_AT
-	player.visual.rotation.y = PI
-	_exposure(.55)
-	var marble: StandardMaterial3D = StandardMaterial3D.new()
-	marble.albedo_color = Color(.86, .85, .82)
-	marble.roughness = .25
-	var pedestal: MeshInstance3D = MeshInstance3D.new()
-	var block: BoxMesh = BoxMesh.new()
-	block.size = Vector3(1.4, 1.1, 1.4)
-	pedestal.mesh = block
-	pedestal.material_override = marble
-	incident.add_child(pedestal)
-	pedestal.global_position = STATUE_AT + Vector3.UP * .55
-	props.append(pedestal)
-	var plaque: Label3D = Label3D.new()
-	plaque.text = PLAQUE
-	plaque.font = preload("res://assets/fonts/cinzel_variable.ttf")
-	plaque.font_size = 40
-	plaque.pixel_size = .0024
-	plaque.modulate = Color(.36, .22, .07)
-	plaque.outline_size = 0
-	plaque.rotation.y = PI
-	incident.add_child(plaque)
-	plaque.global_position = STATUE_AT + Vector3(0, .55, -.71)
-	props.append(plaque)
-	var bronze: StandardMaterial3D = StandardMaterial3D.new()
-	bronze.albedo_color = Color(.55, .36, .18)
-	bronze.metallic = .85
-	bronze.roughness = .35
-	# The Variance, slain, under his feet.
-	var beast: Node3D = load("res://assets/enemies/ultimate_monsters/demon.gltf").instantiate()
-	incident.add_child(beast)
-	beast.scale = Vector3.ONE * .42
-	beast.global_position = STATUE_AT + Vector3(0, 1.1, .15)
-	beast.rotation.y = PI * .5
-	_freeze_pose(beast, "Death", 1.0)
-	_cast(beast, bronze)
-	props.append(beast)
-	# Him: heroic, a little larger than life, arms up.
-	var hero: Node3D = load(ROOT + "suit_male.fbx").instantiate()
-	incident.add_child(hero)
-	hero.scale = Vector3.ONE * .62 * 1.3
-	hero.global_position = STATUE_AT + Vector3(0, 1.32, -.1)
-	hero.rotation.y = PI
-	var pose: AnimationPlayer = hero.find_child("AnimationPlayer", true, false)
-	pose.add_animation_library("ual", MOTION)
-	_freeze_pose(hero, "ual/victory", .45)
-	_cast(hero, bronze)
-	props.append(hero)
-	curtain = MeshInstance3D.new()
-	var drape: BoxMesh = BoxMesh.new()
-	drape.size = Vector3(1.9, 3.8, 1.9)
-	curtain.mesh = drape
-	var velvet: StandardMaterial3D = StandardMaterial3D.new()
-	velvet.albedo_color = Color(.45, .03, .06)
-	velvet.roughness = .95
-	curtain.material_override = velvet
-	incident.add_child(curtain)
-	curtain.global_position = STATUE_AT + Vector3.UP * 1.9
-	props.append(curtain)
-	spot = SpotLight3D.new()
-	spot.light_color = Color(1, .9, .75)
-	spot.light_energy = 24.0
-	spot.spot_range = 12.0
-	spot.spot_angle = 26.0
-	spot.shadow_enabled = true
-	incident.add_child(spot)
-	spot.global_position = Vector3(-.3, 6.4, 10.8)
-	spot.look_at(STATUE_AT + Vector3.UP * 1.2)
-	props.append(spot)
-	live = Label3D.new()
-	live.text = "●  LIVE  ·  STATUE UNVEILING  ·  3,412 WATCHING  ·  3,411 ON MUTE"
-	live.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
-	live.font_size = 64
-	live.pixel_size = .0055
-	live.modulate = Color(1, .3, .25)
-	live.outline_size = 8
-	live.rotation.y = PI
-	incident.add_child(live)
-	live.global_position = Vector3(-.3, 4.4, 15.5)
-	props.append(live)
-	for entry: Array in LEADERSHIP:
-		var body: Node3D = load(ROOT + entry[0]).instantiate()
-		incident.add_child(body)
-		body.scale = Vector3.ONE * .62
-		CREW.dress(body, entry[1])
-		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
-		animator.add_animation_library("ual", MOTION)
-		body.global_position = entry[2]
-		body.rotation.y = PI
-		animator.play("ual/talking")
-		leaders.append({"body": body, "animator": animator, "spot": entry[2], "going": false})
-
-
-## Ta-da: confetti from both sides, a flash on the bronze.
-func _ta_da() -> void:
-	if done:
-		return
-	story.sting(preload("res://assets/audio/sfx/low_boom.ogg"), -4)
-	story.sting(preload("res://assets/audio/sfx/ui_confirm.ogg"), -2)
-	ElementFx.flash(incident, STATUE_AT + Vector3.UP * 2.4, Color(1, .85, .55), 6.0, 7.0, .4)
-	for side in [-1.0, 1.0]:
-		for colour: Color in [Color(1, .3, .6), Color(.3, .8, 1), Color(1, .85, .2), Color(.5, 1, .5)]:
-			ElementFx.shards(incident, STATUE_AT + Vector3(side * 2.4, .3, -.6), colour, 18, 7.0, 2.0, Vector3(-side * .4, 1, 0), .1)
-
-
-## Hold a model in one frame of a clip, as a statue does.
-func _freeze_pose(model: Node3D, clip: String, at: float) -> void:
-	var animator: AnimationPlayer = model.find_child("AnimationPlayer", true, false)
-	if animator == null or not animator.has_animation(clip):
-		return
-	animator.play(clip)
-	animator.seek(animator.get_animation(clip).length * at, true)
-	animator.pause()
-
-
-func _cast(model: Node3D, metal: Material) -> void:
-	for mesh: Node in model.find_children("*", "MeshInstance3D", true, false):
-		(mesh as MeshInstance3D).material_override = metal
-
-
-func _walk(delta: float) -> void:
-	for leader: Dictionary in leaders:
-		if not leader.going:
-			continue
-		var body: Node3D = leader.body
-		var to: Vector3 = leader.spot - body.global_position
-		to.y = 0
-		if to.length() < .08:
-			leader.going = false
-			body.hide()
-			continue
-		body.global_position += to.normalized() * minf(to.length(), WALK_SPEED * delta)
-		body.rotation.y = lerp_angle(body.rotation.y, atan2(to.x, to.z), 1.0 - exp(-8.0 * delta))
-		if leader.animator.assigned_animation != "ual/walk_formal" or not leader.animator.is_playing():
-			leader.animator.play("ual/walk_formal", .2)
-
-
-func _photo_framing(camera: Camera3D) -> void:
-	camera.global_position = Vector3(.4, 1.5, 9.6)
-	camera.look_at(Vector3(.4, 1.7, 14.0))
-	camera.fov = 60.0
-
-
-## The flash, the freeze, and the post: the frame itself, cropped to leave him out.
-func _snap() -> void:
-	ElementFx.flash(incident, Vector3(.4, 1.6, 10.2), Color(1, 1, .95), 8.0, 10.0, .3)
-	story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -2)
-	if DisplayServer.get_name() != "headless":
-		var frame: Image = get_viewport().get_texture().get_image()
-		var size: Vector2i = frame.get_size()
-		# Leadership and the statue; the left edge (his end of the line) goes.
-		var crop: Image = frame.get_region(Rect2i(int(size.x * .26), int(size.y * .05), int(size.x * .74), int(size.y * .78)))
-		photo.texture = ImageTexture.create_from_image(crop)
-		story.whiteout(.35)
-	story.crew_freeze.visible = true
-	(story.crew_freeze.material as ShaderMaterial).set_shader_parameter("amount", .55)
-	(story.crew_freeze.material as ShaderMaterial).set_shader_parameter("tint", Color(.8, .82, .9))
-	ElementFx.slow_motion(&"photo", .02)
-	card.show()
-	card.modulate.a = 0.0
-	var arrive: Tween = card.create_tween()
-	arrive.set_ignore_time_scale(true)
-	arrive.tween_interval(.35)
-	arrive.tween_property(card, "modulate:a", 1.0, .25)
-
 
 func _build_ui() -> void:
-	card = PanelContainer.new()
-	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Off to the right of the frozen frame, which stays in view on the left.
-	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-	card.offset_left = -600
-	card.offset_right = -60
-	card.offset_top = -300
-	card.offset_bottom = 300
-	card.rotation = deg_to_rad(-1.5)
-	var paper: StyleBoxFlat = StyleBoxFlat.new()
-	paper.bg_color = Color(1, 1, 1)
-	paper.set_corner_radius_all(10)
-	paper.set_content_margin_all(18)
-	paper.shadow_color = Color(0, 0, 0, .45)
-	paper.shadow_size = 18
-	card.add_theme_stylebox_override("panel", paper)
-	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override("separation", 10)
-	card.add_child(column)
-	column.add_child(_text("Brent Fairweather · Chief Synergy Officer at SYNERGEX · 1st\nPosted Monday, 9:04 AM · Edited", 15, Color(.35, .37, .4)))
-	column.add_child(_text(POST, 17, Color(.1, .1, .12)))
-	photo = TextureRect.new()
-	photo.custom_minimum_size = Vector2(500, 250)
-	photo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	photo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	column.add_child(photo)
-	column.add_child(_text("♥ 4,812   ·   312 comments   ·   97 reposts   ·   1 engineer cropped out", 16, Color(.35, .37, .4)))
-	card.hide()
-	story.add_child(card)
 	fade = ColorRect.new()
 	fade.color = Color(0, 0, 0, 0)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -996,15 +685,4 @@ func _memorial(size: int, top: float, left: float) -> Label:
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, .6))
 	label.hide()
 	story.add_child(label)
-	return label
-
-
-func _text(words: String, size: int, colour: Color) -> Label:
-	var label: Label = Label.new()
-	label.text = words
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size.x = 500
-	label.add_theme_font_override("font", preload("res://assets/fonts/inter_variable.ttf"))
-	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", colour)
 	return label

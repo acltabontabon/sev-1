@@ -1182,5 +1182,53 @@
     "duration": 4.333333333333333,
     "peak": 0.6345821022987366,
     "review_status": "candidate; human listening acceptance pending"
+  },
+  "pm_root": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "bf_emma",
+    "generation_date": "2026-10-10T22:17:17.107393+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "2be83fc03ab4946d1507f81e5de1bae5152817c49fddf77f8fbe5c7f4e4df986",
+    "sha256": "a5cc2252b0d4f54d1ae4db18047d00921fa3be7174a22b5ed3b41d38bef88a68",
+    "master_sha256": "e2678a57d9b5e1daed24c1f4155e9402310664ff9e04868587e1912b2816e158",
+    "duration": 2.147125,
+    "peak": 0.6449311971664429,
+    "review_status": "candidate; human listening acceptance pending"
+  },
+  "pm_impact": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "bf_emma",
+    "generation_date": "2026-10-10T22:17:17.827261+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "bbd43347cfa4b04fc090228f3c0115a395e704f02331e58d785c4431167b9165",
+    "sha256": "5256ce98af7653a06875b241966ccfc58b88db179f5d4fb08db6335fe42af544",
+    "master_sha256": "214fdf0837d6a10dc9c488d247205dcd86f4fdecf24d0d8491eb77521a2b2bbd",
+    "duration": 3.7772083333333333,
+    "peak": 0.6603503823280334,
+    "review_status": "candidate; human listening acceptance pending"
+  },
+  "pm_backfill": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "bf_emma",
+    "generation_date": "2026-10-10T22:18:17.917954+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "ae464c5a810c8d85b553ec2e79b98e8f4387fbfa61c3ba9e6e4755753ac5155c",
+    "sha256": "6de802199036ce991085e985722bcbcb1dd993abb4ed20befeea76492145c8e8",
+    "master_sha256": "c13e2c11fbdf94a8d8d6d1f32ea80a0fae2c2745c20e21f92e78f62a36f128fc",
+    "duration": 6.025125,
+    "peak": 0.811119556427002,
+    "review_status": "candidate; human listening acceptance pending"
   }
 }
