@@ -136,6 +136,31 @@ long-duration soak or Windows benchmark is claimed. The steady boss probe exclud
 five seconds of warm-up and screenshot saving; the lifecycle probe includes initial
 scene creation/first rendering and paused UI. Both are synthetic scenarios.
 
+### 0.2.33 whole-run probe (11 October 2026)
+
+`tests/performance_probe.gd` plays a scripted Incident 001 at 1920×1080 (Apple M2 Pro,
+macOS, Forward+/Metal, High quality: SSAO, glow, MSAA 2x; VSync off): walking the
+office, the first outbreak cutscene, melee with specials and kill cams, the second
+encounter, the omnislash, the vault arrival and the boss. It writes ignored
+`builds/performance_probe.json` with per-phase percentiles, pipeline compilations and
+what changed on screen in every frame over 33 ms.
+
+| Build | Avg FPS | Median / p95 / p99 (ms) | Frames >16.7 ms | Frames >33 ms (ex. startup) |
+| --- | --- | --- | --- | --- |
+| 0.2.32 (three runs) | 102–110 | 8.9–9.2 / 12.1–13.8 / 14.3–15.9 | 30–45 | 6–8, up to 73 ms |
+| 0.2.33 (two runs) | 109–110 | 8.8–9.0 / 12.5–12.7 / 14.5–15.2 | 30–31 | 2 + one first-view freeze |
+
+The 0.2.32 stutters (40–73 ms) coincided with text appearing for the first time (the HUD
+after the opening, the outbreak lower-third, the first kill's stamp) while CPU process and
+render times stayed low: glyphs rasterised on first use per font, size and outline. The
+HUD now draws every 2D text style and the runtime 3D text styles once, all but
+invisibly, at load. MSDF fonts also removed the stutters but changed every outlined 3D
+sign's look, so they were rejected. Remaining: a single 135–145 ms freeze the first
+time the gameplay camera sees the whole office (74 GPU pipelines compiled in one
+frame), and one or two 37–53 ms frames in fights without a text cause. Steady play is
+well above 60 FPS here; a 120 Hz display with VSync will still drop frames around the
+p95. Windows and lower-end hardware remain unmeasured.
+
 ## Remaining limits and human gate
 
 The full ordinary run has no measured human duration. One enemy is damaging at a time;

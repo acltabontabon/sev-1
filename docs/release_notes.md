@@ -1,5 +1,18 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.33 — Fewer stutters (11 October 2026)
+
+Creator request: check performance and smoothness.
+
+- Measured a whole scripted run at 1080p on the M2 Pro (`tests/performance_probe.gd`):
+  about 109 FPS average, 9 ms median, 12.6 ms p95. Steady play was fine; the problem was
+  6–8 stutters of 40–73 ms per run, each when text first appeared (the HUD after the
+  opening, the outbreak title, the first kill stamp).
+- Text styles are now pre-drawn invisibly at load, so those stutters are gone (two
+  remain per run, down from up to eight). One known first-view freeze (~140 ms, GPU
+  pipelines for the whole office) is next, folded into the new opening. Details and
+  numbers in [stabilization](stabilization.md#0233-whole-run-probe-11-october-2026).
+
 ## 0.2.32 — A quieter top-left (11 October 2026)
 
 Creator request: trim the top-left text too.

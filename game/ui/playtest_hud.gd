@@ -58,6 +58,7 @@ const STATUS: Array[String] = ["NEW", "TRIAGE", "INVESTIGATING", "CONTAINING", "
 
 
 func _ready() -> void:
+	_warm_glyphs.call_deferred()
 	shake_strength = camera_rig.impulse_degrees
 	comfort.get_node("Shake").toggled.connect(_set_shake)
 	comfort.get_node("Flash").toggled.connect(_set_flash)
@@ -452,6 +453,61 @@ func _pulse(control: Control) -> void:
 
 
 ## The investigation as a board of three system cards: status first, then the fact.
+## Every character the interface and story text use.
+const GLYPHS: String = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•—–→←↓▼◆◇™…‘’“”×✓"
+
+
+## Text is rasterised the first time each font, size and outline is drawn, and that cost
+## used to land mid-game as 40–70 ms stutters (the HUD appearing, the outbreak title,
+## the first kill stamp). Draw every combination in use once, all but invisibly, while
+## the scene is still loading, then throw the samples away.
+func _warm_glyphs() -> void:
+	var holder: Control = Control.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.modulate.a = .004
+	add_child(holder)
+	var seen: Dictionary = {}
+	for node in get_tree().current_scene.find_children("*", "Control", true, false) if get_tree().current_scene != null else get_parent().find_children("*", "Control", true, false):
+		if not (node is Label or node is Button or node is RichTextLabel):
+			continue
+		var control: Control = node
+		var theme_type: StringName = &"RichTextLabel" if control is RichTextLabel else &""
+		var font: Font = control.get_theme_font(&"normal_font" if control is RichTextLabel else &"font", theme_type)
+		var size: int = control.get_theme_font_size(&"normal_font_size" if control is RichTextLabel else &"font_size", theme_type)
+		var outline: int = control.get_theme_constant(&"outline_size", theme_type)
+		var key: String = "%d/%d/%d" % [font.get_instance_id() if font != null else 0, size, outline]
+		if font == null or seen.has(key):
+			continue
+		seen[key] = true
+		var sample: Label = Label.new()
+		sample.text = GLYPHS
+		sample.add_theme_font_override(&"font", font)
+		sample.add_theme_font_size_override(&"font_size", size)
+		sample.add_theme_constant_override(&"outline_size", outline)
+		holder.add_child(sample)
+	# World text made on the fly (kill stamps, spell words, barks, markers, callouts):
+	# [font (null: the default), size, outline] as their scripts set them.
+	var spot: Node3D = Node3D.new()
+	add_child(spot)
+	spot.global_position = Vector3(0, -500, 0)
+	var barlow: Font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
+	var inter: Font = preload("res://assets/fonts/inter_variable.ttf")
+	for style: Array in [[null, 40, 10], [null, 40, 0], [null, 48, 12], [null, 30, 12], [null, 32, 12], [null, 44, 12],
+			[null, 44, 10], [null, 64, 12], [null, 22, 0], [null, 30, 8], [null, 30, 6], [inter, 34, 10], [inter, 36, 12],
+			[barlow, 40, 10], [barlow, 44, 10], [barlow, 56, 12], [barlow, 64, 0]]:
+		var word: Label3D = Label3D.new()
+		if style[0] != null:
+			word.font = style[0]
+		word.font_size = style[1]
+		word.outline_size = style[2]
+		word.text = GLYPHS
+		spot.add_child(word)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	holder.queue_free()
+	spot.queue_free()
+
+
 func _build_evidence() -> void:
 	evidence = VBoxContainer.new()
 	evidence.mouse_filter = Control.MOUSE_FILTER_IGNORE
