@@ -86,6 +86,16 @@ var host: Node3D
 var disguise_left: float = 0.0
 ## Blame Shift: while blamed, every hit lands 30% harder.
 var blamed_left: float = 0.0
+## Monsters talk: overworked employees who lost their minds, voiced from talk.json
+## "barks" (spot, idle, attack, hurt, death) in a speech bubble and positional audio.
+## One bark at a time across the floor (deaths may interrupt), and a pause per monster.
+static var next_bark_ms: int = 0
+var bark_cooldown: float = 0.0
+var idle_bark_left: float = 0.0
+var bubble: Label3D
+var bubble_left: float = 0.0
+var mouth: AudioStreamPlayer3D
+var last_bark: String = ""
 ## The last accepted hit (after multipliers): monster_rig.gd picks a death from it.
 var last_damage: int = 0
 var rig: MonsterRig
@@ -113,6 +123,28 @@ func _ready() -> void:
 	cone = preload("res://game/enemies/sight_cone.gd").new()
 	cone.name = "SightCone"
 	add_child(cone)
+	bubble = Label3D.new()
+	bubble.name = "Bark"
+	bubble.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	bubble.font = preload("res://assets/fonts/inter_variable.ttf")
+	bubble.font_size = 36
+	bubble.pixel_size = .0045
+	bubble.outline_size = 12
+	bubble.outline_modulate = Color(.12, 0, 0)
+	bubble.modulate = Color(1, .86, .8, 0)
+	bubble.width = 520
+	bubble.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bubble.no_depth_test = true
+	bubble.position.y = 3.6
+	bubble.visible = false
+	add_child(bubble)
+	mouth = AudioStreamPlayer3D.new()
+	mouth.name = "Mouth"
+	mouth.bus = &"Voice"
+	mouth.unit_size = 8.0
+	mouth.max_distance = 32.0
+	add_child(mouth)
+	idle_bark_left = randf_range(5.0, 12.0)
 	if rig_kind != "":
 		rig = MonsterRig.create(rig_kind, self)
 		visual.add_child(rig)
@@ -127,6 +159,8 @@ func _ready() -> void:
 		$HealthBack.position.y = top
 		$HealthFill.position.y = top
 		label.position.y = maxf(label.position.y, top + .2)
+		# Above the status label and the first-sighting name card.
+		bubble.position.y = top + 1.4
 	reset_enemy()
 
 
@@ -238,6 +272,10 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 	last_damage = amount
 	health = maxi(health - amount, 0)
 	health_changed.emit(health)
+	if health > 0:
+		bark("hurt", .3)
+	else:
+		bark("death", .8, true)
 	flash_left = hit_flash_duration
 	stagger_left = hit_reaction_duration
 	knockback = (global_position - Vector3(source.x, global_position.y, source.z)).normalized() * knockback_speed
@@ -277,6 +315,7 @@ func engage(seen: Vector3 = Vector3.INF, propagate: bool = false) -> void:
 func notice(propagate: bool = true) -> void:
 	if health <= 0 or awareness in [Awareness.NOTICING, Awareness.ENGAGED]:
 		return
+	bark("spot", .85)
 	awareness = Awareness.NOTICING
 	awareness_left = randf_range(.45, .7)
 	label.text = "ASSIGNED TO YOU"
@@ -589,7 +628,49 @@ func _update_state() -> void:
 		state = State.IDLE
 
 
+## Say something from this monster's `moment` lines. Returns true when it spoke.
+func bark(moment: String, chance: float = 1.0, urgent: bool = false) -> bool:
+	if host != null or (bark_cooldown > 0 and not urgent) or randf() > chance:
+		return false
+	var now: int = Time.get_ticks_msec()
+	if not urgent and now < next_bark_ms:
+		return false
+	var lines: Array = preload("res://game/incidents/dialogues.gd").data().get("barks", {}).get(rig_kind, {}).get(moment, [])
+	if lines.is_empty():
+		return false
+	var index: int = randi() % lines.size()
+	last_bark = "bark_%s_%s_%d" % [rig_kind, moment, index]
+	next_bark_ms = now + 2200
+	bark_cooldown = 5.0
+	bubble.text = lines[index]
+	bubble_left = 2.8
+	bubble.modulate.a = 1.0
+	bubble.visible = true
+	var path: String = "res://assets/audio/voices/talk/%s.ogg" % last_bark
+	if ResourceLoader.exists(path):
+		mouth.stream = load(path)
+		mouth.pitch_scale = randf_range(.95, 1.05)
+		if DisplayServer.get_name() != "headless":
+			mouth.play()
+	return true
+
+
+func _tick_bark(delta: float) -> void:
+	bark_cooldown = maxf(0.0, bark_cooldown - delta)
+	bubble_left = maxf(0.0, bubble_left - delta)
+	bubble.modulate.a = minf(1.0, bubble_left * 2.5)
+	bubble.visible = bubble.modulate.a > .01
+	# Patrolling monsters mutter to themselves when the engineer is in earshot.
+	if awareness == Awareness.UNAWARE and health > 0 and host == null:
+		idle_bark_left -= delta
+		if idle_bark_left <= 0:
+			idle_bark_left = randf_range(8.0, 15.0)
+			if is_instance_valid(target) and target.global_position.distance_to(global_position) < 16.0:
+				bark("idle")
+
+
 func _physics_process(delta: float) -> void:
+	_tick_bark(delta)
 	if hitstop_left > 0:
 		hitstop_left = maxf(0, hitstop_left - delta)
 		return
@@ -607,6 +688,7 @@ func _physics_process(delta: float) -> void:
 	_update_state()
 	if state != last_state:
 		if state == State.TELEGRAPH:
+			bark("attack", .4)
 			_cast_magic()
 		elif state == State.ATTACK:
 			_release_magic()

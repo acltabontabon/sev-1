@@ -1,5 +1,21 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.19 — The monsters talk (10 October 2026)
+
+Creator request: the monsters should say funny things, like they lost their minds from
+too much work.
+
+- **Overworked and unhinged.** Every monster type now talks, voiced in its own distorted
+  monster voice (a grit, doubled-throat, short-room chain on pitched-down voice blends)
+  with a speech bubble over its head: lines when it spots you ("ANOTHER TICKET?! I'LL
+  RECONCILE YOU!", "YOU SHALL NOT DEPLOY!", "ACCEPT! ACCEPT! ACCEPT!", "ONE MORE THING!"),
+  muttering on patrol when you are within earshot ("My kids call me 'Status: Away'.",
+  "Form 27-B. In triplicate. Signed in blood."), on attacks ("PER MY LAST EMAIL!"), when
+  hurt ("That's not in my KPIs!") and last words ("Finally… PTO…", "This meeting… could
+  have been… an email…"). Bugs squeak "IT'S A FEATURE!". One monster speaks at a time
+  across the floor (last words may interrupt), with a pause per monster.
+- 42 new lines, 200 voiced lines in all; unheard candidates.
+
 ## 0.2.18 — Monsters, not toys (10 October 2026)
 
 Creator direction: make the enemies more monster, not neon; the game is a satirical,

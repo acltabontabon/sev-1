@@ -87,6 +87,10 @@ def process(master, output, profile):
         # Shift pitch by semitones and keep the timing: a blended voice becomes a person.
         ratio = 2 ** (profile['pitch'] / 12)
         filters += [f'asetrate={round(24000 * ratio)}', 'aresample=24000', f'atempo={1 / ratio:.4f}']
+    if profile['processing'] == 'monster':
+        # Overworked monsters: grit, a doubled throat and a short ugly room.
+        filters += ['highpass=f=90', 'equalizer=f=900:t=q:w=1:g=4', 'acompressor=threshold=-22dB:ratio=6:attack=3:release=80:makeup=6',
+                    'chorus=0.6:0.85:28|41:0.4|0.32:0.35|0.5:1.1|0.7', 'aecho=0.8:0.4:35|60:0.35|0.2', 'asoftclip=type=atan']
     if profile['processing'] == 'hype':
         # Anime move call: presence, hard compression, a doubled voice, arena echo, soft
         # saturation; mastered louder than dialogue so it cuts through a fight.
@@ -261,6 +265,11 @@ def talk_lines(talk):
                                         ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
                 lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
+    # Monsters muttering and screaming about their workload.
+    for kind, moments in talk.get('barks', {}).items():
+        for moment, texts in moments.items():
+            for index, text in enumerate(texts):
+                lines.append({'id': f'bark_{kind}_{moment}_{index}', 'text': text, 'voice_profile': f'monster_{kind}'})
     # Move callouts, shouted anime style by the engineer.
     for key, call in talk.get('callouts', {}).items():
         lines.append({'id': f'call_{key}', 'text': call['text'], 'voice_profile': 'shout', 'pronunciation_text': call['say']})

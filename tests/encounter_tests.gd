@@ -620,6 +620,16 @@ func _run() -> void:
 	await frames(2)
 	check(get_nodes_in_group("blood").is_empty(), "restart mops up the blood")
 	MonsterRig.gore_in_headless = false
+	# Monsters talk: overworked employees who lost their minds, voiced, one at a time.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var talker: CharacterBody3D = spawn("record", Vector3(-3, .05, 0), false)
+	var other_talker: CharacterBody3D = spawn("scope", Vector3(3, .05, 0), false)
+	for foe: CharacterBody3D in [talker, other_talker]:
+		foe.set_physics_process(false)
+	talker.next_bark_ms = 0
+	check(talker.bark("idle") and talker.bubble.text != "" and talker.mouth.stream != null and talker.last_bark.begins_with("bark_record_idle"), "a monster mutters about its workload, voiced")
+	check(not other_talker.bark("attack") and not talker.bark("attack"), "one bark at a time across the floor, and a pause per monster")
+	check(other_talker.bark("death", 1.0, true) and other_talker.last_bark.begins_with("bark_scope_death"), "a dying monster always gets its last words")
 	# Satisfying kills: a stamped death notice, FOCUS, and a streak banner for quick kills.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var stamped: CharacterBody3D = spawn("record", Vector3(-3, .05, 0), true)

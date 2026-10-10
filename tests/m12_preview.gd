@@ -342,6 +342,15 @@ func lineup() -> void:
 			cam.make_current()
 			await process_frame
 		await shot(view[0])
+	cam.global_position = Vector3(-1.2, 1.9, 7.5)
+	cam.look_at(Vector3(-2.0, 1.8, 3.0))
+	cam.fov = 50.0
+	monsters[0].next_bark_ms = 0
+	monsters[0].bark("spot")
+	for frame in range(18):
+		cam.make_current()
+		await process_frame
+	await shot("lineup_bark")
 	for foe: CharacterBody3D in monsters:
 		foe.health = roundi(foe.max_health * .3)
 	cam.global_position = Vector3(4.5, 1.6, 9.5)

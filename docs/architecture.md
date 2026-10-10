@@ -626,6 +626,12 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   material name; a kind's `palette` can override). Its `gore` instance uniform is pinned to
   `instance_index(4)` because the overlay pass already uses slots 0-3 on the same mesh;
   `_shade()` drives it from health.
+- **Monster barks.** `incident.gd bark(moment, chance, urgent)` reads `talk.json`
+  `barks[rig_kind][moment]`, shows a bubble and plays `bark_<kind>_<moment>_<n>.ogg` on a
+  positional player; a static `next_bark_ms` keeps one at a time (urgent last words skip
+  it). Hooks: `notice()` spot, `_tick_bark()` idle within 16 m, telegraph attack,
+  `receive_damage()` hurt and death. Voices use the `monster_<kind>` profiles and the
+  `monster` chain in `tools/voices.py`.
 - **Blood.** `game/combat/blood.gd` (`Blood`): `burst()` and `spurt()` are CPU droplet
   particles (alpha, billboarded, gravity), `splat()` drops a Decal with a generated splat
   texture onto the floor below a point (capped, fading). `MonsterRig._slice()` calls all
