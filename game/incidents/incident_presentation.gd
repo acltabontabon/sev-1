@@ -59,10 +59,10 @@ const BEATS: Array = [
 ## freezes and drains of colour, and a card slams in.
 ## [cast name, who, their misery, colour, framing: distance, height above the head, sideways].
 const CREW: Array = [
-	["Recruiter", "DREW", "TALENT  ·  CULTURE FIT ENFORCEMENT", Color(1, .45, .5), Vector3(1.9, .15, .9)],
+	["SRE", "NADIA", "SRE  ·  ON CALL SINCE 2019", Color(.45, .9, .85), Vector3(1.8, .35, 1.0)],
 	["Manager", "MORGAN", "ON A CALL ABOUT THE CALL", Color(1, .62, .78), Vector3(1.9, .15, .9)],
+	["Designer", "JUN", "DESIGN  ·  KERNING A CATASTROPHE", Color(1, .7, .3), Vector3(1.9, .15, .9)],
 	["Sleeper", "GARY", "ON CALL. TECHNICALLY.", Color(.7, .6, 1), Vector3(2.0, 1.1, 1.4)],
-	["Intern", "JO", "INTERN  ·  DAY ONE  ·  ON CALL", Color(1, .7, .3), Vector3(1.9, .15, .9)],
 ]
 const CREW_START: float = 8.6
 ## The fly-in: one continuous move from the city at night, down the tower, through the
@@ -1687,7 +1687,11 @@ func _crew_montage(time: float) -> void:
 		crew_from = camera.global_transform
 		incident.coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
 		sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -8)
-	var head: Vector3 = body.global_position + Vector3.UP * (1.05 if entry[0] == "Sleeper" else 1.5)
+	var routine: String = ""
+	for someone: Dictionary in incident.coworkers.people:
+		if someone.body == body:
+			routine = someone.entry.routine
+	var head: Vector3 = body.global_position + Vector3.UP * {"asleep": 1.05, "sit": 1.2}.get(routine, 1.5)
 	var front: Vector3 = body.global_basis.z
 	front.y = 0
 	front = front.normalized() if front.length() > .1 else Vector3.BACK

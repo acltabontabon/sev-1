@@ -5,6 +5,11 @@ extends Node3D
 ## walks past. When a fight ends, the manager on the call takes the credit.
 
 const ROOT: String = "res://assets/characters/quaternius/"
+## How far forward of the sofa's centre a sitter's hips rest.
+const SOFA_FORWARD: float = .12
+## Office-chair correction for the sitting clip (the engineer's SEATED_OFFSET).
+const CHAIR_LIFT: float = .17
+const CHAIR_FORWARD: float = .3
 ## How long a looping gesture (talking) runs before they settle back to idle.
 const GESTURE_SECONDS: float = 3.5
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
@@ -29,6 +34,12 @@ const CAST: Array[Dictionary] = [
 		"line": "It said one minute. That was forty minutes ago.", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
 	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(8.0, 1.5, -9.4), "facing": PI * .15, "gesture": "Victory",
 		"line": "We're like a family here. A family with KPIs.", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},
+	{"name": "SRE", "body": "casual_female.fbx", "routine": "sit", "at": Vector3(-6.5, 0, .87), "facing": PI,
+		"line": "I'm not on call. I AM the call.", "palette": [Color(.18, .2, .24), Color(.12, .12, .16), Color(.66, .46, .33), Color(.06, .05, .05)]},
+	{"name": "Director", "body": "suit_female.fbx", "routine": "pace", "at": Vector3(2.6, 0, -9.0), "facing": 0.0, "route": Vector3(0, 0, 6.5),
+		"line": "Love the energy! Can we make it… more?", "palette": [Color(.75, .2, .32), Color(.12, .1, .14), Color(.86, .66, .52), Color(.62, .44, .2)]},
+	{"name": "Designer", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-11.1, 0, -2.9), "facing": -.9, "gesture": "ual/talking",
+		"line": "My husband thinks I'm at the gym. Technically this is cardio.", "palette": [Color(.28, .62, .78), Color(.85, .8, .7), Color(.74, .55, .4), Color(.15, .1, .08)]},
 ]
 
 var player: Node3D
@@ -65,6 +76,35 @@ func _ready() -> void:
 	reset()
 
 
+## Sitters sit on the furniture nearest their spot: an office chair (facing its desk)
+## or the lounge sofa, never on the air in front of it.
+func _seat(body: Node3D) -> void:
+	if incident == null or not "room" in incident:
+		return
+	var best: Node3D = null
+	for node in incident.room.find_children("*", "Node3D", true, false):
+		var seat: Node3D = node
+		var chair: bool = seat.scene_file_path.ends_with("chair.tscn")
+		if not chair and not str(seat.name).begins_with("LoungeSofa"):
+			continue
+		var gap: float = Vector2(seat.global_position.x - body.position.x, seat.global_position.z - body.position.z).length()
+		if gap < 1.6 and (best == null or gap < Vector2(best.global_position.x - body.position.x, best.global_position.z - body.position.z).length()):
+			best = seat
+	if best == null:
+		return
+	var turn: float = best.global_rotation.y
+	if best.scene_file_path.ends_with("chair.tscn"):
+		# Office chairs face their desk down -Z; bodies face +Z. The sitting clip was made
+		# for a lower stool set further back (as for the engineer): lift onto the cushion
+		# and forward off the backrest.
+		body.rotation.y = turn + PI
+		var ahead: Vector3 = Vector3(sin(body.rotation.y), 0, cos(body.rotation.y))
+		body.position = best.global_position + Vector3.UP * CHAIR_LIFT + ahead * CHAIR_FORWARD
+	else:
+		body.rotation.y = turn
+		body.position = best.global_position + Vector3(sin(turn), 0, cos(turn)) * SOFA_FORWARD
+
+
 func person(name: String) -> Dictionary:
 	for candidate: Dictionary in people:
 		if candidate.entry.name == name:
@@ -80,6 +120,8 @@ func reset() -> void:
 		body.position = someone.entry.at
 		body.scale = Vector3.ONE * .62
 		body.rotation.y = someone.entry.facing
+		if someone.entry.routine in ["sit", "asleep"]:
+			_seat(body)
 		someone.said = false
 		someone.line_left = 0.0
 		someone.clock = 0.0

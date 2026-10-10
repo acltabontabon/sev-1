@@ -40,8 +40,9 @@ attention, as noted in the upstream voice catalog.
 | documentary | `bm_george` | UK English | 0.88 | The cold open's wry nature-documentary narrator (0.2.35): slow, warm, grave, sincere about the absurd. Never a parody or an impression of any real narrator. Processing: clean. Lines `doc_office`, `doc_shift`, `doc_chose`, `doc_engineer`, `doc_missing`, `doc_fascinating`. |
 | postmortem | `bf_emma` | UK English | 1.0 | Precise, polite compliance. Emotionally indifferent. Processing: clean. |
 
-**The night shift (0.2.9).** Conversations with coworkers and planted employees live in
-`assets/audio/voices/talk.json` (crew, dialogue trees, 25 voice profiles). Each profile
+**The night shift (0.2.9; NADIA, VAL and JUN added 0.2.38 with profiles `nadia`, `val`,
+`jun`).** Conversations with coworkers and planted employees live in
+`assets/audio/voices/talk.json` (crew, dialogue trees, voice profiles). Each profile
 is a weighted blend of the six installed stock voices above plus a speed and a pitch
 shift in semitones (FFmpeg `asetrate`/`atempo`, timing preserved), so no further voice
 packs are downloaded. Employees' "turning" lines reuse their blend slower, lower and

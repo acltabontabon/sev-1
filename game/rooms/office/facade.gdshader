@@ -1,11 +1,11 @@
 shader_type spatial;
 // Night curtain wall for the office tower and the city around it: a grid of dark glass
-// panes in thin frames, every floor banded by a slab, and a scatter of offices where
-// somebody is still working. Everything comes from world position, so any box becomes
+// panes in thin frames, every floor banded by a slab. Everyone else went home: only a
+// rare window, a lonely bay here and there, is still lit by somebody else on call. Everything comes from world position, so any box becomes
 // a building and no two windows repeat. Roofs stay plain dark.
 
 uniform vec2 cell = vec2(1.6, 3.4);
-uniform float lit_chance = 0.05;
+uniform float lit_chance = 0.004;
 uniform vec4 glass: source_color = vec4(0.025, 0.04, 0.06, 1.0);
 uniform vec4 frame: source_color = vec4(0.012, 0.013, 0.016, 1.0);
 uniform float glow = 1.8;
@@ -34,9 +34,9 @@ void fragment() {
 		float mullion = 1.0 - step(0.05, f.x) * step(f.x, 0.95);
 		float slab = 1.0 - step(0.1, f.y) * step(f.y, 0.94);
 		float framed = max(mullion, slab);
-		// Whole bays tend to be lit together: somebody's team is still on call.
+		// Once in a great while a whole bay is lit: somebody's team is still on call.
 		float bay = hash(floor(id / vec2(3.0, 1.0)) + 9.1);
-		float lit = step(1.0 - lit_chance, hash(id)) + step(0.988, bay) * step(0.4, hash(id + 2.3));
+		float lit = step(1.0 - lit_chance, hash(id)) + step(0.9985, bay) * step(0.5, hash(id + 2.3));
 		lit = min(lit, 1.0);
 		vec3 warm = vec3(1.0, 0.74, 0.46);
 		vec3 cold = vec3(0.6, 0.8, 1.0);

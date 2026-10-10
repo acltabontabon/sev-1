@@ -1,5 +1,27 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.38 — More of the night shift, sitting properly (11 October 2026)
+
+Creator requests: more inclusive cast (women, a gay coworker) with unhinged voices,
+backgrounds and work; NPCs placed properly on their furniture; fewer lights in the city.
+
+- **New coworkers, voiced** (local Kokoro blends of the installed voices):
+  - **NADIA**, SRE, on call since 2019, at her desk: "I'm not on call. I AM the call."
+    The pager doesn't ring any more; it lives in her skull. Rent-free.
+  - **VAL**, VP of Synergy, promoted for a deck nobody read, pacing: the outage is a
+    feature, it's on slide forty-seven, the rocket is on fire, the board loved it.
+  - **JUN**, product design, at the whiteboard: "My husband thinks I'm at the gym.
+    Technically this is cardio." He gave the error page a gradient so production dies
+    on brand. The satire aims at the work, never at who anyone is.
+- **The planted employees** DANA, KIM, GRETA and PRIYA now have women's bodies (CC0
+  Quaternius, the same pack and rig as everyone else).
+- **The crew montage** introduces NADIA, MORGAN, JUN and GARY.
+- **Seated people sit on the furniture.** Sitters snap to the nearest office chair or the
+  lounge sofa, facing the way it faces, lifted onto the cushion and forward off the
+  backrest (GARY was sitting on air in front of his chair, RIO in front of the sofa).
+- **The city at night is nearly dark.** Everyone else went home: a handful of lonely lit
+  windows, and one glowing floor.
+
 ## 0.2.37 — The missing transaction is here (11 October 2026)
 
 Creator request: the reveal before SEV-1 was a good idea, plainly executed; make it

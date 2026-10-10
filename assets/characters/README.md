@@ -88,6 +88,7 @@ itch.io purchase flow) is superseded by these two direct, account-free CC0 downl
 | File in `quaternius/` | Source | License |
 | --- | --- | --- |
 | `casual_male.fbx` (used), `casual2_male.fbx`, `casual3_male.fbx`, `worker_male.fbx`, `suit_male.fbx` (candidates) | Quaternius, "Ultimate Animated Character Pack", [OpenGameArt](https://opengameart.org/content/animated-characters-pack) | CC0 1.0 |
+| `casual_female.fbx`, `casual2_female.fbx`, `suit_female.fbx`, `worker_female.fbx` (0.2.38; the pack's `Casual_Female.fbx` etc., renamed) | Same pack, same page; the zip `ultimate_animated_character_pack_by_quaternius.zip` downloaded 11 October 2026 without an account | CC0 1.0 |
 | `knight_animations.fbx` (the pack's `KnightCharacter.fbx`, renamed) | Quaternius, "Lowpoly Animated Knight", [OpenGameArt](https://opengameart.org/content/lowpoly-animated-knight) | CC0 1.0 |
 
 Files are unmodified FBX stored with Git LFS; attribution is voluntary

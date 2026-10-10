@@ -47,6 +47,7 @@ without an account on 10 October 2026 and reviewed in the running game.
 | 16 interface/effect sounds | Kenney Interface Sounds, Impact Sounds, UI Audio, Sci-Fi Sounds; CC0 1.0 | [assets/audio/sfx](../assets/audio/sfx/README.md) |
 | 4 whoosh effects (0.2.15) | Original, synthesized by `tools/build_whoosh.py`; no third-party material | [assets/audio/sfx](../assets/audio/sfx/README.md) |
 | 8 PBR material sets (1K) | ambientCG and Poly Haven; CC0 1.0 (paper added in 0.2.29) | [assets/environment/textures](../assets/environment/textures/README.md) |
+| 4 female office bodies (0.2.38) | Quaternius "Ultimate Animated Character Pack", OpenGameArt; CC0 1.0 | [assets/characters](../assets/characters/README.md) |
 | 5 culture-print photographs (0.2.29) | Poly Haven HDRI tonemapped previews, cropped and downscaled; CC0 1.0 | [assets/environment/posters](../assets/environment/posters/README.md) |
 | Night-city sky (2K HDRI) | Poly Haven "Hansaplatz", Greg Zaal; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md#night-sky-hdri) |
 | 8 pantry props | Kenney Furniture Kit; CC0 1.0, tinted at load | [assets/environment/kenney_furniture](../assets/environment/kenney_furniture/README.md) |
