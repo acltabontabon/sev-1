@@ -1,5 +1,22 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Monday starts again (11 October 2026)
+
+- Removed the legacy victory speech queued after the finale, including “Great
+  teamwork” and the repeated postmortem. Resolved reports are silent, including
+  headless lifecycle paths; defeat dialogue is preserved.
+- The engineer answers the final on-call assignment with a newly prerecorded
+  “Fucking great.” He leaves the meeting, crosses the office, gradually sits at his
+  desk and starts typing. “END OF INCIDENT 001 — MONDAY, 9:05 AM” closes this slice.
+- The night exit covers about 60% more distance in the same voice-dependent time,
+  making the walk faster while keeping the full memory lines. Memories spread along
+  the longer route. All five gossip takes now share Kevin, the ancient fridge yogurt
+  with a better career trajectory than the night shift.
+- Six replacement voice performances use the existing local stock Kokoro profiles;
+  provenance is preserved. Closing shots and gait remain candidates for human review.
+  `tests/finale_preview.gd -- --closing` renders the return-to-work checkpoints.
+  The existing packaged build predates this source change.
+
 ## Source update — The things they left behind (11 October 2026)
 
 - After the memorial, a last look at JO leads to a held face close-up with a tear.

@@ -88,10 +88,10 @@ func _run() -> void:
 	boss.exposed = true
 	boss.receive_damage(10000, player.position)
 	await frames(3)
-	check(app.page == "report" and voice.current_line == "victory_thanks" and not voice.suspended, "victory speech plays over paused report")
-	check(app.report_subtitle.text == voice.subtitle and not voice.subtitle.is_empty(), "report slot shows synchronized terminal subtitle")
+	check(app.page == "report" and voice.current_line.is_empty() and voice.queue.is_empty(), "resolved report adds no leftover victory speech")
+	check(app.report_subtitle.text.is_empty(), "resolved report has no obsolete victory subtitle")
 	await frames(600)
-	check(voice.seen.has("postmortem") and voice.current_line != "victory", "postmortem follows terminal reaction without blocking report")
+	check(voice.current_line.is_empty() and voice.queue.is_empty() and not voice.seen.has("victory_thanks"), "resolved report stays silent after the ending")
 	app.restart_incident()
 	check(voice.seen.is_empty() and voice.current_line.is_empty() and voice.queue.is_empty(), "restart immediately clears all old speech")
 	await frames(3)

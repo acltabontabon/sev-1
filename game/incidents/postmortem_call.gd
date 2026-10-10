@@ -61,8 +61,7 @@ const STEPS: Array = [
 	["allhands_photo", "screen", 7, 1.0],
 	["", "photo", 7, 4.0],
 	["allhands_oncall", "him", 7, 1.0],
-	["allhands_engineer", "him_close", 7, 1.2],
-	["", "pullout", 7, 4.5]]
+	["allhands_engineer", "him_close", 7, 1.2]]
 const POST: String = "Humbled to share that our leadership team ran a flawless blameless postmortem today. Root cause identified, actions owned, and our night shift is now fully AI-powered.\n\nProud of what we built. Grateful for our people (5 fewer).\n\n#leadership #AI #blameless #grateful"
 
 var story: Node

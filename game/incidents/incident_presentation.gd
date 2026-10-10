@@ -879,9 +879,8 @@ func stage_changed() -> void:
 			sting(preload("res://assets/audio/sfx/door_open.ogg"), -4)
 		incident.Stage.RESOLVED, incident.Stage.FAILED:
 			if incident.stage == incident.Stage.RESOLVED:
-				# With the finale they wait for its end (leadership is asleep until Monday).
-				if DisplayServer.get_name() == "headless" and not killcam_in_headless:
-					say_sequence(ALL_HANDS.VICTORY_LINES)
+				# Monday owns the final dialogue; a resolved report adds no victory banter.
+				voice.clear()
 			else:
 				say_sequence(["defeat", "postmortem", "postmortem_owner"])
 			ambient.stop()

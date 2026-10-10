@@ -737,7 +737,9 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   memorial, tear close-up, desk sword placement and belongings pickup, the walk out
   with recalled coffee/lunch/gossip conversations, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
-  SubViewport, its tiles fed by small cameras on off-map sets) on real time before the report, which then gets the victory lines. Each
+  SubViewport, its tiles fed by small cameras on off-map sets) on real time before a silent report. After Monday’s final reply,
+  three staged shots return the engineer to his desk and an authored sit-down
+  ends in typing; the end card closes Incident 001. Each
   cutscene restores what it touched and TAB ends it. The aftermath uses temporary
   bone attachments for the tear and carried box, local cinematic hand targets for
   prop contacts, and a parked copy of the sword. `Dialogues.remembered_lines` stores

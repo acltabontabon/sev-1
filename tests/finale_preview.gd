@@ -1,6 +1,6 @@
 extends SceneTree
 ## Rendered checkpoints for grief, desk pickup and remembered conversations.
-## sh tools/godot.sh --path . --script tests/finale_preview.gd
+## sh tools/godot.sh --path . --script tests/finale_preview.gd [-- --closing]
 var scene: Node
 
 
@@ -35,7 +35,17 @@ func _run() -> void:
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
 	finale._beat("memorial")
-	for sample: Array in [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["street", 3.0]]:
+	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["street", 3.0]]
+	if "--closing" in OS.get_cmdline_user_args():
+		finale._beat("grief")
+		finale._beat("desk")
+		finale._beat("card")
+		finale._beat("monday")
+		finale.meeting.step = finale.meeting.STEPS.size() - 2
+		story.voice.clear()
+		finale.meeting._next()
+		samples = [["monday", 1.0], ["return_meeting", 1.6], ["return_floor", 1.6], ["return_desk", 4.0], ["return_desk", 6.0]]
+	for sample: Array in samples:
 		if finale.beat != sample[0]:
 			finale._beat(sample[0])
 		var elapsed: float = finale.clock - finale.beat_at

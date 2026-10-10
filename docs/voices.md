@@ -130,7 +130,7 @@ source of truth. This table is its review copy. Priorities: 3 critical/terminal,
 | `evidence_confirmed` | PRODUCTION SYSTEM | Missing delivery confirmed. Containment authorized. | Containment begins after management choice | 2 |
 | `variance_intro` | THE VARIANCE | Records do not match. Reconciliation failed. | Boss arrival begins | 2 |
 | `variance_half` | THE VARIANCE | One record. Two truths. Neither belongs to you. | First surviving half-health crossing | 2 |
-| `victory` | ENGINEER | Can I go home now? | Resolved report opens | 3 |
+| `victory` | ENGINEER | Can I go home now? | Retained legacy clip; resolved report is silent | 3 |
 | `defeat` | ENGINEER | Still my incident. Of course. | Failed report opens | 3 |
 | `postmortem` | POSTMORTEM AI | Corrective action assigned. Due date: yesterday. | After victory or defeat response | 3 |
 
@@ -311,3 +311,9 @@ reference recordings or runtime synthesis. The ending recalls the take heard thi
 or draws a take for an unvisited coworker. Memory clips use the Voice bus at −10 dB
 and play one at a time; the existing original mourning theme loops on the Music bus.
 Human acting and mix acceptance remain pending.
+
+The 11 October closing refinement replaces `allhands_engineer` with “Fucking great.”
+The five `good_days_variant_2` performances now share Kevin, the ancient fridge
+yogurt. These six clips were regenerated locally with the existing profiles and
+provenance; human listening acceptance remains pending. The resolved ending and
+report no longer trigger the legacy victory or repeated postmortem sequence.

@@ -17,7 +17,8 @@ extends Node3D
 ## Monday (leadership slept through all of it):
 ##  "card"      MONDAY, 9:00 AM. Blameless postmortem. Attendance mandatory.
 ##  "monday"    the postmortem call in the Quick Sync room (postmortem_call.gd).
-##  "next"      NEXT: INCIDENT 002.
+##  "return"    Monday again: out of the meeting, back to his desk, another workday.
+##  "next"      END OF INCIDENT 001.
 ## Presentation only, on real time (the photo freezes the world, not the scene). TAB skips.
 
 const ROOT: String = "res://assets/characters/quaternius/"
@@ -36,15 +37,13 @@ const MEMORIAL_EACH: float = 2.4
 ## clip, facing]); each recalls an ordinary conversation with him.
 const MEMORIES: Array = [
 	["Manager", Vector3(-1.2, 0, 13.4), "ual/phone", PI],
-	["SRE", Vector3(.2, 0, 9.7), "ual/interact", 0.0],
-	["Designer", Vector3(1.6, 0, 13.5), "ual/talking", PI],
-	["Intern", Vector3(3.0, 0, 9.8), "ual/yes", 0.0],
-	["Director", Vector3(4.4, 0, 13.5), "ual/phone", PI]]
-## What used to play the moment it died, now the epilogue over the report.
-const VICTORY_LINES: Array[String] = ["victory_thanks", "victory", "postmortem", "postmortem_owner"]
+	["SRE", Vector3(1.5, 0, 9.7), "ual/interact", 0.0],
+	["Designer", Vector3(4.2, 0, 13.5), "ual/talking", PI],
+	["Intern", Vector3(6.8, 0, 9.8), "ual/yes", 0.0],
+	["Director", Vector3(9.2, 0, 13.5), "ual/phone", PI]]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
-const EXIT_PATH: Array[Vector3] = [Vector3(-2.5, .05, 11.4), Vector3(5.6, .05, 11.8)]
+const EXIT_PATH: Array[Vector3] = [Vector3(-2.5, .05, 11.4), Vector3(10.6, .05, 11.8)]
 const EXIT_SECONDS: float = 9.0
 ## The street at the foot of the tower (its west face), and his way away from it.
 const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 5.0), Vector3(-23.0, -69.95, 8.0)]
@@ -89,6 +88,7 @@ var weapon_was_visible: bool
 var parked_sword: Node3D
 var sword_from: Transform3D
 var sword_rest: Transform3D
+var saved_clock: String
 
 
 func _init(presentation: Node) -> void:
@@ -106,6 +106,7 @@ func start() -> void:
 		var screen: Label3D = incident.room.get_node("LedgerText%d" % index)
 		ledger.append([screen, screen.text, screen.modulate])
 	desk_texts = [story.desk.alarm_title.text, story.desk.alarm_detail.text]
+	saved_clock = incident.room.get_node("Clock").text
 	saved_attributes = story.camera.attributes
 	weapon_was_visible = character.weapon.visible
 	focus = CameraAttributesPractical.new()
@@ -205,6 +206,7 @@ func _beat(next: String) -> void:
 			titles.show()
 			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did."
 		"card":
+			incident.room.get_node("Clock").text = "MONDAY / 09:00"
 			titles.text = "MONDAY, 9:00 AM\nBLAMELESS POSTMORTEM  ·  ATTENDANCE MANDATORY"
 			if mourn.playing:
 				var out: Tween = mourn.create_tween()
@@ -213,6 +215,10 @@ func _beat(next: String) -> void:
 			# Monday: he has showered. He has not slept. The gold is long gone.
 			_unbloody()
 			character.overtime(false)
+			character.story_pose = 0
+			character.sit = 0.0
+			character.story_hand_targets.clear()
+			character.story_sit_progress = -1.0
 			belongings.hide()
 		"monday":
 			titles.hide()
@@ -221,7 +227,21 @@ func _beat(next: String) -> void:
 			add_child(meeting)
 			meeting.start()
 		"next":
-			titles.text = "NEXT: INCIDENT 002\nMONDAY, 9:05 AM"
+			titles.text = "END OF INCIDENT 001\nMONDAY, 9:05 AM"
+		"return_meeting":
+			meeting.ended.show()
+			character.story_pose = 0
+		"return_floor":
+			meeting.finish()
+			meeting = null
+			player.global_position = Vector3(4.6, .05, 11.4)
+		"return_desk":
+			incident.room.get_node("Clock").text = "MONDAY / 09:05"
+			player.global_position = Vector3(-.5, .05, 11.4)
+			story.desk.alarm(false)
+			story.desk.alarm_title.text = "MONDAY  ·  09:05"
+			story.desk.alarm_detail.text = "NEW DAY. SAME DESK."
+			story.desk.set_live(true)
 
 
 ## Returns false when it is over (or skipped).
@@ -383,6 +403,36 @@ func tick(delta: float) -> bool:
 		"monday":
 			fade.color.a = 1.0 - smoothstep(0.0, .7, t)
 			if not meeting.tick(real):
+				_beat("return_meeting")
+		"return_meeting", "return_floor":
+			var from: Vector3 = POSTMORTEM.STANDS_AT if beat == "return_meeting" else Vector3(4.6, .05, 11.4)
+			var to: Vector3 = Vector3(17.7, .05, -8.75) if beat == "return_meeting" else Vector3(.6, .05, 11.4)
+			var length: float = 3.2
+			player.global_position = from.lerp(to, _walk_progress(t, length))
+			character.story_walk_speed = _walk_speed(t, length, from.distance_to(to))
+			player.visual.rotation.y = PI * .5
+			camera.global_position = player.global_position + (Vector3(-1.4, 2.2, .9) if beat == "return_meeting" else Vector3(-2.4, 2.4, -1.1))
+			camera.look_at(player.global_position + Vector3.UP * 1.1)
+			camera.fov = 50.0
+			if t >= length:
+				_beat("return_floor" if beat == "return_meeting" else "return_desk")
+		"return_desk":
+			if t < 3.0:
+				var from: Vector3 = Vector3(-.5, .05, 11.4)
+				player.global_position = from.lerp(story.SEAT, _walk_progress(t, 3.0))
+				character.story_walk_speed = _walk_speed(t, 3.0, from.distance_to(story.SEAT))
+				var heading: Vector3 = story.SEAT - from
+				player.visual.rotation.y = atan2(-heading.x, -heading.z)
+			else:
+				player.global_position = story.SEAT
+				player.visual.rotation.y = lerp_angle(player.visual.rotation.y, 0.0, 1.0 - exp(-5.0 * real))
+				character.story_walk_speed = 0.0
+				character.story_pose = character.Pose.TYPING
+				character.story_sit_progress = smoothstep(3.0, 4.8, t)
+			camera.global_position = story.SEAT + Vector3(1.7, 2.0, 1.5)
+			camera.look_at(story.SEAT + Vector3(0, .95, -.5))
+			camera.fov = 48.0
+			if t >= 8.0:
 				_beat("next")
 		"next":
 			fade.show()
@@ -397,13 +447,13 @@ func tick(delta: float) -> bool:
 
 
 ## Skipped or over: everything it made goes, and the world is left as the ending found it.
-## Then (unless a restart is ending it) the night's last lines play over the report.
-func finish(epilogue: bool = true) -> void:
+## The report is silent: Monday already delivered the final word.
+func finish(_epilogue: bool = true) -> void:
 	if done:
 		return
 	done = true
-	if epilogue:
-		story.say_sequence(VICTORY_LINES)
+	story.sequence.clear()
+	story.voice.clear()
 	ElementFx.slow_motion(&"photo", 1.0)
 	ElementFx.slow_motion(&"finale", 1.0)
 	story.crew_freeze.hide()
@@ -413,6 +463,7 @@ func finish(epilogue: bool = true) -> void:
 	character.sit = 0.0
 	character.story_hand_targets.clear()
 	character.story_walk_speed = 0.0
+	character.story_sit_progress = -1.0
 	character.weapon.visible = weapon_was_visible
 	player.global_position = VAULT_AT
 	_unbloody()
@@ -429,6 +480,7 @@ func finish(epilogue: bool = true) -> void:
 		story.desk.alarm(false)
 		story.desk.alarm_title.text = desk_texts[0]
 		story.desk.alarm_detail.text = desk_texts[1]
+	incident.room.get_node("Clock").text = saved_clock
 	# The report follows straight on; the orbit it usually waits for has been had.
 	incident.ending_hold = minf(incident.ending_hold, .3)
 	for memory: Dictionary in memories:
@@ -579,7 +631,7 @@ func _park_sword() -> void:
 	incident.add_child(parked_sword)
 	props.append(parked_sword)
 	parked_sword.show()
-	sword_rest = Transform3D(Basis.from_euler(Vector3(0, -PI * .5, 0)), story.SEAT + Vector3(-.65, .86, -.55))
+	sword_rest = Transform3D(Basis.from_euler(Vector3(0, -PI * .5, 0)), story.SEAT + Vector3(-.65, .86, -.95))
 	sword_from = Transform3D(sword_rest.basis, sword_rest.origin + Vector3(0, .22, .28))
 	parked_sword.global_transform = sword_from
 

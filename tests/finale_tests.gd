@@ -78,8 +78,11 @@ func _run() -> void:
 	for frame in range(20):
 		finale.tick(1.0 / 60.0)
 		await physics_frame
-	check(character.story_walk_speed < .35 and character.animator.current_animation == "rig/walk" and character.animator.current_animation_position != walk_at,
-		"the slow office exit advances a walk cycle instead of sliding in idle or freezing in jump")
+	check(character.story_walk_speed > 8.1 / (finale.exit_duration - .6) and character.animator.current_animation == "rig/walk" and character.animator.current_animation_position != walk_at,
+		"the faster office exit advances its walk cycle with a pace matched to travel")
+	character.story_walk_speed = .2
+	character._physics_process(1.0 / 60.0)
+	check(character.animator.current_animation == "rig/walk", "even slower cinematic travel keeps walking below the gameplay idle threshold")
 	finale._beat("street")
 	for frame in range(40):
 		finale.tick(1.0 / 60.0)
@@ -102,6 +105,51 @@ func _run() -> void:
 	await process_frame
 	check(dialogue.remembered_lines.is_empty() and character.sit == 0 and character.weapon.visible and character.story_walk_speed == 0.0 and character.story_hand_targets.is_empty(),
 		"retry clears run memories and restores the playable engineer")
+	story.skip()
+	incident._cleanup()
+	for stage in [incident.Stage.INVESTIGATION, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
+		incident._enter(stage)
+	story.reset_story()
+	incident.player.camera_rig.controls_active = true
+	story.set_process(true)
+	incident._enter(incident.Stage.RESOLVED)
+	await process_frame
+	story.set_process(false)
+	var closing: Node = story.all_hands
+	check(is_instance_valid(closing), "retry can stage a fresh closing scene")
+	if not is_instance_valid(closing):
+		quit(1)
+		return
+	closing._beat("receipts")
+	closing._beat("grief")
+	closing._beat("desk")
+	closing._beat("card")
+	closing._beat("monday")
+	closing.meeting.step = closing.meeting.STEPS.size() - 1
+	story.voice.clear()
+	closing.tick(2.0)
+	check(closing.beat == "return_meeting", "the final postmortem reply leads into returning to work")
+	closing.tick(3.3)
+	closing.tick(3.3)
+	check(closing.beat == "return_desk", "the engineer returns across the office to his workstation")
+	closing.tick(4.0)
+	await physics_frame
+	check(character.story_pose == character.Pose.TYPING and character.story_sit_progress > 0 and character.story_sit_progress < 1,
+		"the return plays a gradual sit-down before starting the day")
+	closing.tick(4.1)
+	check(closing.beat == "next" and "END OF INCIDENT 001" in closing.titles.text and "INCIDENT 002" not in closing.titles.text,
+		"this episode closes at his desk without promising another incident")
+	var obsolete_lines: Array[String] = ["victory_thanks", "victory"]
+	story.say_sequence(obsolete_lines)
+	story.say("victory_thanks")
+	closing.tick(3.6)
+	await process_frame
+	await process_frame
+	check(story.voice.current_line.is_empty() and story.voice.queue.is_empty() and story.sequence.is_empty(), "the ending clears stale speech instead of replaying teamwork congratulations")
+	story.set_process(true)
+	scene.reset_encounter()
+	await process_frame
+	check(character.story_sit_progress == -1.0, "retry clears the closing sit-down override")
 	scene.queue_free()
 	await process_frame
 	quit(1 if failures else 0)

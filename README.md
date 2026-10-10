@@ -97,7 +97,10 @@ For the revised ending (duel through departure and Monday), run
 For rendered grief, sword placement, pickup and memory checkpoints, run
 `sh tools/godot.sh --path . --script tests/finale_preview.gd`. In a normal run, use E
 with MORGAN, NADIA, JUN, JO or VAL and choose “Tell me something normal”; win the
-boss fight to hear that conversation recalled. Review the tear, animation transitions
+boss fight to hear that conversation recalled. The finale now closes with
+“Fucking great,” his return to the desk, and the start of Monday; no extra victory
+speech plays afterward. Use `tests/finale_preview.gd -- --closing` to inspect
+just the final reply and return-to-work shots. Review the tear, animation transitions
 and sad-theme mix. TAB skips; R retries. These source changes are not in the existing ZIP.
 
 `play.command` is the source-project Finder launcher and requires the pinned engine.

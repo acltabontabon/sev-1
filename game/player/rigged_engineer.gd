@@ -36,6 +36,7 @@ var story_pose: int = 0
 var story_hand_targets: Array[Vector3] = []
 ## Staged travel has no move_and_slide floor update; its pace drives the walk clip.
 var story_walk_speed: float = 0.0
+var story_sit_progress: float = -1.0
 var sit: float = 0.0
 var crouch: float = 0.0
 ## 0..1, set by the incident's battle-mode director: eyes and keyboard light up.
@@ -122,6 +123,7 @@ func _ready() -> void:
 func reset_pose() -> void:
 	story_hand_targets.clear()
 	story_walk_speed = 0.0
+	story_sit_progress = -1.0
 	if actor != null:
 		process_mode = Node.PROCESS_MODE_INHERIT
 	phase = -1.0
@@ -571,6 +573,8 @@ func _staged(delta: float) -> void:
 	var seated: bool = story_pose in SEATED
 	var blend: float = 1.0 - exp(-7.0 * delta)
 	sit = lerpf(sit, 1.0 if seated else 0.0, blend)
+	if seated and story_sit_progress >= 0.0:
+		sit = clampf(story_sit_progress, 0.0, 1.0)
 	if was_seated and not seated:
 		standing_left = ANIMATIONS.get_animation("stand_up").length * .7
 	was_seated = seated
@@ -625,7 +629,7 @@ func _staged(delta: float) -> void:
 	if story_pose == Pose.FINISH:
 		_loop("sword_idle", 1.0, .1, delta)
 	elif seated:
-		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length, .3, delta)
+		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length * (clampf(story_sit_progress, 0.0, 1.0) if story_sit_progress >= 0.0 else 1.0), .3, delta)
 	elif standing_left > 0:
 		var length: float = ANIMATIONS.get_animation("stand_up").length
 		_scrub("stand_up", length * .3 + (length * .7 - standing_left), .1, delta)

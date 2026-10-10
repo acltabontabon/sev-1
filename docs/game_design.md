@@ -190,7 +190,13 @@ clips; TAB skips and R clears the props and this run's recalled lines. Hand cont
 stand-up motion and prop movement are blended; the box stays upright as he walks.
 Explicit cinematic gait matches the eased travel pace, including slow movement below
 the gameplay idle threshold and street shots without a physics floor update.
-Monday's existing postmortem follows the night.
+Monday's postmortem follows the night. The engineer's last reply is “Fucking great.”
+He leaves the call, walks back across the office, gradually sits at his workstation
+and begins typing. A quiet “END OF INCIDENT 001 — MONDAY, 9:05 AM” card closes this
+slice; the report queues no victory congratulations or repeated postmortem dialogue.
+The night walk covers a longer stretch at about 60% greater travel speed, with its
+animation pace matched to the movement. The five gossip takes share Kevin, the ancient
+fridge yogurt who receives admin access, recruiters, a promotion and a retention bonus.
 
 Human checkpoint: judge the tear's visibility, smooth hand/prop contacts, stand-up and
 walk transitions, voice/music balance, and whether ordinary memories make the loss
