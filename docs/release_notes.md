@@ -1,5 +1,14 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Gossip has a whole office (11 October 2026)
+
+Four gossip performances now cover Migs’ fake dentist appointment and CEO parking
+space, Gab’s copied holiday reply, and Bea’s argument with the printer. JO retains
+Kevin, the ancient fridge yogurt with a retention bonus. This replaces the all-Kevin
+pass below; coffee and lunch takes, choices, recall and cinematic timing are preserved.
+The revised lines use existing local stock voices with updated provenance; human
+listening acceptance remains pending.
+
 ## Source update — Monday starts again (11 October 2026)
 
 - Removed the legacy victory speech queued after the finale, including “Great

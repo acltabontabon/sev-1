@@ -313,7 +313,8 @@ and play one at a time; the existing original mourning theme loops on the Music 
 Human acting and mix acceptance remain pending.
 
 The 11 October closing refinement replaces `allhands_engineer` with “Fucking great.”
-The five `good_days_variant_2` performances now share Kevin, the ancient fridge
-yogurt. These six clips were regenerated locally with the existing profiles and
+The `good_days_variant_2` performances now vary their subjects: Migs, Gab and Bea,
+with JO retaining Kevin the ancient fridge yogurt. The four revised gossip clips
+and the final reply were regenerated locally with the existing profiles and
 provenance; human listening acceptance remains pending. The resolved ending and
 report no longer trigger the legacy victory or repeated postmortem sequence.

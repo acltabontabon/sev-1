@@ -195,8 +195,10 @@ He leaves the call, walks back across the office, gradually sits at his workstat
 and begins typing. A quiet “END OF INCIDENT 001 — MONDAY, 9:05 AM” card closes this
 slice; the report queues no victory congratulations or repeated postmortem dialogue.
 The night walk covers a longer stretch at about 60% greater travel speed, with its
-animation pace matched to the movement. The five gossip takes share Kevin, the ancient
-fridge yogurt who receives admin access, recruiters, a promotion and a retention bonus.
+animation pace matched to the movement. Gossip varies across the office: Migs protects his nacho break with a fake dentist
+appointment and borrows the CEO’s parking space; Gab’s holiday reply starts a small
+rebellion; Bea argues with the printer. JO keeps Kevin, the ancient fridge yogurt
+who somehow receives a retention bonus.
 
 Human checkpoint: judge the tear's visibility, smooth hand/prop contacts, stand-up and
 walk transitions, voice/music balance, and whether ordinary memories make the loss
