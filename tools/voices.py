@@ -113,6 +113,14 @@ def process(master, output, profile):
                     'acompressor=threshold=-28dB:ratio=14:attack=1:release=80:makeup=12',
                     'asoftclip=type=hard:threshold=0.6', 'aecho=0.85:0.6:60|130|240:0.35|0.22|0.12',
                     'asoftclip=type=tanh']
+    # Hold a wordless vocal effort through a cinematic charge without lowering its
+    # pitch. Existing dialogue profiles have no stretch and retain their processing.
+    if profile.get('stretch', 1.0) != 1.0:
+        tempo = 1.0 / float(profile['stretch'])
+        while tempo < 0.5:
+            filters += ['atempo=0.5']
+            tempo *= 2.0
+        filters += [f'atempo={tempo:.6f}']
     loudness = profile.get('loudness', -20)
     filters += ['loudnorm=I=-20:TP=-2:LRA=11' if loudness == -20 else f'loudnorm=I={loudness}:TP=-1:LRA=7']
     output.parent.mkdir(parents=True, exist_ok=True)

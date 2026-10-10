@@ -4223,6 +4223,22 @@
     "peak": 0.9132221937179565,
     "review_status": "candidate; human listening acceptance pending"
   },
+  "call_powerup": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "blend am_michael 1.0",
+    "generation_date": "2026-10-10T23:03:42.986043+00:00",
+    "usage_rights": "Apache-2.0 model; blended stock voices; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/double/pitch0",
+    "fingerprint": "0f17b4e6521ec3fa9008d50cf7b0e9bb512f755422d3b5b7fc2c2b28b84d06df",
+    "sha256": "058f782cb9de9de1db552cacee3e01faa0e726233eb6af3aa757a894a6934be9",
+    "master_sha256": "5283c35211a2bb9e5b7d4b0415c29523be90771310b1548963adc62dc2449424",
+    "duration": 3.978125,
+    "peak": 0.9152199625968933,
+    "review_status": "candidate; human listening acceptance pending"
+  },
   "talk_sleeper_a_variant_1": {
     "provider": "local Kokoro",
     "model": "hexgrad/Kokoro-82M",

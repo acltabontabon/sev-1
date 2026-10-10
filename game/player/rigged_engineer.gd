@@ -8,7 +8,7 @@ extends Node3D
 ## During a swing the keyboard follows an authored arc in character space and two-bone IK
 ## pulls the arms onto its grip, so the visible strike always matches the damage window.
 
-enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, FINISH }
+enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, FINISH, RAGE }
 const SEATED: Array[int] = [Pose.TYPING, Pose.ALERT, Pose.SLUMP, Pose.SIP, Pose.RELAX, Pose.GLANCE]
 const ANIMATIONS: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 ## Weapon space: where each fist closes on the grip.
@@ -76,6 +76,9 @@ var hair_material: StandardMaterial3D
 var overtime_on: bool = false
 var overtime_aura: Node3D
 var overtime_crackle: float = 0.0
+var overtime_strength: float = 0.0
+var overtime_hair: Node3D
+var overtime_hair_material: StandardMaterial3D
 var rim_materials: Array[StandardMaterial3D] = []
 var bones: Dictionary = {}
 var striking: bool = false
@@ -204,9 +207,12 @@ var preview_at: float = 0.0
 
 func overtime(on: bool) -> void:
 	overtime_on = on
+	overtime_strength = 1.0 if on else 0.0
+	_shape_overtime_hair(overtime_strength)
 	if hair_material != null:
 		hair_material.albedo_color = Color(1, .8, .25) if on else Color(.05, .04, .04)
 		hair_material.emission_energy_multiplier = 1.1 if on else 0.0
+		_blend_overtime_hair(overtime_strength)
 	if eye_material != null:
 		eye_material.emission = Color(1, .8, .3) if on else Color(.35, .95, 1.0)
 	if is_instance_valid(overtime_aura):
@@ -245,6 +251,26 @@ func overtime(on: bool) -> void:
 	overtime_aura.add_child(glow)
 
 
+## Cinematic buildup: the form only locks in when the charge reaches one.
+func overtime_charge(amount: float) -> void:
+	if not is_instance_valid(overtime_aura):
+		overtime(true)
+	overtime_strength = clampf(amount, 0.0, 1.0)
+	overtime_on = overtime_strength >= .999
+	var gold: float = smoothstep(.35, 1.0, overtime_strength)
+	_shape_overtime_hair(overtime_strength)
+	hair_material.albedo_color = Color(.05, .04, .04).lerp(Color(1, .8, .25), gold)
+	hair_material.emission_energy_multiplier = gold * 1.1
+	_blend_overtime_hair(overtime_strength)
+	eye_material.emission = Color(.35, .95, 1.0).lerp(Color(1, .8, .3), gold)
+	for child in overtime_aura.get_children():
+		if child is CPUParticles3D:
+			child.scale_amount_min = .7 * overtime_strength
+			child.scale_amount_max = 1.5 * overtime_strength
+		elif child is OmniLight3D:
+			child.light_energy = 2.2 * overtime_strength
+
+
 ## The gold runs out slowly: the aura thins, the light and the hair dim, then he is just
 ## a tired engineer again.
 func overtime_fade(seconds: float) -> void:
@@ -263,6 +289,8 @@ func overtime_fade(seconds: float) -> void:
 	if hair_material != null:
 		fade.tween_property(hair_material, "emission_energy_multiplier", 0.0, seconds)
 		fade.tween_property(hair_material, "albedo_color", Color(.05, .04, .04), seconds)
+	fade.tween_method(_shape_overtime_hair, 1.0, 0.0, seconds)
+	fade.tween_method(_blend_overtime_hair, 1.0, 0.0, seconds)
 	fade.chain().tween_callback(overtime.bind(false))
 
 
@@ -279,11 +307,11 @@ func _physics_process(delta: float) -> void:
 		left_ik.active = false
 		skeleton.advance(delta)
 		return
-	if overtime_on:
+	if overtime_strength > .2:
 		# Arcs crackle round him, and the light breathes with them.
 		overtime_crackle -= delta
 		if overtime_crackle <= 0.0 and is_inside_tree():
-			overtime_crackle = randf_range(.18, .45)
+			overtime_crackle = randf_range(.18, .45) / maxf(.2, overtime_strength)
 			var at: Vector3 = global_position + Vector3(randf_range(-.4, .4), randf_range(.4, 1.6), randf_range(-.4, .4))
 			ElementFx.bolt(self, at, at + Vector3(randf_range(-.5, .5), randf_range(-.4, .4), randf_range(-.5, .5)), Color(1, .9, .45), .08, .025)
 	if not preview_clip.is_empty():
@@ -548,6 +576,10 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.04, 0)
 			target_lean = 0.0
 			reach = 0.0
+		Pose.RAGE:
+			look = Vector2(lerpf(.28, -.08, overtime_strength), 0)
+			target_lean = -.16
+			reach = 0.0
 		Pose.FINISH:
 			look = Vector2(-.05, 0)
 			target_lean = 0.0
@@ -559,6 +591,9 @@ func _staged(delta: float) -> void:
 	head_turn = head_turn.lerp(look, blend)
 	lean = lerpf(lean, target_lean, blend)
 	position = SEATED_OFFSET * sit
+	if story_pose == Pose.RAGE:
+		position.x += sin(clock * 45.0) * .012 * overtime_strength
+		position.y += sin(clock * 32.0) * .008 * overtime_strength
 	if story_pose == Pose.FINISH:
 		_loop("sword_idle", 1.0, .1, delta)
 	elif seated:
@@ -595,6 +630,12 @@ func _staged(delta: float) -> void:
 		_pose_swing(finish_style, t, FINISH_TIMING.x, FINISH_TIMING.y, FINISH_TIMING.z)
 		rotation.y = spin
 		position = Vector3(0, lift, -lunge)
+	elif story_pose == Pose.RAGE:
+		# Lower the blade while he grieves; his face stays clear for the buildup.
+		held = 0.0
+		shoulder_rest = 0.0
+		right_reach = 1.0
+		weapon.transform = Transform3D(Basis.looking_at(Vector3(.15, -.3, -1).normalized()), Vector3(.45, .75, 0))
 
 
 func _solve(delta: float) -> void:
@@ -631,7 +672,7 @@ func _solve(delta: float) -> void:
 func _glow() -> void:
 	if eye_material == null:
 		return
-	eye_material.emission_energy_multiplier = 2.6 * battle
+	eye_material.emission_energy_multiplier = maxf(2.6 * battle, 3.0 * overtime_strength)
 	var hue: Color = Color.from_hsv(fmod(clock * .35, 1.0), .75, 1.0)
 	for material in rim_materials:
 		material.emission = Color(.08, .62, .66).lerp(hue, battle)
@@ -723,6 +764,7 @@ func _dress() -> void:
 		rim_materials.append(rim)
 	var unit: float = 1.0 / (skeleton.global_basis.get_scale().x if skeleton.is_inside_tree() else 100.0 * model_scale)
 	var neck: Node3D = _attach("Neck", unit)
+	_build_overtime_hair(_attach("Head", unit))
 	var phones: MeshInstance3D = MeshInstance3D.new()
 	var band: TorusMesh = TorusMesh.new()
 	band.inner_radius = .1
@@ -769,6 +811,61 @@ func _dress() -> void:
 	badge.mesh = card
 	badge.position = Vector3(.1, .08, .17)
 	torso.add_child(badge)
+
+
+## An original faceted, swept-up silhouette, attached to the animated head. The
+## tufts rise out of the existing hair as the charge builds, then lower at the ending.
+func _build_overtime_hair(head: Node3D) -> void:
+	overtime_hair_material = hair_material.duplicate()
+	overtime_hair = Node3D.new()
+	overtime_hair.name = "OvertimeHair"
+	head.add_child(overtime_hair)
+	for index in range(9):
+		var angle: float = float(index) * TAU / 8.0
+		var outward: Vector3 = Vector3(cos(angle), 0, sin(angle))
+		var root: Vector3 = outward * .23 + Vector3.UP * .25 if index < 8 else Vector3(0, .33, 0)
+		var height: float = .42 + .13 * (1.0 + sin(angle)) * .5 if index < 8 else .66
+		var width: float = .15 if index < 8 else .19
+		var tip: Vector3 = root + Vector3.UP * height + outward * .25 if index < 8 else root + Vector3(.05, height, .12)
+		var mesh: SurfaceTool = SurfaceTool.new()
+		mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for side in range(5):
+			var a: float = side * TAU / 5.0
+			var b: float = (side + 1) * TAU / 5.0
+			var base_a: Vector3 = root + Vector3(cos(a), 0, sin(a)) * width
+			var base_b: Vector3 = root + Vector3(cos(b), 0, sin(b)) * width
+			var mid: Vector3 = root.lerp(tip, .45)
+			var mid_a: Vector3 = mid + Vector3(cos(a), 0, sin(a)) * width * .75
+			var mid_b: Vector3 = mid + Vector3(cos(b), 0, sin(b)) * width * .75
+			for vertex: Vector3 in [base_a, mid_a, base_b, base_b, mid_a, mid_b, mid_a, tip, mid_b]:
+				mesh.add_vertex(vertex)
+		mesh.generate_normals()
+		var tuft: MeshInstance3D = MeshInstance3D.new()
+		tuft.mesh = mesh.commit()
+		tuft.material_override = overtime_hair_material
+		overtime_hair.add_child(tuft)
+	_shape_overtime_hair(0.0)
+
+
+func _shape_overtime_hair(amount: float) -> void:
+	if not is_instance_valid(overtime_hair):
+		return
+	var rise: float = smoothstep(.22, .9, amount)
+	overtime_hair.visible = rise > .01
+	overtime_hair.scale = Vector3(lerpf(.65, 1.0, rise), maxf(.01, rise), lerpf(.65, 1.0, rise))
+
+
+func _blend_overtime_hair(_amount: float) -> void:
+	if overtime_hair_material == null:
+		return
+	# The swept tufts extend a full gold base; never expose the bald scalp under it.
+	hair_material.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	var color: Color = hair_material.albedo_color
+	color.a = 1.0
+	hair_material.albedo_color = color
+	color.a = 1.0
+	overtime_hair_material.albedo_color = color
+	overtime_hair_material.emission_energy_multiplier = hair_material.emission_energy_multiplier
 
 
 func _attach(bone: String, unit: float) -> Node3D:

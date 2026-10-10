@@ -52,5 +52,6 @@ if __name__ == "__main__":
     run("environment", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/environment_tests.gd"])
     run("encounter", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/encounter_tests.gd"])
     run("coworker_aid", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/coworker_aid_tests.gd"])
+    run("rage", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/rage_tests.gd"])
     run("interface", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/interface_tests.gd"])
     print("All checks passed. Graphical review and human playtesting remain separate.")

@@ -1,5 +1,29 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Unpaid Overtime buildup (11 October 2026)
+
+Creator feedback: the gold transformation was too abrupt; give the loss time to become
+rage, with a cinematic flashback, a shouted power-up and a changed hairstyle.
+
+- After "They were my team", three warm, vignetted memories show NADIA, JO and the
+  intact night shift at the office, with fading fragments of their conversations.
+  These are separately staged bodies; the actual casualties stay in the vault.
+- Back at the engineer's bloody feet, the camera rises to his face. He lowers his
+  sword, trembles, and the hair, eyes, light and aura build with an uneven gold charge
+  over 3.8 seconds. Nine original, faceted hair tufts sweep upward into golden spikes,
+  attached to his animated head over a full gold hair base. They stay raised through combat and lower as his
+  overtime burns out at the ending.
+- A new local, wordless power-up shout swells with the charge; the existing spoken
+  rage line lands with the blast. Low booms and a music dip give the memory and voice
+  room. Only the roar completes the form and throws The Variance back; the reply
+  eases into the gameplay camera. Audio provenance is in `talk/provenance.json`.
+- About 12 seconds added before combat; TAB still skips into the finished form.
+  Restart clears memories, partial hair/aura and both vocal tracks.
+- `tests/rage_tests.gd` checks staged memories, delayed form/knockback, raised hair,
+  control handoff, skip and restart. `tests/rage_preview.gd` is the quick graphical
+  checkpoint. Human acceptance of pacing, sound and emotional payoff remains open;
+  the packaged 0.2.45 build is unchanged.
+
 ## 0.2.45 — Blameless (11 October 2026)
 
 Creator feedback: the Monday all-hands still sucked; make it the postmortem meeting, and

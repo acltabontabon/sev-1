@@ -748,3 +748,23 @@ No autoloads or frameworks were added; new behavior lives with its owners.
 - **Tests.** New suites: `environment_tests.gd`, `encounter_tests.gd`,
   `interface_tests.gd`. `tests/m12_preview.gd` captures the menu, opening, areas, battle mode,
   roster, UI, finale and cast for visual review.
+
+### Unpaid Overtime cinematic refinement (11 October 2026)
+
+`incident_presentation.gd` extends the existing massacre director with `memory` and
+`charge` phases between grief and the roar. `rage_memory.gd` owns fresh intact crew
+bodies, a warm local light and remembered dialogue fragments for three shots (8.4 s),
+using the existing desaturation/vignette overlay. Finishing, skipping or resetting
+removes the recollection and stops its audio; real casualties remain untouched.
+`rigged_engineer.gd` exposes `overtime_charge()` for partial hair/eye/aura illumination.
+Nine original faceted hair tufts attach to the head bone and rise with that charge;
+`overtime(false)` hides them, and the ending lowers them through `overtime_fade()`.
+Only the roar locks `overtime_on` and knocks the staged boss back. A separate local
+`call_powerup` track spans the charge and stops at the spoken roar, skip or reset.
+The final reply interpolates back to the gameplay camera before releasing control.
+
+`tests/rage_tests.gd`, included in `tools/validate.py`, checks casualty preservation,
+partial and completed forms, raised hair, control/spawn handoff and skip/reset cleanup.
+`tests/rage_preview.gd` renders the entrance at 1280×720 on the development M2 Pro,
+Forward+/Metal, with phase captures under `/tmp/sev1_rage_*.png`. This is visual
+inspection, not a performance measurement or human acceptance of sound and pacing.

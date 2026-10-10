@@ -85,6 +85,13 @@ python3 tools/validate.py
 sh tools/release.sh
 ```
 
+For a quick preview of the revised boss transformation in the source checkout, run
+`sh tools/godot.sh --path . --script tests/rage_preview.gd`. It starts at the engineer's
+grief, plays the memories, shouted charge and spiked-hair form, then enters the fight.
+The packaged 0.2.45 build predates this refinement. In a normal run, reach the vault;
+TAB skips the cinematic and R retries the episode. Review the pacing, shout and hair
+silhouette; visual inspection and automated checks do not establish the emotional payoff.
+
 `play.command` is the source-project Finder launcher and requires the pinned engine.
 The packaged `.app` does not. F5 opens the title screen; F6 can run the standalone
 incident scene or `game/main.tscn` combat lab. Those regression scenes retain the

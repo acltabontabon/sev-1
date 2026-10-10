@@ -7,6 +7,7 @@ const CHARACTER = preload("res://game/player/rigged_engineer.gd")
 const VARIANCE = preload("res://game/incidents/variance.gd")
 const ALL_HANDS: Script = preload("res://game/incidents/all_hands.gd")
 const DUEL: Script = preload("res://game/incidents/duel.gd")
+const RAGE_MEMORY: Script = preload("res://game/incidents/rage_memory.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
@@ -173,13 +174,17 @@ const MASSACRE_FIRST: float = .8
 const MASSACRE_GAP: float = .5
 const MASSACRE_PATIENCE: float = 5.0
 const HERO_WALK: float = 1.9
+const HERO_CHARGE: float = 3.8
+var rage_memory: Node3D
+var charge_pulse: int = -1
 var massacre_time: float = 0.0
 var massacre_last: float = 0.0
-## The engineer's entrance, after the last of them: "walk", "grief", "roar", "reply".
+## The engineer's entrance: walk, grief, memories, charge, roar, reply.
 var hero_phase: String = ""
 var hero_phase_at: float = 0.0
 var roar_length: float = 2.2
 var roar: AudioStreamPlayer
+var powerup: AudioStreamPlayer
 ## The victory ending (see all_hands.gd), while it plays.
 var all_hands: Node3D
 var all_hands_played: bool = false
@@ -553,6 +558,11 @@ func _caption_layout(cinematic: bool) -> void:
 
 
 func reset_story() -> void:
+	_end_rage_memory()
+	if roar != null:
+		roar.stop()
+	if powerup != null:
+		powerup.stop()
 	if is_instance_valid(all_hands):
 		all_hands.finish(false)
 	all_hands = null
@@ -823,6 +833,7 @@ func skip() -> void:
 		voice.clear()
 		incident.coworkers.fall_all_now()
 		if beat_shot in ["massacre", "casualty"]:
+			_end_rage_memory()
 			# Skipped, it still happened: he fights in Unpaid Overtime.
 			incident.player.get_node("Visual/Character").overtime(true)
 			beat_shot = ""
@@ -835,6 +846,7 @@ func skip() -> void:
 			release_camera()
 			boss_move_strip.hide()
 			roar.stop()
+			powerup.stop()
 			incident.player.get_node("Visual/Character").story_pose = CHARACTER.Pose.NONE
 			incident.player.global_position = Vector3(9, .05, -31.0)
 		boss_seen = true
@@ -1408,6 +1420,9 @@ func _music(delta: float) -> void:
 		level = -9.0
 	elif incident.stage == incident.Stage.INVESTIGATION:
 		level = -17.0
+	if beat_shot == "massacre" and hero_phase in ["grief", "memory", "charge"]:
+		# Give the remembered voices and the heartbeat room before the roar.
+		level = -27.0 if hero_phase != "charge" else lerpf(-27.0, -12.0, smoothstep(0.0, HERO_CHARGE, massacre_time - hero_phase_at))
 	if get_tree().paused and not incident.terminal():
 		level -= 8.0
 	if DisplayServer.get_name() == "headless":
@@ -1782,7 +1797,14 @@ func _massacre_shot(delta: float) -> void:
 			if hero_time >= HERO_WALK:
 				_hero_phase("grief")
 		"grief":
-			if hero_time >= .9 and voices_idle():
+			if hero_time >= 1.8 and voices_idle():
+				_hero_phase("memory")
+		"memory":
+			if hero_time >= RAGE_MEMORY.LENGTH:
+				_end_rage_memory()
+				_hero_phase("charge")
+		"charge":
+			if hero_time >= HERO_CHARGE:
 				_hero_phase("roar")
 		"roar":
 			if hero_time >= roar_length + .2:
@@ -1818,10 +1840,30 @@ func _massacre_shot(delta: float) -> void:
 			camera.global_position = player.global_position + Vector3(.5, 1.05, -1.6).lerp(Vector3(.4, 1.15, -1.25), push)
 			camera.look_at(face)
 			camera.fov = 38.0
+		"memory":
+			rage_memory.tick(hero_time)
+		"charge":
+			# Back to the blood at his feet, then rise into his face. The first gold
+			# sputters out; the next wave holds. The blast waits for the roar.
+			var buildup: float = smoothstep(0.0, HERO_CHARGE, hero_time)
+			powerup.volume_db = lerpf(-6.0, 0.0, buildup)
+			var strength: float = buildup * (.72 + .28 * sin(hero_time * 7.0))
+			player.get_node("Visual/Character").overtime_charge(strength * .9)
+			camera.global_position = player.global_position + Vector3(.5, .3, -2.1).lerp(Vector3(.45, 1.3, -1.9), smoothstep(0.0, 2.2, hero_time))
+			camera.look_at(player.global_position + Vector3.UP * lerpf(.2, 1.45, smoothstep(0.0, 2.0, hero_time)))
+			camera.fov = lerpf(44.0, 38.0, buildup)
+			var comfort: float = incident.player.camera_rig.impulse_degrees / .8
+			camera.position += Vector3(sin(hero_time * 47.0), cos(hero_time * 39.0), 0) * .018 * buildup * comfort
+			var pulse: int = int(hero_time / .85)
+			if pulse > charge_pulse:
+				charge_pulse = pulse
+				sting(preload("res://assets/audio/sfx/low_boom.ogg"), lerpf(-17.0, -6.0, buildup))
+				if buildup > .2:
+					ElementFx.debris(incident, player.global_position + Vector3.UP * .05, 4, 1.5, 1.0)
 		"roar":
 			# He snaps: the camera is thrown back, shaking, as the floor catches fire.
 			var back: float = ease(minf(1.0, hero_time / .35), .3)
-			var shake: float = .12 * maxf(0.0, 1.0 - hero_time / 1.6)
+			var shake: float = .12 * maxf(0.0, 1.0 - hero_time / 1.6) * incident.player.camera_rig.impulse_degrees / .8
 			camera.global_position = player.global_position + Vector3(.4, 1.15, -1.25).lerp(Vector3(2.0, .45, -4.0), back) \
 				+ Vector3(randf_range(-shake, shake), randf_range(-shake, shake), 0.0)
 			camera.look_at(player.global_position + Vector3.UP * 1.3)
@@ -1833,6 +1875,10 @@ func _massacre_shot(delta: float) -> void:
 			camera.global_position = player.global_position + Vector3(1.6, 2.3, 2.6).lerp(Vector3(1.3, 2.1, 1.9), push)
 			camera.look_at(boss_at + Vector3.UP * 2.2)
 			camera.fov = 46.0
+			var handover: float = smoothstep(boss_length - .65, boss_length, massacre_time)
+			var rig: Camera3D = player.get_node("CameraRig/SpringArm3D/Camera3D")
+			camera.global_transform = camera.global_transform.interpolate_with(rig.global_transform, handover)
+			camera.fov = lerpf(camera.fov, rig.fov, handover)
 	# Its length is only real once its answer starts (until then it is a placeholder).
 	if hero_phase == "reply" and massacre_time >= boss_length:
 		beat_shot = ""
@@ -1846,7 +1892,7 @@ func _massacre_shot(delta: float) -> void:
 	camera.make_current()
 
 
-## The engineer arrives: walk in, grief, the roar, its answer, then the fight.
+## The engineer arrives: grief becomes rage through memories and a gradual charge.
 func _hero_phase(phase: String) -> void:
 	hero_phase = phase
 	hero_phase_at = massacre_time
@@ -1857,16 +1903,28 @@ func _hero_phase(phase: String) -> void:
 			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
 		"grief":
 			# Their blood runs to his shoes.
-			character.story_pose = CHARACTER.Pose.LOOK_DOWN
+			character.story_pose = CHARACTER.Pose.RAGE
 			say("rage_quiet")
 			var ahead: Vector3 = Vector3(player.global_position.x, .02, player.global_position.z - .7)
 			Blood.splat(incident, ahead, Vector3.UP, 1.6)
 			Blood.splat(incident, ahead + Vector3(.35, 0, -.5), Vector3.UP, 1.1)
 			Blood.burst(incident, ahead + Vector3.UP * .3, Vector3(0, .4, 1), 18)
+		"memory":
+			rage_memory = RAGE_MEMORY.new(self)
+			incident.add_child(rage_memory)
+		"charge":
+			character.story_pose = CHARACTER.Pose.RAGE
+			charge_pulse = -1
+			powerup.stream = load("res://assets/audio/voices/talk/call_powerup.ogg")
+			if DisplayServer.get_name() != "headless":
+				powerup.volume_db = -5.0
+				powerup.play()
+			sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -12)
 		"roar":
+			powerup.stop()
 			# He snaps, and goes gold: Unpaid Overtime. The blast throws it back across the vault.
 			character.story_pose = CHARACTER.Pose.ARMED
-			character.overtime(true)
+			character.overtime_charge(1.0)
 			incident.coworkers.blown_home = true
 			var stream: AudioStream = load("res://assets/audio/voices/talk/call_rage.ogg") if ResourceLoader.exists("res://assets/audio/voices/talk/call_rage.ogg") else null
 			roar_length = stream.get_length() if stream != null else 2.2
@@ -1891,6 +1949,12 @@ func _hero_phase(phase: String) -> void:
 			say("variance_budget")
 			var answer: float = voice.lines.get("variance_budget", {}).get("fallback_duration", 2.6)
 			boss_length = massacre_time + maxf(2.2, float(answer)) + .3
+
+
+func _end_rage_memory() -> void:
+	if is_instance_valid(rage_memory):
+		rage_memory.finish()
+	rage_memory = null
 
 
 ## The engineer lands what would kill The Variance: the duel plays it out (duel.gd).
@@ -1982,6 +2046,9 @@ func _build_boss_move() -> void:
 	roar = AudioStreamPlayer.new()
 	roar.bus = &"Voice"
 	add_child(roar)
+	powerup = AudioStreamPlayer.new()
+	powerup.bus = &"Voice"
+	add_child(powerup)
 
 
 ## The first angle round them with a clear line: no wall, and not through the boss.

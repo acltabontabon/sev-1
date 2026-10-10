@@ -391,6 +391,17 @@
       "processing": "clean",
       "direction": "Witty, theatrical exasperation; exhausted designer."
     },
+    "powerup": {
+      "blend": {
+        "am_michael": 1.0
+      },
+      "language": "a",
+      "speed": 1.08,
+      "pitch": 0,
+      "processing": "double",
+      "loudness": -15,
+      "stretch": 4.5
+    },
     "rage": {
       "blend": {
         "am_michael": 1.0
@@ -1405,6 +1416,11 @@
       "text": "YOU LAID OFF MY TEAM… ON A FRIDAY?!",
       "say": "You laid off my TEAM!! ... On a FRIDAY?!!",
       "profile": "rage"
+    },
+    "powerup": {
+      "text": "HAAAAAAAH!",
+      "say": "[Ah](/ɑː/)! [Ah](/ɑːː/)! [Ah](/ɑːːː/)!",
+      "profile": "powerup"
     },
     "wontfix": {
       "text": "CLOSED! AS! WON'T! FIX!!",

@@ -161,6 +161,17 @@ coffee policy, Quick Sync, Scope Creep's escalation, the status page that stays 
 and through chat cards from named senders. The beat list above remains the creative
 direction; the Variance's harmless copies are unchanged.
 
+### Unpaid Overtime entrance (implemented prototype, 11 October 2026)
+
+The loss of the night shift drives the engineer's transformation before The Variance
+fight. After his quiet acknowledgement, three short office memories recall the crew
+alive; returning to the blood at his feet gives him time to grieve before the rage.
+A 3.8-second wordless shout and uneven charge raise his hair into golden spikes and
+build the light and aura. The spoken rage line completes the form and launches the
+boss; its reply eases back into the playable fight. The entire entrance remains
+skippable with TAB. This presentation adds about 12 seconds and no combat stat buff.
+The creator still needs to accept the emotional buildup, voice and hair silhouette.
+
 ## Proposed ending
 
 After The Root Cause falls, production stabilizes and the office returns to normal. A company-wide message thanks leadership for the resolution. The protagonist earns “Exceeds Expectations,” with a 0% salary increase, and finally leaves. A final notification announces “Monday, 9:00 AM — Sprint Planning.” Credits.

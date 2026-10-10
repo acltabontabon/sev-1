@@ -74,6 +74,21 @@ the line is shown. Retries retain the bags for the application session, and an e
 bag refills without immediately repeating its last take. Acting and joke timing await
 human listening acceptance.
 
+The transformation buildup adds `call_powerup`, a wordless vocal effort using the
+stock protagonist blend with a light doubled echo, at its natural pitch and −15 LUFS.
+Creator feedback removed the distorted octave growl from this charge track.
+Its separate `powerup` profile
+stretches the performance 4.5× with pitch-preserving FFmpeg tempo stages, so it holds
+through the 3.8-second charge; game volume rises from −6 to 0 dB before the spoken
+rage line. Skip and restart stop both tracks. The model/voice rights, fingerprint,
+master/output checksums and duration are recorded in `talk/provenance.json`; no
+Dragon Ball recording or actor voice is used. Listening acceptance remains pending.
+
+The wordless charge uses explicit Misaki vowel phonemes (`ɑː`) for three "ah"
+efforts, rather than stretched uppercase spellings which the front end can interpret
+as letter names. The waveform is sustained in processing instead of spelling more
+letters; the third vowel gets the longest notation.
+
 “Clean” preserves the voice, intercom uses a light 180–6500 Hz band limit, and
 Variance adds a quiet 38 ms echo. All clips target −20 LUFS / −2 dB true peak before
 Vorbis encoding; decoded peaks are checked. Runtime voice gain is −3 dB plus the
