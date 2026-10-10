@@ -608,6 +608,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   player between `omni_targets` and emits `omnislash_step`, which the presentation turns
   into hard camera cuts avoiding walls and bodies (`_blocks_view()`), then `_slam()`); the wave is a top-level crescent swept against the `enemies` group each tick
   (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
+  `game/ui/skill_bar.gd` (the HUD's `SkillBar`, bottom centre) shows the moves as drawn
+  icons with keycaps: a clockwise sweep and seconds while one cools down (each tracks
+  its own full length, since a landed counter resets faster), a flash when it is back,
+  and FOCUS filling the ultimate's tile.
   `blame_shift()` drives `player.dash_velocity` (the player skips normal movement and
   drops enemy collision while it is set) and cuts each enemy near the swept segment the
   moment it is passed; `circle_back()` repeats combo step 1 and pulses

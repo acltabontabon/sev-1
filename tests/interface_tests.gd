@@ -52,6 +52,16 @@ func _run() -> void:
 	check(hud.health_bar.value == 40 and hud.burnout_bar.value == 75 and "OVERLOADED" in hud.burnout_value.text, "vitals bars track health and Burnout")
 	check("INVESTIGATING" in scene.get_node("HUD/Margin/VBox/Title").text, "the ticket header names the incident's status")
 	check(not hud.boss_box.visible, "no boss bar without a boss")
+	# Special moves read as icons with cooldowns, not a line of text.
+	player.specials.wave_cooldown = 0.0
+	await frames(2)
+	player.specials.wave_cooldown = 3.0
+	await frames(2)
+	check(hud.skill_bar.visible and hud.skill_bar.remaining(0) > 2.5 and not hud.skill_bar.ready_now(0) and hud.skill_bar.peaks[0] >= 2.9, "the skill bar shows a move cooling down")
+	player.specials.wave_cooldown = 0.0
+	await frames(2)
+	check(hud.skill_bar.ready_now(0) and hud.skill_bar.flashes[0] > 0.0, "a move coming back flashes its icon")
+	check(not "REPLY ALL" in scene.get_node("HUD/Controls").text and not "·" in hud.focus_value.text, "move keys and cooldowns are no longer spelled out in text")
 	player.health = 10000
 	incident._cleanup()
 	for next in [incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:

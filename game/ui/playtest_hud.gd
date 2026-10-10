@@ -14,6 +14,8 @@ var minimap: Control
 var focus_bar: ProgressBar
 var focus_value: Label
 var focus_full: bool = false
+## The special moves as icons with cooldown sweeps (bottom centre).
+var skill_bar: Control
 ## Anime cut-in: a slanted strip with the move's name, sliding through.
 var cut_in: PanelContainer
 var cut_in_text: Label
@@ -160,6 +162,10 @@ func _build_incident_hud() -> void:
 		label.custom_minimum_size.x = 240
 	_build_cut_in()
 	_build_streak()
+	skill_bar = preload("res://game/ui/skill_bar.gd").new()
+	skill_bar.name = "SkillBar"
+	skill_bar.specials = player.specials
+	add_child(skill_bar)
 	player.specials.called.connect(_on_move_called)
 	minimap = preload("res://game/ui/minimap.gd").new()
 	minimap.name = "Minimap"
@@ -219,8 +225,9 @@ func _build_incident_hud() -> void:
 	notice.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	notice.offset_left = -330
 	notice.offset_right = 330
-	notice.offset_top = -150
-	notice.offset_bottom = -70
+	# Above the skill bar.
+	notice.offset_top = -190
+	notice.offset_bottom = -110
 	notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(notice)
 	notice_text = Label.new()
@@ -233,12 +240,14 @@ func _build_incident_hud() -> void:
 	$Controls.theme_type_variation = "Eyebrow"
 	$Controls.remove_theme_font_size_override("font_size")
 	$Controls.add_theme_font_size_override("font_size", 12)
-	# Two lines in the gap between the vitals card (up to ~560 px wide) and the minimap.
+	# One quiet line under the skill bar; the moves' keys live on their icons.
 	$Controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	$Controls.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	$Controls.offset_left = -730
-	$Controls.offset_right = -232
+	$Controls.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	$Controls.offset_left = -260
+	$Controls.offset_right = 260
 	$Controls.offset_bottom = -10
+	$Controls.add_theme_font_size_override("font_size", 11)
+	$Controls.modulate.a = .7
 
 
 func _set_shake(enabled: bool) -> void:
@@ -504,8 +513,8 @@ func _refresh_incident(incident: Node) -> void:
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
-	$Controls.text = "E USE   LMB COMBO   Q DODGE   R RESTART   ESC PAUSE\nC REPLY ALL   X BLAME   Z CIRCLE   G COUNTER   V ULT"
-	$Controls.offset_top = -46
+	$Controls.text = "E USE   LMB COMBO   Q DODGE   ESC PAUSE"
+	$Controls.offset_top = -28
 	if incident.message != last_message:
 		last_message = incident.message
 		message_age = 0.0
@@ -521,10 +530,7 @@ func _refresh_incident(incident: Node) -> void:
 	debt_value.text = "%d  %s" % [incident.run.debt, incident.run.severity()]
 	var specials: Node = player.specials
 	focus_bar.value = specials.focus
-	var skills: Array[String] = []
-	for entry: Array in [["C", specials.wave_cooldown], ["X", specials.dash_cooldown], ["Z", specials.spin_cooldown], ["G", specials.counter_cooldown]]:
-		skills.append("%s %s" % [entry[0], "%.1f" % entry[1] if entry[1] > 0 else "✓"])
-	focus_value.text = ("V ROLLBACK READY" if specials.ultimate_ready() else "%d%%" % roundi(specials.focus)) + "  ·  " + "  ".join(skills)
+	focus_value.text = "V READY" if specials.ultimate_ready() else "%d%%" % roundi(specials.focus)
 	focus_value.add_theme_color_override("font_color", Color(.8, .7, 1) if specials.ultimate_ready() else Color(.75, .8, .85))
 	if specials.ultimate_ready() and not focus_full:
 		_pulse(focus_bar)
@@ -586,11 +592,13 @@ func _refresh_incident(incident: Node) -> void:
 	if incident.stage == incident.Stage.ALERT or (incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < incident.presentation.boss_length + 2):
 		$Margin.visible = false
 	$Controls.visible = $Margin.visible
+	skill_bar.visible = $Margin.visible
 	vitals.visible = $Margin.visible
 	if not $Margin.visible:
 		banner.hide()
 	evidence.visible = $Margin.visible and incident.stage == incident.Stage.INVESTIGATION and incident.inspected and incident.near_console()
 	vitals.visible = vitals.visible and not evidence.visible
+	skill_bar.visible = skill_bar.visible and not evidence.visible
 	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < 7.0
 	boss_box.visible = boss_box.visible and $Margin.visible
 	_refresh_guide(incident)

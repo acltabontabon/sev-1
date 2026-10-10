@@ -1,5 +1,19 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.27 — Skill icons (10 October 2026)
+
+Creator request: show the skills as icons so cooldowns are easy to notice, with less
+text on screen.
+
+- **A skill bar, bottom centre.** One tile per move with its key: Reply All (reply-all
+  arrow, C), Blame Shift (dash, X), Circle Back (loop, Z), Works On My Machine (laptop
+  with a check, G) and Force Rollback (rewind, V). Ready moves light up in their colour;
+  cooling moves go dark with a clockwise sweep and the seconds left; a move coming back
+  flashes. The ultimate's tile fills with FOCUS and pulses when it is ready.
+- **Less text.** The second controls line (move names) and the cooldown list next to
+  FOCUS are gone; the controls hint is one quieter line; tutorial notices sit above the
+  bar instead of over it.
+
 ## 0.2.26 — The camera stays out of the walls (10 October 2026)
 
 Creator report: moving around, the camera passes through walls and the view is lost.
