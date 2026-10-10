@@ -1277,6 +1277,11 @@
       "text": "YOU LAID OFF MY TEAM… ON A FRIDAY?!",
       "say": "You laid off my TEAM!! ... On a FRIDAY?!!",
       "profile": "rage"
+    },
+    "wontfix": {
+      "text": "CLOSED! AS! WON'T! FIX!!",
+      "say": "CLOSED! ... AS! ... WON'T! ... FIX!!!",
+      "profile": "rage"
     }
   },
   "barks": {

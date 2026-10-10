@@ -5,6 +5,8 @@ const FEED: Script = preload("res://game/ui/notification_feed.gd")
 const ALERT_SENDERS: Array[String] = ["MONITORING / SEV-1", "PRODUCTION SYSTEM", "STATUS PAGE", "THE VARIANCE"]
 const CHARACTER = preload("res://game/player/rigged_engineer.gd")
 const VARIANCE = preload("res://game/incidents/variance.gd")
+const ALL_HANDS: Script = preload("res://game/incidents/all_hands.gd")
+const DUEL: Script = preload("res://game/incidents/duel.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
@@ -178,6 +180,11 @@ var hero_phase: String = ""
 var hero_phase_at: float = 0.0
 var roar_length: float = 2.2
 var roar: AudioStreamPlayer
+## The victory ending (see all_hands.gd), while it plays.
+var all_hands: Node3D
+var all_hands_played: bool = false
+## The final blow's cutscene (see duel.gd), while it plays.
+var duel_scene: Node3D
 var boss_move_strip: PanelContainer
 var boss_move_name: Label
 var boss_move_tagline: Label
@@ -544,6 +551,13 @@ func _caption_layout(cinematic: bool) -> void:
 
 
 func reset_story() -> void:
+	if is_instance_valid(all_hands):
+		all_hands.finish()
+	all_hands = null
+	if is_instance_valid(duel_scene):
+		duel_scene.queue_free()
+	duel_scene = null
+	all_hands_played = false
 	if incident != null and is_instance_valid(incident.player):
 		incident.player.get_node("Visual/Character").overtime(false)
 	if boss_move_strip != null:
@@ -781,6 +795,12 @@ func declare_incident() -> void:
 
 
 func skip() -> void:
+	if beat_shot == "all_hands" and is_instance_valid(all_hands):
+		all_hands.finish()
+		return
+	if beat_shot == "duel" and is_instance_valid(duel_scene):
+		duel_scene.land()
+		return
 	if incident.terminal() or incident.modal_pending():
 		return
 	if beat_shot == "outbreak":
@@ -795,6 +815,8 @@ func skip() -> void:
 		voice.clear()
 		incident.coworkers.fall_all_now()
 		if beat_shot in ["massacre", "casualty"]:
+			# Skipped, it still happened: he fights in Unpaid Overtime.
+			incident.player.get_node("Visual/Character").overtime(true)
 			beat_shot = ""
 			ElementFx.slow_motion(&"casualty", 1.0)
 			crew_freeze.hide()
@@ -1215,6 +1237,10 @@ func _beats(delta: float) -> void:
 			_omnislash_shot()
 		"killcam":
 			_killcam_shot()
+		"duel":
+			if not is_instance_valid(duel_scene) or not duel_scene.tick(get_process_delta_time()):
+				if beat_shot == "duel":
+					beat_shot = ""
 		"casualty":
 			_casualty_shot()
 		"massacre":
@@ -1317,6 +1343,18 @@ func _outbreak_shot(delta: float, rig: Camera3D) -> void:
 func _ending(delta: float) -> void:
 	if not incident.terminal() or beat_shot == "killcam":
 		return
+	# Won: the all-hands first (once; headless only when a suite asks).
+	if incident.stage == incident.Stage.RESOLVED and not all_hands_played and beat_shot.is_empty() \
+			and (DisplayServer.get_name() != "headless" or killcam_in_headless):
+		all_hands_played = true
+		all_hands = ALL_HANDS.new(self)
+		add_child(all_hands)
+		all_hands.start()
+		beat_shot = "all_hands"
+	if beat_shot == "all_hands":
+		if is_instance_valid(all_hands) and all_hands.tick(delta):
+			return
+		beat_shot = ""
 	if beat_shot != "ending":
 		beat_shot = "ending"
 		beat_time = 0.0
@@ -1841,26 +1879,51 @@ func _hero_phase(phase: String) -> void:
 			boss_length = massacre_time + maxf(2.2, float(answer)) + .3
 
 
+## The engineer lands what would kill The Variance: the duel plays it out (duel.gd).
+func duel(boss: CharacterBody3D) -> void:
+	if beat_shot == "killcam":
+		_end_killcam()
+	beat_shot = "duel"
+	duel_scene = DUEL.new(self, boss)
+	add_child(duel_scene)
+	duel_scene.start()
+
+
+## Blinded: the screen goes white and fades back (Paid In Exposure, looked at).
+func whiteout(seconds: float) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	killflash.color = Color(1, 1, 1, .95)
+	killflash.show()
+	var fade: Tween = killflash.create_tween()
+	fade.set_ignore_time_scale(true)
+	fade.tween_property(killflash, "color:a", 0.0, seconds).set_delay(.15)
+	fade.tween_callback(killflash.hide)
+
+
 func voices_idle() -> bool:
 	return voice.current_line.is_empty() and voice.queue.is_empty() and Time.get_ticks_msec() >= incident.coworkers.voice_until
 
 
-## The Variance names the move it is about to use, in a red strip from the right.
-func boss_move(move: String) -> void:
+## The Variance names the move it is about to use, in a red strip from the right; in the
+## fight the strip says how to get out of it.
+func boss_move(move: String, voiced: bool = true, fight: bool = false) -> void:
 	var entry: Dictionary = VARIANCE.MOVES.get(move, {})
 	if entry.is_empty():
 		return
-	say(entry.line)
+	if voiced:
+		say(entry.line)
 	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
 		return
 	# Real time, so slow motion does not stall it.
 	var view: Vector2 = get_viewport().get_visible_rect().size
 	boss_move_name.text = entry.name
-	boss_move_tagline.text = entry.tagline
+	boss_move_tagline.text = entry.hint if fight else entry.tagline
 	boss_move_strip.reset_size()
 	boss_move_strip.size.x = view.x * 1.3
 	boss_move_strip.pivot_offset = boss_move_strip.size * .5
-	boss_move_strip.position = Vector2(view.x * 1.4, view.y * .16)
+	# Below the boss bar in the fight; high in the cutscene (no HUD there).
+	boss_move_strip.position = Vector2(view.x * 1.4, view.y * (.3 if fight else .16))
 	boss_move_strip.show()
 	var slide: Tween = boss_move_strip.create_tween()
 	slide.set_ignore_time_scale(true)
@@ -2151,7 +2214,8 @@ func _crew_montage(time: float) -> void:
 ## The staged Variance in the vault (before the real one takes over): idle, and swinging
 ## at whoever is in reach.
 func _vault_demon(delta: float) -> void:
-	if incident.stage != incident.Stage.BOSS or not demon.visible:
+	# The duel drives it itself.
+	if incident.stage != incident.Stage.BOSS or not demon.visible or beat_shot == "duel":
 		return
 	if is_instance_valid(incident.boss):
 		demon.hide()

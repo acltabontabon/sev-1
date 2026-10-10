@@ -16,6 +16,29 @@ func fresh_stage(next: int) -> void:
 	await frames(2)
 
 
+## One of the boss's moves on the engineer 4 m in front of it, who either stands there
+## (facing it) or takes the way out. Returns the damage taken.
+func move_outcome(boss: CharacterBody3D, move: String, escape: bool) -> int:
+	var moves: Node3D = boss.moves
+	moves.cancel()
+	boss.phase_time = 0.0
+	player.health = 10000
+	player.invulnerable_left = 0.0
+	player.position = boss.global_position + Vector3(0, 0, 4.0)
+	moves.turn = moves.ORDER.find(move)
+	moves.start(player)
+	var before: int = player.health
+	while moves.active():
+		boss.phase_time = minf(boss.phase_time, 3.0)
+		player.camera_rig.rotation.y = PI if escape and move == "expose" else 0.0
+		if escape and move in ["delayer", "downsize"] and moves.t > 1.35 or escape and move == "pop" and moves.t > .1:
+			player.position = boss.global_position + Vector3(5.0, 0, 4.0)
+		if escape and move == "decommission":
+			player.invulnerable_left = .2
+		await physics_frame
+	return before - player.health
+
+
 func spawn(kind: String, at: Vector3, aware: bool = true) -> CharacterBody3D:
 	var actor: CharacterBody3D = incident._spawn_entry([kind, "A1"], incident.alive)
 	actor.position = at
@@ -730,6 +753,29 @@ func _run() -> void:
 	await create_timer(incident.ENDING_HOLD + .3, true, false, true).timeout
 	check(paused and not player.camera_rig.controls_active, "the report follows once the ending has played")
 	incident.hold_ending = false
+	# Won: the all-hands plays first (leadership walks in over the night shift); TAB ends
+	# it, the report follows, and a restart leaves nothing of it behind.
+	await fresh_stage(incident.Stage.BOSS)
+	var quiet_nodes: int = scene.find_children("*", "", true, false).size()
+	incident.presentation.killcam_in_headless = true
+	incident.hold_ending = true
+	incident._enter(incident.Stage.RESOLVED)
+	await frames(3)
+	var party: Node3D = incident.presentation.all_hands
+	check(incident.presentation.beat_shot == "all_hands" and is_instance_valid(party) and party.beat == "death" and not paused, "winning opens the finale before the report")
+	var hold_on: int = Time.get_ticks_msec() + 25000
+	while is_instance_valid(party) and party.beat != "memorial" and Time.get_ticks_msec() < hold_on:
+		await frames(1)
+	check(is_instance_valid(party) and party.beat == "memorial" and not player.get_node("Visual/Character").overtime_on \
+		and incident.room.get_node("LedgerText1").text == "SUCCESS", "the boss comes apart, the ledger reconciles, the overtime burns out, and the dead are remembered")
+	await key(KEY_TAB)
+	await create_timer(.7, true, false, true).timeout
+	check(not is_instance_valid(party) and paused, "TAB ends the all-hands and the report follows")
+	incident.presentation.killcam_in_headless = false
+	incident.hold_ending = false
+	scene.reset_encounter()
+	await frames(3)
+	check(scene.find_children("*", "", true, false).size() <= quiet_nodes + 2 and incident.room.get_node("LedgerText1").text != "SUCCESS", "a restart leaves no leadership, cards or reconciled ledger behind")
 	# The vault, first time: the night shift is already fighting The Variance, falls in
 	# front of the engineer, and the real fight starts after; a restart brings them back.
 	await fresh_stage(incident.Stage.INVESTIGATION)
@@ -784,6 +830,52 @@ func _run() -> void:
 	await frames(3)
 	check(incident.coworkers.cavalry_fallen() == 0 and incident.coworkers.cavalry_standing() == 0 and scene.find_children("*", "", true, false).size() <= crew_count + 2, "a restart brings the night shift back and leaves no gore behind")
 	check(not player.get_node("Visual/Character").overtime_on and night_shift.person("Intern").body.position.y < 1.0 and night_shift.person("Manager").body.scale.y > .5, "a restart ends the overtime and puts everyone back on the floor")
+	# The fight moveset: every move lands on an engineer who stands in it, and each has a
+	# way out (step away, roll through, look away).
+	await fresh_stage(incident.Stage.BOSS)
+	incident.presentation.boss_seen = true
+	await enter_vault()
+	incident.spawn_delay = 0
+	var boss_deadline: int = Time.get_ticks_msec() + 5000
+	while not is_instance_valid(incident.boss) and Time.get_ticks_msec() < boss_deadline:
+		await frames(1)
+	var move_hurt: Dictionary = {}
+	for move: String in ["delayer", "pop", "decommission", "expose", "downsize"]:
+		move_hurt[move] = [await move_outcome(incident.boss, move, false), await move_outcome(incident.boss, move, true)]
+	check(move_hurt.values().all(func(pair: Array) -> bool: return pair[0] > 0 and pair[1] == 0),
+		"each of The Variance's moves hurts if stood in and misses if escaped: %s" % [move_hurt])
+	# The killing blow cuts to the duel: the boss lives through it, hidden, then dies
+	# sliced at its end, and the finale takes over.
+	incident.presentation.killcam_in_headless = true
+	var dueling: CharacterBody3D = incident.boss
+	dueling.moves.cancel()
+	dueling.phase_time = 5.0
+	await physics_frame
+	await physics_frame
+	dueling.receive_damage(dueling.health + 50, player.global_position)
+	await frames(2)
+	check(incident.presentation.beat_shot == "duel" and dueling.health > 0 and not dueling.visible and incident.presentation.demon.visible,
+		"the killing blow cuts to the duel; the real Variance waits, hidden, for it")
+	var duel_end: int = Time.get_ticks_msec() + 15000
+	while incident.stage != incident.Stage.RESOLVED and Time.get_ticks_msec() < duel_end:
+		await frames(1)
+	await frames(2)
+	check(incident.stage == incident.Stage.RESOLVED and dueling.health <= 0 and dueling.get_meta("kill_style", "") == "slice" \
+		and incident.presentation.beat_shot == "all_hands", "the duel ends in the blow that cuts it in half, and the finale begins")
+	incident.presentation.skip()
+	incident.presentation.killcam_in_headless = false
+	await fresh_stage(incident.Stage.BOSS)
+	incident.presentation.boss_seen = true
+	await enter_vault()
+	incident.spawn_delay = 0
+	boss_deadline = Time.get_ticks_msec() + 5000
+	while not is_instance_valid(incident.boss) and Time.get_ticks_msec() < boss_deadline:
+		await frames(1)
+	await move_outcome(incident.boss, "downsize", false)
+	var shrunk: float = player.visual.scale.x
+	scene.reset_encounter()
+	await frames(2)
+	check(shrunk < .6 and is_equal_approx(player.visual.scale.x, 1.0), "Downsizing shrinks the engineer, and a restart puts him back to size")
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

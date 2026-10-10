@@ -237,7 +237,7 @@ def validate(data):
             assert entry['duration'] > 0 and 0 < entry['peak'] < 1
         else:
             assert not path.exists(), f'Untracked voice provenance: {path}'
-    assert len(ids) == 66 and len(data['profiles']) == 7
+    assert len(ids) == 74 and len(data["profiles"]) == 8
     print(f'PASS voice manifest: {len(ids)} lines; {sum(x["status"] != "missing" for x in data["lines"])} assets; remaining entries use subtitles.')
 
 

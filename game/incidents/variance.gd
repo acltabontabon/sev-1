@@ -3,20 +3,25 @@ extends "res://game/enemies/incident.gd"
 signal false_positives
 
 ## Its moveset: corporate euphemisms, done literally. Each has a name for the banner, a
-## line it says as it does it, and what it means. It used them on the night shift first.
+## line it says as it does it, what it means, and (in the fight) the way out of it. It
+## used them on the night shift first; see variance_moves.gd for the fight.
 const MOVES: Dictionary = {
-	"delayer": {"name": "DELAYERING", "tagline": "removing one layer of management", "line": "move_delayer"},
-	"decommission": {"name": "DECOMMISSION", "tagline": "service has reached end of life", "line": "move_decommission"},
-	"pop": {"name": "MAKE IT POP", "tagline": "feedback has been provided", "line": "move_pop"},
-	"expose": {"name": "PAID IN EXPOSURE", "tagline": "unpaid internship, fully compensated", "line": "move_expose"},
-	"downsize": {"name": "DOWNSIZING", "tagline": "headcount adjusted", "line": "move_downsize"},
+	"delayer": {"name": "DELAYERING", "tagline": "removing one layer of management", "hint": "step out from under it", "line": "move_delayer"},
+	"decommission": {"name": "DECOMMISSION", "tagline": "service has reached end of life", "hint": "roll through the ring", "line": "move_decommission"},
+	"pop": {"name": "MAKE IT POP", "tagline": "feedback has been provided", "hint": "don't stand under the feedback", "line": "move_pop"},
+	"expose": {"name": "PAID IN EXPOSURE", "tagline": "unpaid internship, fully compensated", "hint": "look away from the flash", "line": "move_expose"},
+	"downsize": {"name": "DOWNSIZING", "tagline": "headcount adjusted", "hint": "get out of the beam", "line": "move_downsize"},
 }
+const MOVESET: Script = preload("res://game/incidents/variance_moves.gd")
+## When in each shield cycle it uses a move (it opens at 4.5).
+const MOVE_AT: float = .6
 
 var duplicated: bool = false
 var phase_time: float = 0.0
 var exposed: bool = false
 var marker: Label3D
 var seal: MeshInstance3D
+var moves: Node3D
 
 
 func _ready() -> void:
@@ -48,6 +53,8 @@ func _ready() -> void:
 	seal.material_override = material
 	add_child(seal)
 	_crown()
+	moves = MOVESET.new(self)
+	add_child(moves)
 
 
 ## Three truths orbit its head: the same transaction as each system reports it.
@@ -96,10 +103,23 @@ func _crown() -> void:
 		visual.get_node("RecordDetails/Slab%d" % index).material_override = cold if index % 2 == 0 else hot
 
 
+## The killing blow waits for the duel (duel.gd) when there is anyone to show it to.
+var spared: bool = false
+var dueled: bool = false
+
+
 func receive_damage(amount: int, source: Vector3) -> bool:
 	if not exposed:
 		show_blocked()
 		return false
+	if spared:
+		return false
+	var story: Node = get_parent().get("presentation")
+	if health - amount <= 0 and story != null and (DisplayServer.get_name() != "headless" or story.killcam_in_headless):
+		spared = true
+		dueled = true
+		story.duel(self)
+		return true
 	var accepted: bool = super.receive_damage(amount, source)
 	if health <= 0:
 		marker.text = "✓ RECONCILED"
@@ -110,9 +130,17 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 	return accepted
 
 
+## The duel's last word: it dies, cut in half.
+func final_blow() -> void:
+	spared = false
+	exposed = true
+	super.receive_damage(health + 1000, global_position + Vector3.BACK)
+
+
 func _physics_process(delta: float) -> void:
 	if health <= 0:
 		marker.text = "✓  RECONCILED"
+		moves.cancel()
 		return
 	# The opening is combat time: impact must freeze it alongside the actor/weapon.
 	if hitstop_left > 0:
@@ -122,10 +150,22 @@ func _physics_process(delta: float) -> void:
 	crown.position.y = 3.6 + sin(phase_time * 2.0) * .08
 	phase_time = fmod(phase_time + delta, 8.0)
 	var was_exposed: bool = exposed
+	var before: float = phase_time - delta
 	exposed = phase_time >= 4.5
 	if exposed != was_exposed:
 		_phase_magic()
-	if exposed:
+	if not exposed and before < MOVE_AT and phase_time >= MOVE_AT and not moves.active() and is_instance_valid(target) \
+			and target.health > 0 and global_position.distance_to(target.global_position) < 18.0:
+		moves.start(target)
+	if moves.active() and not exposed:
+		# Busy with a move: it stands and does it.
+		melee.cancel()
+		var saved: CharacterBody3D = target
+		target = null
+		super._physics_process(delta)
+		target = saved
+		marker.text = "◆  VERIFIED ORIGINAL\nSHIELDED — EVADE"
+	elif exposed:
 		melee.cancel()
 		var saved_target: CharacterBody3D = target
 		target = null

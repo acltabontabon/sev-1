@@ -1,5 +1,51 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.43 — Closed as won't fix (11 October 2026)
+
+Creator requests: the boss's moveset should be creative against the engineer too; the
+killing blow should be a toe-to-toe duel and an unhinged, cinematic kill; the ending
+should be a dramatic cutscene, not text: the gold fading slowly, the sacrifices
+remembered, and management thanking itself, unhinged and satirical.
+
+- **The Variance fights with its moveset.** Once per shield cycle it uses one of the
+  moves it used on the night shift, named in its red strip with the way out:
+  DELAYERING (a shadow follows you, then slams: step out; hit, you are briefly
+  flattened), MAKE IT POP (three feedback bubbles lobbed at you: stay clear),
+  DECOMMISSION (an end-of-life ring rolls out at knee height: roll through it), PAID IN
+  EXPOSURE (three flashes count down, then a big one: look away or be blinded), and
+  DOWNSIZING (a tracking beam locks and fires: get out of the spot, or fight at half size
+  for four seconds). It says each one aloud the first time.
+- **The duel.** What would kill it cuts to a cutscene: a standoff across the vault, a
+  charge, four clashes with hard cuts and sparks, a shove; then "CLOSED! AS! WON'T!
+  FIX!" in the rage voice, a slash on each word, and a leaping slam that cuts it in
+  half.
+- **The finale** (TAB skips it):
+  - It comes apart in slow motion into a storm of receipts while the ledger reconciles
+    to SUCCESS; paper snows over the vault.
+  - A low orbit round the engineer among his colleagues as Unpaid Overtime slowly burns
+    out; one gold receipt drifts down to him: TXN 000001, $0.01, FOUND. The narrator:
+    "And there it was. The missing transaction. One cent."
+  - In Memoriam: a glide past each of the five where they fell (MORGAN: "His calendar
+    is still full." JO: "Never got a badge photo.").
+  - 11:58 PM, a mandatory all-hands in the lobby under the SYNERGEX logo, lit like a
+    keynote (spotlight, LIVE · 3,411 ON MUTE), an audience of one in the dark.
+    Leadership walks on in single file: "Incredible work, everyone. And by everyone… I
+    mean leadership." "I just want to thank myself. For my vision." "To honor the fallen,
+    we're doing a mandatory fun day. Unpaid." "Everyone say… synergy!" Confetti, a flash,
+    a freeze, and the LinkedIn post, whose photo is the actual frame, cropped to leave
+    him out ("1 engineer cropped out"). "Oh, and you're on call this weekend." The
+    spotlight clunks off. "…Of course I am."
+  - Back at his desk: SEV-2, coffee machine down, owner: you. Head down. The camera flies
+    back out of the tower window into the night, the opening in reverse: "By Monday, the
+    cent was reconciled. The night shift was not." INCIDENT 001 — RESOLVED. NEXT:
+    INCIDENT 002, MONDAY, 9:00 AM. Then the report.
+- New voices: the executive (a third management voice, from an installed stock voice),
+  six all-hands lines, two narrator lines and the kill line, all local.
+- New checks: every fight move hurts if stood in and misses if escaped; Downsizing
+  resizes and a restart restores; the killing blow cuts to the duel and ends in the
+  slice; the finale opens before the report, the overtime burns out and the dead are
+  remembered; TAB ends it; a restart leaves nothing of it.
+
 ## 0.2.42 — Corporate euphemisms, done literally (11 October 2026)
 
 Creator requests: the butchering was repetitive and in one spot; make each kill unique

@@ -693,6 +693,19 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   on routines (asleep, sit, pace, carry, fix, stand with a periodic gesture). No collision. Each
   has one line shown when the engineer walks past; they cower while `battle_mode` is
   engaged and the manager claims credit when a fight ends. `reset()` restores them.
+- **The vault and the finale.** When the gate opens five of the crew charge the staged
+  monster (`coworkers.gd` CAVALRY/STAGE: one victim at a time at their own spot, the rest
+  lapping away from it, one voice at a time via `_say` modes). The presentation's
+  massacre beat calls `execute_next()` once the floor is quiet; each death is one of The
+  Variance's `MOVES` (`variance.gd`) with its own wind-up and casualty framing. The
+  engineer's entrance (`_hero_phase`: walk, grief, roar, reply) puts him into Unpaid
+  Overtime (`rigged_engineer.gd` `overtime()` / `overtime_fade()`). In the fight
+  `variance_moves.gd` (a child of the boss) runs one move per shield cycle and owns its
+  telegraphs and damage. A lethal blow is held (`spared`) and handed to `duel.gd`,
+  which plays the duel with the staged monster and calls `final_blow()` on the hidden
+  real boss to slice it; the RESOLVED ending then runs `all_hands.gd` (death, receipts,
+  cent, memorial, all-hands, desk, fly-out) on real time before the report. Each
+  cutscene restores what it touched and TAB ends it.
 - **Freeze-frames and slow motion.** `ElementFx` is the only writer of
   `Engine.time_scale`. `freeze()` drops it for a beat on big impacts (Blocker quake,
   Variance cataclysm, the engineer's finisher hit, the boss's defeat) and a real-time

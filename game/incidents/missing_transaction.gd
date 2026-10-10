@@ -385,7 +385,7 @@ func _process(delta: float) -> void:
 	var real_delta: float = delta / maxf(Engine.time_scale, .01)
 	if terminal() and ending_hold > 0 and not get_tree().paused:
 		player.narrative_hold = true
-		if presentation.beat_shot != "killcam":
+		if presentation.beat_shot not in ["killcam", "all_hands"]:
 			ending_hold = maxf(0.0, ending_hold - real_delta)
 			if ending_hold == 0:
 				player.camera_rig.set_capture(false)
@@ -1144,7 +1144,9 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal():
 		return
 	if actor == boss:
-		presentation.kill_cam(actor.global_position, player.global_position, true, 2.8)
+		# After the duel the blow has had its cutscene; otherwise the kill cam.
+		if not actor.get("dueled"):
+			presentation.kill_cam(actor.global_position, player.global_position, true, 2.8)
 		enemies_defeated += 1
 		_enter(Stage.RESOLVED)
 		return

@@ -245,6 +245,27 @@ func overtime(on: bool) -> void:
 	overtime_aura.add_child(glow)
 
 
+## The gold runs out slowly: the aura thins, the light and the hair dim, then he is just
+## a tired engineer again.
+func overtime_fade(seconds: float) -> void:
+	if not overtime_on or not is_instance_valid(overtime_aura):
+		overtime(false)
+		return
+	var fade: Tween = create_tween()
+	fade.set_parallel(true)
+	for child in overtime_aura.get_children():
+		if child is CPUParticles3D:
+			fade.tween_property(child, "scale_amount_max", .05, seconds * .8)
+			fade.tween_property(child, "scale_amount_min", .02, seconds * .8)
+			fade.tween_property(child, "initial_velocity_max", .4, seconds * .8)
+		elif child is OmniLight3D:
+			fade.tween_property(child, "light_energy", 0.0, seconds)
+	if hair_material != null:
+		fade.tween_property(hair_material, "emission_energy_multiplier", 0.0, seconds)
+		fade.tween_property(hair_material, "albedo_color", Color(.05, .04, .04), seconds)
+	fade.chain().tween_callback(overtime.bind(false))
+
+
 func _physics_process(delta: float) -> void:
 	if overtime_on:
 		# Arcs crackle round him, and the light breathes with them.
