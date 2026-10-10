@@ -152,6 +152,22 @@ var crew_bar: ColorRect
 var crew_freeze: ColorRect
 var crew_from: Transform3D
 var crew_shown: int = -1
+## Casualty cam: one of the night shift falls; a nearly frozen dramatic cut and their record.
+var crew_stamp: Label
+var casualty_body: Node3D
+var casualty_start: int = 0
+var casualty_side: float = 1.0
+var casualty_angle: float = 999.0
+const CASUALTY_SECONDS: float = 1.45
+## The vault, first time: the night shift is already in there, losing. Deaths on this
+## clock, then the engineer's entrance, then the fight.
+const MASSACRE_LENGTH: float = 13.5
+const MASSACRE_DEATHS: Array[float] = [1.2, 3.1, 5.0, 6.9, 8.8]
+const HERO_ENTRANCE: float = 10.4
+var massacre_time: float = 0.0
+var massacre_next: int = 0
+var casualty_resume: String = ""
+var demon_swing: float = 0.0
 ## The reveal: every screen asks one question, the night shift turns, and the missing
 ## transaction is seen only in flashes until it is right behind him.
 var screen_words: Array[Label3D] = []
@@ -344,6 +360,16 @@ func _ready() -> void:
 	crew_misery.add_theme_color_override("font_outline_color", Color(0, 0, 0, .8))
 	crew_misery.add_theme_color_override("font_color", Color(.95, .93, .9))
 	crew_card.add_child(crew_misery)
+	crew_stamp = Label.new()
+	crew_stamp.position = Vector2(420, -40)
+	crew_stamp.rotation = deg_to_rad(-14.0)
+	crew_stamp.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_bold.ttf"))
+	crew_stamp.add_theme_font_size_override("font_size", 84)
+	crew_stamp.add_theme_color_override("font_color", Color(1, .16, .1))
+	crew_stamp.add_theme_constant_override("outline_size", 8)
+	crew_stamp.add_theme_color_override("font_outline_color", Color(.25, 0, 0, .9))
+	crew_stamp.hide()
+	crew_card.add_child(crew_stamp)
 	crew_card.hide()
 	add_child(crew_card)
 	lower_third = VBoxContainer.new()
@@ -738,6 +764,17 @@ func skip() -> void:
 		incident._enter(incident.Stage.ENCOUNTER_ONE)
 	elif incident.stage == incident.Stage.BOSS and not is_instance_valid(incident.active_enemy):
 		voice.clear()
+		incident.coworkers.fall_all_now()
+		if beat_shot in ["massacre", "casualty"]:
+			beat_shot = ""
+			ElementFx.slow_motion(&"casualty", 1.0)
+			crew_freeze.hide()
+			crew_card.hide()
+			crew_stamp.hide()
+			for bar in letterbox:
+				bar.hide()
+			release_camera()
+			incident.player.global_position = Vector3(9, .05, -31.0)
 		boss_seen = true
 		incident.boss_triggered = true
 		incident.spawn_delay = 0
@@ -763,6 +800,7 @@ func stage_changed() -> void:
 		incident.Stage.BOSS:
 			say("gate_open")
 			boss_length = 1.5 if boss_seen else 6.0
+			_stage_vault_fight()
 			incident.light_target = 3.7
 			set_screens(Color(.45, .12, .3))
 			sting(preload("res://assets/audio/sfx/door_open.ogg"), -4)
@@ -818,12 +856,34 @@ func quick_sync(active: bool) -> void:
 
 
 ## The engineer crossed into the vault: the arrival clock starts here.
+## The gate opens: The Variance is already in the vault, and the night shift sprints
+## past the engineer to take it on themselves.
+func _stage_vault_fight() -> void:
+	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+		return
+	demon.global_position = incident.arrival_site()
+	demon.rotation.y = PI
+	demon.show()
+	demon.animator.play(demon.clips.idle, 0.0)
+	incident.coworkers.charge(demon)
+
+
 func vault_entered() -> void:
 	voice.clear()
-	say("variance_intro")
 	sound("res://assets/audio/boss_arrival.wav")
-	beat_shot = "vault"
 	beat_time = 0.0
+	if demon.visible and incident.coworkers.cavalry_standing() > 0 and not boss_seen:
+		# They are still fighting it when he walks in. Not for long.
+		beat_shot = "massacre"
+		boss_length = MASSACRE_LENGTH
+		massacre_time = 0.0
+		massacre_next = 0
+		incident.player.global_position = Vector3(9, .05, -26.8)
+		incident.player.velocity = Vector3.ZERO
+		return
+	incident.coworkers.fall_all_now()
+	say("variance_intro")
+	beat_shot = "vault"
 
 
 ## A wave is due: cut to one employee as the ticket lands, watch them turn, hand back.
@@ -1117,6 +1177,10 @@ func _beats(delta: float) -> void:
 			_omnislash_shot()
 		"killcam":
 			_killcam_shot()
+		"casualty":
+			_casualty_shot()
+		"massacre":
+			_massacre_shot(get_process_delta_time())
 		"outbreak":
 			_outbreak_shot(delta, rig)
 		"evidence":
@@ -1321,6 +1385,7 @@ func _end_opening() -> void:
 	crew_shown = -1
 	crew_card.hide()
 	crew_freeze.hide()
+	crew_stamp.hide()
 	for word in screen_words:
 		word.hide()
 	for body: Node3D in crew_facing:
@@ -1568,6 +1633,151 @@ func _opening(time: float, delta: float) -> void:
 		card.modulate.a = minf(1.0, since / .08) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .4, time))
 
 
+## One of the night shift falls in the boss fight: cut to them, nearly frozen, and file
+## their record. Skipped (card only) while another beat owns the camera.
+func casualty(body: Node3D, who: String, epitaph: String, stamp: String) -> void:
+	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+		return
+	crew_name.text = who
+	crew_misery.text = epitaph
+	crew_stamp.text = stamp
+	crew_bar.color = Color(1, .2, .15)
+	crew_name.add_theme_color_override("font_color", Color(1, .9, .85))
+	sting(preload("res://assets/audio/sfx/low_boom.ogg"), -4)
+	sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -6)
+	casualty_start = Time.get_ticks_msec()
+	casualty_side = -casualty_side
+	casualty_angle = 999.0
+	if beat_shot.is_empty() or beat_shot == "massacre":
+		casualty_resume = beat_shot
+		beat_shot = "casualty"
+		casualty_body = body
+
+
+## The real Variance waits for the massacre (casualty cams pause this clock, not the
+## boss's): its countdown is held and its timer follows the cutscene.
+func _hold_boss() -> void:
+	incident.spawn_delay = maxf(incident.spawn_delay, 1.0)
+	incident.boss_time = minf(incident.boss_time, massacre_time)
+
+
+func _massacre_shot(delta: float) -> void:
+	massacre_time += delta
+	_hold_boss()
+	var player: CharacterBody3D = incident.player
+	player.narrative_hold = true
+	player.invulnerable_left = maxf(player.invulnerable_left, .3)
+	incident.main.get_node("HUD").visible = false
+	while massacre_next < MASSACRE_DEATHS.size() and massacre_time >= MASSACRE_DEATHS[massacre_next]:
+		massacre_next += 1
+		incident.coworkers.fall_next()
+		if beat_shot != "massacre":
+			return
+	var bars: float = 54.0 * smoothstep(0.0, .4, massacre_time) * (1.0 - smoothstep(MASSACRE_LENGTH - .5, MASSACRE_LENGTH, massacre_time))
+	for side in [0, 1]:
+		letterbox[side].visible = bars > .5
+		letterbox[side].offset_top = 0.0 if side == 0 else -bars
+		letterbox[side].offset_bottom = bars if side == 0 else 0.0
+	var boss_at: Vector3 = demon.global_position
+	if massacre_time < HERO_ENTRANCE:
+		# From deep in the vault: the fight, the bodies, the door he will come through.
+		var drift: float = massacre_time / HERO_ENTRANCE
+		camera.global_position = Vector3(15.2, 3.4, -41.5).lerp(Vector3(14.0, 2.6, -40.0), drift)
+		camera.look_at(boss_at + Vector3.UP * 1.2)
+		camera.fov = 52.0
+	else:
+		# Hero entrance: over the monster's shoulder, he walks in over his colleagues.
+		var walk: float = smoothstep(HERO_ENTRANCE, HERO_ENTRANCE + 2.2, massacre_time)
+		player.global_position = Vector3(9, .05, -26.8).lerp(Vector3(9, .05, -30.4), walk)
+		player.visual.rotation.y = 0.0
+		if massacre_time - delta < HERO_ENTRANCE:
+			say("variance_intro")
+			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
+		var push: float = smoothstep(HERO_ENTRANCE, MASSACRE_LENGTH, massacre_time)
+		camera.global_position = boss_at + Vector3(1.5, 2.9, -1.7) + Vector3(0, -.6, 1.0) * push
+		camera.look_at(player.global_position + Vector3.UP * 1.25)
+		camera.fov = lerpf(40.0, 32.0, push)
+		camera.rotate_object_local(Vector3.BACK, deg_to_rad(-6.0 * (1.0 - push)))
+	if massacre_time >= MASSACRE_LENGTH:
+		beat_shot = ""
+		incident.boss_time = MASSACRE_LENGTH
+		incident.spawn_delay = 0.0
+		for bar in letterbox:
+			bar.hide()
+		release_camera()
+		return
+	camera.make_current()
+
+
+## The first angle round them with a clear line: no wall, and not through the boss.
+func _clear_angle(at: Vector3) -> float:
+	var space: PhysicsDirectSpaceState3D = incident.get_world_3d().direct_space_state
+	var boss: Node3D = incident.boss if is_instance_valid(incident.boss) else null
+	for step in range(12):
+		var angle: float = casualty_side * (.9 + step * TAU / 12.0)
+		var spot: Vector3 = at + Vector3(sin(angle), 0, cos(angle)) * 2.4 + Vector3.UP * -.35
+		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(at, spot + (spot - at).normalized() * .4, 1)).is_empty():
+			continue
+		if boss != null and Geometry3D.get_closest_point_to_segment(boss.global_position + Vector3.UP * 1.2, at, spot).distance_to(boss.global_position + Vector3.UP * 1.2) < 1.1:
+			continue
+		return angle
+	return casualty_side * .9
+
+
+func _casualty_shot() -> void:
+	var t: float = (Time.get_ticks_msec() - casualty_start) / 1000.0
+	var player: CharacterBody3D = incident.player
+	var rig: Camera3D = player.get_node("CameraRig/SpringArm3D/Camera3D")
+	if t >= CASUALTY_SECONDS or not is_instance_valid(casualty_body):
+		beat_shot = casualty_resume
+		casualty_resume = ""
+		ElementFx.slow_motion(&"casualty", 1.0)
+		crew_freeze.hide()
+		crew_stamp.hide()
+		crew_card.hide()
+		if beat_shot.is_empty():
+			for bar in letterbox:
+				bar.hide()
+			release_camera()
+		return
+	player.narrative_hold = true
+	player.invulnerable_left = maxf(player.invulnerable_left, .3)
+	incident.main.get_node("HUD").visible = false
+	if casualty_resume == "massacre":
+		_hold_boss()
+	# Low, tilted, drifting round them while the world all but stops.
+	var at: Vector3 = casualty_body.global_position + Vector3.UP * .9
+	if t - get_process_delta_time() <= 0.0 or casualty_angle > 99.0:
+		casualty_angle = _clear_angle(at)
+	var orbit: float = casualty_angle + casualty_side * t * .35
+	camera.global_position = at + Vector3(sin(orbit), 0, cos(orbit)) * 2.4 + Vector3.UP * -.35
+	camera.look_at(at + Vector3.UP * .2)
+	camera.rotate_object_local(Vector3.BACK, deg_to_rad(11.0 * casualty_side))
+	camera.fov = lerpf(40.0, 34.0, t / CASUALTY_SECONDS)
+	var handover: float = smoothstep(CASUALTY_SECONDS - .3, CASUALTY_SECONDS, t) if casualty_resume.is_empty() else 0.0
+	if handover > 0:
+		camera.global_transform = camera.global_transform.interpolate_with(rig.global_transform, handover)
+		camera.fov = lerpf(camera.fov, rig.fov, handover)
+	camera.make_current()
+	ElementFx.slow_motion(&"casualty", lerpf(.06, 1.0, handover))
+	var drain: float = smoothstep(0.0, .12, t) * (1.0 - handover)
+	crew_freeze.visible = true
+	(crew_freeze.material as ShaderMaterial).set_shader_parameter("amount", drain * .8)
+	(crew_freeze.material as ShaderMaterial).set_shader_parameter("tint", Color(1, .45, .4))
+	crew_card.visible = true
+	crew_card.position.x = lerpf(-700.0, 90.0, ease(minf(1.0, t / .16), .35))
+	crew_card.modulate.a = drain
+	crew_stamp.visible = t > .35
+	crew_stamp.scale = Vector2.ONE * lerpf(2.2, 1.0, ease(minf(1.0, (t - .35) / .12), .4))
+	if crew_stamp.visible and t - get_process_delta_time() <= .35:
+		sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -5)
+	var bars: float = 50.0 * smoothstep(0.0, .1, t) * (1.0 - handover)
+	for side in [0, 1]:
+		letterbox[side].visible = bars > .5
+		letterbox[side].offset_top = 0.0 if side == 0 else -bars
+		letterbox[side].offset_bottom = bars if side == 0 else 0.0
+
+
 func _flashing(time: float) -> bool:
 	for flash: Array in FLASHES:
 		if time >= flash[0] and time < flash[0] + FLASH_LENGTH:
@@ -1726,7 +1936,25 @@ func _crew_montage(time: float) -> void:
 		crew_card.modulate.a = drain
 
 
+## The staged Variance in the vault (before the real one takes over): idle, and swinging
+## at whoever is in reach.
+func _vault_demon(delta: float) -> void:
+	if incident.stage != incident.Stage.BOSS or not demon.visible:
+		return
+	if is_instance_valid(incident.boss):
+		demon.hide()
+		return
+	demon_swing -= delta
+	if demon_swing <= 0.0 and incident.coworkers.cavalry_standing() > 0:
+		demon_swing = randf_range(1.1, 1.8)
+		demon.animator.play(demon.clips.attack, .1)
+	elif not demon.animator.is_playing():
+		demon.animator.play(demon.clips.idle, .2)
+	demon.animator.advance(delta)
+
+
 func _process(delta: float) -> void:
+	_vault_demon(delta)
 	if slowmo_until > 0 and Time.get_ticks_msec() >= slowmo_until:
 		slowmo_until = 0
 		ElementFx.slow_motion(&"first_sighting", 1.0)
@@ -1764,10 +1992,10 @@ func _process(delta: float) -> void:
 			_opening(time, delta)
 	elif incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < boss_length + 2:
 		time = incident.boss_time
-		title.show()
+		title.visible = not (beat_shot in ["massacre", "casualty"]) or time >= boss_length - 2
 		title.text = "DISCREPANCY CONVERGING" if time < boss_length - 2 else "THE VARIANCE\nDifference detected. Explanation unavailable."
 		hint.visible = not is_instance_valid(incident.active_enemy)
-		if hint.visible:
+		if hint.visible and not demon.visible:
 			var center: Vector3 = incident.arrival_site() + Vector3.UP * 1.5
 			for index in range(fragments.size()):
 				var angle: float = index * TAU / 8 + time

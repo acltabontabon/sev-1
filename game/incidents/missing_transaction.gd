@@ -467,8 +467,8 @@ func trigger_boss() -> void:
 	log_event("Entered the vault; The Variance manifested")
 	boss_triggered = true
 	boss_time = 0
-	spawn_delay = presentation.boss_length
 	presentation.vault_entered()
+	spawn_delay = presentation.boss_length
 
 
 func arrival_site() -> Vector3:

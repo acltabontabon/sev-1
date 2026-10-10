@@ -1,5 +1,28 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.39 — The night shift goes in first (11 October 2026)
+
+Creator requests: the coworkers should fight the boss first and lose (some dismembered,
+calling for help, sounding beaten), with dramatic casualty shots and unhinged epitaphs,
+apologising and leaning on the engineer; then his hero entrance over their bodies.
+
+- **The gate opens and the night shift sprints past you** down the server corridor to take
+  on The Variance themselves (MORGAN, NADIA, JUN, JO and VAL, each with a battle cry).
+  Walking the corridor you hear it going badly: punches, impacts and voiced pain cries
+  ("OW! Is this HR?!", "OW! OW! I'm MANAGEMENT!").
+- **Walk into the vault and they fall in front of you**, one by one: sliced in half at the
+  waist with blood, or thrown across the room. Each gets a **casualty cam**: a nearly
+  frozen low dutch angle, a red-drained frame, and their HR record slammed on screen with
+  a stamp (MORGAN, ESCALATED ONE LAST TIME, SURVIVED BY 14 RECURRING INVITES: OFFBOARDED;
+  JO, TENURE: ONE DAY, EXIT INTERVIEW: MONDAY, 9:00: RESTRUCTURED). Their last words
+  are apologies, and it's all on you now ("Sorry! I'm just the intern! Please… you do it!").
+- **Hero entrance.** Over the monster's shoulder, the engineer walks in over his
+  colleagues with the Monolith; THE VARIANCE titles up; the real fight starts. The first
+  arrival only (retries and TAB skip straight to the fight, with the bodies already down).
+- 25 new voiced lines (battle cries, pain, apologies) from the coworkers' own voice
+  blends. Restarting brings everyone back. Presentation only: the boss fight itself is
+  unchanged.
+
 ## 0.2.38 — More of the night shift, sitting properly (11 October 2026)
 
 Creator requests: more inclusive cast (women, a gay coworker) with unhinged voices,

@@ -730,6 +730,30 @@ func _run() -> void:
 	await create_timer(incident.ENDING_HOLD + .3, true, false, true).timeout
 	check(paused and not player.camera_rig.controls_active, "the report follows once the ending has played")
 	incident.hold_ending = false
+	# The vault, first time: the night shift is already fighting The Variance, falls in
+	# front of the engineer, and the real fight starts after; a restart brings them back.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var crew_count: int = scene.find_children("*", "", true, false).size()
+	incident.coworkers.cavalry_in_headless = true
+	incident.presentation.killcam_in_headless = true
+	incident.presentation.boss_seen = false
+	incident._enter(incident.Stage.ENCOUNTER_TWO)
+	incident._enter(incident.Stage.BOSS)
+	await frames(2)
+	check(incident.coworkers.cavalry_standing() == 5 and incident.presentation.demon.visible, "the gate opens on the night shift charging The Variance")
+	player.position = Vector3(9, .05, -31.0)
+	await frames(3)
+	check(incident.presentation.beat_shot == "massacre" and not is_instance_valid(incident.boss), "walking into the vault starts the massacre before the fight")
+	# The casualty cams run on real time; frames here run faster than that.
+	var massacre_deadline: int = Time.get_ticks_msec() + 40000
+	while not is_instance_valid(incident.boss) and Time.get_ticks_msec() < massacre_deadline:
+		await frames(1)
+	check(incident.coworkers.cavalry_fallen() == 5 and is_instance_valid(incident.boss) and not incident.presentation.demon.visible, "all five fall, then the real Variance takes over")
+	incident.coworkers.cavalry_in_headless = false
+	incident.presentation.killcam_in_headless = false
+	scene.reset_encounter()
+	await frames(3)
+	check(incident.coworkers.cavalry_fallen() == 0 and incident.coworkers.cavalry_standing() == 0 and scene.find_children("*", "", true, false).size() <= crew_count + 2, "a restart brings the night shift back and leaves no gore behind")
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

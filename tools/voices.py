@@ -269,6 +269,12 @@ def talk_lines(talk):
                                         ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
                 lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
+    # The night shift charging into the boss fight, and what they scream on the way out.
+    for name, moments in talk.get('cavalry', {}).items():
+        for moment, text in moments.items():
+            for index, said in (enumerate(text) if isinstance(text, list) else [(None, text)]):
+                suffix = moment if index is None else f'{moment}_{index}'
+                lines.append({'id': f'cavalry_{name.lower()}_{suffix}', 'text': said, 'voice_profile': talk['trees'][name]['profile']})
     # Monsters muttering and screaming about their workload.
     for kind, moments in talk.get('barks', {}).items():
         for moment, texts in moments.items():

@@ -1377,5 +1377,52 @@
         "Closed… as duplicate…"
       ]
     }
+  },
+  "cavalry": {
+    "Manager": {
+      "charge": "I'll escalate this to DEATH!",
+      "help": "Somebody escalate! HELP US!",
+      "sorry": "Sorry… I escalated to you. You ARE the escalation now.",
+      "pain": [
+        "AGH! Not before my one-on-one!",
+        "OW! OW! I'm MANAGEMENT!"
+      ]
+    },
+    "SRE": {
+      "charge": "I'm on call! This is MY call!",
+      "help": "It's not in the runbook! HELP!",
+      "sorry": "I'm sorry. You're on call now. You were always on call.",
+      "pain": [
+        "UGH! That's going in the postmortem!",
+        "AAH! Paging myself! PAGING MYSELF!"
+      ]
+    },
+    "Designer": {
+      "charge": "NOT ON MY ERROR PAGE!",
+      "help": "Tell my husband the kerning was perfect!",
+      "sorry": "Sorry. Don't let it ship. You're all we've got.",
+      "pain": [
+        "OW! Not the face! The face is on brand!",
+        "AAGH! My wrists! I need those for Figma!"
+      ]
+    },
+    "Intern": {
+      "charge": "Is this part of onboarding?!",
+      "help": "HELP US! It's my FIRST DAY!",
+      "sorry": "Sorry! I'm just the intern! Please… you do it!",
+      "pain": [
+        "OW! Is this HR?!",
+        "AAAH! MOM! MOOOM!"
+      ]
+    },
+    "Director": {
+      "charge": "Let's align on VIOLENCE!",
+      "help": "Let's circle back! LET'S CIRCLE BACK!",
+      "sorry": "Sorry! Go win! I'll take credit for it on Monday!",
+      "pain": [
+        "OW! Let's take this OFFLINE!",
+        "AGH! That is NOT synergy!"
+      ]
+    }
   }
 }

@@ -5,6 +5,25 @@ extends Node3D
 ## walks past. When a fight ends, the manager on the call takes the credit.
 
 const ROOT: String = "res://assets/characters/quaternius/"
+## The boss fight: the night shift charges in to help, and loses, loudly. Who goes, in
+## what order, and how: "slice" (in half at the waist) or "fling" (across the vault).
+## Each gets an epitaph about their worth for the casualty cam.
+const CAVALRY: Array = [
+	["Manager", "fling", "ESCALATED ONE LAST TIME\nSURVIVED BY 14 RECURRING INVITES"],
+	["SRE", "slice", "FINALLY OFF CALL\nPAGER STILL RINGING"],
+	["Designer", "fling", "DIED ON BRAND\nLAST FILE: final_FINAL_v4.fig"],
+	["Intern", "slice", "TENURE: ONE DAY\nEXIT INTERVIEW: MONDAY, 9:00"],
+	["Director", "slice", "VALUE ADDED: ONE (1) DECK\nREPLACED BY: A SLIDE"]]
+const CAVALRY_ENTRY: Vector3 = Vector3(9.0, 0, -24.0)
+const CAVALRY_SPEED: float = 5.0
+const CAVALRY_FIRST: float = 4.5
+const CAVALRY_GAP: float = 3.0
+const STAMPS: Array[String] = ["OFFBOARDED", "RIGHT-SIZED", "LAID OFF", "RESTRUCTURED", "PIP'D"]
+const GORE_LAYER: int = 1 << 7
+## Headless suites skip the charge unless a test opts in.
+static var cavalry_in_headless: bool = false
+var cavalry_target: Node3D
+var cavalry_clock: float = -1.0
 ## How far forward of the sofa's centre a sitter's hips rest.
 const SOFA_FORWARD: float = .12
 ## Office-chair correction for the sitting clip (the engineer's SEATED_OFFSET).
@@ -12,6 +31,7 @@ const CHAIR_LIFT: float = .17
 const CHAIR_FORWARD: float = .3
 ## How long a looping gesture (talking) runs before they settle back to idle.
 const GESTURE_SECONDS: float = 3.5
+const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 ## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
@@ -71,8 +91,15 @@ func _ready() -> void:
 		line.position.y = 2.25
 		line.no_depth_test = true
 		body.add_child(line)
+		var voice: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		voice.name = "Voice"
+		voice.bus = &"Voice"
+		voice.unit_size = 6.0
+		voice.position.y = 1.5
+		body.add_child(voice)
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
-			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0})
+			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0,
+			"charging": false, "doom": 0.0, "fate": "", "cried": false, "dead": false, "pieces": [], "slot": 0})
 	reset()
 
 
@@ -114,9 +141,28 @@ func person(name: String) -> Dictionary:
 
 func reset() -> void:
 	was_fighting = false
+	cavalry_target = null
+	cavalry_clock = -1.0
 	for index in range(people.size()):
 		var someone: Dictionary = people[index]
 		var body: Node3D = someone.body
+		for piece: Node in someone.pieces:
+			if is_instance_valid(piece):
+				piece.queue_free()
+		# Stamps, slashes and spurts left on a fallen body go with the restart.
+		ElementFx.clear_from(body)
+		for child in body.get_children():
+			if child is CPUParticles3D or child is GPUParticles3D:
+				child.queue_free()
+		someone.pieces = []
+		someone.charging = false
+		someone.dead = false
+		someone.cried = false
+		someone.fate = ""
+		body.show()
+		var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
+		for bone in ["Abdomen", "UpperLeg.L", "UpperLeg.R"]:
+			skeleton.set_bone_pose_scale(skeleton.find_bone(bone), Vector3.ONE)
 		body.position = someone.entry.at
 		body.scale = Vector3.ONE * .62
 		body.rotation.y = someone.entry.facing
@@ -148,6 +194,11 @@ func _process(delta: float) -> void:
 		line.outline_modulate.a = line.modulate.a
 		# Remarks stay out of cutscenes and kill cams.
 		line.visible = line.modulate.a > .01 and (incident == null or incident.presentation == null or incident.presentation.beat_shot.is_empty())
+		if someone.dead:
+			continue
+		if someone.charging:
+			_charge(someone, delta)
+			continue
 		var routine: String = someone.entry.routine
 		if fighting and routine != "asleep" and routine != "sit":
 			_play(someone, "Defeat", .25, false)
@@ -163,15 +214,210 @@ func _process(delta: float) -> void:
 				var repairing: bool = someone.animator.is_playing() and someone.animator.assigned_animation == "ual/fixing"
 				if fighting != was_fighting or routine == "fix" and not repairing:
 					_routine(someone, false)
+	if cavalry_clock >= 0.0:
+		cavalry_clock += delta
 	if was_fighting and not fighting:
 		_applaud()
 	was_fighting = fighting
 
 
+## The gate is open: the night shift sprints past the engineer down the corridor to take
+## on The Variance themselves. They fight it (badly, loudly) until the engineer arrives.
+func charge(target: Node3D) -> void:
+	if cavalry_clock >= 0.0 or (DisplayServer.get_name() == "headless" and not cavalry_in_headless):
+		return
+	cavalry_target = target
+	cavalry_clock = 0.0
+	for index in range(CAVALRY.size()):
+		var someone: Dictionary = person(CAVALRY[index][0])
+		if someone.is_empty():
+			continue
+		var body: Node3D = someone.body
+		someone.charging = true
+		someone.fate = CAVALRY[index][1]
+		someone.slot = index
+		someone.cried = false
+		someone.doom = randf_range(1.5, 3.5) + index * .7
+		someone.line_left = 0.0
+		body.position = CAVALRY_ENTRY + Vector3((index - 2) * .9, 0, index * 1.1)
+		body.scale = Vector3.ONE * .62
+		_play(someone, "ual/sprint", .1, true)
+		_say(someone, "charge", "", .4 * index)
+
+
+func cavalry_fallen() -> int:
+	return people.filter(func(someone: Dictionary) -> bool: return someone.dead).size()
+
+
+func cavalry_standing() -> int:
+	return people.filter(func(someone: Dictionary) -> bool: return someone.charging).size()
+
+
+## The next of them goes down (for the arrival cutscene); "" when nobody is left.
+func fall_next() -> String:
+	for entry: Array in CAVALRY:
+		var someone: Dictionary = person(entry[0])
+		if not someone.is_empty() and someone.charging:
+			var centre: Vector3 = cavalry_target.global_position if is_instance_valid(cavalry_target) else someone.body.global_position
+			_fall(someone, (someone.body.global_position - centre).normalized())
+			return entry[0]
+	return ""
+
+
+## Everyone still standing goes down at once, without ceremony (skips and retries).
+func fall_all_now() -> void:
+	for entry: Array in CAVALRY:
+		var someone: Dictionary = person(entry[0])
+		if not someone.is_empty() and someone.charging:
+			var centre: Vector3 = cavalry_target.global_position if is_instance_valid(cavalry_target) else someone.body.global_position
+			var ring: float = someone.slot * TAU / CAVALRY.size() + .4
+			someone.body.position = centre + Vector3(sin(ring), 0, cos(ring)) * 2.6
+			_fall(someone, (someone.body.global_position - centre).normalized(), true)
+
+
+func _say(someone: Dictionary, moment: String, shown: String, delay: float = 0.0, variant: int = -1) -> void:
+	var talk: Dictionary = DIALOGUES.data().get("cavalry", {}).get(someone.entry.name, {})
+	var said: Variant = talk.get(moment, shown)
+	var text: String = str(said[variant % said.size()]) if said is Array else str(said)
+	var suffix: String = moment if not said is Array else "%s_%d" % [moment, variant % said.size()]
+	(someone.line as Label3D).text = text
+	someone.line_left = 2.4
+	var voice: AudioStreamPlayer3D = someone.body.get_node("Voice")
+	var path: String = "res://assets/audio/voices/talk/cavalry_%s_%s.ogg" % [str(someone.entry.name).to_lower(), suffix]
+	if DisplayServer.get_name() == "headless" or not ResourceLoader.exists(path):
+		return
+	voice.stream = load(path)
+	if delay > 0.0:
+		get_tree().create_timer(delay, false).timeout.connect(voice.play)
+	else:
+		voice.play()
+
+
+func _charge(someone: Dictionary, delta: float) -> void:
+	var body: Node3D = someone.body
+	if not is_instance_valid(cavalry_target) or not cavalry_target.is_visible_in_tree():
+		_play(someone, "Idle", .2, true)
+		return
+	var centre: Vector3 = cavalry_target.global_position
+	var angle: float = someone.slot * TAU / CAVALRY.size() + .4
+	var spot: Vector3 = centre + Vector3(sin(angle), 0, cos(angle)) * 2.6
+	spot.y = body.position.y
+	var step: Vector3 = spot - body.position
+	step.y = 0
+	var toward: Vector3 = centre - body.position
+	if step.length() > .25:
+		body.position += step.normalized() * minf(step.length(), CAVALRY_SPEED * delta)
+		body.rotation.y = lerp_angle(body.rotation.y, atan2(step.x, step.z), 1.0 - exp(-10.0 * delta))
+		_play(someone, "ual/sprint", .15, true)
+		return
+	body.rotation.y = lerp_angle(body.rotation.y, atan2(toward.x, toward.z), 1.0 - exp(-10.0 * delta))
+	# In the ring: swing, get hit, howl about it, swing again.
+	someone.doom -= delta
+	if someone.doom <= 0.0:
+		someone.doom = randf_range(2.6, 4.6)
+		someone.animator.play("CharacterArmature|RecieveHit", .05)
+		_say(someone, "pain", "", 0.0, randi())
+		ElementFx.flash(body, body.global_position + Vector3.UP * 1.0, Color(1, .3, .2), 2.0, 3.0, .12)
+		Blood.burst(incident if incident != null else self, body.global_position + Vector3.UP * 1.0, (body.global_position - centre).normalized() + Vector3.UP * .5, 14)
+		var hit: AudioStreamPlayer3D = body.get_node("Voice")
+		if DisplayServer.get_name() != "headless":
+			var thud: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+			thud.stream = preload("res://assets/audio/sfx/heavy_impact.ogg")
+			thud.bus = &"Effects"
+			thud.unit_size = 5.0
+			body.add_child(thud)
+			thud.position = hit.position
+			thud.play()
+			thud.finished.connect(thud.queue_free)
+	elif not someone.animator.is_playing() or someone.animator.assigned_animation == "ual/sprint":
+		someone.animator.play("CharacterArmature|Punch", .1)
+
+
+## One of the night shift meets The Variance.
+func _fall(someone: Dictionary, away: Vector3, quiet: bool = false) -> void:
+	var body: Node3D = someone.body
+	someone.charging = false
+	someone.dead = true
+	away.y = 0
+	away = away.normalized() if away.length() > .1 else Vector3.BACK
+	var at: Vector3 = body.global_position + Vector3.UP * .9
+	var level: Node = incident if incident != null else self
+	var stamp: String = STAMPS[someone.slot % STAMPS.size()]
+	if not quiet:
+		ElementFx.glyphs(body, at + Vector3.UP * 1.3, Color(1, .3, .25), [stamp], 1.4, 0.0)
+	if not quiet and incident != null and incident.get("presentation") != null:
+		var who: String = DIALOGUES.data().trees.get(someone.entry.name, {}).get("who", str(someone.entry.name).to_upper())
+		incident.presentation.casualty(body, who, CAVALRY[someone.slot][2], stamp)
+	# Their last words are for the engineer: sorry, and it's all on you now.
+	if not quiet:
+		_say(someone, "sorry", "", .2)
+	ElementFx.bolt(body, at - away.cross(Vector3.UP) * 1.2, at + away.cross(Vector3.UP) * 1.2, Color(1, .95, .8), .3, .1)
+	if someone.fate == "slice":
+		_slice(someone, away)
+	else:
+		# Thrown: knocked across the vault and left where they land.
+		someone.animator.play("ual/hit_knockback", .05)
+		var landing: Vector3 = body.position + away * 4.5
+		var throw: Tween = body.create_tween()
+		throw.tween_property(body, "position", landing + Vector3.UP * 1.4, .3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		throw.tween_property(body, "position", landing, .3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+		throw.tween_callback(func() -> void: someone.animator.play("ual/death_ual", .1))
+		Blood.burst(level, at, away + Vector3.UP * .6, 30)
+		Blood.splat(level, body.global_position + away * 4.5, away, 1.2)
+
+
+## In half at the waist: the legs stay standing a moment; the rest goes flying.
+func _slice(someone: Dictionary, away: Vector3) -> void:
+	var body: Node3D = someone.body
+	var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
+	var centre: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("Torso")).origin
+	someone.animator.pause()
+	var upper: RigidBody3D = RigidBody3D.new()
+	upper.top_level = true
+	upper.collision_layer = GORE_LAYER
+	upper.collision_mask = 1
+	upper.mass = 2.0
+	upper.angular_damp = 1.2
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	var ball: SphereShape3D = SphereShape3D.new()
+	ball.radius = .3
+	shape.shape = ball
+	upper.add_child(shape)
+	add_child(upper)
+	upper.global_position = centre
+	var copy: Node3D = body.duplicate(0)
+	copy.scale = Vector3.ONE
+	for child in copy.get_children():
+		if child is Label3D or child is AudioStreamPlayer3D:
+			child.queue_free()
+	upper.add_child(copy)
+	copy.global_transform = body.global_transform
+	var copy_skeleton: Skeleton3D = copy.find_child("Skeleton3D", true, false)
+	var copy_player: AnimationPlayer = copy.find_child("AnimationPlayer", true, false)
+	if copy_player != null:
+		copy_player.active = false
+	for index in skeleton.get_bone_count():
+		copy_skeleton.set_bone_pose_position(index, skeleton.get_bone_pose_position(index))
+		copy_skeleton.set_bone_pose_rotation(index, skeleton.get_bone_pose_rotation(index))
+	# The legs keep the hips; the flying half keeps everything above them.
+	skeleton.set_bone_pose_scale(skeleton.find_bone("Abdomen"), Vector3.ONE * .001)
+	for bone in ["UpperLeg.L", "UpperLeg.R"]:
+		copy_skeleton.set_bone_pose_scale(copy_skeleton.find_bone(bone), Vector3.ONE * .001)
+	upper.linear_velocity = away * 4.0 + Vector3.UP * 6.5
+	upper.angular_velocity = away.cross(Vector3.UP) * -8.0
+	someone.pieces = [upper]
+	var level: Node = incident if incident != null else self
+	Blood.burst(level, centre, away + Vector3.UP * .8, 60)
+	Blood.burst(level, centre, -away + Vector3.UP * .4, 24)
+	Blood.spurt(upper, Vector3.ZERO, -Vector3.UP, .9)
+	Blood.spurt(body, Vector3.UP * .9, Vector3.UP, .8)
+	Blood.splat(level, centre + away * .7, away, 1.4)
+
+
 ## Someone always takes credit for the engineer's work.
 func _applaud() -> void:
 	var manager: Dictionary = person("Manager")
-	if manager.is_empty():
+	if manager.is_empty() or manager.dead or manager.charging:
 		return
 	_play(manager, "Victory", .2, false)
 	manager.pause = 2.6
