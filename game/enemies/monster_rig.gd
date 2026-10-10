@@ -213,11 +213,13 @@ func _die(delta: float) -> void:
 		model.position.y = spec.get("lift", 0.0) * (1.0 - minf(1.0, dying * 2.0)) - sink * 1.2
 		_shade(0.0, 0.0, sink)
 		return
-	# The pieces come to rest, then dissolve where they fell.
+	# The pieces come to rest, then dissolve where they fell; a cut leaves a second pool.
 	if dying > 1.6:
 		for body in pieces:
-			if is_instance_valid(body):
+			if is_instance_valid(body) and not body.freeze:
 				body.freeze = true
+				if death_style == "slice":
+					Blood.splat(actor.get_parent(), body.global_position, body.linear_velocity, spec.height * .7)
 	_shade(0.0, 0.0, clampf((dying - 1.2) / .9, 0.0, 1.0))
 
 
@@ -306,6 +308,13 @@ func _slice(away: Vector3) -> void:
 	var side: Vector3 = away.cross(Vector3.UP).normalized()
 	ElementFx.bolt(actor, center - side * 1.4, center + side * 1.4, Color(1, .97, .85), .35, .1)
 	ElementFx.motes(actor, center, actor.magic_color, 26, 5.0, .7, -6.0, .14)
+	# Blood: a burst from the cut, both halves spurting, a pool where it happened.
+	var level: Node = actor.get_parent()
+	Blood.burst(level, center, away + Vector3.UP * .8, 60)
+	Blood.burst(level, center, -away + Vector3.UP * .4, 24)
+	Blood.spurt(body, Vector3.ZERO, -Vector3.UP, .9)
+	Blood.spurt(actor, Vector3.UP * spec.height * .4, Vector3.UP, .7)
+	Blood.splat(level, center + away * .7, away, spec.height * 1.1)
 
 
 func _hold_collapsed() -> void:

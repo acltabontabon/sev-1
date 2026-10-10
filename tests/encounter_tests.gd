@@ -609,11 +609,16 @@ func _run() -> void:
 	check(flung.rig.death_style == "tumble", "bodies that cannot be cut (flyers, blobs) tumble instead")
 	var chunks: int = halved.get_children().filter(func(node: Node) -> bool: return node.has_meta("gib")).size()
 	check(chunks >= 6, "data chunks spray from the kill")
+	check(get_nodes_in_group("blood").filter(func(node: Node) -> bool: return node is Decal).size() >= 1, "a slice splashes blood on the floor")
 	var lifted: float = halved.rig.pieces[0].global_position.y
 	await frames(20)
 	check(halved.rig.pieces[0].global_position.y > lifted - .2 or halved.rig.pieces[0].linear_velocity.length() > .5, "the severed half is a live physics body")
 	await frames(110)
 	check(halved.rig.pieces.all(func(body: RigidBody3D) -> bool: return body.freeze), "pieces come to rest before they dissolve")
+	check(get_nodes_in_group("blood").filter(func(node: Node) -> bool: return node is Decal).size() >= 2, "the severed half leaves a second pool where it lands")
+	scene.reset_encounter()
+	await frames(2)
+	check(get_nodes_in_group("blood").is_empty(), "restart mops up the blood")
 	MonsterRig.gore_in_headless = false
 	# Satisfying kills: a stamped death notice, FOCUS, and a streak banner for quick kills.
 	await fresh_stage(incident.Stage.INVESTIGATION)

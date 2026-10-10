@@ -1,5 +1,16 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.17 — Blood (10 October 2026)
+
+Creator request: blood splatter when enemies get sliced.
+
+- **Slices bleed.** A cut sprays a burst of dark droplets that arc and fall, both halves
+  spurt as the top one flies, and a pool splashes on the floor at the cut with streaks
+  thrown along the swing; the severed half leaves a second pool where it lands. Splat
+  shapes are generated once (irregular pools, satellite drops, streaks), at most 24 lie
+  on the floor at a time (oldest go first), each fades after about 10 s, and a restart
+  mops them all up. Visual only (`game/combat/blood.gd`).
+
 ## 0.2.16 — Works On My Machine, sliced in half, and kill cams (10 October 2026)
 
 Creator requests: add the "Works On My Machine" counter move; ragdolls or enemies getting

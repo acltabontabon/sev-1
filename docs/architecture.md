@@ -621,6 +621,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   bones at zero scale on each half (`collapsed`); `_tumble()` reparents the model into one;
   `_gibs()` spawns short-lived chunk bodies. All are children of the actor (freed with it)
   on collision layer 8 against the world only.
+- **Blood.** `game/combat/blood.gd` (`Blood`): `burst()` and `spurt()` are CPU droplet
+  particles (alpha, billboarded, gravity), `splat()` drops a Decal with a generated splat
+  texture onto the floor below a point (capped, fading). `MonsterRig._slice()` calls all
+  three; the incident's `_cleanup()` clears the `blood` group.
 - **Kill cams.** `presentation.kill_cam(subject, from, force)` runs a real-time `killcam`
   beat (slow motion through `ElementFx.freeze`); `missing_transaction._on_record_died()`
   calls it and, in a rendered game, delays the stage's upgrade offer by `upgrade_delay`.

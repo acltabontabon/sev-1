@@ -187,6 +187,8 @@ func _ready() -> void:
 	battle_mode.name = "BattleMode"
 	add_child(battle_mode)
 	_make_beacon()
+	if DisplayServer.get_name() != "headless":
+		Blood.prewarm()
 	dialogue = preload("res://game/ui/dialogue_box.gd").new()
 	dialogue.name = "Dialogue"
 	add_child(dialogue)
@@ -321,6 +323,7 @@ func _cleanup() -> void:
 			actor.queue_free()
 	actors.clear()
 	copies.clear()
+	Blood.clear(get_tree())
 
 
 func _enter(next: Stage) -> void:
