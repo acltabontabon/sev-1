@@ -42,7 +42,7 @@ the run while adjusting preferences. Use Quit or the window close action to exit
 
 ## Report a bug
 
-Include version **0.2.21**, Mac model/chip, macOS version, resolution, graphics setting,
+Include version **0.2.22**, Mac model/chip, macOS version, resolution, graphics setting,
 the incident stage, choices made, what you expected, what happened, and repeat steps.
 A screenshot or short clip is useful. Note whether retry fixed it. Local logs and
 `settings.cfg` live in `~/Library/Application Support/SEV-1/`. Share logs only after

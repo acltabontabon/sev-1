@@ -1,5 +1,14 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.22 — Softer lightning (10 October 2026)
+
+Creator feedback: the lightning effect was too edgy; make it soft and smooth.
+
+- Every lightning bolt (the HOT RELOAD combo hit, slash marks, the boss's strikes) is
+  now a smooth arc with a few gentle bends that drift slowly instead of a jagged
+  zigzag re-randomised every frame: tapered ends, three feathered layers (a wide tinted
+  haze, a coloured body, a bright core) and a smooth fade with no flicker.
+
 ## 0.2.21 — The Legacy Monolith, hero finishers, clearer monsters (10 October 2026)
 
 Creator feedback on 0.2.20: the finishers were too fast; make them dramatic and

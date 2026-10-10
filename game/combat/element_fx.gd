@@ -204,27 +204,48 @@ static func bolt(emitter: Node, from: Vector3, to: Vector3, color: Color, durati
 	var mesh: ImmediateMesh = ImmediateMesh.new()
 	strand.mesh = mesh
 	effect.add_child(strand)
+	var axis: Vector3 = to - from
+	var side: Vector3 = axis.cross(Vector3.UP).normalized()
+	if side.is_zero_approx():
+		side = Vector3.RIGHT
+	var lift: Vector3 = axis.cross(side).normalized()
+	# A few gentle bends, chosen once and drifting slowly: a soft arc, not a zigzag.
+	var bends: Array[Vector2] = []
+	var drift: Array[Vector2] = []
+	for knot in range(3):
+		bends.append(Vector2(randf_range(-1, 1), randf_range(-1, 1)) * axis.length() * .07)
+		drift.append(Vector2(randf_range(-1, 1), randf_range(-1, 1)) * axis.length() * .05)
 	var redraw: Callable = func(t: float) -> void:
 		mesh.clear_surfaces()
-		var axis: Vector3 = to - from
-		var side: Vector3 = axis.cross(Vector3.UP).normalized()
-		if side.is_zero_approx():
-			side = Vector3.RIGHT
-		var lift: Vector3 = axis.cross(side).normalized()
 		var points: PackedVector3Array = PackedVector3Array()
-		for step in range(9):
-			var along: float = step / 8.0
-			var jitter: float = sin(along * PI) * axis.length() * .12
-			points.append(from + axis * along + side * randf_range(-jitter, jitter) + lift * randf_range(-jitter, jitter))
-		var alpha: float = (1.0 - t) * (.6 + randf() * .4)
-		for plane in [side, lift]:
-			mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, _ribbon())
-			for point in points:
-				mesh.surface_set_color(Color(1, 1, 1, alpha * .8))
-				mesh.surface_add_vertex(point + plane * width * .35)
-				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
-				mesh.surface_add_vertex(point - plane * width)
-			mesh.surface_end()
+		var taper: PackedFloat32Array = PackedFloat32Array()
+		var steps: int = 24
+		for step in range(steps + 1):
+			var along: float = float(step) / steps
+			# Smooth blend of the bends (cosine-weighted), pinned at both ends.
+			var offset: Vector2 = Vector2.ZERO
+			for knot in range(3):
+				var center: float = (knot + 1) / 4.0
+				var weight: float = maxf(0.0, cos(clampf((along - center) * 4.0, -1.0, 1.0) * PI * .5))
+				offset += (bends[knot] + drift[knot] * t) * weight
+			offset *= sin(along * PI)
+			points.append(from + axis * along + side * offset.x + lift * offset.y)
+			taper.append(pow(sin(along * PI), .45))
+		var fade: float = pow(1.0 - t, 1.6)
+		var soft: Color = color.lerp(Color(1, 1, 1), .25)
+		# Wide haze, coloured body, bright core; every layer feathers to nothing at its edges.
+		for layer: Array in [[width * 4.5, Color(color, .22)], [width * 1.8, Color(soft, .55)], [width * .55, Color(1, 1, 1, .85)]]:
+			for plane in [side, lift]:
+				for edge in [1.0, -1.0]:
+					mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, _ribbon())
+					for index in range(points.size()):
+						var half: float = layer[0] * taper[index]
+						var tone: Color = layer[1]
+						mesh.surface_set_color(Color(tone.r, tone.g, tone.b, tone.a * fade))
+						mesh.surface_add_vertex(points[index])
+						mesh.surface_set_color(Color(tone.r, tone.g, tone.b, 0.0))
+						mesh.surface_add_vertex(points[index] + plane * half * edge)
+					mesh.surface_end()
 	redraw.call(0.0)
 	effect.on_tick = redraw
 	return effect
