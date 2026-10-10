@@ -276,6 +276,16 @@
    "pitch": -1,
    "processing": "double",
    "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "you": {
+   "blend": {
+    "am_michael": 1.0
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": 0,
+   "processing": "clean",
+   "direction": "The engineer: conversational, exhausted, competent. Dry; never announce the punchline."
   }
  },
  "crew": {
@@ -300,7 +310,7 @@
     "name": "MIGUEL",
     "team": "Finance Ops",
     "quip": "47 spreadsheets open. Needs one more.",
-    "line": "VLOOKUP is looking back at me.",
+    "line": "VLOOKUP is looking back at me. I think it's judging my formulas.",
     "body": "casual2_male.fbx",
     "profile": "miguel"
    },
@@ -353,12 +363,12 @@
   ]
  },
  "host_replies": {
-  "record": "Fine. Balanced. Debits equal credits equal debits equal credits equal—",
-  "blocker": "Your question has been forwarded to the Change Advisory Board. Expected response: after the heat death of the universe.",
-  "invite": "I'm great! Let's sync on how great I am. I've sent you an invite. It's recurring. Forever. Accept?",
-  "scope": "Fine! Just one tiny thing. And another. And— everything. I want everything. Small ask."
+  "record": "Fine. Balanced. Debits equal credits equal debits equal credits equal— why are there three of you? Why do you all disagree?",
+  "blocker": "Your question has been forwarded to the Change Advisory Board. Next meeting: after the heat death of the universe. Please bring a rollback plan.",
+  "invite": "I'm great! Let's sync on how great I am. I've sent you an invite. It's recurring. Forever. You can't decline. I removed the button.",
+  "scope": "Fine! Just one tiny thing. And another. And a dashboard. And AI. And the moon. Small ask. Barely a requirement."
  },
- "host_soon": "See you soon. Very soon. Your ticket is almost ready.",
+ "host_soon": "See you soon. Very soon. Your ticket is almost ready. It has your name on it. It always did.",
  "trees": {
   "Sleeper": {
    "who": "GARY",
@@ -366,7 +376,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "zZz… the dashboards are green… the dashboards are always green… zZz…",
+     "text": "…the dashboards are green… the dashboards are always green… don't page me… I'm a load balancer…",
      "replies": [
       [
        "Wake up. Production is on fire.",
@@ -382,14 +392,14 @@
        }
       ],
       [
-       "(Check their pulse. And their pager.)",
+       "(Poke the pager.)",
        "pager",
        {}
       ]
      ]
     },
     "wake": {
-     "text": "Production has been on fire since the reorg. I'm conserving energy for the postmortem. Someone has to look rested in the screenshot.",
+     "text": "Production has been on fire since the reorg. I've been on fire since the reorg. We're the same now, production and me. We have matching alerts.",
      "replies": [
       [
        "You're on call too!",
@@ -397,28 +407,32 @@
        {}
       ],
       [
-       "Fair.",
-       "",
+       "That's bleak.",
+       "bleak",
        {}
       ]
      ]
     },
     "spirit": {
-     "text": "I'm on call in spirit. My body is Out Of Office. We're in different time zones, me and my body.",
+     "text": "I'm on call in spirit. My body filed for Out Of Office. Legally we're two separate entities now. My body has better benefits.",
      "replies": [
       [
-       "…Respect.",
+       "Respect.",
        "",
        {}
       ]
      ]
     },
+    "bleak": {
+     "text": "Bleak is a strong word. I prefer 'operationally mature'. Now lower your voice. My nightmares are running a canary deploy.",
+     "replies": []
+    },
     "tuck": {
-     "text": "…tell my manager I was 'heads-down'… that's not a lie… my head is down…",
+     "text": "Tell my manager I was heads-down. It's not a lie. My head. Is down. On the keyboard. …I think I just approved something.",
      "replies": []
     },
     "pager": {
-     "text": "The pager is set to 'vibrate'. It's under them. It has been vibrating since 4 PM. They call it 'the massage'.",
+     "text": "Don't touch the pager. It's been vibrating under me since four PM. I named it Kevin. Kevin is the only one who checks on me.",
      "replies": [
       [
        "Let them sleep.",
@@ -457,7 +471,7 @@
      ]
     },
     "which": {
-     "text": "INC-000. It's the incident about having too many incidents. We scheduled a meeting to triage the meetings. Then the meeting got its own incident number.",
+     "text": "INC-000. The incident about having too many incidents. We opened a war room. The war room got its own incident. Now the incidents are unionizing.",
      "replies": [
       [
        "That's insane.",
@@ -472,11 +486,11 @@
      ]
     },
     "process": {
-     "text": "That's process.",
+     "text": "That's process. Insanity is just process without a wiki page.",
      "replies": []
     },
     "observer": {
-     "text": "I can add you as an Observer. Observers get every notification and none of the authority. It's like management, but honest.",
+     "text": "I can add you as an Observer. Observers get every notification and none of the authority. It's like being management, but you're aware of it.",
      "replies": [
       [
        "Pass.",
@@ -486,7 +500,7 @@
      ]
     },
     "help": {
-     "text": "I'd love to, but my OKR is 'tickets closed', not 'monsters killed'. File a ticket and I'll close it as Duplicate. Great for my numbers.",
+     "text": "I'd love to, but my goal this quarter is tickets closed, not monsters killed. If one eats you, I'll close your ticket as Duplicate. Great for my numbers. Thank you for your sacrifice.",
      "replies": [
       [
        "Thanks for nothing.",
@@ -496,7 +510,7 @@
      ]
     },
     "watch": {
-     "text": "Watching is a contribution. I'm 'maintaining situational awareness'. It's on my self-review. Under 'Leadership'.",
+     "text": "Watching is a contribution. I'm maintaining situational awareness. It's on my self-review under 'Leadership'. Also under 'Teamwork'. Also under 'Hobbies'.",
      "replies": [
       [
        "Of course it is.",
@@ -506,7 +520,7 @@
      ]
     },
     "again": {
-     "text": "Still not my incident. Still watching, though. Strong work on the one you're doing alone.",
+     "text": "Still not my incident. But I've started a document called 'Lessons Learned From Watching You'. Chapter one is just the word 'wow'.",
      "replies": [
       [
        "…",
@@ -525,7 +539,7 @@
    "again": "again",
    "nodes": {
     "a": {
-     "text": "Yes, someone's on it. No, I don't know who. — Oh! You! You're on it?",
+     "text": "Yes, someone's on it. No, I don't know who. — Oh! You! You're on it? Incredible. Can I put your face in a slide?",
      "replies": [
       [
        "Yes. I'm on it. Alone.",
@@ -545,7 +559,7 @@
      ]
     },
     "eta": {
-     "text": "Amazing. I'll tell leadership 'we' are on it. Quick one: can you give me an ETA for the ETA? I need a number to say confidently.",
+     "text": "Amazing. I'll tell leadership 'we' are on it. Quick one: can you give me an ETA for the ETA? And how confident are you in the ETA of the ETA, as a percentage?",
      "replies": [
       [
        "Five minutes.",
@@ -568,15 +582,15 @@
      ]
     },
     "deck": {
-     "text": "Love it. I'll put 'two minutes' in the deck to show ambition. If it slips, that's a growth opportunity. For you.",
+     "text": "Love it. I'll say two minutes in the deck to show ambition. If it slips, that's a growth opportunity. For you. I'll be growing in a different direction. Upward.",
      "replies": []
     },
     "aligned": {
-     "text": "I'll write 'aligned on next steps'. That sentence has never been wrong. It has never been anything.",
+     "text": "Perfect. I'll write 'aligned on next steps'. That sentence has never been wrong. It has never been anything. It's a shrug wearing a blazer.",
      "replies": []
     },
     "managing": {
-     "text": "Managing expectations. Mostly upward. Leadership expects production to be fixed, and I expect to be thanked for it.",
+     "text": "Managing expectations. Mostly upward. Leadership expects production to be fixed. I expect to be thanked for it. You expect to go home. Two out of three. Very healthy ratio.",
      "replies": [
       [
        "That's unbelievable.",
@@ -591,11 +605,11 @@
      ]
     },
     "growth": {
-     "text": "Unbelievable growth, yes. Put that in your self-review. In the 'what your manager did' box. Use full sentences.",
+     "text": "Unbelievable growth, yes! Put that in your self-review, in the box labelled 'What your manager did'. Use the passive voice. 'Mistakes were fixed.'",
      "replies": []
     },
     "help": {
-     "text": "I am helping. I've renamed the Slack channel twice. Morale is up eleven percent. I measured it. With a poll. That I answered.",
+     "text": "I am helping. I renamed the Slack channel twice. I added an emoji. Morale is up eleven percent. I measured it with a poll. That I answered. Twice.",
      "replies": [
       [
        "…",
@@ -605,10 +619,10 @@
      ]
     },
     "home": {
-     "text": "Of course! Right after this. And the retro. And the retro about the retro. We're a family here, and family doesn't leave at 5.",
+     "text": "Of course! Right after this. And the retro. And the retro about the retro. And the offsite where we discuss why nobody goes home. We're a family here, and families don't log off.",
      "replies": [
       [
-       "(Leave at 5.)",
+       "(Leave at five anyway.)",
        "",
        {
         "burnout": 3,
@@ -618,7 +632,7 @@
      ]
     },
     "again": {
-     "text": "Back so soon? Is it fixed? No? Then why are you talking to me? I'm in a very important tab.",
+     "text": "You again? Is it fixed? No? Then why are you talking to me? I'm in a very important browser tab. It's my calendar. I'm moving things around. Strategically.",
      "replies": [
       [
        "Sorry.",
@@ -636,7 +650,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "Ticket open since 2019. Today's the day. Probably.",
+     "text": "Ticket open since 2019. Today's the day. Probably. Me and this microwave have an understanding. It doesn't work, and neither do I.",
      "replies": [
       [
        "What's wrong with it?",
@@ -654,7 +668,7 @@
      ]
     },
     "chain": {
-     "text": "Nothing's wrong with it. It's waiting on a part. The part is waiting on a PO. The PO is waiting on budget. Budget is waiting on Q3. Q3 is waiting on the microwave.",
+     "text": "Nothing's wrong with it. It's waiting on a part. The part's waiting on a PO. The PO's waiting on budget. Budget's waiting on Q3. Q3 is waiting on the microwave. I've been in this loop so long we're legally married.",
      "replies": [
       [
        "That's a circular dependency.",
@@ -669,15 +683,15 @@
      ]
     },
     "word": {
-     "text": "Don't say that word near it. Last time someone said 'circular dependency' it sparked and three VPs got promoted.",
+     "text": "Don't say that word near it. Last time someone said 'circular dependency' it sparked, the lights went out, and three vice presidents got promoted.",
      "replies": []
     },
     "capex": {
-     "text": "A new one is CapEx. Fixing the old one is OpEx. I've spent four years of OpEx avoiding sixty dollars of CapEx. The spreadsheet says I'm winning.",
+     "text": "A new one is capital expense. Fixing the old one is operating expense. I've spent four years of operating expense avoiding sixty dollars of capital expense. The spreadsheet says I'm winning. I made the spreadsheet.",
      "replies": []
     },
     "hand": {
-     "text": "Sure. Hold this wire. No, not that one— … you felt that, right? Good. That means it works. Somewhere.",
+     "text": "Sure. Hold this wire. No, not that one. Not that one either. — You felt that, right? Good. That means it works. Somewhere. Possibly in your spine.",
      "replies": []
     }
    },
@@ -689,7 +703,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "Yesterday: meetings. Today: meetings. Blockers: meetings.",
+     "text": "Yesterday: meetings. Today: meetings. Blockers: meetings. Tomorrow: a meeting about the meetings, which I'm blocked on. By a meeting.",
      "replies": [
       [
        "Who are you talking to?",
@@ -704,7 +718,7 @@
      ]
     },
     "alone": {
-     "text": "The standup. Everyone dropped off at 9:15. I don't know how to end it. Nobody ever taught me how to end it.",
+     "text": "The standup. Everyone dropped off at 9:15. This morning. I don't know how to end it. Nobody ever taught me how to end it. I've been giving updates to an empty room for eight hours. The room seems engaged.",
      "replies": [
       [
        "Just say 'that's it from me'.",
@@ -722,15 +736,15 @@
      ]
     },
     "free": {
-     "text": "…that's… it… from me. — Oh no. Oh, I'm free. What do I do with my hands? Who do I report my feelings to?",
+     "text": "That's… it… from me. — Oh no. Oh, I'm free. What do I do with my hands? Who do I report my feelings to? Is there a ticket for feelings? Can I point it?",
      "replies": []
     },
     "velocity": {
-     "text": "Velocity is up 400 percent since I started counting each sentence as a story point. This one is a three.",
+     "text": "Velocity is up four hundred percent since I started counting every sentence as a story point. This sentence is a three. This one's a five, it's emotionally complex.",
      "replies": []
     },
     "blockers": {
-     "text": "You, physically. Also Legal, Procurement, the VPN, the concept of Friday, and a calendar invite titled 'Quick Chat (2h)'.",
+     "text": "You, physically. Also Legal, Procurement, the VPN, the concept of Friday, and a calendar invite called 'Quick Chat', two hours, no agenda, sent by someone who left the company in March.",
      "replies": [
       [
        "Good luck.",
@@ -748,7 +762,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "Is it normal to be on call on day one?",
+     "text": "Is it normal to be on call on day one? They gave me a pager and a hug. The hug felt like an apology.",
      "replies": [
       [
        "Totally normal.",
@@ -771,7 +785,7 @@
      ]
     },
     "normal": {
-     "text": "Cool cool cool. They also gave me production access, a pager, and the root password on a sticky note. Is that also normal?",
+     "text": "Cool cool cool. They also gave me production access and the root password on a sticky note. The sticky note says 'do not lose'. I've lost it twice. It keeps coming back.",
      "replies": [
       [
        "Burn the sticky note.",
@@ -786,15 +800,15 @@
      ]
     },
     "loadbearing": {
-     "text": "I can't. It's load-bearing. The VPN stops working without it. IT said it's 'temporarily permanent'.",
+     "text": "I can't. It's load-bearing. The VPN stops working without it. IT says it's 'temporarily permanent'. Like me. Like all of us.",
      "replies": []
     },
     "box": {
-     "text": "I can't run, I'm carrying the 'Culture' box. It's mostly lanyards. And one kombucha. The kombucha is the culture.",
+     "text": "I can't run, I'm carrying the culture box. It's mostly lanyards and one kombucha. The kombucha is the culture. It's alive. It's been here longer than the CEO.",
      "replies": []
     },
     "swag": {
-     "text": "Four hundred t-shirts that say DISRUPT. They disrupted the budget for raises to print them. I got a small. I'm a large. That's also culture.",
+     "text": "Four hundred t-shirts that say DISRUPT. They disrupted the budget for raises to print them. I got a small. I'm a large. That's also culture. Everything is culture if you're brave enough.",
      "replies": [
       [
        "Welcome aboard.",
@@ -812,7 +826,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "I'm working from home. This is home now.",
+     "text": "I'm working from home. This is home now. Return-to-office worked so well, I returned to it permanently.",
      "replies": [
       [
        "You live here?",
@@ -827,7 +841,7 @@
      ]
     },
     "live": {
-     "text": "Define 'live'. I have a sofa, a microwave I'm not allowed to use, and a standing desk I sit at. My commute is four metres. Return-to-office was a huge success.",
+     "text": "Define 'live'. I have a sofa, a microwave I'm not allowed to use, and a standing desk I sit at. My commute is four metres. I charge my phone from the badge reader. I am the office now.",
      "replies": [
       [
        "Huge.",
@@ -837,7 +851,7 @@
      ]
     },
     "certificate": {
-     "text": "Sad? I hit one hundred percent badge-in compliance. HR sent me a certificate. I sleep under it. It's warmer than it looks.",
+     "text": "Sad? I hit one hundred percent badge-in compliance. HR sent me a certificate. I sleep under it. It's warmer than it looks. On weekends I badge in just to feel something.",
      "replies": []
     }
    },
@@ -849,7 +863,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "It said one minute. That was forty minutes ago.",
+     "text": "It said one minute. That was forty minutes ago. I've watched it the whole time. We've been through a lot together, me and this burrito.",
      "replies": [
       [
        "What's in there?",
@@ -864,7 +878,7 @@
      ]
     },
     "burrito": {
-     "text": "A burrito. Or it was. It's in a superposition now. Facilities marked it 'pending'. Like my promotion.",
+     "text": "A burrito. Or it was. It's in a superposition now. Facilities marked it 'pending'. Like my promotion. Like my raise. Like my will to live, which is also in there, slowly rotating.",
      "replies": [
       [
        "Just eat it cold.",
@@ -879,15 +893,15 @@
      ]
     },
     "sunk": {
-     "text": "And walk away from forty minutes of sunk cost? That's not how we do things here. Here we double down. Ask the roadmap.",
+     "text": "And walk away from forty minutes of sunk cost? That's not how we do things here. Here we double down. Ask the roadmap. Ask the blockchain pivot. Ask Gary.",
      "replies": []
     },
     "escalate": {
-     "text": "I escalated it. It came back assigned to me, as a Blocker. Now I'm blocking my own burrito.",
+     "text": "I escalated it. It came back assigned to me, as a Blocker. Now I'm blocking my own burrito. I scheduled a meeting with myself about it. I declined.",
      "replies": []
     },
     "denial": {
-     "text": "Don't. I know. I'm in the denial stage. Let me have this. It's the only thing here with a status light that's honest.",
+     "text": "Don't. I know. I'm in the denial stage. Let me have this. It's the only thing in this building with an honest status light. It says 'nothing is happening'. Respect.",
      "replies": []
     }
    },
@@ -899,7 +913,7 @@
    "start": "a",
    "nodes": {
     "a": {
-     "text": "We're like a family here. A family with KPIs.",
+     "text": "We're like a family here. A family with KPIs. And a performance review at Thanksgiving.",
      "replies": [
       [
        "What kind of family?",
@@ -919,11 +933,11 @@
      ]
     },
     "family": {
-     "text": "The kind you can't leave, where holidays are optional, and the parent is a quarterly earnings call.",
+     "text": "The kind you can't leave, where holidays are optional, and Dad is a quarterly earnings call. Mom is the stock price. We don't talk about Uncle Layoffs.",
      "replies": []
     },
     "hiring": {
-     "text": "Always! We need a senior engineer with ten years in a framework released last spring. Compensation: exposure. To production.",
+     "text": "Always! We need a senior engineer with ten years of experience in a framework released last spring. Compensation: exposure. To production. Directly. Like radiation.",
      "replies": [
       [
        "That's exploitative.",
@@ -941,26 +955,38 @@
      ]
     },
     "ownership": {
-     "text": "We prefer 'high-ownership culture'. You own everything. Except equity.",
+     "text": "We prefer 'high-ownership culture'. You own everything. The outages, the pager, the blame. Everything except equity.",
      "replies": []
     },
     "sign": {
-     "text": "You already did. Page 41 of the laptop policy. Welcome back. You never left.",
+     "text": "You already did. Page forty-one of the laptop policy. Welcome back. You never left. Nobody ever leaves. Smile for the careers page.",
      "replies": []
     },
     "pay": {
-     "text": "Extremely competitive. Competitive with what, we can't legally disclose. But we have a ping-pong table. Nobody's allowed to use it during business hours, which are all hours.",
+     "text": "Extremely competitive. Competitive with what, we can't legally disclose. But we have a ping-pong table. Nobody's allowed to use it during business hours, which are all hours. It's a sculpture now.",
      "replies": []
     }
    },
    "profile": "drew"
   }
  },
- "pronunciation": {
-  "talk_sleeper_a": "Mmmh… the dashboards are green… the dashboards are always green… mmmh…",
-  "talk_standup_free": "…that's… it… from me. Oh no. Oh, I'm free. What do I do with my hands? Who do I report my feelings to?",
-  "talk_manager_a": "Yes, someone's on it. No, I don't know who. Oh! You! You're on it?",
-  "talk_facilities_hand": "Sure. Hold this wire. No, not that one… you felt that, right? Good. That means it works. Somewhere.",
-  "talk_recruiter_pay": "Extremely competitive. Competitive with what, we can't legally disclose. But we have a ping pong table. Nobody's allowed to use it during business hours, which are all hours."
+ "pronunciation": {},
+ "spoken": {
+  "INC-000": "incident zero",
+  "VLOOKUP": "vee-lookup",
+  "DISRUPT": "disrupt",
+  "ETA": "E.T.A.",
+  "VPN": "V.P.N.",
+  "IT": "I.T.",
+  "HR": "H.R.",
+  "CEO": "C.E.O.",
+  "KPIs": "K.P.I.s",
+  "AI": "A.I.",
+  "PO": "P.O.",
+  "PO's": "P.O.'s",
+  "Q3": "Q three",
+  "9:15": "nine fifteen",
+  "2019": "twenty nineteen",
+  "YOU": "you"
  }
 }

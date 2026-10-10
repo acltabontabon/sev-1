@@ -306,13 +306,18 @@ func talk() -> void:
 		if entry[0] == "Manager":
 			await shot("talk_prompt")
 		incident.talk(incident.talk_target())
-		await frames(40)
+		await frames(20)
+		await shot(entry[1] + "_establish")
 		incident.dialogue.shown = 999.0
-		await frames(4)
+		await live(1.7)
 		await shot(entry[1])
 		incident.dialogue.choose(0)
+		await frames(20)
+		await shot(entry[1] + "_you")
+		incident.dialogue.advance()
+		incident.dialogue.advance()
 		incident.dialogue.shown = 999.0
-		await frames(4)
+		await frames(30)
 		await shot(entry[1] + "_reply")
 		incident.dialogue.close()
 		await frames(3)

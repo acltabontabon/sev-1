@@ -24,6 +24,13 @@ var toast: Label
 ## Each line is spoken; the text types out at the speed of the voice.
 var speaker: AudioStreamPlayer
 var pace: float = SPEED
+var on_frame: Callable
+## "them" while the other person talks, "you" while the engineer answers.
+var speaking: String = "them"
+var answer_next: String = ""
+var line_time: float = 0.0
+var line_count: int = 0
+var hold_left: float = 0.0
 
 
 func _ready() -> void:
@@ -92,15 +99,41 @@ func is_open() -> bool:
 	return visible
 
 
-## Start a talk. `effect` receives a reply's effect dictionary when it has one.
-func open(talk: Dictionary, effect: Callable, again: bool = false) -> void:
+## Start a talk. `effect` receives a reply's effect dictionary when it has one; `frame`
+## is called every frame with (who is speaking: "them" or "you", seconds into the line,
+## line number, the line's text) so the incident can cut cameras and gesture.
+func open(talk: Dictionary, effect: Callable, again: bool = false, frame: Callable = Callable()) -> void:
 	tree = talk
 	on_effect = effect
-	name_label.text = talk.get("who", "")
-	role_label.text = str(talk.get("role", "")).to_upper()
+	on_frame = frame
+	line_count = 0
 	toast.text = ""
 	show()
 	_go(talk.get("again", talk.start) if again else talk.start)
+
+
+## Show and speak one line: the other person's (with replies) or the engineer's answer.
+func _say(who: String, text: String, clip: String) -> void:
+	speaking = who
+	line_time = 0.0
+	line_count += 1
+	name_label.text = "YOU" if who == "you" else tree.get("who", "")
+	role_label.text = "ON CALL  ·  ENGINEER" if who == "you" else str(tree.get("role", "")).to_upper()
+	name_label.add_theme_color_override("font_color", ACCENT if who == "you" else Color(.95, .97, 1))
+	text_label.text = text
+	text_label.visible_characters = 0
+	shown = 0.0
+	pace = SPEED
+	speaker.stop()
+	var path: String = DIALOGUES.audio(clip)
+	if not clip.is_empty() and ResourceLoader.exists(path):
+		speaker.stream = load(path)
+		pace = clampf(text_label.get_total_character_count() / maxf(speaker.stream.get_length() * .85, .3), 18.0, 90.0)
+		if DisplayServer.get_name() != "headless":
+			speaker.play()
+	for child in replies.get_children():
+		replies.remove_child(child)
+		child.queue_free()
 
 
 func _go(id: String) -> void:
@@ -109,24 +142,11 @@ func _go(id: String) -> void:
 		return
 	node_id = id
 	var node: Dictionary = tree.nodes[id]
-	text_label.text = node.text
-	text_label.visible_characters = 0
-	shown = 0.0
-	pace = SPEED
-	speaker.stop()
-	var path: String = DIALOGUES.audio(str(tree.get("voice", "")) + id)
-	if tree.has("voice") and ResourceLoader.exists(path):
-		speaker.stream = load(path)
-		pace = clampf(text_label.get_total_character_count() / maxf(speaker.stream.get_length() * .85, .3), 18.0, 90.0)
-		if DisplayServer.get_name() != "headless":
-			speaker.play()
-	for child in replies.get_children():
-		replies.remove_child(child)
-		child.queue_free()
-	var options: Array = node.replies if not node.replies.is_empty() else [["Leave", "", {}]]
-	for index in range(options.size()):
+	_say("them", node.text, str(tree.get("voice", "")) + id if tree.has("voice") else "")
+	var list: Array = options()
+	for index in range(list.size()):
 		var button: Button = Button.new()
-		button.text = "%d   %s" % [index + 1, options[index][0]]
+		button.text = "%d   %s" % [index + 1, list[index][0]]
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.flat = true
 		button.add_theme_font_size_override("font_size", 18)
@@ -145,8 +165,18 @@ func typed() -> bool:
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	line_time += delta
 	shown += delta * pace
 	text_label.visible_characters = -1 if typed() else int(shown)
+	if on_frame.is_valid():
+		on_frame.call(speaking, line_time, line_count, text_label.text)
+	# The engineer's answer plays out, then the other person responds.
+	if speaking == "you":
+		if typed() and not speaker.playing:
+			hold_left -= delta
+			if hold_left <= 0:
+				advance()
+		return
 	var ready: bool = typed()
 	replies.modulate.a = move_toward(replies.modulate.a, 1.0 if ready else 0.0, delta * 8.0)
 	for button: Button in replies.get_children():
@@ -161,7 +191,7 @@ func options() -> Array:
 
 
 func choose(index: int) -> void:
-	if not visible or not typed():
+	if not visible or not typed() or speaking == "you":
 		return
 	var list: Array = options()
 	if index < 0 or index >= list.size():
@@ -172,7 +202,21 @@ func choose(index: int) -> void:
 		on_effect.call(effect)
 		var change: int = int(effect.get("burnout", 0))
 		toast.text = "BURNOUT %s%d  ·  %s" % ["+" if change > 0 else "−", absi(change), str(effect.get("note", "")).to_upper()]
-	_go(reply[1])
+	answer_next = reply[1]
+	if DIALOGUES.voiced_reply(reply[0]) and reply[0] != "Leave":
+		hold_left = .25
+		_say("you", reply[0], DIALOGUES.reply_id(reply[0]))
+	else:
+		_go(answer_next)
+
+
+## Finish the current line now: complete the typing, or end the engineer's answer.
+func advance() -> void:
+	if not typed():
+		shown = 9999.0
+	elif speaking == "you":
+		speaking = "them"
+		_go(answer_next)
 
 
 func close() -> void:
@@ -180,6 +224,7 @@ func close() -> void:
 		return
 	hide()
 	speaker.stop()
+	speaking = "them"
 	tree = {}
 	node_id = ""
 	for child in replies.get_children():
@@ -195,8 +240,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("release_mouse"):
 		close()
 	elif event.is_action_pressed("inspect_record") or (event is InputEventKey and event.physical_keycode in [KEY_SPACE, KEY_ENTER]):
-		if not typed():
-			shown = 9999.0
+		if not typed() or speaking == "you":
+			advance()
 		elif options().size() == 1:
 			choose(0)
 		else:

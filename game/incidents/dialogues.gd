@@ -51,3 +51,24 @@ static func host_tree(identity: Dictionary, kind: String) -> Dictionary:
 
 static func audio(id: String) -> String:
 	return AUDIO % id
+
+
+## The engineer's spoken reply clip; tools/voices.py reply_id() uses the same rule.
+static func reply_id(text: String) -> String:
+	var slug: String = ""
+	for character in text.to_lower():
+		if character in "abcdefghijklmnopqrstuvwxyz0123456789":
+			slug += character
+		elif not slug.ends_with("_"):
+			slug += "_"
+	return "you_" + slug.lstrip("_").rstrip("_").left(40)
+
+
+## Stage directions in parentheses and bare ellipses are not spoken.
+static func voiced_reply(text: String) -> bool:
+	if text.begins_with("("):
+		return false
+	for character in text:
+		if character.to_lower() in "abcdefghijklmnopqrstuvwxyz0123456789":
+			return true
+	return false

@@ -60,6 +60,8 @@ var dialogue: CanvasLayer
 var talk_prompt: Label3D
 var talking: Node3D
 var talked: Dictionary = {}
+var talk_with: Dictionary = {}
+var talk_line: int = 0
 ## The optional meeting: an invite holds the room while two records press in.
 const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
 @export_range(0, 6) var max_telegraphs: int = 2
@@ -185,6 +187,8 @@ func _ready() -> void:
 	coworkers = preload("res://game/incidents/coworkers.gd").new()
 	coworkers.name = "Coworkers"
 	coworkers.incident = self
+	# The incident runs always (menus, voice); the night shift stops when play does.
+	coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(coworkers)
 	# Pantry objects: honest reactions, one of them useful.
 	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"]]:
@@ -587,6 +591,7 @@ func _make_host(kind: String, at: Vector3) -> Node3D:
 	crew_index[kind] = crew_index.get(kind, 0) + 1
 	host.position = at
 	host.rotation.y = randf() * TAU
+	host.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(host)
 	actors.append(host)
 	return host
@@ -1105,14 +1110,21 @@ func talk(someone: Dictionary) -> void:
 		if someone.standing:
 			# Office bodies face +Z: turn the speaker back toward the engineer.
 			talking.global_rotation.y = atan2(-to.x, -to.z)
-	# The speaker keeps breathing while everything else waits.
+	# The two of them keep breathing (and gesturing) while everything else waits.
 	talking.process_mode = Node.PROCESS_MODE_ALWAYS
+	player.get_node("Visual/Character").process_mode = Node.PROCESS_MODE_ALWAYS
+	# Nobody wants a giant keyboard in the two-shot; it comes back with play.
+	player.get_node("Visual/Character").weapon.visible = false
+	if "talking" in talking:
+		talking.talking = true
+	talk_with = someone
+	talk_line = 0
 	if someone.standing and someone.animator != null:
 		(someone.animator as AnimationPlayer).play("CharacterArmature|Idle", .2)
-	presentation.dialogue_shot(talking, someone.standing)
+	presentation.begin_dialogue(talking, someone.standing)
 	log_event("Stopped to talk to " + someone.tree.who.capitalize())
 	player.camera_rig.set_capture(false)
-	dialogue.open(someone.tree, _talk_effect, talked.has(someone.name))
+	dialogue.open(someone.tree, _talk_effect, talked.has(someone.name), _talk_frame)
 	talked[someone.name] = true
 
 
@@ -1122,9 +1134,32 @@ func _talk_effect(effect: Dictionary) -> void:
 		run.apply_to(player)
 
 
+## Every frame of a talk: the camera cuts with whoever speaks, and the other person acts
+## the line out (an emphatic line gets arms up, a question gets a point).
+func _talk_frame(who: String, time: float, line: int, text: String) -> void:
+	presentation.dialogue_camera(who, time, line)
+	var animator: AnimationPlayer = talk_with.get("animator")
+	if animator == null or not talk_with.get("standing", false):
+		return
+	if line != talk_line:
+		talk_line = line
+		var clip: String = "Idle"
+		if who == "them":
+			clip = "Victory" if text.contains("!") else ("Shoot_OneHanded" if text.contains("?") or line % 2 == 0 else "Idle")
+		animator.play("CharacterArmature|" + clip, .25)
+		animator.speed_scale = 1.0
+	elif not animator.is_playing() or (animator.current_animation.ends_with("Victory") and time > 2.4):
+		animator.play("CharacterArmature|Idle", .3)
+
+
 func _end_talk() -> void:
 	if is_instance_valid(talking):
-		talking.process_mode = Node.PROCESS_MODE_INHERIT
+		talking.process_mode = Node.PROCESS_MODE_INHERIT if not talking.has_method("turn") else Node.PROCESS_MODE_PAUSABLE
+		if "talking" in talking:
+			talking.talking = false
+	player.get_node("Visual/Character").process_mode = Node.PROCESS_MODE_INHERIT
+	player.get_node("Visual/Character").weapon.visible = true
+	talk_with = {}
 	talking = null
 	presentation.release_camera()
 	if not terminal():

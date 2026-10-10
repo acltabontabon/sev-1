@@ -37,6 +37,8 @@ var said: bool = false
 ## 0..1 while turning: drives the red glow and the shaking.
 var dread: float = 0.0
 var phase: String = "calm"
+## Mid-conversation: the incident drives the gestures and the twitching waits.
+var talking: bool = false
 
 
 static func create(kind_: String, index: int) -> Node3D:
@@ -120,7 +122,9 @@ func _phase(next: String) -> void:
 func _process(delta: float) -> void:
 	clock += delta
 	var twitch: float = 0.0
-	if phase == "calm":
+	if talking:
+		line_left = 0.0
+	elif phase == "calm":
 		calm_left -= delta
 		if calm_left <= 0:
 			calm_left = randf_range(5.0, 9.0)

@@ -603,7 +603,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   to each other, frames them via `presentation.dialogue_shot()`, and applies reply effects
   through `run.change_burnout()`. `game/incidents/dialogues.gd` loads
   `assets/audio/voices/talk.json` (crew, trees, voice profiles); each node plays
-  `assets/audio/voices/talk/<voice><node>.ogg` and types at its pace.
+  `assets/audio/voices/talk/<voice><node>.ogg` and types at its pace. A chosen reply is
+  spoken by the engineer (`you_<slug>.ogg`) before the next node. The box calls the
+  incident's `_talk_frame()` every frame: `presentation.dialogue_camera()` cuts two-shot /
+  over-the-shoulder / close single / reverse by speaker, and the listener gestures per line.
+  The crew runs PAUSABLE under the always-running incident, so only the pair moves.
 - **Minions.** `game/enemies/bug.gd` is a one-hit archetype (any accepted hit kills).
   `missing_transaction.gd` releases `SWARMS` of bugs with each wave; they live in `bugs`,
   never count toward `remaining` or wave completion, bypass the telegraph cap, and

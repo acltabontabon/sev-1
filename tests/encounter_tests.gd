@@ -410,11 +410,20 @@ func _run() -> void:
 	check(incident.dialogue.is_open() and incident.modal_pending() and paused, "talking opens the dialogue and holds the incident")
 	check(incident.dialogue.speaker.stream != null and incident.dialogue.pace != incident.dialogue.SPEED, "every line is voiced and the text keeps pace with the voice")
 	var calm: int = incident.run.burnout
+	var standing: Vector3 = morgan.body.global_position
 	incident.dialogue.shown = 999.0
 	incident.dialogue.choose(0)
+	check(incident.dialogue.speaking == "you" and incident.dialogue.speaker.stream != null and incident.dialogue.name_label.text == "YOU", "the engineer speaks the chosen reply out loud")
+	await frames(30)
+	check(morgan.body.global_position.distance_to(standing) < .01, "the person you are talking to stops walking")
+	incident.dialogue.advance()
+	incident.dialogue.advance()
+	check(incident.dialogue.speaking == "them" and incident.dialogue.node_id == "eta", "after the reply, they answer")
 	incident.dialogue.shown = 999.0
 	incident.dialogue.choose(0)
 	check(incident.run.burnout == calm + 5, "a reply can cost Burnout through the run's own bookkeeping")
+	incident.dialogue.advance()
+	incident.dialogue.advance()
 	incident.dialogue.shown = 999.0
 	incident.dialogue.choose(0)
 	await frames(2)
@@ -430,6 +439,15 @@ func _run() -> void:
 	spawn("record", player.position + Vector3(0, 0, 3))
 	await frames(4)
 	check(incident.talk_target().is_empty() and not incident.talk_prompt.visible, "nobody chats while something is hunting the engineer")
+	var silent: Array[String] = []
+	var talk_data: Dictionary = preload("res://game/incidents/dialogues.gd").data()
+	for tree: Dictionary in talk_data.trees.values():
+		for node: Dictionary in tree.nodes.values():
+			for reply: Array in node.replies:
+				var dialogues: Script = preload("res://game/incidents/dialogues.gd")
+				if dialogues.voiced_reply(reply[0]) and not ResourceLoader.exists(dialogues.audio(dialogues.reply_id(reply[0]))):
+					silent.append(reply[0])
+	check(silent.is_empty(), "every spoken reply has the engineer's recorded line %s" % [silent])
 	# Minimap, seating and the corridor invites.
 	var minimap: Control = scene.get_node("HUD/Minimap")
 	check(minimap.floor_mesh != null and minimap.visible, "the minimap draws the walkable floor during play")

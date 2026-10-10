@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -213,9 +214,34 @@ def validate(data):
     print(f'PASS voice manifest: {len(ids)} lines; {sum(x["status"] != "missing" for x in data["lines"])} assets; remaining entries use subtitles.')
 
 
+def reply_id(text):
+    """Same rule as dialogues.gd reply_id(): the engineer's reply clip, shared by identical replies."""
+    return 'you_' + re.sub(r'[^a-z0-9]+', '_', text.lower()).strip('_')[:40]
+
+
+def voiced_reply(text):
+    return not text.startswith('(') and any(c.isalnum() for c in text)
+
+
+def spoken(talk, text):
+    """Subtitles keep the written form; speech gets acronyms and numbers spelled for the voice."""
+    for written in sorted(talk.get('spoken', {}), key=len, reverse=True):
+        text = re.sub(r'(?<![\w])' + re.escape(written) + r'(?![\w])', talk['spoken'][written], text)
+    return re.sub(r'\.\.(?!\.)', '.', text)
+
+
 def talk_lines(talk):
     """Every voiced talk line, derived from the manifest so text and audio never drift."""
     lines = []
+    replies = {}
+    host_replies = [['Are you okay?'], ['…I\'ll just go.'], ['(Back away slowly.)']]
+    for tree in list(talk['trees'].values()) + [{'nodes': {'host': {'replies': host_replies}}}]:
+        for entry in tree['nodes'].values():
+            for reply in entry['replies']:
+                if voiced_reply(reply[0]):
+                    replies[reply_id(reply[0])] = reply[0]
+    for key, text in sorted(replies.items()):
+        lines.append({'id': key, 'text': text, 'voice_profile': 'you'})
     for name, tree in talk['trees'].items():
         for node, entry in tree['nodes'].items():
             lines.append({'id': f'talk_{name.lower()}_{node}', 'text': entry['text'], 'voice_profile': tree['profile']})
@@ -228,6 +254,8 @@ def talk_lines(talk):
     for line in lines:
         if line['id'] in talk.get('pronunciation', {}):
             line['pronunciation_text'] = talk['pronunciation'][line['id']]
+        elif spoken(talk, line['text']) != line['text']:
+            line['pronunciation_text'] = spoken(talk, line['text'])
         line['audio'] = TALK_DIR / f"{line['id']}.ogg"
     return lines
 

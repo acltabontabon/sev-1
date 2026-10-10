@@ -1,5 +1,30 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.10 — The night shift talks properly (10 October 2026)
+
+Creator feedback on 0.2.9: a sleepy "mmm" was read out as "em em em"; NPCs kept walking
+while talking; conversations needed better camera angles; the engineer should speak
+too; and the writing could go all out.
+
+- **Unhinged rewrite.** Every conversation was rewritten and pushed further (Gary is a
+  load balancer now; the incidents are unionizing; the burrito holds Casey's will to
+  live; Uncle Layoffs). Satire still aims at corporate systems, not professions.
+- **Pronunciation.** Lines keep their written form in subtitles, but speech goes through
+  a spoken-form table (ETA, VPN, HR, KPIs, Q3, INC-000, VLOOKUP, DISRUPT, 9:15, …), and
+  the sleepy hum was rewritten as words. No line is spelled out letter by letter.
+- **The engineer answers out loud.** Picking a reply now plays it in the protagonist's
+  own voice (52 recorded replies; actions in parentheses stay silent), then the other
+  person responds. E skips ahead.
+- **They stop and act.** The crew now pauses with the rest of the game (the incident
+  node runs always; the crew no longer inherits that), the person you talk to faces you
+  and gestures with the line (arms up for an exclamation, a point for a question), and
+  the engineer lowers the keyboard while talking.
+- **Camera.** Each talk opens on a side two-shot, then cuts shot/reverse-shot from the
+  same side of the pair: over the engineer's shoulder or a close single on the speaker,
+  and a reverse over their shoulder while the engineer answers, each drifting in.
+
+127 talk lines are voiced now (75 crew, 52 engineer), all unheard candidates.
+
 ## 0.2.9 — Outbreaks, a minimap and the night shift talks back (10 October 2026)
 
 Creator feedback on 0.2.8: show where the enemies are; introduce them more creatively

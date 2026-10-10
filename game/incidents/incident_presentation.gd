@@ -581,25 +581,61 @@ func outbreak(actor: CharacterBody3D, area: String) -> void:
 	sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -6)
 
 
-## Talking: over the engineer's shoulder onto the speaker, pulled in if a wall is behind.
-func dialogue_shot(speaker: Node3D, standing: bool) -> void:
+## Talking: who the camera is covering and the shot it last used.
+var talk_speaker: Node3D
+var talk_standing: bool = true
+
+
+func begin_dialogue(speaker: Node3D, standing: bool) -> void:
+	talk_speaker = speaker
+	talk_standing = standing
+	incident.main.get_node("HUD").visible = false
+	dialogue_camera("them", 0.0, 1)
+
+
+## Shot / reverse shot, always from the same side of the pair: an establishing two-shot
+## to open, then over the engineer's shoulder or a close single on whoever is talking,
+## and a reverse over the speaker's shoulder when the engineer answers. Each line drifts
+## in slowly; walls pull the camera in.
+func dialogue_camera(who: String, time: float, line: int) -> void:
+	if not is_instance_valid(talk_speaker):
+		return
 	var from: Vector3 = incident.player.global_position
-	var head: Vector3 = speaker.global_position + Vector3.UP * (1.2 if standing else .95)
-	var toward: Vector3 = speaker.global_position - from
-	toward.y = 0
+	var to: Vector3 = talk_speaker.global_position
+	var toward: Vector3 = Vector3(to.x - from.x, 0, to.z - from.z)
 	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
 	var side: Vector3 = toward.cross(Vector3.UP).normalized()
-	var spot: Vector3 = from - toward * 2.1 + side * 1.15 + Vector3.UP * 1.75
-	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(head, spot, 1)
+	var mine: Vector3 = from + Vector3.UP * 1.3
+	var theirs: Vector3 = to + Vector3.UP * (1.2 if talk_standing else .95)
+	var spot: Vector3
+	var look: Vector3
+	var lens: float = 44.0
+	if who == "you":
+		spot = to + toward * 2.3 + side * 1.35
+		spot.y = to.y + 1.75
+		look = mine - Vector3.UP * .4
+		lens = 40.0
+	elif line == 1 and time < 1.6:
+		var middle: Vector3 = (from + to) * .5
+		spot = middle + side * 3.0 - toward * .4 + Vector3.UP * 1.55
+		look = (mine + theirs) * .5 - Vector3.UP * .45
+		lens = 46.0
+	elif line % 2 == 1:
+		spot = from - toward * 2.1 + side * 1.15 + Vector3.UP * 1.75
+		look = theirs.lerp(mine, .3) - Vector3.UP * .55
+	else:
+		spot = from + toward * .45 + side * .5 + Vector3.UP * 1.3
+		look = theirs - Vector3.UP * .3
+		lens = 38.0
+	spot = look + (spot - look) * (1.0 - .08 * smoothstep(0.0, 5.0, time))
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(look, spot, 1)
 	var hit: Dictionary = incident.get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
-		spot = hit.position + (head - hit.position).normalized() * .25
+		spot = hit.position + (look - hit.position).normalized() * .25
 	camera.global_position = spot
-	# Aim low so the pair sits in the upper frame, clear of the dialogue box.
-	camera.look_at(head.lerp(from + Vector3.UP * 1.1, .3) - Vector3.UP * .55)
-	camera.fov = 46.0
+	camera.look_at(look)
+	camera.fov = lens
 	camera.make_current()
-	incident.main.get_node("HUD").visible = false
 
 
 ## True when a bystander (no collision, so rays miss them) would stand in the shot.
