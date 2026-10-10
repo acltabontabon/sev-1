@@ -107,6 +107,32 @@ func label_overflows(room: Node3D) -> Array[String]:
 	return spilled
 
 
+## Wall texts too small to read from the nearest spot a player can stand: letter-line
+## height in pixels at 1080p through the 70° gameplay camera, 3.5 m behind the player.
+## Ambient screen details (the desk clock, a build log) and the drifting invites are exempt.
+func unreadable_texts(room: Node3D, minimum_px: float) -> Array[String]:
+	var small: Array[String] = []
+	var map: RID = room.get_world_3d().navigation_map
+	for node in room.find_children("*", "Label3D", true, false):
+		var label: Label3D = node
+		var path: String = str(room.get_path_to(label))
+		if not label.is_visible_in_tree() or label.text.strip_edges().is_empty() or label.billboard != BaseMaterial3D.BILLBOARD_DISABLED \
+				or path in ["DeskTime", "BuildFailed"] or path.begins_with("CalendarDrift"):
+			continue
+		var line: float = label.get_aabb().size.y / (label.text.count("\n") + 1) * label.global_basis.get_scale().y
+		var normal: Vector3 = label.global_basis.z.normalized()
+		var nearest: float = INF
+		for step in range(1, 40):
+			var probe: Vector3 = label.global_position + normal * step * .25
+			var spot: Vector3 = NavigationServer3D.map_get_closest_point(map, Vector3(probe.x, 0, probe.z))
+			if Vector3(spot.x - label.global_position.x, 0, spot.z - label.global_position.z).dot(Vector3(normal.x, 0, normal.z)) > 0:
+				nearest = minf(nearest, (spot + Vector3.UP * 2.6).distance_to(label.global_position))
+		var px: float = line / (2.0 * (nearest + 3.5) * tan(deg_to_rad(35.0))) * 1080.0
+		if px < minimum_px:
+			small.append("%s %.0fpx" % [path, px])
+	return small
+
+
 func _run() -> void:
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -182,6 +208,8 @@ func _run() -> void:
 	# thin ray let its lens graze through half the time). Small props stay see-through.
 	var spilled: Array[String] = label_overflows(room)
 	check(spilled.is_empty(), "wall texts stay inside their posters, notices and screens %s" % str(spilled))
+	var small: Array[String] = unreadable_texts(room, 15.0)
+	check(small.is_empty(), "every wall joke is readable from where the engineer can stand %s" % str(small))
 	var clipping: float = await camera_clipping(room)
 	check(clipping < .04, "the camera keeps out of the office's walls, ceilings and beams (%.1f%% of views clip)" % (clipping * 100.0))
 	scene.queue_free()

@@ -1,5 +1,21 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.34 — Wall jokes you can read; the logo stands alone (11 October 2026)
+
+Creator requests: make the wall text readable so the unhinged lines land; remove
+"SEV / 01" beside the company logo.
+
+- Measured every wall text's letter height from the nearest spot the engineer can stand
+  (1080p, gameplay camera). The sticky notes read at 3 px, the coffee/microwave notices,
+  wellness flyer, footnote and vending error at 4–12 px. Same words, now readable:
+  the sticky notes are three oversized notes on the desk-aisle column (20–24 px); the
+  coffee and microwave notices are bigger taped sheets with shorter lines; the vending
+  error is an LED strip across the glass; screen details, captions, the logo small print
+  and wall signs are re-broken and enlarged (punchlines now 20–27 px). A regression
+  check keeps every wall joke at 15 px or more.
+- "SEV / 01 · ENGINEERING · AFTER HOURS" is gone; SYNERGEX takes the centre of the
+  south wall.
+
 ## 0.2.33 — Fewer stutters (11 October 2026)
 
 Creator request: check performance and smoothness.
