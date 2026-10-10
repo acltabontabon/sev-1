@@ -58,6 +58,55 @@ func _run() -> void:
 			if a != b:
 				closest = minf(closest, a.global_position.distance_to(b.global_position))
 	check(closest > .5, "separation keeps a crowd from fusing into one silhouette")
+	# Tactics: a squad surrounds (back first), reads wind-ups, lunges in, regroups once.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 2)
+	player.visual.rotation.y = 0.0
+	var squad: Array[CharacterBody3D] = []
+	for index in range(3):
+		var member: CharacterBody3D = spawn("record", Vector3(index * 2.0 - 2.0, .05, -4), true)
+		member.set_physics_process(false)
+		squad.append(member)
+	incident.slot_clock = 0.0
+	incident._assign_slots(.016)
+	var angles: Array[float] = []
+	var behind_taken: bool = false
+	for member: CharacterBody3D in squad:
+		angles.append(atan2(member.slot.x - player.position.x, member.slot.z - player.position.z))
+		behind_taken = behind_taken or member.slot.z > player.position.z + 1.5
+	var spread_out: bool = absf(angle_difference(angles[0], angles[1])) > .8 and absf(angle_difference(angles[1], angles[2])) > .8 and absf(angle_difference(angles[0], angles[2])) > .8
+	check(spread_out and behind_taken, "an engaged squad is given slots around the engineer, starting behind")
+	var dodger: CharacterBody3D = squad[1]
+	dodger.global_position = player.position + Vector3(0, 0, -1.8)
+	dodger.set_physics_process(true)
+	dodger.evade_chance = 1.0
+	dodger.evade_cooldown = 0.0
+	player.request_attack()
+	await frames(2)
+	check(dodger.knockback.length() > 3.0 or dodger.evade_cooldown > 0, "an enemy reads a wind-up aimed at it and steps out")
+	await frames(40)
+	var lunger: CharacterBody3D = squad[2]
+	lunger.global_position = player.position + Vector3(2.8, 0, 0)
+	lunger.set_physics_process(true)
+	lunger.lunge_cooldown = 0.0
+	lunger.melee.cancel()
+	var start_gap: float = lunger.global_position.distance_to(player.position)
+	await frames(8)
+	check(lunger.lunge_cooldown > 0 and lunger.global_position.distance_to(player.position) < start_gap - .5, "an engaged enemy lunges to close the last metres")
+	var hurt: CharacterBody3D = squad[0]
+	hurt.set_physics_process(true)
+	hurt.receive_damage(hurt.max_health - 5, player.position)
+	await frames(3)
+	check(hurt.regrouped and hurt.regroup_left > 0, "a badly hurt enemy falls back once to regroup")
+	# Guidance: the next step always says what to do and, when there is somewhere to go, where.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var investigate: Dictionary = incident.next_step()
+	check(investigate.get("tag", "") == "CONSOLE" and (investigate.point as Vector3).distance_to(incident.CONSOLE_POSITION) < .1, "during the investigation the next step points to the console")
+	await frames(2)
+	var hud: CanvasLayer = scene.get_node("HUD")
+	check(hud.guide.visible and hud.guide_text.text.begins_with("NEXT") and hud.guide_arrow.visible, "the HUD shows the next step with a compass arrow")
+	await fresh_stage(incident.Stage.BOSS)
+	check(incident.next_step().get("tag", "") == "VAULT", "before the boss the next step points to the vault")
 	# Every outbreak site, and every spawn slot around it, is reachable on foot.
 	var stranded: Array[String] = []
 	for entry: Array in incident.SITES:

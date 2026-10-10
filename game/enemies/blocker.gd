@@ -31,6 +31,8 @@ func _ready() -> void:
 	max_health = 260
 	speed_scale = .7
 	separation = 1.8
+	# A wall does not dodge.
+	evade_chance = 0.0
 	super._ready()
 	for part: String in ["Visual/Body", "Visual/Eye", "Visual/LeftArm", "Visual/RightArm", "Visual/RecordDetails"]:
 		get_node(part).hide()

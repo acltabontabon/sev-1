@@ -58,6 +58,15 @@ var activity: String = ""
 ## Unaware enemies patrol: stroll to a point, look around for a moment, move on.
 var patrol_pause: float = 0.0
 var cone: MeshInstance3D
+## Tactics (incident waves only; the lab opponent and the boss keep their simple duel):
+## a surround slot assigned by the incident, a read on the engineer's wind-up that can
+## sidestep it, a lunge that closes the last couple of metres, and a regroup when hurt.
+var slot: Vector3 = Vector3.INF
+@export_range(0, 1) var evade_chance: float = .4
+var evade_cooldown: float = 0.0
+var lunge_cooldown: float = 0.0
+var regroup_left: float = 0.0
+var regrouped: bool = false
 ## Spell identity, overridden by archetypes in _ready. Presentation only: a sigil under
 ## the caster on every telegraph, a release on the strike, a burst on defeat.
 var magic_color: Color = Color(1, .22, .3)
@@ -141,6 +150,11 @@ func reset_enemy() -> void:
 	lost_left = 0.0
 	backoff_left = 0.0
 	patrol_pause = 0.0
+	slot = Vector3.INF
+	evade_cooldown = 0.0
+	lunge_cooldown = 0.0
+	regroup_left = 0.0
+	regrouped = false
 	home = global_position
 	wander_target = home
 	last_seen = home
@@ -469,6 +483,15 @@ func _dissolve_magic() -> void:
 		ElementFx.shockwave(self, global_position, magic_color, 2.4, .45)
 
 
+## True while the engineer's wind-up is aimed at this enemy and it is within reach.
+func _reads_swing(planar: Vector3) -> bool:
+	var swing: Node3D = target.melee
+	if not swing.attacking or swing.elapsed >= swing.windup or planar.length() > swing.reach + .8:
+		return false
+	var aim: Vector3 = -target.visual.global_basis.z
+	return Vector2(aim.x, aim.z).normalized().dot(Vector2(-planar.x, -planar.z).normalized()) > .5
+
+
 ## Gentle push away from nearby allies so a wave never fuses into one silhouette.
 func _separation() -> Vector3:
 	var push: Vector3 = Vector3.ZERO
@@ -539,31 +562,58 @@ func _physics_process(delta: float) -> void:
 			backoff_left = .55
 		was_attacking = melee.attacking
 		backoff_left = maxf(0, backoff_left - delta)
+		var tactical: bool = not starts_aware
+		if tactical:
+			evade_cooldown = maxf(0, evade_cooldown - delta)
+			lunge_cooldown = maxf(0, lunge_cooldown - delta)
+			regroup_left = maxf(0, regroup_left - delta)
+			# Read the engineer's wind-up aimed at us and sometimes step out of it.
+			if not melee.attacking and stagger_left <= 0 and evade_cooldown <= 0 and _reads_swing(planar):
+				evade_cooldown = 2.2
+				if randf() < evade_chance:
+					var side: Vector3 = planar.normalized().cross(Vector3.UP) * orbit_sign
+					knockback = (side - planar.normalized() * .7).normalized() * 8.0
+					orbit_sign = -orbit_sign
+			# Badly hurt with friends still fighting: fall back once and let them press.
+			if not regrouped and health < max_health * .3 and health > 0:
+				regrouped = true
+				regroup_left = 2.2
 		if state == State.IDLE and distance < detection_distance:
 			visual.rotation.y = atan2(-planar.x, -planar.z)
 			var allowed: bool = not get_parent().has_method("request_attack") or get_parent().request_attack(self)
 			if distance <= attack_distance and absf(offset.y) < 0.7:
 				var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, target.global_position + Vector3.UP, 1)
 				# A crowd takes turns: the incident caps simultaneous telegraphs.
-				if allowed and get_world_3d().direct_space_state.intersect_ray(query).is_empty():
+				if allowed and regroup_left <= 0 and get_world_3d().direct_space_state.intersect_ray(query).is_empty():
 					melee.start()
 					state = State.TELEGRAPH
+			elif tactical and allowed and regroup_left <= 0 and lunge_cooldown <= 0 and distance < attack_distance + 2.6 and absf(offset.y) < 0.7 and _line_of_sight():
+				# Close the last couple of metres in one burst instead of a slow walk.
+				lunge_cooldown = 3.2
+				knockback = planar.normalized() * 9.0
 			# Being close through furniture is not an attack opportunity: keep routing.
 			if state != State.TELEGRAPH:
 				state = State.APPROACH
-				if backoff_left > 0:
+				if backoff_left > 0 or regroup_left > 0:
 					direction = -planar.normalized()
-					pace = .6
-				elif not allowed and distance < 3.6 and not starts_aware:
-					# Waiting for a turn: circle at a respectful distance instead of queueing in place.
+					pace = .6 if regroup_left <= 0 else .8
+				elif tactical and (not allowed or distance > 4.0) and slot.is_finite() and Vector2(slot.x - global_position.x, slot.z - global_position.z).length() > .5 and not (allowed and distance < 3.0):
+					# Take the surround slot the incident assigned: sides and back first.
+					var to_slot: Vector3 = Vector3(slot.x - global_position.x, 0, slot.z - global_position.z)
+					direction = to_slot.normalized()
+					pace = .75 if not allowed else 1.0
+					if to_slot.length() > 2.0 and NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:
+						navigation.target_position = slot
+						var step: Vector3 = navigation.get_next_path_position() - global_position
+						direction = Vector3(step.x, 0, step.z).normalized()
+					direction = (direction + _separation()).normalized()
+				elif not allowed and distance < 3.6 and tactical:
+					# In the slot and waiting a turn: sidestep and keep facing the engineer.
 					var tangent: Vector3 = planar.normalized().cross(Vector3.UP) * orbit_sign
-					direction = (tangent + planar.normalized() * (distance - 2.8) * .8).normalized()
-					pace = .55
+					direction = (tangent * .5 + planar.normalized() * (distance - 2.8) * .8).normalized()
+					pace = .4
 				else:
-					# Approach from staggered angles so a wave surrounds rather than stacks.
 					var goal: Vector3 = target.global_position
-					if distance > 4.0 and not starts_aware:
-						goal += (-planar.normalized()).rotated(Vector3.UP, orbit_sign * .6) * 2.2
 					direction = planar.normalized()
 					# The office has furniture; use its baked routes without changing attacks.
 					if NavigationServer3D.map_get_iteration_id(navigation.get_navigation_map()) > 0:

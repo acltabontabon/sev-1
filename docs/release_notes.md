@@ -1,5 +1,27 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.8 — Smarter enemies and a clear next step (10 October 2026)
+
+Creator feedback on 0.2.7: enemies still felt dumb; "cardboard" stuck out in the hallway
+by the pantry; and it was not obvious what to do next.
+
+- **Smarter enemies.** A wave now fights as a squad: while waiting for a turn, enemies
+  spread around you (behind you first, then the sides) instead of queueing in front.
+  They read your wind-up when it is aimed at them and sometimes sidestep it (the Blocker
+  never does; bugs rarely), lunge to close the last couple of metres instead of walking
+  in, and a badly hurt one falls back once to let the others press. Damage, telegraphs
+  and the two-attackers cap are unchanged.
+- **The "cardboard" was the sight cones.** Their cream fill looked like flattened boxes
+  on the blue carpet. They are now red, additive outlines (edges and rim) over a faint
+  haze: a line to stay outside of, not a patch of floor. Bugs see less (6 m, 90°).
+- **What next.** A "NEXT" line at the top centre always says what to do, with a compass
+  arrow and the distance when there is somewhere to go: hunt the threats, fight, inspect
+  the console in Operations, go north into the vault, strike The Variance while it is
+  OPEN. The through-wall marker follows the same step (THREAT, CONSOLE, VAULT).
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 119.3 FPS mean (p95
+9.7 ms, max 17.1 ms). Validation: 665 assertions across 15 headless suites.
+
 ## 0.2.7 — Patrols, sight cones and the night shift (10 October 2026)
 
 Creator feedback on 0.2.6: a monster got stuck in a room where it could not be hit; the

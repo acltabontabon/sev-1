@@ -338,10 +338,17 @@ func office_life() -> void:
 	for view: Array in [["office_lounge", Vector3(3.5, 2.6, 6.0), Vector3(9.4, .9, 13.0)],
 			["office_desks", Vector3(-2.5, 2.8, 11.0), Vector3(-10.5, 1.0, -1.0)],
 			["office_north", Vector3(-1.0, 2.6, -5.0), Vector3(-8.8, 3.0, -15.7)],
-			["office_wing", Vector3(16.2, 2.2, 10.0), Vector3(15.0, 1.6, -8.0)]]:
+			["office_wing", Vector3(16.2, 2.2, 10.0), Vector3(15.0, 1.6, -8.0)],
+			["office_pantry_hall", Vector3(15.2, 1.9, -2.0), Vector3(19.0, .6, 9.0)],
+			["office_pantry_hall_back", Vector3(17.5, 1.9, 13.0), Vector3(16.0, .6, 0.0)]]:
+		if not app.page.is_empty():
+			app.resume_incident()
 		camera.position = view[1]
 		camera.look_at(view[2])
 		await live(.3)
+		if not app.page.is_empty():
+			app.resume_incident()
+			await frames(3)
 		await shot(view[0])
 	var ceiling: Node3D = incident.room.get_node("Ceiling")
 	ceiling.hide()

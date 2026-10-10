@@ -22,7 +22,9 @@ func _run() -> void:
 	boss.phase_time = 7.98
 	boss.exposed = true
 	boss.apply_hitstop(.12)
-	await frames(4)
+	# Count physics ticks (the freeze is 7): render frames can batch several under load.
+	for tick in range(4):
+		await physics_frame
 	check(boss.receive_damage(25, player.position), "original still takes damage when impact freezes the end of OPEN")
 	await frames(12)
 	check(not boss.receive_damage(25, player.position), "shield resumes after hit-stop and remaining OPEN expire")

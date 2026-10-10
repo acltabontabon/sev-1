@@ -15,6 +15,10 @@ func _ready() -> void:
 	max_health = 10
 	speed_scale = 1.6
 	separation = .8
+	evade_chance = .15
+	# Small and short-sighted: easy to slip past, quick to swarm once they spot you.
+	sight_range = 6.0
+	sight_fov = 90.0
 	super._ready()
 	melee.damage = 4
 	melee.reach = 1.3

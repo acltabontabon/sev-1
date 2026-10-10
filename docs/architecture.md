@@ -569,9 +569,22 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   through-wall "▼ THREAT · N m" marker) follows `nearest_threat()`, the closest member
   not yet chasing; `encounter_status()` reports how many roam and the nearest distance.
 - **Sight cones.** `game/enemies/sight_cone.gd` paints each enemy's real field of view
-  (`sight_range` 11 m, `sight_fov` 110°) on the floor as a fan of 22 rays clipped by
-  world collision, rebuilt every 0.15 s with staggered starts. It is pale while UNAWARE,
-  orange while NOTICING, amber while SEARCHING, and hidden when ENGAGED or dead.
+  (`sight_range` 11 m, `sight_fov` 110°; bugs 6 m, 90°) on the floor as a fan of 22
+  rays clipped by world collision, rebuilt every 0.15 s with staggered starts. It is drawn
+  additively as an outline (edges and rim) over a faint fill, red while UNAWARE, orange
+  while NOTICING, amber while SEARCHING, and hidden when ENGAGED or dead.
+- **Squad tactics (incident waves only).** `missing_transaction._assign_slots()` shares out
+  positions around the engineer among engaged enemies every 0.3 s, starting behind them
+  and alternating sides; `incident.gd` routes to its `slot` while it waits for an attack
+  token. Engaged enemies also read the engineer's wind-up aimed at them (`_reads_swing()`)
+  and may sidestep it (`evade_chance`; Blocker 0, bugs 0.15), lunge to close the last
+  2.6 m when they have a token, and fall back once (`regroup_left`) below 30% health. The
+  lab opponent and the boss (`starts_aware`) keep the plain duel.
+- **Guidance.** `missing_transaction.next_step()` returns what to do now (text, a point,
+  a marker tag): hunt the nearest unaware threat, fight, the console during the
+  investigation, the vault before the boss, the boss's OPEN window. The `IncidentBeacon`
+  shows the tag and distance over the point; `playtest_hud.gd` shows a top-centre "NEXT"
+  line with a compass arrow relative to the camera.
 - **Minions.** `game/enemies/bug.gd` is a one-hit archetype (any accepted hit kills).
   `missing_transaction.gd` releases `SWARMS` of bugs with each wave; they live in `bugs`,
   never count toward `remaining` or wave completion, bypass the telegraph cap, and

@@ -6,6 +6,10 @@ var hurt_left: float = 0.0
 var damage_flash_enabled: bool = true
 var shake_strength: float = 0.0
 var vitals: PanelContainer
+## "What next": a compass arrow toward the next step and one plain sentence.
+var guide: HBoxContainer
+var guide_arrow: Label
+var guide_text: Label
 var health_bar: ProgressBar
 var health_value: Label
 var burnout_bar: ProgressBar
@@ -146,6 +150,30 @@ func _build_incident_hud() -> void:
 	buff.add_theme_font_size_override("font_size", 13)
 	buff.add_theme_color_override("font_color", Color(.55, 1, .7))
 	column.add_child(buff)
+	guide = HBoxContainer.new()
+	guide.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	guide.offset_left = -360
+	guide.offset_right = 360
+	guide.offset_top = 112
+	guide.alignment = BoxContainer.ALIGNMENT_CENTER
+	guide.add_theme_constant_override("separation", 10)
+	guide.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(guide)
+	guide_arrow = Label.new()
+	guide_arrow.text = "▲"
+	guide_arrow.add_theme_font_size_override("font_size", 24)
+	guide_arrow.add_theme_color_override("font_color", Color(1, .7, .35))
+	guide_arrow.custom_minimum_size = Vector2(28, 28)
+	guide_arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	guide_arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	guide_arrow.pivot_offset = Vector2(14, 14)
+	guide.add_child(guide_arrow)
+	guide_text = Label.new()
+	guide_text.theme_type_variation = "Subhead"
+	guide_text.add_theme_font_size_override("font_size", 17)
+	guide_text.add_theme_color_override("font_outline_color", Color(0, 0, 0, .85))
+	guide_text.add_theme_constant_override("outline_size", 6)
+	guide.add_child(guide_text)
 	boss_box = VBoxContainer.new()
 	boss_box.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	boss_box.offset_left = -260
@@ -440,10 +468,33 @@ func _refresh_incident(incident: Node) -> void:
 	vitals.visible = vitals.visible and not evidence.visible
 	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < 7.0
 	boss_box.visible = boss_box.visible and $Margin.visible
+	_refresh_guide(incident)
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
 	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E inspect operations\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."
 	if not incident.terminal() and incident.elapsed > 0:
 		$CapturePrompt/Panel/Padding/VBox/Text.text += "\n\n" + run.modifier_summary() + "\n" + run.burnout_notice
+
+
+func _refresh_guide(incident: Node) -> void:
+	var step: Dictionary = incident.next_step()
+	guide.visible = $Margin.visible and not step.is_empty() and not evidence.visible
+	if not guide.visible:
+		return
+	var point: Vector3 = step.point
+	guide_arrow.visible = point.is_finite()
+	var text: String = "NEXT  ·  " + step.text
+	if point.is_finite():
+		var to: Vector3 = point - player.global_position
+		to.y = 0
+		var view: Basis = player.camera_rig.global_basis
+		var forward: Vector3 = -view.z
+		forward.y = 0
+		var right: Vector3 = view.x
+		right.y = 0
+		# Screen rotation is clockwise: positive when the step lies to the right.
+		guide_arrow.rotation = atan2(to.dot(right.normalized()), to.dot(forward.normalized()))
+		text += "  ·  %d m" % roundi(to.length())
+	guide_text.text = text
 
 
 func configure_release_ui() -> void:

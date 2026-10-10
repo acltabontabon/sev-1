@@ -333,6 +333,7 @@ func _process(delta: float) -> void:
 		if spawn_delay <= 0:
 			_spawn()
 	_update_beacon()
+	_assign_slots(delta)
 	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
 		_start_quick_sync()
 	var attending: bool = false
@@ -518,7 +519,33 @@ func _on_floor(point: Vector3) -> Vector3:
 	return NavigationServer3D.map_get_closest_point(map, point) + Vector3.UP * .05
 
 
-## A marker over the nearest unaware threat, so the floor can be hunted.
+## What the engineer should do right now, for the HUD compass and the waypoint marker:
+## {text, point (INF when there is nowhere to go), tag (marker word, empty for none)}.
+func next_step() -> Dictionary:
+	var none: Vector3 = Vector3.INF
+	if terminal() or stage == Stage.ALERT or modal_pending():
+		return {}
+	match stage:
+		Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO:
+			var near: CharacterBody3D = nearest_threat()
+			if near != null:
+				return {"text": "Hunt the threats. Hit them before they see you.", "point": near.global_position, "tag": "THREAT"}
+			if not alive.is_empty() or not pending.is_empty():
+				return {"text": "Fight! Dodge the orange arcs, strike after.", "point": none, "tag": ""}
+			return {"text": "Catch your breath. The next wave is coming.", "point": none, "tag": ""}
+		Stage.INVESTIGATION:
+			if quick_sync == "active":
+				return {"text": "Survive the Quick Sync.", "point": none, "tag": ""}
+			return {"text": "Inspect the console in Operations (press E there).", "point": CONSOLE_POSITION, "tag": "CONSOLE"}
+		Stage.BOSS:
+			if not boss_triggered:
+				return {"text": "Go north through the server corridor into the vault.", "point": room.get_node("SpawnPoints/VaultEntry").global_position, "tag": "VAULT"}
+			if is_instance_valid(boss) and boss.health > 0:
+				return {"text": "Defeat The Variance. Strike only while it is OPEN.", "point": none, "tag": ""}
+	return {}
+
+
+## A marker over the next step: the nearest unaware threat, the console or the vault.
 func _show_beacon() -> void:
 	beacon.global_position = wave_site
 	beacon.show()
@@ -570,18 +597,55 @@ func _make_beacon() -> void:
 
 
 func _update_beacon() -> void:
-	if beacon == null or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
-		if beacon != null:
-			beacon.hide()
+	if beacon == null:
 		return
-	var target: CharacterBody3D = nearest_threat()
-	if target == null:
+	var step: Dictionary = next_step()
+	if step.is_empty() or step.tag == "" or not (step.point as Vector3).is_finite():
 		beacon.hide()
 		return
-	var distance: int = roundi(Vector2(target.global_position.x - player.global_position.x, target.global_position.z - player.global_position.z).length())
-	beacon.global_position = target.global_position
+	var point: Vector3 = step.point
+	var distance: int = roundi(Vector2(point.x - player.global_position.x, point.z - player.global_position.z).length())
+	if distance < 3:
+		beacon.hide()
+		return
+	beacon.global_position = point
 	beacon.show()
-	(beacon.get_node("Marker") as Label3D).text = "▼\nTHREAT · %d m" % distance
+	(beacon.get_node("Marker") as Label3D).text = "▼\n%s · %d m" % [step.tag, distance]
+
+
+var slot_clock: float = 0.0
+
+
+## Squad: engaged enemies share out positions around the engineer, sides and back
+## first, so a wave surrounds instead of queueing in front. Re-planned a few times a second.
+func _assign_slots(delta: float) -> void:
+	slot_clock -= delta
+	if slot_clock > 0:
+		return
+	slot_clock = .3
+	var squad: Array[CharacterBody3D] = []
+	for actor: CharacterBody3D in alive + sync_alive + bugs:
+		if is_instance_valid(actor) and actor.health > 0 and actor.awareness == actor.Awareness.ENGAGED:
+			squad.append(actor)
+	if squad.is_empty():
+		return
+	var facing: Vector3 = -player.visual.global_basis.z
+	var behind: float = atan2(-facing.x, -facing.z)
+	var free: Array[float] = []
+	for index in range(squad.size()):
+		# Spread around the engineer starting behind them, alternating left and right.
+		var step: float = TAU / maxf(squad.size(), 3)
+		free.append(behind + (ceili(index / 2.0) * step) * (1 if index % 2 == 0 else -1))
+	for actor: CharacterBody3D in squad:
+		var here: float = atan2(actor.global_position.x - player.global_position.x, actor.global_position.z - player.global_position.z)
+		var best: int = 0
+		for index in range(free.size()):
+			if absf(angle_difference(here, free[index])) < absf(angle_difference(here, free[best])):
+				best = index
+		var angle: float = free[best]
+		free.remove_at(best)
+		var radius: float = 2.6 if actor.attack_style != "nip" else 1.8
+		actor.slot = _on_floor(player.global_position + Vector3(sin(angle), 0, cos(angle)) * radius)
 
 
 ## The closest living wave member that is not already chasing the engineer.
