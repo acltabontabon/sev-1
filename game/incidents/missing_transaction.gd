@@ -40,6 +40,26 @@ const SITES: Array = [
 	["the meeting wing", Vector3(16.2, 0, -9.5)],
 ]
 const ROAM_DISTANCE: float = 14.0
+## Outbreaks: every wave member starts as an overtime employee planted on the floor ahead
+## of time. When the wave is due, a short cutscene watches one of them turn; all of them
+## break out OUTBREAK_BURST seconds later. Headless runs skip the turn unless asked.
+const HOST: Script = preload("res://game/enemies/employee_host.gd")
+const OUTBREAK_BURST: float = 2.4
+@export var outbreak_in_headless: bool = false
+## Employees planted for the next wave (in wave order) and for the Quick Sync.
+var hosts: Array[Node3D] = []
+var sync_hosts: Array[Node3D] = []
+var pending_hosts: Array = []
+var crew_index: Dictionary = {}
+var outbreak_left: float = 0.0
+var swarm_waiting: Array = []
+## Talking to the night shift: RPG-style dialogue while nothing is hunting the engineer.
+const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
+const TALK_RANGE: float = 2.4
+var dialogue: CanvasLayer
+var talk_prompt: Label3D
+var talking: Node3D
+var talked: Dictionary = {}
 ## The optional meeting: an invite holds the room while two records press in.
 const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
 @export_range(0, 6) var max_telegraphs: int = 2
@@ -146,6 +166,22 @@ func _ready() -> void:
 	battle_mode.name = "BattleMode"
 	add_child(battle_mode)
 	_make_beacon()
+	dialogue = preload("res://game/ui/dialogue_box.gd").new()
+	dialogue.name = "Dialogue"
+	add_child(dialogue)
+	dialogue.finished.connect(_end_talk)
+	talk_prompt = Label3D.new()
+	talk_prompt.name = "TalkPrompt"
+	talk_prompt.text = "E — TALK"
+	talk_prompt.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
+	talk_prompt.font_size = 40
+	talk_prompt.pixel_size = .004
+	talk_prompt.outline_size = 10
+	talk_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	talk_prompt.no_depth_test = true
+	talk_prompt.modulate = Color(.5, .95, 1)
+	talk_prompt.hide()
+	add_child(talk_prompt)
 	coworkers = preload("res://game/incidents/coworkers.gd").new()
 	coworkers.name = "Coworkers"
 	coworkers.incident = self
@@ -162,6 +198,9 @@ func _ready() -> void:
 
 
 func reset_incident() -> void:
+	if dialogue.is_open():
+		dialogue.close()
+	talked.clear()
 	_cleanup()
 	decision_pending = false
 	corporate_choice = -1
@@ -234,6 +273,12 @@ func _cleanup() -> void:
 	zones.clear()
 	corpses.clear()
 	bugs.clear()
+	hosts.clear()
+	sync_hosts.clear()
+	pending_hosts.clear()
+	crew_index.clear()
+	swarm_waiting.clear()
+	outbreak_left = 0.0
 	wave_area = ""
 	if beacon != null:
 		beacon.hide()
@@ -264,17 +309,20 @@ func _enter(next: Stage) -> void:
 			wave_index = 0
 			remaining = stage_total()
 			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
+			_plant(0)
 			message = "Incidents break out around the floor: follow the ▼ marker.\nHit them before they spot you for double damage. Orange arc: dodge, then counter."
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
 			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED • East wing: the pantry still has coffee; Meeting Room 3 has an ongoing sync."
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
+			_plant_sync()
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
 		Stage.ENCOUNTER_TWO:
 			wave_index = 0
 			remaining = stage_total()
 			objective = "2 / 3 — Contain the failed delivery. Clear the aggressive records."
+			_plant(0)
 			message = "Payment Processing is missing the delivered record.\nCore saved it. Delivery stopped downstream. These records pursue faster."
 			console_marker.text = ""
 			light_target = 3.2
@@ -299,6 +347,7 @@ func _process(delta: float) -> void:
 		return
 	for point: Node3D in interactions.values():
 		point.refresh(player, not modal_pending() and stage != Stage.ALERT)
+	_refresh_talk_prompt()
 	if stage == Stage.ENCOUNTER_TWO and challenge_result == "Active":
 		challenge_left = maxf(0, challenge_left - delta)
 		if challenge_left == 0:
@@ -318,11 +367,15 @@ func _process(delta: float) -> void:
 			player.move_multiplier = 1.0
 			run.apply_to(player)
 			message = "Motivation expired. Productivity returns to baseline."
+	if outbreak_left > 0:
+		outbreak_left = maxf(0.0, outbreak_left - delta)
+		if outbreak_left == 0:
+			end_outbreak()
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and not modal_pending():
 		if not pending.is_empty():
 			pop_left -= delta
 			if pop_left <= 0:
-				_spawn_entry(pending.pop_front(), alive)
+				_spawn_entry(pending.pop_front(), alive, pending_hosts.pop_front() if not pending_hosts.is_empty() else null)
 				pop_left = .4
 		elif alive.is_empty() and wave_index < waves().size():
 			spawn_delay -= delta
@@ -419,16 +472,34 @@ func _spawn() -> void:
 		actor.false_positives.connect(_make_copies, CONNECT_ONE_SHOT)
 		actor.show_impact(Color(.4, 1, 1))
 		return
-	if pending.is_empty():
+	var opening: bool = pending.is_empty()
+	if opening:
 		if wave_index >= waves().size():
 			return
 		pending = waves()[wave_index].duplicate(true)
-		_choose_site()
+		pending_hosts = hosts.duplicate()
+		hosts.clear()
+		var patient: Node3D = pending_hosts[0] if not pending_hosts.is_empty() and is_instance_valid(pending_hosts[0]) else null
+		if patient != null:
+			wave_area = patient.get_meta("area", "")
+			wave_site = patient.position
+			last_area = wave_area
+		else:
+			_choose_site()
 		log_event("Wave %d breaks out across the floor" % (wave_index + 1))
-		_release_swarm(wave_index, pending[0][1])
+		if outbreaks():
+			outbreak_left = OUTBREAK_BURST
+			swarm_waiting = [wave_index, pending[0][1]]
+		else:
+			_release_swarm(wave_index, pending[0][1])
 		wave_index += 1
-	_spawn_entry(pending.pop_front(), alive)
+		# The next wave's employees take their places now, far from the engineer.
+		if wave_index < waves().size():
+			_plant(wave_index)
+	var first: CharacterBody3D = _spawn_entry(pending.pop_front(), alive, pending_hosts.pop_front() if not pending_hosts.is_empty() else null)
 	pop_left = .4
+	if opening and outbreaks():
+		presentation.outbreak(first, wave_area)
 
 
 func _release_swarm(index: int, site: String) -> void:
@@ -468,6 +539,69 @@ func _close_bugs() -> void:
 			bug.receive_damage(bug.health, bug.global_position)
 	if not open.is_empty():
 		log_event("%d bug%s closed as WONTFIX" % [open.size(), "" if open.size() == 1 else "s"])
+
+
+## True when waves break out of employees with a cutscene (always in a rendered game).
+func outbreaks() -> bool:
+	return DisplayServer.get_name() != "headless" or outbreak_in_headless
+
+
+## Place the employees a wave will break out of, each at its own outbreak site.
+func _plant(index: int) -> void:
+	for host in hosts:
+		if is_instance_valid(host):
+			actors.erase(host)
+			host.queue_free()
+	hosts.clear()
+	var list: Array = waves()
+	if index >= list.size():
+		return
+	var area: String = wave_area
+	var site: Vector3 = wave_site
+	for entry: Array in list[index]:
+		_choose_site()
+		var host: Node3D = _make_host(entry[0], wave_site if wave_area != "" else spawn_site(entry[1]))
+		host.set_meta("area", wave_area)
+		hosts.append(host)
+	# Planting looks ahead; the wave in progress keeps its own site for its swarm.
+	wave_area = area
+	wave_site = site
+
+
+## The Quick Sync is already in session: three attendees standing round the table.
+func _plant_sync() -> void:
+	if quick_sync != "idle" or not sync_hosts.is_empty():
+		return
+	var center: Vector3 = room.get_node("SpawnPoints/Spawn_B1").position
+	for entry: Array in QUICK_SYNC:
+		var host: Node3D = _make_host(entry[0], spawn_site(entry[1]))
+		host.set_meta("area", "Meeting Room 3")
+		var away: Vector3 = center - host.position
+		if away.length() > .5:
+			host.rotation.y = atan2(-away.x, -away.z)
+		sync_hosts.append(host)
+
+
+func _make_host(kind: String, at: Vector3) -> Node3D:
+	var host: Node3D = HOST.create(kind, crew_index.get(kind, 0))
+	crew_index[kind] = crew_index.get(kind, 0) + 1
+	host.position = at
+	host.rotation.y = randf() * TAU
+	add_child(host)
+	actors.append(host)
+	return host
+
+
+## The turn completes: every employee still wearing an incident breaks out, and the
+## wave's bugs pour out of the first one.
+func end_outbreak() -> void:
+	outbreak_left = 0.0
+	for actor: CharacterBody3D in alive + sync_alive:
+		if is_instance_valid(actor) and actor.disguised():
+			actor.reveal()
+	if not swarm_waiting.is_empty():
+		_release_swarm(swarm_waiting[0], swarm_waiting[1])
+		swarm_waiting.clear()
 
 
 ## Pick where the next wave breaks out: the next site in rotation that is far enough
@@ -653,7 +787,7 @@ func nearest_threat() -> CharacterBody3D:
 	var best: CharacterBody3D = null
 	var best_distance: float = INF
 	for actor: CharacterBody3D in alive:
-		if not is_instance_valid(actor) or actor.health <= 0 or actor.awareness == actor.Awareness.ENGAGED:
+		if not is_instance_valid(actor) or actor.health <= 0 or actor.awareness == actor.Awareness.ENGAGED or actor.disguised():
 			continue
 		var distance: float = actor.global_position.distance_to(player.global_position)
 		if distance < best_distance:
@@ -668,7 +802,7 @@ func spawn_site(name: String) -> Vector3:
 	return arrival_site() if site.distance_to(player.position) < 4.0 and stage != Stage.INVESTIGATION else site
 
 
-func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3D:
+func _spawn_entry(entry: Array, group: Array[CharacterBody3D], host: Node3D = null) -> CharacterBody3D:
 	var kind: String = entry[0]
 	var actor: CharacterBody3D = RECORD.instantiate()
 	if ARCHETYPES[kind] != null:
@@ -676,7 +810,11 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
 	actor.starts_aware = is_same(group, sync_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
-	if is_same(group, alive) and wave_area != "":
+	if not is_instance_valid(host):
+		host = null
+	if host != null:
+		actor.position = _on_floor(host.position) if reachable(_on_floor(host.position)) else host.position
+	elif is_same(group, alive) and wave_area != "":
 		# Each member breaks out at its own site away from the engineer, then patrols.
 		_choose_site()
 		var slot: float = (alive.size() + bugs.size()) * 2.4
@@ -684,7 +822,21 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	else:
 		actor.position = spawn_site(entry[1])
 	actor.detection_distance = 50
+	if outbreaks():
+		if host == null:
+			host = _make_host(kind, actor.position)
+		actors.erase(host)
+		actor.disguise(host, maxf(outbreak_left, .05))
+	elif host != null:
+		actors.erase(host)
+		host.queue_free()
+		host = null
 	add_child(actor)
+	if host != null:
+		host.reparent(actor)
+		host.position = Vector3.ZERO
+		# Bodies face +Z, enemies face -Z: the monster looks where the employee looked.
+		actor.visual.rotation.y = host.rotation.y + PI
 	actor.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * actor.speed_scale * run.pressure()
 	actors.append(actor)
 	group.append(actor)
@@ -703,13 +855,22 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 		tag.font_size = 30
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		actor.add_child(tag)
+	if actor.disguised():
+		actor.revealed.connect(_announce.bind(kind, actor), CONNECT_ONE_SHOT)
+	else:
+		_announce(kind, actor)
+	return actor
+
+
+func _announce(kind: String, actor: CharacterBody3D) -> void:
+	if not is_instance_valid(actor) or terminal():
+		return
 	actor.show_impact(Color(.4, 1, 1))
 	if not seen_kinds.has(kind):
 		seen_kinds[kind] = true
 		presentation.introduce(kind, actor)
 	elif stage == Stage.ENCOUNTER_ONE:
 		presentation.say("enemy")
-	return actor
 
 
 var noticed_stage: int = -1
@@ -730,6 +891,9 @@ func on_surprise(_actor: Node) -> void:
 
 ## At most a few enemies wind up at once, so a crowd reads as a sequence of tells.
 func request_attack(actor: Node) -> bool:
+	# Nobody swings while the camera is watching an employee turn.
+	if outbreak_left > 0:
+		return false
 	var busy: int = 0
 	# Bugs nip freely and never queue the real threats behind them.
 	if bugs.has(actor):
@@ -784,8 +948,13 @@ func _start_quick_sync() -> void:
 		door.collision_layer = 1
 	presentation.quick_sync(true)
 	message = "QUICK SYNC (15 MIN) • Leadership has taken this offline. Survive the meeting."
-	for entry: Array in QUICK_SYNC:
-		_spawn_entry(entry, sync_alive)
+	if outbreaks():
+		outbreak_left = OUTBREAK_BURST
+	for index in range(QUICK_SYNC.size()):
+		_spawn_entry(QUICK_SYNC[index], sync_alive, sync_hosts[index] if index < sync_hosts.size() else null)
+	sync_hosts.clear()
+	if outbreaks():
+		presentation.outbreak(sync_alive[0], "Meeting Room 3")
 
 
 func _end_quick_sync() -> void:
@@ -876,10 +1045,90 @@ func inspect_console() -> void:
 func interact() -> void:
 	if terminal() or modal_pending() or stage == Stage.ALERT:
 		return
+	var nearest: String = ""
 	for key: String in interactions:
-		if interactions[key].in_range(player):
-			use(key)
-			return
+		if interactions[key].in_range(player) and (nearest.is_empty() or _flat(interactions[key].global_position) < _flat(interactions[nearest].global_position)):
+			nearest = key
+	var someone: Dictionary = talk_target()
+	if not someone.is_empty() and (nearest.is_empty() or _flat(someone.body.global_position) < _flat(interactions[nearest].global_position)):
+		talk(someone)
+	elif not nearest.is_empty():
+		use(nearest)
+
+
+func _flat(at: Vector3) -> float:
+	return Vector2(at.x - player.global_position.x, at.z - player.global_position.z).length()
+
+
+## Who the engineer could talk to right now: the nearest coworker or planted employee in
+## reach, never while a fight is on. {body, tree, name, standing}, or empty.
+func talk_target() -> Dictionary:
+	if terminal() or modal_pending() or stage == Stage.ALERT or battle_mode.engaged or outbreak_left > 0:
+		return {}
+	var best: Dictionary = {}
+	var best_distance: float = TALK_RANGE
+	for someone: Dictionary in coworkers.people:
+		var distance: float = _flat(someone.body.global_position)
+		if distance < best_distance and DIALOGUES.has_tree(someone.entry.name):
+			best_distance = distance
+			best = {"body": someone.body, "tree": DIALOGUES.tree(someone.entry.name), "name": someone.entry.name,
+				"standing": someone.entry.routine not in ["asleep", "sit"], "animator": someone.animator}
+	for host: Node3D in hosts + sync_hosts:
+		if is_instance_valid(host) and _flat(host.global_position) < best_distance:
+			best_distance = _flat(host.global_position)
+			best = {"body": host, "tree": DIALOGUES.host_tree(host.identity, host.kind), "name": host.name, "standing": true, "animator": host.animator}
+	return best
+
+
+func _refresh_talk_prompt() -> void:
+	var someone: Dictionary = talk_target()
+	talk_prompt.visible = not someone.is_empty()
+	if talk_prompt.visible:
+		talk_prompt.global_position = (someone.body as Node3D).global_position + Vector3.UP * (2.0 if someone.standing else 1.6)
+
+
+## Stop and talk: the world pauses, the two face each other, the camera finds the pair.
+func talk(someone: Dictionary) -> void:
+	if someone.is_empty() or modal_pending():
+		return
+	talking = someone.body
+	talk_prompt.hide()
+	# Their passing remark would hang over the conversation.
+	for label: Node in talking.find_children("*", "Label3D", false, false):
+		(label as Label3D).visible = false
+	player.melee.cancel()
+	player.clear_combo()
+	var to: Vector3 = talking.global_position - player.global_position
+	to.y = 0
+	if to.length() > .1:
+		player.visual.rotation.y = atan2(-to.x, -to.z)
+		if someone.standing:
+			# Office bodies face +Z: turn the speaker back toward the engineer.
+			talking.global_rotation.y = atan2(-to.x, -to.z)
+	# The speaker keeps breathing while everything else waits.
+	talking.process_mode = Node.PROCESS_MODE_ALWAYS
+	if someone.standing and someone.animator != null:
+		(someone.animator as AnimationPlayer).play("CharacterArmature|Idle", .2)
+	presentation.dialogue_shot(talking, someone.standing)
+	log_event("Stopped to talk to " + someone.tree.who.capitalize())
+	player.camera_rig.set_capture(false)
+	dialogue.open(someone.tree, _talk_effect, talked.has(someone.name))
+	talked[someone.name] = true
+
+
+func _talk_effect(effect: Dictionary) -> void:
+	if effect.has("burnout"):
+		run.change_burnout(int(effect.burnout), effect.get("note", "Small talk"))
+		run.apply_to(player)
+
+
+func _end_talk() -> void:
+	if is_instance_valid(talking):
+		talking.process_mode = Node.PROCESS_MODE_INHERIT
+	talking = null
+	presentation.release_camera()
+	if not terminal():
+		player.camera_rig.set_capture(true)
 
 
 func use(key: String) -> void:
@@ -1074,7 +1323,7 @@ func _debt_dashboard() -> void:
 
 
 func modal_pending() -> bool:
-	return upgrade_pending or decision_pending
+	return upgrade_pending or decision_pending or talking != null
 
 
 func _choose_modal(index: int) -> void:

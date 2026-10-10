@@ -22,6 +22,9 @@ const ELEMENTS: Array[Dictionary] = [
 	{"call": "HOTFIX", "color": Color(1, .52, .14)},
 ]
 const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .8, -.5), Vector3(.13, .8, -.5)]
+## The sitting clip was authored for a lower stool set further back: seated, the body
+## shifts up onto the cushion and forward off the backrest so the chair never cuts it.
+const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
 
 @export var model_scale: float = .64
 @export var stride_length: float = 1.25
@@ -383,10 +386,13 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.04, 0)
 			target_lean = 0.0
 			reach = 0.0
+	# Hands on the desk stay on the desk while the body is lifted onto the cushion.
+	var on_desk: Array[bool] = [story_pose != Pose.SLUMP and story_pose != Pose.RELAX, story_pose in [Pose.TYPING, Pose.ALERT, Pose.GLANCE]]
 	for side in [0, 1]:
-		hands[side] = hands[side].lerp(targets[side], blend)
+		hands[side] = hands[side].lerp(targets[side] - (SEATED_OFFSET * sit if on_desk[side] else Vector3.ZERO), blend)
 	head_turn = head_turn.lerp(look, blend)
 	lean = lerpf(lean, target_lean, blend)
+	position = SEATED_OFFSET * sit
 	if seated:
 		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length, .3, delta)
 	elif standing_left > 0:
@@ -406,7 +412,7 @@ func _staged(delta: float) -> void:
 	# The improvised weapon lies across the desk until the engineer reaches for it.
 	held = move_toward(held, 0.0 if seated else 1.0, delta * 3.0)
 	if seated:
-		weapon.transform = Transform3D(Basis.from_euler(Vector3(0, -1.2, 0)), Vector3(.3, .8, -.62))
+		weapon.transform = Transform3D(Basis.from_euler(Vector3(0, -1.2, 0)), Vector3(.3, .8, -.62) - SEATED_OFFSET * sit)
 
 
 func _solve(delta: float) -> void:

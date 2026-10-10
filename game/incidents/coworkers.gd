@@ -43,7 +43,7 @@ func _ready() -> void:
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		for clip in ["Idle", "Walk", "Walk_Carry", "PickUp"]:
 			animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
-		_dress(body, entry.palette)
+		dress(body, entry.palette)
 		var line: Label3D = Label3D.new()
 		line.text = entry.line
 		line.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -193,7 +193,8 @@ func _fighting() -> bool:
 	return incident.battle_mode.engaged
 
 
-func _dress(body: Node3D, palette: Array) -> void:
+## Recolour a Quaternius office body: shirt, pants, skin, hair (shared with the hosts).
+static func dress(body: Node3D, palette: Array) -> void:
 	var names: Dictionary = {"Shirt": palette[0], "Pants": palette[1], "Skin": palette[2], "Hair": palette[3], "Face": Color(.04, .04, .05)}
 	for mesh in body.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D

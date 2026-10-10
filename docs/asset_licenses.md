@@ -34,6 +34,8 @@ required before future binary asset intake.
 
 `assets/audio/voices/*.ogg`: original SEV-1 script synthesized locally with the publisher's Apache-2.0 Kokoro-82M model and six stock English voices. Model revision, source license link, voice, processing, generation date and checksum are recorded per clip in [provenance](../assets/audio/voices/provenance.json). No voice cloning or real-person imitation was used. These are candidate performances awaiting human listening approval. Model weights and development dependencies do not ship. See [voice source and rights](voices.md#provenance-and-rights).
 
+`assets/audio/voices/talk/*.ogg` (0.2.9): the night shift's conversation lines from `assets/audio/voices/talk.json`, synthesized the same way from weighted blends of those six stock voices with pitch/speed processing; per-clip provenance in [talk provenance](../assets/audio/voices/talk/provenance.json). Candidates awaiting human listening approval.
+
 ## Milestone 12 outside assets
 
 Git LFS tracks these new binaries (see `.gitattributes`). Each source was retrieved

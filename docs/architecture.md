@@ -585,6 +585,25 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   investigation, the vault before the boss, the boss's OPEN window. The `IncidentBeacon`
   shows the tag and distance over the point; `playtest_hud.gd` shows a top-centre "NEXT"
   line with a compass arrow relative to the camera.
+- **Outbreaks.** Wave members start as employees: `missing_transaction._plant()` places
+  an `employee_host.gd` body (Quaternius office worker, identity from `talk.json` crew)
+  at each upcoming member's outbreak site when the stage opens and when the previous wave
+  breaks out; `_plant_sync()` stands the Quick Sync attendees in Meeting Room 3 during the
+  investigation. `_spawn_entry()` hands each host to its enemy (`incident.disguise()`),
+  which stays MANIFESTING with its visual hidden until `reveal()` (timer, a hit, or
+  `engage()`). `outbreak_left` (OUTBREAK_BURST, 2.4 s) blocks attack tokens, defers the bug
+  swarm to `end_outbreak()`, and the presentation's `outbreak()` cutscene picks a clear,
+  uncrowded angle, shows a lower third, and hands back after 4.1 s (TAB jumps to the
+  burst). Headless runs skip disguises unless `outbreak_in_headless` is set.
+- **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one
+  2D mesh once and draws it player-centred, rotated with the camera, with threats,
+  patrol sight fans, people and the NEXT step pinned to the rim.
+- **Talk.** `game/ui/dialogue_box.gd` is a PROCESS_MODE_ALWAYS modal; `missing_transaction
+  .talk()` pauses play (capture off; `modal_pending()` includes `talking`), turns the pair
+  to each other, frames them via `presentation.dialogue_shot()`, and applies reply effects
+  through `run.change_burnout()`. `game/incidents/dialogues.gd` loads
+  `assets/audio/voices/talk.json` (crew, trees, voice profiles); each node plays
+  `assets/audio/voices/talk/<voice><node>.ogg` and types at its pace.
 - **Minions.** `game/enemies/bug.gd` is a one-hit archetype (any accepted hit kills).
   `missing_transaction.gd` releases `SWARMS` of bugs with each wave; they live in `bugs`,
   never count toward `remaining` or wave completion, bypass the telegraph cap, and

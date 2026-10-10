@@ -3,6 +3,8 @@ extends CharacterBody3D
 
 signal health_changed(value: int)
 signal died
+## The employee it was wearing is gone; the incident is out.
+signal revealed
 
 enum State { IDLE, APPROACH, TELEGRAPH, ATTACK, RECOVER, REACT, DEAD }
 ## Incident arrivals are not omniscient: they materialize, go about their "work",
@@ -78,6 +80,10 @@ var attack_style: String = "slash"
 var last_state: State = State.IDLE
 ## Which CC0 rigged body to wear (MonsterRig.KINDS); archetypes set it before super._ready().
 var rig_kind: String = "record"
+## The overtime employee this incident is still wearing (employee_host.gd), and how long
+## until it breaks out. Set by `disguise()` before the enemy enters the tree.
+var host: Node3D
+var disguise_left: float = 0.0
 var rig: MonsterRig
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
@@ -146,6 +152,10 @@ func reset_enemy() -> void:
 	drop_shield()
 	awareness = Awareness.ENGAGED if starts_aware else Awareness.MANIFESTING
 	awareness_left = .9
+	if host != null:
+		awareness = Awareness.MANIFESTING
+		visual.hide()
+		label.hide()
 	unaware_time = 0.0
 	lost_left = 0.0
 	backoff_left = 0.0
@@ -166,9 +176,48 @@ func reset_enemy() -> void:
 	reset_physics_interpolation()
 
 
+## Wear an employee until `seconds` pass (or the outbreak cutscene calls reveal()).
+func disguise(employee: Node3D, seconds: float) -> void:
+	host = employee
+	disguise_left = seconds
+
+
+## Out of the employee: a burst of corruption, and the monster takes its place.
+func reveal() -> void:
+	if host == null:
+		return
+	var at: Vector3 = global_position
+	if is_instance_valid(host):
+		host.queue_free()
+	host = null
+	disguise_left = 0.0
+	visual.show()
+	label.show()
+	awareness = Awareness.MANIFESTING
+	awareness_left = .9
+	ElementFx.flash(self, at + Vector3.UP * 1.2, magic_color, 4.5, 6.0, .4)
+	ElementFx.shockwave(self, at, magic_color, 3.4, .55)
+	ElementFx.motes(self, at + Vector3.UP * 1.0, magic_color, 30, 6.0, .8, 2.0, .2)
+	ElementFx.shards(self, at + Vector3.UP * 1.2, magic_accent, 14, 5.0, .7)
+	if DisplayServer.get_name() != "headless":
+		var boom: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		boom.stream = preload("res://assets/audio/sfx/glitch_a.ogg")
+		boom.bus = &"Effects"
+		boom.volume_db = 2
+		add_child(boom)
+		boom.play()
+		boom.finished.connect(boom.queue_free)
+	revealed.emit()
+
+
+func disguised() -> bool:
+	return host != null
+
+
 func receive_damage(amount: int, source: Vector3) -> bool:
 	if health <= 0:
 		return false
+	reveal()
 	if shield_left > 0:
 		show_blocked()
 		return false
@@ -205,6 +254,7 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 func engage(seen: Vector3 = Vector3.INF, propagate: bool = false) -> void:
 	if health <= 0:
 		return
+	reveal()
 	var was: Awareness = awareness
 	awareness = Awareness.ENGAGED
 	lost_left = 0.0
@@ -284,11 +334,21 @@ func _awareness(delta: float) -> Variant:
 		sense_left = .2
 	match awareness:
 		Awareness.MANIFESTING:
+			if host != null:
+				disguise_left -= delta
+				if is_instance_valid(host) and host.has_method("turn"):
+					host.turn(disguise_left)
+				if disguise_left <= 0:
+					reveal()
+				return Vector3.ZERO
 			awareness_left -= delta
 			visual.scale = Vector3(1, 1, 1) * (1.0 - .25 * absf(sin(awareness_left * 40.0)) * awareness_left)
 			if awareness_left <= 0:
 				visual.scale = Vector3.ONE
 				awareness = Awareness.UNAWARE
+				# An ambush (the Quick Sync) comes out of the employee already hunting.
+				if starts_aware:
+					engage()
 			return Vector3.ZERO
 		Awareness.NOTICING:
 			awareness_left -= delta

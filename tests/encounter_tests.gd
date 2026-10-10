@@ -359,6 +359,86 @@ func _run() -> void:
 	seeker.last_seen = Vector3(0, .05, 0)
 	await frames(60 * 7)
 	check(seeker.awareness == seeker.Awareness.SEARCHING or seeker.awareness == seeker.Awareness.UNAWARE, "losing sight for long enough turns pursuit into a search")
+	# Outbreaks: a wave waits inside planted employees and breaks out after a cutscene.
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	player.max_health = 10000
+	player.health = 10000
+	incident.outbreak_in_headless = true
+	incident.presentation.skip()
+	await frames(2)
+	var planted: Array[Vector3] = []
+	for host: Node3D in incident.hosts:
+		planted.append(host.position)
+	check(planted.size() == 2 and planted.all(func(at: Vector3) -> bool: return Vector2(at.x - player.position.x, at.z - player.position.z).length() >= incident.ROAM_DISTANCE - .5), "the first wave waits inside two employees planted away from the engineer")
+	incident.spawn_delay = 0
+	await frames(3)
+	var patient: CharacterBody3D = incident.alive[0]
+	check(patient.disguised() and not patient.visual.visible and incident.presentation.beat_shot == "outbreak" and player.narrative_hold, "a due wave opens on an employee, still human, with the camera on them")
+	check(Vector2(patient.global_position.x - planted[0].x, patient.global_position.z - planted[0].z).length() < 1.0, "the incident breaks out where its employee stood")
+	check(not incident.request_attack(patient) and incident.bugs.is_empty(), "nobody swings and no bugs arrive before the burst")
+	await frames(roundi(incident.OUTBREAK_BURST * 60) + 12)
+	check(incident.alive.size() == 2 and incident.alive.all(func(actor: CharacterBody3D) -> bool: return not actor.disguised() and actor.visual.visible) and incident.bugs.size() == 3, "the burst turns every employee in the wave and releases the swarm")
+	check(incident.hosts.size() == 2, "the next wave's employees take their places as this one breaks out")
+	await frames(150)
+	check(incident.presentation.beat_shot == "" and not player.narrative_hold and scene.get_node("HUD").visible, "the cutscene hands control back")
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	incident.spawn_delay = 0
+	await frames(3)
+	incident.presentation.skip()
+	await frames(2)
+	check(not incident.alive[0].disguised() and incident.outbreak_left == 0 and incident.bugs.size() == 3, "TAB skips the cutscene straight to the burst")
+	incident.outbreak_left = 2.0
+	var lurker: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+	check(lurker.disguised(), "a member spawned mid-outbreak still wears an employee")
+	lurker.receive_damage(5, player.position)
+	check(not lurker.disguised() and lurker.awareness == lurker.Awareness.ENGAGED, "hitting an employee early forces the reveal")
+	incident.outbreak_in_headless = false
+	# The Quick Sync is in session before anyone walks in.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	check(incident.sync_hosts.size() == 3 and incident.sync_hosts.all(func(host: Node3D) -> bool: return host.position.x > 18.8), "the Quick Sync attendees stand in Meeting Room 3 during the investigation")
+	# Talking to the night shift.
+	var morgan: Dictionary = incident.coworkers.person("Manager")
+	player.position = Vector3(morgan.body.global_position.x + 1.2, .05, morgan.body.global_position.z)
+	await frames(2)
+	var someone: Dictionary = incident.talk_target()
+	check(someone.get("name", "") == "Manager" and incident.talk_prompt.visible, "E — TALK appears over a coworker in reach")
+	incident.talk(someone)
+	await frames(2)
+	check(incident.dialogue.is_open() and incident.modal_pending() and paused, "talking opens the dialogue and holds the incident")
+	check(incident.dialogue.speaker.stream != null and incident.dialogue.pace != incident.dialogue.SPEED, "every line is voiced and the text keeps pace with the voice")
+	var calm: int = incident.run.burnout
+	incident.dialogue.shown = 999.0
+	incident.dialogue.choose(0)
+	incident.dialogue.shown = 999.0
+	incident.dialogue.choose(0)
+	check(incident.run.burnout == calm + 5, "a reply can cost Burnout through the run's own bookkeeping")
+	incident.dialogue.shown = 999.0
+	incident.dialogue.choose(0)
+	await frames(2)
+	check(not incident.dialogue.is_open() and not incident.modal_pending() and not paused, "leaving the talk resumes play")
+	incident.talk(incident.talk_target())
+	check(incident.dialogue.node_id == "again", "a second visit opens differently")
+	incident.dialogue.close()
+	await frames(2)
+	var planted_talk: Node3D = incident.sync_hosts[0]
+	player.position = Vector3(planted_talk.global_position.x - 1.0, .05, planted_talk.global_position.z)
+	await frames(2)
+	check(incident.talk_target().get("body") == planted_talk, "the employees a wave is waiting inside can be talked to")
+	spawn("record", player.position + Vector3(0, 0, 3))
+	await frames(4)
+	check(incident.talk_target().is_empty() and not incident.talk_prompt.visible, "nobody chats while something is hunting the engineer")
+	# Minimap, seating and the corridor invites.
+	var minimap: Control = scene.get_node("HUD/Minimap")
+	check(minimap.floor_mesh != null and minimap.visible, "the minimap draws the walkable floor during play")
+	var character: Node3D = player.get_node("Visual/Character")
+	character.story_pose = character.Pose.TYPING
+	await frames(60)
+	check(character.position.distance_to(character.SEATED_OFFSET) < .03, "seated, the engineer sits up on the cushion and off the backrest")
+	character.story_pose = 0
+	check(incident.room.get_node("CalendarDrift").cards.all(func(card: Node3D) -> bool: return card.position.y > 2.9), "corridor invites drift under the ceiling, above the camera line")
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

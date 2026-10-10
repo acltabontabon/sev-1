@@ -31,6 +31,7 @@ def run(name, args, timeout=120):
 if __name__ == "__main__":
     LOGS.mkdir(exist_ok=True)
     subprocess.run([sys.executable, "tools/voices.py", "validate"], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "tools/voices.py", "talk-validate"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tests/voice_pipeline_tests.py"], cwd=ROOT, check=True)
     run("import", ["--headless", "--path", ".", "--import"])
     for script in sorted([*ROOT.glob("game/**/*.gd"), *ROOT.glob("tests/**/*.gd"), *ROOT.glob("tools/*.gd")]):

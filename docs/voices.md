@@ -39,6 +39,16 @@ attention, as noted in the upstream voice catalog.
 | narrator | `bm_george` | UK English | 1.0 | Restrained dramatic seriousness. No wink, parody, or trailer shouting. Processing: clean. |
 | postmortem | `bf_emma` | UK English | 1.0 | Precise, polite compliance. Emotionally indifferent. Processing: clean. |
 
+**The night shift (0.2.9).** Conversations with coworkers and planted employees live in
+`assets/audio/voices/talk.json` (crew, dialogue trees, 25 voice profiles). Each profile
+is a weighted blend of the six installed stock voices above plus a speed and a pitch
+shift in semitones (FFmpeg `asetrate`/`atempo`, timing preserved), so no further voice
+packs are downloaded. Employees' "turning" lines reuse their blend slower, lower and
+with the Variance echo. `.tools/voice-env/bin/python tools/voices.py talk` generates
+every line derived from the manifest (74 at 0.2.9) into `assets/audio/voices/talk/` with
+`talk/provenance.json`; `talk-validate` (run by `tools/validate.py`) fails on a missing,
+stale or untracked clip. Status: candidates; human listening acceptance pending.
+
 “Clean” preserves the voice, intercom uses a light 180–6500 Hz band limit, and
 Variance adds a quiet 38 ms echo. All clips target −20 LUFS / −2 dB true peak before
 Vorbis encoding; decoded peaks are checked. Runtime voice gain is −3 dB plus the

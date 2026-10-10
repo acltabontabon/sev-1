@@ -1,0 +1,966 @@
+{
+ "schema_version": 1,
+ "about": "The night shift: who the overtime crew are and what they say when the engineer stops to talk. Read by game/incidents/dialogues.gd; voiced by tools/voices.py talk.",
+ "profiles": {
+  "gary": {
+   "blend": {
+    "am_fenrir": 0.6,
+    "am_michael": 0.4
+   },
+   "language": "a",
+   "speed": 0.84,
+   "pitch": -2,
+   "processing": "clean",
+   "direction": "Half asleep, mumbling, unbothered."
+  },
+  "pat": {
+   "blend": {
+    "af_kore": 0.5,
+    "am_michael": 0.5
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": 0,
+   "processing": "clean",
+   "direction": "Deadpan, deflecting, faintly smug."
+  },
+  "morgan": {
+   "blend": {
+    "af_heart": 0.7,
+    "bf_emma": 0.3
+   },
+   "language": "a",
+   "speed": 1.1,
+   "pitch": 1,
+   "processing": "clean",
+   "direction": "Relentlessly upbeat, managing upward."
+  },
+  "sam": {
+   "blend": {
+    "am_fenrir": 0.5,
+    "bm_george": 0.5
+   },
+   "language": "b",
+   "speed": 0.95,
+   "pitch": -1,
+   "processing": "clean",
+   "direction": "Weary tradesperson, patient, resigned."
+  },
+  "alex": {
+   "blend": {
+    "am_michael": 0.6,
+    "af_kore": 0.4
+   },
+   "language": "a",
+   "speed": 1.12,
+   "pitch": 1,
+   "processing": "clean",
+   "direction": "Rushed status-update cadence, slightly frayed."
+  },
+  "jo": {
+   "blend": {
+    "af_heart": 0.5,
+    "af_kore": 0.5
+   },
+   "language": "a",
+   "speed": 1.15,
+   "pitch": 3,
+   "processing": "clean",
+   "direction": "Nervous, eager, a little too fast."
+  },
+  "rio": {
+   "blend": {
+    "bf_emma": 0.6,
+    "am_michael": 0.4
+   },
+   "language": "b",
+   "speed": 0.95,
+   "pitch": 0,
+   "processing": "clean",
+   "direction": "Calm, cosy, unsettlingly at home."
+  },
+  "casey": {
+   "blend": {
+    "af_kore": 0.7,
+    "am_fenrir": 0.3
+   },
+   "language": "a",
+   "speed": 0.92,
+   "pitch": -1,
+   "processing": "clean",
+   "direction": "Flat, hungry, in denial."
+  },
+  "drew": {
+   "blend": {
+    "bm_george": 0.6,
+    "af_heart": 0.4
+   },
+   "language": "b",
+   "speed": 1.08,
+   "pitch": 1,
+   "processing": "clean",
+   "direction": "Polished pitch voice, smiling through it."
+  },
+  "dana": {
+   "blend": {
+    "af_heart": 0.6,
+    "am_fenrir": 0.4
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": 0,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "dana_turning": {
+   "blend": {
+    "af_heart": 0.6,
+    "am_fenrir": 0.4
+   },
+   "language": "a",
+   "speed": 0.9,
+   "pitch": -2,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "raj": {
+   "blend": {
+    "am_michael": 0.7,
+    "bm_george": 0.3
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": -1,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "raj_turning": {
+   "blend": {
+    "am_michael": 0.7,
+    "bm_george": 0.3
+   },
+   "language": "a",
+   "speed": 0.9,
+   "pitch": -3,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "miguel": {
+   "blend": {
+    "am_fenrir": 0.4,
+    "af_kore": 0.6
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": -2,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "miguel_turning": {
+   "blend": {
+    "am_fenrir": 0.4,
+    "af_kore": 0.6
+   },
+   "language": "a",
+   "speed": 0.9,
+   "pitch": -4,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "kim": {
+   "blend": {
+    "bf_emma": 0.5,
+    "af_kore": 0.5
+   },
+   "language": "b",
+   "speed": 1.0,
+   "pitch": 1,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "kim_turning": {
+   "blend": {
+    "bf_emma": 0.5,
+    "af_kore": 0.5
+   },
+   "language": "b",
+   "speed": 0.9,
+   "pitch": -1,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "greta": {
+   "blend": {
+    "bf_emma": 0.8,
+    "am_fenrir": 0.2
+   },
+   "language": "b",
+   "speed": 1.0,
+   "pitch": -1,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "greta_turning": {
+   "blend": {
+    "bf_emma": 0.8,
+    "am_fenrir": 0.2
+   },
+   "language": "b",
+   "speed": 0.9,
+   "pitch": -3,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "todd": {
+   "blend": {
+    "bm_george": 0.7,
+    "am_michael": 0.3
+   },
+   "language": "b",
+   "speed": 1.0,
+   "pitch": 0,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "todd_turning": {
+   "blend": {
+    "bm_george": 0.7,
+    "am_michael": 0.3
+   },
+   "language": "b",
+   "speed": 0.9,
+   "pitch": -2,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "priya": {
+   "blend": {
+    "af_heart": 0.4,
+    "bf_emma": 0.6
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": 2,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "priya_turning": {
+   "blend": {
+    "af_heart": 0.4,
+    "bf_emma": 0.6
+   },
+   "language": "a",
+   "speed": 0.9,
+   "pitch": 0,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  },
+  "leo": {
+   "blend": {
+    "am_michael": 0.5,
+    "af_heart": 0.5
+   },
+   "language": "a",
+   "speed": 1.0,
+   "pitch": 1,
+   "processing": "clean",
+   "direction": "Polite overtime small talk; something underneath is wrong."
+  },
+  "leo_turning": {
+   "blend": {
+    "am_michael": 0.5,
+    "af_heart": 0.5
+   },
+   "language": "a",
+   "speed": 0.9,
+   "pitch": -1,
+   "processing": "double",
+   "direction": "The same voice, slowing, doubled: the incident speaking through them."
+  }
+ },
+ "crew": {
+  "record": [
+   {
+    "name": "DANA",
+    "team": "Accounts Receivable",
+    "quip": "Reconciling since Tuesday.",
+    "line": "The ledger said hi. Ledgers shouldn't talk.",
+    "body": "casual2_male.fbx",
+    "profile": "dana"
+   },
+   {
+    "name": "RAJ",
+    "team": "Data Engineering",
+    "quip": "Last commit message: “fix”.",
+    "line": "The migration is fine. Mostly fine.",
+    "body": "casual3_male.fbx",
+    "profile": "raj"
+   },
+   {
+    "name": "MIGUEL",
+    "team": "Finance Ops",
+    "quip": "47 spreadsheets open. Needs one more.",
+    "line": "VLOOKUP is looking back at me.",
+    "body": "casual2_male.fbx",
+    "profile": "miguel"
+   },
+   {
+    "name": "KIM",
+    "team": "Billing",
+    "quip": "Has not blinked since 3 PM.",
+    "line": "Invoices don't sleep. Neither do I.",
+    "body": "casual3_male.fbx",
+    "profile": "kim"
+   }
+  ],
+  "blocker": [
+   {
+    "name": "GRETA",
+    "team": "Change Advisory Board",
+    "quip": "Has concerns. Will raise them in a meeting.",
+    "line": "Has this been approved? In writing?",
+    "body": "suit_male.fbx",
+    "profile": "greta"
+   }
+  ],
+  "invite": [
+   {
+    "name": "TODD",
+    "team": "Program Management",
+    "quip": "Calendar: 112% booked.",
+    "line": "Got fifteen minutes? It's recurring.",
+    "body": "suit_male.fbx",
+    "profile": "todd"
+   }
+  ],
+  "scope": [
+   {
+    "name": "PRIYA",
+    "team": "Product",
+    "quip": "Just one tiny thing before launch.",
+    "line": "Small ask. Teeny. Barely a requirement.",
+    "body": "casual3_male.fbx",
+    "profile": "priya"
+   },
+   {
+    "name": "LEO",
+    "team": "Growth",
+    "quip": "Wants it viral by Monday.",
+    "line": "What if it also did… everything?",
+    "body": "casual2_male.fbx",
+    "profile": "leo"
+   }
+  ]
+ },
+ "host_replies": {
+  "record": "Fine. Balanced. Debits equal credits equal debits equal credits equal—",
+  "blocker": "Your question has been forwarded to the Change Advisory Board. Expected response: after the heat death of the universe.",
+  "invite": "I'm great! Let's sync on how great I am. I've sent you an invite. It's recurring. Forever. Accept?",
+  "scope": "Fine! Just one tiny thing. And another. And— everything. I want everything. Small ask."
+ },
+ "host_soon": "See you soon. Very soon. Your ticket is almost ready.",
+ "trees": {
+  "Sleeper": {
+   "who": "GARY",
+   "role": "Platform Team · asleep, technically on call",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "zZz… the dashboards are green… the dashboards are always green… zZz…",
+     "replies": [
+      [
+       "Wake up. Production is on fire.",
+       "wake",
+       {}
+      ],
+      [
+       "Sleep well, sweet prince.",
+       "tuck",
+       {
+        "burnout": -3,
+        "note": "Solidarity nap"
+       }
+      ],
+      [
+       "(Check their pulse. And their pager.)",
+       "pager",
+       {}
+      ]
+     ]
+    },
+    "wake": {
+     "text": "Production has been on fire since the reorg. I'm conserving energy for the postmortem. Someone has to look rested in the screenshot.",
+     "replies": [
+      [
+       "You're on call too!",
+       "spirit",
+       {}
+      ],
+      [
+       "Fair.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "spirit": {
+     "text": "I'm on call in spirit. My body is Out Of Office. We're in different time zones, me and my body.",
+     "replies": [
+      [
+       "…Respect.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "tuck": {
+     "text": "…tell my manager I was 'heads-down'… that's not a lie… my head is down…",
+     "replies": []
+    },
+    "pager": {
+     "text": "The pager is set to 'vibrate'. It's under them. It has been vibrating since 4 PM. They call it 'the massage'.",
+     "replies": [
+      [
+       "Let them sleep.",
+       "",
+       {}
+      ]
+     ]
+    }
+   },
+   "profile": "gary"
+  },
+  "Bystander": {
+   "who": "PAT",
+   "role": "Reliability · different incident",
+   "start": "a",
+   "again": "again",
+   "nodes": {
+    "a": {
+     "text": "Don't look at me. I'm on a different incident.",
+     "replies": [
+      [
+       "Which incident?",
+       "which",
+       {}
+      ],
+      [
+       "Help me fight the corrupted records.",
+       "help",
+       {}
+      ],
+      [
+       "You're literally watching me.",
+       "watch",
+       {}
+      ]
+     ]
+    },
+    "which": {
+     "text": "INC-000. It's the incident about having too many incidents. We scheduled a meeting to triage the meetings. Then the meeting got its own incident number.",
+     "replies": [
+      [
+       "That's insane.",
+       "process",
+       {}
+      ],
+      [
+       "Can I join?",
+       "observer",
+       {}
+      ]
+     ]
+    },
+    "process": {
+     "text": "That's process.",
+     "replies": []
+    },
+    "observer": {
+     "text": "I can add you as an Observer. Observers get every notification and none of the authority. It's like management, but honest.",
+     "replies": [
+      [
+       "Pass.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "help": {
+     "text": "I'd love to, but my OKR is 'tickets closed', not 'monsters killed'. File a ticket and I'll close it as Duplicate. Great for my numbers.",
+     "replies": [
+      [
+       "Thanks for nothing.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "watch": {
+     "text": "Watching is a contribution. I'm 'maintaining situational awareness'. It's on my self-review. Under 'Leadership'.",
+     "replies": [
+      [
+       "Of course it is.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "again": {
+     "text": "Still not my incident. Still watching, though. Strong work on the one you're doing alone.",
+     "replies": [
+      [
+       "…",
+       "",
+       {}
+      ]
+     ]
+    }
+   },
+   "profile": "pat"
+  },
+  "Manager": {
+   "who": "MORGAN",
+   "role": "Engineering Manager · on a call about the call",
+   "start": "a",
+   "again": "again",
+   "nodes": {
+    "a": {
+     "text": "Yes, someone's on it. No, I don't know who. — Oh! You! You're on it?",
+     "replies": [
+      [
+       "Yes. I'm on it. Alone.",
+       "eta",
+       {}
+      ],
+      [
+       "What are YOU doing?",
+       "managing",
+       {}
+      ],
+      [
+       "Can I go home?",
+       "home",
+       {}
+      ]
+     ]
+    },
+    "eta": {
+     "text": "Amazing. I'll tell leadership 'we' are on it. Quick one: can you give me an ETA for the ETA? I need a number to say confidently.",
+     "replies": [
+      [
+       "Five minutes.",
+       "deck",
+       {
+        "burnout": 5,
+        "note": "Committed to a number"
+       }
+      ],
+      [
+       "No.",
+       "aligned",
+       {}
+      ],
+      [
+       "When it's fixed.",
+       "aligned",
+       {}
+      ]
+     ]
+    },
+    "deck": {
+     "text": "Love it. I'll put 'two minutes' in the deck to show ambition. If it slips, that's a growth opportunity. For you.",
+     "replies": []
+    },
+    "aligned": {
+     "text": "I'll write 'aligned on next steps'. That sentence has never been wrong. It has never been anything.",
+     "replies": []
+    },
+    "managing": {
+     "text": "Managing expectations. Mostly upward. Leadership expects production to be fixed, and I expect to be thanked for it.",
+     "replies": [
+      [
+       "That's unbelievable.",
+       "growth",
+       {}
+      ],
+      [
+       "Want to help?",
+       "help",
+       {}
+      ]
+     ]
+    },
+    "growth": {
+     "text": "Unbelievable growth, yes. Put that in your self-review. In the 'what your manager did' box. Use full sentences.",
+     "replies": []
+    },
+    "help": {
+     "text": "I am helping. I've renamed the Slack channel twice. Morale is up eleven percent. I measured it. With a poll. That I answered.",
+     "replies": [
+      [
+       "…",
+       "",
+       {}
+      ]
+     ]
+    },
+    "home": {
+     "text": "Of course! Right after this. And the retro. And the retro about the retro. We're a family here, and family doesn't leave at 5.",
+     "replies": [
+      [
+       "(Leave at 5.)",
+       "",
+       {
+        "burnout": 3,
+        "note": "Family meeting"
+       }
+      ]
+     ]
+    },
+    "again": {
+     "text": "Back so soon? Is it fixed? No? Then why are you talking to me? I'm in a very important tab.",
+     "replies": [
+      [
+       "Sorry.",
+       "",
+       {}
+      ]
+     ]
+    }
+   },
+   "profile": "morgan"
+  },
+  "Facilities": {
+   "who": "SAM",
+   "role": "Facilities · microwave liaison",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "Ticket open since 2019. Today's the day. Probably.",
+     "replies": [
+      [
+       "What's wrong with it?",
+       "chain",
+       {}
+      ],
+      [
+       "Want a hand?",
+       "hand",
+       {
+        "burnout": -2,
+        "note": "Shocking teamwork"
+       }
+      ]
+     ]
+    },
+    "chain": {
+     "text": "Nothing's wrong with it. It's waiting on a part. The part is waiting on a PO. The PO is waiting on budget. Budget is waiting on Q3. Q3 is waiting on the microwave.",
+     "replies": [
+      [
+       "That's a circular dependency.",
+       "word",
+       {}
+      ],
+      [
+       "Just buy a new one.",
+       "capex",
+       {}
+      ]
+     ]
+    },
+    "word": {
+     "text": "Don't say that word near it. Last time someone said 'circular dependency' it sparked and three VPs got promoted.",
+     "replies": []
+    },
+    "capex": {
+     "text": "A new one is CapEx. Fixing the old one is OpEx. I've spent four years of OpEx avoiding sixty dollars of CapEx. The spreadsheet says I'm winning.",
+     "replies": []
+    },
+    "hand": {
+     "text": "Sure. Hold this wire. No, not that one— … you felt that, right? Good. That means it works. Somewhere.",
+     "replies": []
+    }
+   },
+   "profile": "sam"
+  },
+  "Standup": {
+   "who": "ALEX",
+   "role": "Feature Team · still in the 9:00 standup",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "Yesterday: meetings. Today: meetings. Blockers: meetings.",
+     "replies": [
+      [
+       "Who are you talking to?",
+       "alone",
+       {}
+      ],
+      [
+       "Any other blockers?",
+       "blockers",
+       {}
+      ]
+     ]
+    },
+    "alone": {
+     "text": "The standup. Everyone dropped off at 9:15. I don't know how to end it. Nobody ever taught me how to end it.",
+     "replies": [
+      [
+       "Just say 'that's it from me'.",
+       "free",
+       {
+        "burnout": -4,
+        "note": "Ended a standup"
+       }
+      ],
+      [
+       "Keep going. Velocity matters.",
+       "velocity",
+       {}
+      ]
+     ]
+    },
+    "free": {
+     "text": "…that's… it… from me. — Oh no. Oh, I'm free. What do I do with my hands? Who do I report my feelings to?",
+     "replies": []
+    },
+    "velocity": {
+     "text": "Velocity is up 400 percent since I started counting each sentence as a story point. This one is a three.",
+     "replies": []
+    },
+    "blockers": {
+     "text": "You, physically. Also Legal, Procurement, the VPN, the concept of Friday, and a calendar invite titled 'Quick Chat (2h)'.",
+     "replies": [
+      [
+       "Good luck.",
+       "",
+       {}
+      ]
+     ]
+    }
+   },
+   "profile": "alex"
+  },
+  "Intern": {
+   "who": "JO",
+   "role": "Intern · day one · on call",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "Is it normal to be on call on day one?",
+     "replies": [
+      [
+       "Totally normal.",
+       "normal",
+       {}
+      ],
+      [
+       "No. Run.",
+       "box",
+       {
+        "burnout": -3,
+        "note": "Mentorship"
+       }
+      ],
+      [
+       "What's in the box?",
+       "swag",
+       {}
+      ]
+     ]
+    },
+    "normal": {
+     "text": "Cool cool cool. They also gave me production access, a pager, and the root password on a sticky note. Is that also normal?",
+     "replies": [
+      [
+       "Burn the sticky note.",
+       "loadbearing",
+       {}
+      ],
+      [
+       "That's onboarding.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "loadbearing": {
+     "text": "I can't. It's load-bearing. The VPN stops working without it. IT said it's 'temporarily permanent'.",
+     "replies": []
+    },
+    "box": {
+     "text": "I can't run, I'm carrying the 'Culture' box. It's mostly lanyards. And one kombucha. The kombucha is the culture.",
+     "replies": []
+    },
+    "swag": {
+     "text": "Four hundred t-shirts that say DISRUPT. They disrupted the budget for raises to print them. I got a small. I'm a large. That's also culture.",
+     "replies": [
+      [
+       "Welcome aboard.",
+       "",
+       {}
+      ]
+     ]
+    }
+   },
+   "profile": "jo"
+  },
+  "Remote": {
+   "who": "RIO",
+   "role": "Hybrid · 100% badge-in compliance",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "I'm working from home. This is home now.",
+     "replies": [
+      [
+       "You live here?",
+       "live",
+       {}
+      ],
+      [
+       "Isn't that sad?",
+       "certificate",
+       {}
+      ]
+     ]
+    },
+    "live": {
+     "text": "Define 'live'. I have a sofa, a microwave I'm not allowed to use, and a standing desk I sit at. My commute is four metres. Return-to-office was a huge success.",
+     "replies": [
+      [
+       "Huge.",
+       "",
+       {}
+      ]
+     ]
+    },
+    "certificate": {
+     "text": "Sad? I hit one hundred percent badge-in compliance. HR sent me a certificate. I sleep under it. It's warmer than it looks.",
+     "replies": []
+    }
+   },
+   "profile": "rio"
+  },
+  "Microwave": {
+   "who": "CASEY",
+   "role": "Payments · waiting on a burrito",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "It said one minute. That was forty minutes ago.",
+     "replies": [
+      [
+       "What's in there?",
+       "burrito",
+       {}
+      ],
+      [
+       "The microwave is broken.",
+       "denial",
+       {}
+      ]
+     ]
+    },
+    "burrito": {
+     "text": "A burrito. Or it was. It's in a superposition now. Facilities marked it 'pending'. Like my promotion.",
+     "replies": [
+      [
+       "Just eat it cold.",
+       "sunk",
+       {}
+      ],
+      [
+       "Want to escalate it?",
+       "escalate",
+       {}
+      ]
+     ]
+    },
+    "sunk": {
+     "text": "And walk away from forty minutes of sunk cost? That's not how we do things here. Here we double down. Ask the roadmap.",
+     "replies": []
+    },
+    "escalate": {
+     "text": "I escalated it. It came back assigned to me, as a Blocker. Now I'm blocking my own burrito.",
+     "replies": []
+    },
+    "denial": {
+     "text": "Don't. I know. I'm in the denial stage. Let me have this. It's the only thing here with a status light that's honest.",
+     "replies": []
+    }
+   },
+   "profile": "casey"
+  },
+  "Recruiter": {
+   "who": "DREW",
+   "role": "Talent · culture fit enforcement",
+   "start": "a",
+   "nodes": {
+    "a": {
+     "text": "We're like a family here. A family with KPIs.",
+     "replies": [
+      [
+       "What kind of family?",
+       "family",
+       {}
+      ],
+      [
+       "Are you hiring?",
+       "hiring",
+       {}
+      ],
+      [
+       "Is the pay good?",
+       "pay",
+       {}
+      ]
+     ]
+    },
+    "family": {
+     "text": "The kind you can't leave, where holidays are optional, and the parent is a quarterly earnings call.",
+     "replies": []
+    },
+    "hiring": {
+     "text": "Always! We need a senior engineer with ten years in a framework released last spring. Compensation: exposure. To production.",
+     "replies": [
+      [
+       "That's exploitative.",
+       "ownership",
+       {}
+      ],
+      [
+       "Where do I sign?",
+       "sign",
+       {
+        "burnout": 4,
+        "note": "Culture fit"
+       }
+      ]
+     ]
+    },
+    "ownership": {
+     "text": "We prefer 'high-ownership culture'. You own everything. Except equity.",
+     "replies": []
+    },
+    "sign": {
+     "text": "You already did. Page 41 of the laptop policy. Welcome back. You never left.",
+     "replies": []
+    },
+    "pay": {
+     "text": "Extremely competitive. Competitive with what, we can't legally disclose. But we have a ping-pong table. Nobody's allowed to use it during business hours, which are all hours.",
+     "replies": []
+    }
+   },
+   "profile": "drew"
+  }
+ },
+ "pronunciation": {
+  "talk_sleeper_a": "Mmmh… the dashboards are green… the dashboards are always green… mmmh…",
+  "talk_standup_free": "…that's… it… from me. Oh no. Oh, I'm free. What do I do with my hands? Who do I report my feelings to?",
+  "talk_manager_a": "Yes, someone's on it. No, I don't know who. Oh! You! You're on it?",
+  "talk_facilities_hand": "Sure. Hold this wire. No, not that one… you felt that, right? Good. That means it works. Somewhere.",
+  "talk_recruiter_pay": "Extremely competitive. Competitive with what, we can't legally disclose. But we have a ping pong table. Nobody's allowed to use it during business hours, which are all hours."
+ }
+}

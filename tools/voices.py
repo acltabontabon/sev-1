@@ -19,6 +19,10 @@ PROVENANCE = MANIFEST.with_name('provenance.json')
 MODEL_LICENSE = 'https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md'
 AUDITIONS = ['start', 'eta', 'alert', 'variance_intro', 'opening', 'postmortem']
 PROCESSING = 'trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1'
+# The night shift's talk: crew, dialogue trees and blended voice profiles in one manifest.
+TALK = ROOT / 'assets/audio/voices/talk.json'
+TALK_DIR = ROOT / 'assets/audio/voices/talk'
+TALK_PROVENANCE = TALK_DIR / 'provenance.json'
 
 
 def digest(path):
@@ -78,6 +82,10 @@ def process(master, output, profile):
         filters += ['highpass=f=180', 'lowpass=f=6500']
     elif profile['processing'] == 'double':
         filters += ['aecho=0.9:0.9:38:0.10']
+    if profile.get('pitch'):
+        # Shift pitch by semitones and keep the timing: a blended voice becomes a person.
+        ratio = 2 ** (profile['pitch'] / 12)
+        filters += [f'asetrate={round(24000 * ratio)}', 'aresample=24000', f'atempo={1 / ratio:.4f}']
     filters += ['loudnorm=I=-20:TP=-2:LRA=11']
     output.parent.mkdir(parents=True, exist_ok=True)
     run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', master, '-af', ','.join(filters),
@@ -205,14 +213,113 @@ def validate(data):
     print(f'PASS voice manifest: {len(ids)} lines; {sum(x["status"] != "missing" for x in data["lines"])} assets; remaining entries use subtitles.')
 
 
+def talk_lines(talk):
+    """Every voiced talk line, derived from the manifest so text and audio never drift."""
+    lines = []
+    for name, tree in talk['trees'].items():
+        for node, entry in tree['nodes'].items():
+            lines.append({'id': f'talk_{name.lower()}_{node}', 'text': entry['text'], 'voice_profile': tree['profile']})
+    for kind, people in talk['crew'].items():
+        for person in people:
+            key = person['name'].lower()
+            for node, text, profile in [('a', person['line'], key), ('wrong', talk['host_replies'].get(kind, 'Fine.'), key + '_turning'),
+                                        ('soon', talk['host_soon'], key + '_turning')]:
+                lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
+    for line in lines:
+        if line['id'] in talk.get('pronunciation', {}):
+            line['pronunciation_text'] = talk['pronunciation'][line['id']]
+        line['audio'] = TALK_DIR / f"{line['id']}.ogg"
+    return lines
+
+
+def talk_data(data, talk):
+    return {'model': data['model'], 'model_revision': data['model_revision'], 'profiles': talk['profiles']}
+
+
+def talk_generate(data, talk, ids):
+    """Voice the night shift locally: blends of the installed stock voices, no downloads."""
+    merged = talk_data(data, talk)
+    lock = json.loads((ROOT / 'tools/voice_model_lock.json').read_text())
+    for name, profile in talk['profiles'].items():
+        for voice in profile['blend']:
+            if f'voices/{voice}.pt' not in lock:
+                raise SystemExit(f'Profile {name} blends {voice}, which is not an installed, locked voice.')
+    import espeakng_loader
+    os.environ['PHONEMIZER_ESPEAK_LIBRARY'] = espeakng_loader.get_library_path()
+    os.environ['ESPEAK_DATA_PATH'] = espeakng_loader.get_data_path()
+    os.environ['HF_HUB_OFFLINE'] = '1'
+    import torch
+    import soundfile as sf
+    import numpy as np
+    from kokoro import KModel, KPipeline
+    model_dir = WORK / 'model' / data['model_revision']
+    for name, expected in lock.items():
+        if digest(model_dir / name) != expected:
+            raise SystemExit(f'Model checksum mismatch: {name}')
+    torch.set_num_threads(4)
+    torch.manual_seed(11)
+    model = KModel(repo_id=data['model'], config=str(model_dir/'config.json'), model=str(model_dir/'kokoro-v1_0.pth')).eval()
+    pipelines = {lang: KPipeline(lang_code=lang, repo_id=data['model'], model=model) for lang in ['a', 'b']}
+    provenance = json.loads(TALK_PROVENANCE.read_text()) if TALK_PROVENANCE.exists() else {}
+    for line in talk_lines(talk):
+        if ids and line['id'] not in ids:
+            continue
+        key = fingerprint(merged, line)
+        profile = talk['profiles'][line['voice_profile']]
+        output = line['audio']
+        prior = provenance.get(line['id'], {})
+        if prior.get('fingerprint') == key and output.exists() and digest(output) == prior.get('sha256'):
+            print('Cached', line['id'], flush=True)
+            continue
+        master = WORK / 'takes' / f"{line['id']}-{key}.wav"
+        master.parent.mkdir(parents=True, exist_ok=True)
+        if not master.exists():
+            print('Generate', line['id'], flush=True)
+            voice = sum(weight * torch.load(model_dir / 'voices' / f'{name}.pt', weights_only=True, map_location='cpu')
+                        for name, weight in profile['blend'].items())
+            chunks = [r.audio.numpy() for r in pipelines[profile['language']](line.get('pronunciation_text', line['text']), voice=voice, speed=profile['speed'])]
+            sf.write(master, np.concatenate(chunks), 24000, subtype='PCM_16')
+        duration, peak = process(master, output, profile)
+        provenance[line['id']] = dict(provider='local Kokoro', model=data['model'], model_revision=data['model_revision'],
+            voice='blend ' + ' + '.join(f'{name} {weight}' for name, weight in profile['blend'].items()),
+            generation_date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            usage_rights='Apache-2.0 model; blended stock voices; authored game script. See model license and docs/voices.md.',
+            license_source=MODEL_LICENSE, processing=PROCESSING + '/' + profile['processing'] + f"/pitch{profile.get('pitch', 0)}",
+            fingerprint=key, sha256=digest(output), master_sha256=digest(master), duration=duration, peak=peak,
+            review_status='candidate; human listening acceptance pending')
+        save(TALK_PROVENANCE, provenance)
+    print('Talk lines recorded. Run validate and Godot import next.')
+
+
+def talk_validate(data, talk):
+    merged = talk_data(data, talk)
+    provenance = json.loads(TALK_PROVENANCE.read_text()) if TALK_PROVENANCE.exists() else {}
+    lines = talk_lines(talk)
+    ids = {line['id'] for line in lines}
+    assert len(ids) == len(lines), 'Duplicate talk line ID'
+    for line in lines:
+        path = line['audio']
+        assert line['voice_profile'] in talk['profiles'], f"Unknown talk voice: {line['voice_profile']}"
+        assert path.is_file(), f'Missing talk line: {path}'
+        entry = provenance[line['id']]
+        assert entry['fingerprint'] == fingerprint(merged, line), f'Stale talk line: {path}'
+        assert digest(path) == entry['sha256'], f'Talk checksum mismatch: {path}'
+        assert entry['duration'] > 0 and 0 < entry['peak'] < 1
+    for path in TALK_DIR.glob('*.ogg'):
+        assert path.stem in ids, f'Untracked talk audio: {path}'
+    print(f'PASS talk voices: {len(ids)} lines voiced across {len(talk["profiles"])} profiles.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
-    for command in ('setup', 'audition', 'validate'):
+    for command in ('setup', 'audition', 'validate', 'talk-validate'):
         commands.add_parser(command)
     generate_parser = commands.add_parser('generate')
     generate_parser.add_argument('--id', action='append', default=[])
     generate_parser.add_argument('--replace-imported', action='store_true')
+    talk_parser = commands.add_parser('talk')
+    talk_parser.add_argument('--id', action='append', default=[])
     imp = commands.add_parser('import')
     for name in ('id', 'file', 'provider', 'model', 'voice', 'date', 'rights', 'license'):
         imp.add_argument('--' + name, required=True)
@@ -221,6 +328,8 @@ def main():
     WORK.mkdir(parents=True, exist_ok=True)
     if args.command == 'setup': setup(data)
     elif args.command == 'validate': validate(data)
+    elif args.command == 'talk': talk_generate(data, json.loads(TALK.read_text()), args.id)
+    elif args.command == 'talk-validate': talk_validate(data, json.loads(TALK.read_text()))
     elif args.command == 'import': import_clip(data, args)
     else: generate(data, AUDITIONS if args.command == 'audition' else args.id, args.command == 'audition', getattr(args, 'replace_imported', False))
 

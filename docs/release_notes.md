@@ -1,5 +1,45 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.9 — Outbreaks, a minimap and the night shift talks back (10 October 2026)
+
+Creator feedback on 0.2.8: show where the enemies are; introduce them more creatively
+(regular employees who transform in a cutscene); the engineer clipped through the chair
+in the opening; interact with NPCs RPG-style with unhinged dialogue, voiced; the
+floating cards in the hallway by the pantry blocked the view.
+
+- **Outbreaks.** Every wave member now starts as an ordinary overtime employee planted
+  around the floor ahead of time (well away from you). When the wave is due, a short
+  cutscene cuts to one of them: a lower third (*DANA · Accounts Receivable — Reconciling
+  since Tuesday*), a "P1 ASSIGNED" ping, a red convulsion, then a burst into the monster
+  with its own title card. The rest of the wave turns at the same moment wherever they
+  are, and the bugs pour out of the first one. TAB skips to the burst. Hitting a planted
+  employee's incident early forces it out. The Quick Sync attendees are already standing
+  in Meeting Room 3 during the investigation, and turn when you walk in. Planted
+  employees twitch red every few seconds, for the attentive.
+- **Minimap.** Bottom right: the walkable floor, turned with the camera. Red dots hunt
+  you, orange dots patrol (with their sight drawn at true scale), grey dots are people,
+  the cyan diamond is the NEXT step; anything past the edge is pinned to the rim.
+- **Talk to the night shift.** Walk up to any coworker (or an employee who is about to
+  turn) and press E: the incident pauses, the camera frames the pair, and a dialogue box
+  types out the line in their own voice with up to three replies (1·2·3, click, E to
+  continue, Esc to leave). Nine coworkers have branching satirical conversations and a
+  different opener on a second visit; a few replies nudge Burnout. Nobody chats while
+  something is hunting you.
+- **Voices.** 74 new lines, voiced locally with Kokoro: 25 profiles blended from the six
+  installed stock voices with their own speed and pitch (no new downloads). Text types
+  at the pace of the voice.
+- **Chair clipping fixed.** Seated, the engineer now sits up on the cushion and forward
+  of the backrest (the sitting clip was authored for a lower stool); hands and the
+  keyboard stay on the desk, and the opening close-ups were re-framed to match.
+- **Hallway invites.** The calendar invites drifting down the east corridor float under
+  the ceiling at 72% size and step aside (hide) when the camera comes close.
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 118.4 FPS mean (p95
+13.1 ms, max 17.0 ms; 0.2.8 measured p95 9.7 ms in a different spot, so the minimap's
+per-frame drawing is a suspect to watch). Validation: 687 assertions across 15 headless
+suites, plus the talk-voice manifest check. The 74 new voice lines are unheard
+candidates: human listening is pending.
+
 ## 0.2.8 — Smarter enemies and a clear next step (10 October 2026)
 
 Creator feedback on 0.2.7: enemies still felt dumb; "cardboard" stuck out in the hallway

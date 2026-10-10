@@ -95,6 +95,14 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "talk":
+		await talk()
+		quit()
+		return
+	if only == "outbreak":
+		await outbreak()
+		quit()
+		return
 	if only == "battle":
 		await battle()
 		quit()
@@ -118,6 +126,9 @@ func _run() -> void:
 	for mark: Array in marks:
 		while incident.stage == incident.Stage.ALERT and incident.stage_time < mark[0]:
 			app.session.get_node("Player/CameraRig").controls_active = true
+			# Losing window focus opens the pause page; the probe keeps the clock running.
+			if not app.page.is_empty():
+				app.resume_incident()
 			await process_frame
 			sample()
 		await shot(mark[1])
@@ -230,7 +241,10 @@ func battle() -> void:
 	var incident: Node = app.session.get_node("Incident")
 	var player: CharacterBody3D = app.session.get_node("Player")
 	incident.presentation.skip()
-	await live(3.5)
+	await live(2.5)
+	while incident.presentation.beat_shot == "outbreak":
+		await live(.1)
+	await live(.6)
 	var to_site: Vector3 = incident.wave_site - player.global_position
 	player.camera_rig.rotation.y = atan2(-to_site.x, -to_site.z)
 	player.camera_rig.focus = Vector3.INF
@@ -269,6 +283,97 @@ func battle() -> void:
 		await process_frame
 		sample()
 	report("battle_mode_combat")
+	app.main_menu()
+	await frames(5)
+
+
+## Talking to the night shift: the prompt, a conversation, a reply with an effect.
+func talk() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(2.5)
+	incident.presentation.skip()
+	await live(1.0)
+	for entry: Array in [["Manager", "talk_manager"], ["Intern", "talk_intern"], ["Recruiter", "talk_recruiter"]]:
+		var someone: Dictionary = incident.coworkers.person(entry[0])
+		var body: Node3D = someone.body
+		player.global_position = incident._on_floor(body.global_position + Vector3(1.4, 0, 1.0))
+		player.camera_rig.rotation.y = atan2(1.4, 1.0)
+		player.camera_rig.reset_view()
+		await live(.4)
+		if entry[0] == "Manager":
+			await shot("talk_prompt")
+		incident.talk(incident.talk_target())
+		await frames(40)
+		incident.dialogue.shown = 999.0
+		await frames(4)
+		await shot(entry[1])
+		incident.dialogue.choose(0)
+		incident.dialogue.shown = 999.0
+		await frames(4)
+		await shot(entry[1] + "_reply")
+		incident.dialogue.close()
+		await frames(3)
+		if not app.page.is_empty():
+			app.resume_incident()
+	for view: Array in [["cards_pantry_hall", Vector3(15.2, .05, -2.0), PI], ["cards_wing", Vector3(16.2, .05, 6.0), 0.0]]:
+		player.global_position = view[1]
+		player.camera_rig.rotation.y = view[2]
+		player.camera_rig.reset_view()
+		await live(.6)
+		await shot(view[0])
+	app.main_menu()
+	await frames(5)
+
+
+## A wave breaking out of the overtime crew, the minimap, and the Quick Sync turning.
+func outbreak() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	var story: CanvasLayer = incident.presentation
+	story.skip()
+	# A planted employee up close, before anything happens.
+	await live(.3)
+	var host: Node3D = incident.hosts[0]
+	player.global_position = incident._on_floor(host.global_position + Vector3(1.6, 0, 1.6))
+	player.camera_rig.rotation.y = atan2(1.6, 1.6)
+	player.camera_rig.reset_view()
+	await live(1.0)
+	await shot("outbreak_planted")
+	player.global_position = Vector3(-1.8, .05, 10.8)
+	while story.beat_shot != "outbreak":
+		await live(.05)
+	for mark: Array in [[.7, "outbreak_ticket"], [1.9, "outbreak_turning"], [2.5, "outbreak_burst"], [3.3, "outbreak_monster"]]:
+		while story.beat_shot == "outbreak" and story.beat_time < mark[0]:
+			await live(.02)
+		await shot(mark[1])
+	while story.beat_shot == "outbreak":
+		await live(.05)
+	await live(1.5)
+	await shot("minimap_wave")
+	# Straight to the investigation: the Quick Sync is already in session.
+	for actor: CharacterBody3D in incident.alive.duplicate():
+		actor.receive_damage(100000, actor.global_position)
+	incident.pending.clear()
+	incident.wave_index = incident.waves().size()
+	incident.upgrade_pending = false
+	incident.stage = incident.Stage.ENCOUNTER_ONE
+	incident._enter(incident.Stage.INVESTIGATION)
+	await live(.5)
+	player.global_position = Vector3(17.2, .05, -8.75)
+	player.camera_rig.rotation.y = -PI * .5
+	await live(.6)
+	await shot("sync_planted")
+	player.global_position = Vector3(19.4, .05, -8.75)
+	while story.beat_shot != "outbreak":
+		await live(.05)
+	for mark: Array in [[1.0, "sync_ticket"], [2.7, "sync_burst"]]:
+		while story.beat_shot == "outbreak" and story.beat_time < mark[0]:
+			await live(.02)
+		await shot(mark[1])
 	app.main_menu()
 	await frames(5)
 

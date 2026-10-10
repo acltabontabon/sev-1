@@ -7,19 +7,20 @@ const CHARACTER = preload("res://game/player/rigged_engineer.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
-const FACE: Vector3 = Vector3(-2.5, 1.48, 10.2)
+## Where the seated engineer's face is (rigged_engineer.SEATED_OFFSET lifts him onto the cushion).
+const FACE: Vector3 = Vector3(-2.5, 1.63, 9.92)
 const OPENING_LENGTH: float = 36.0
 ## Opening shots: start, camera from, camera to, look from, look to, field of view.
 ## Each shot eases from its first pose to its second until the next shot cuts in.
 const SHOTS: Array = [
 	[0.0, Vector3(3.6, 2.7, 14.8), Vector3(2.6, 2.4, 14.0), Vector3(-2.3, 1.0, 9.8), Vector3(-2.4, 1.1, 9.7), 46.0],
-	[4.4, Vector3(-1.62, 1.78, 10.95), Vector3(-1.78, 1.7, 10.62), MONITOR + Vector3(.12, 0, 0), MONITOR + Vector3(.08, 0, 0), 36.0],
-	[8.4, Vector3(-2.02, 1.8, 8.72), Vector3(-2.2, 1.74, 8.92), FACE, FACE + Vector3(0, .02, 0), 40.0],
-	[11.6, Vector3(-2.3, 1.42, 10.32), Vector3(-2.38, 1.36, 10.02), MONITOR, MONITOR, 33.0],
+	[4.4, Vector3(-1.62, 1.95, 10.7), Vector3(-1.78, 1.87, 10.38), MONITOR + Vector3(.12, 0, 0), MONITOR + Vector3(.08, 0, 0), 36.0],
+	[8.4, Vector3(-1.98, 1.95, 8.25), Vector3(-2.16, 1.9, 8.45), FACE, FACE + Vector3(0, .02, 0), 42.0],
+	[11.6, Vector3(-2.26, 1.55, 9.98), Vector3(-2.36, 1.49, 9.74), MONITOR, MONITOR, 33.0],
 	[13.4, Vector3(-2.5, 1.27, 9.95), Vector3(-2.5, 1.27, 9.82), MONITOR, MONITOR, 42.0],
-	[16.9, Vector3(-2.12, 1.68, 9.02), Vector3(-2.24, 1.62, 9.18), FACE, FACE, 36.0],
-	[18.6, Vector3(-2.14, 1.24, 9.98), Vector3(-2.18, 1.22, 9.84), Vector3(-2.3, 1.13, 9.19), Vector3(-2.3, 1.12, 9.19), 34.0],
-	[21.4, Vector3(-2.15, 1.68, 8.98), Vector3(-2.26, 1.62, 9.18), FACE, FACE + Vector3(0, -.03, 0), 38.0],
+	[16.9, Vector3(-2.08, 1.85, 8.5), Vector3(-2.2, 1.79, 8.68), FACE, FACE, 38.0],
+	[18.6, Vector3(-2.12, 1.38, 9.7), Vector3(-2.16, 1.36, 9.58), Vector3(-2.3, 1.13, 9.19), Vector3(-2.3, 1.12, 9.19), 34.0],
+	[21.4, Vector3(-2.1, 1.85, 8.45), Vector3(-2.22, 1.79, 8.68), FACE, FACE + Vector3(0, -.03, 0), 40.0],
 	[26.2, Vector3(-1.1, 1.85, 11.7), Vector3(-1.35, 1.95, 11.0), Vector3(-3.0, 2.0, -14.5), Vector3(-3.2, 2.1, -14.5), 46.0],
 	[28.0, Vector3(-1.55, .95, -8.0), Vector3(-1.95, 1.05, -8.9), Vector3(-4.1, 1.75, -14.6), Vector3(-4.1, 1.45, -13.8), 44.0],
 	[30.4, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
@@ -97,6 +98,16 @@ var sequence: Array[String] = []
 var corridor_lights: Array[OmniLight3D] = []
 var corridor_leds: Array[MeshInstance3D] = []
 var alert_material: Material = preload("res://game/rooms/office/alert.tres")
+## Outbreak cutscene: the employee being watched, and the camera's dolly ends.
+const OUTBREAK_LENGTH: float = 4.1
+var outbreak_actor: CharacterBody3D
+var outbreak_from: Vector3
+var outbreak_to: Vector3
+var outbreak_burst: bool = false
+var lower_third: VBoxContainer
+var lower_kicker: Label
+var lower_name: Label
+var lower_note: Label
 
 
 func _ready() -> void:
@@ -184,6 +195,28 @@ func _ready() -> void:
 		card.add_child(label)
 	card.hide()
 	add_child(card)
+	lower_third = VBoxContainer.new()
+	lower_third.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	lower_third.offset_left = 72
+	lower_third.offset_right = 760
+	lower_third.offset_top = -230
+	lower_third.offset_bottom = -78
+	lower_third.alignment = BoxContainer.ALIGNMENT_END
+	lower_third.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lower_third.add_theme_constant_override("separation", 0)
+	for entry: Array in [["Eyebrow", 15], ["DisplayTitle", 58], ["Subhead", 22]]:
+		var label: Label = Label.new()
+		label.theme_type_variation = entry[0]
+		label.add_theme_font_size_override("font_size", entry[1])
+		label.add_theme_constant_override("outline_size", 8)
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, .8))
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lower_third.add_child(label)
+	lower_kicker = lower_third.get_child(0)
+	lower_name = lower_third.get_child(1)
+	lower_note = lower_third.get_child(2)
+	lower_third.hide()
+	add_child(lower_third)
 	fade = ColorRect.new()
 	fade.color = Color.BLACK
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -281,6 +314,8 @@ func _caption_layout(cinematic: bool) -> void:
 
 func reset_story() -> void:
 	beat_shot = ""
+	outbreak_actor = null
+	lower_third.hide()
 	Engine.time_scale = 1.0
 	release_camera()
 	short_opening = opening_seen
@@ -405,6 +440,10 @@ func declare_incident() -> void:
 func skip() -> void:
 	if incident.terminal() or incident.modal_pending():
 		return
+	if beat_shot == "outbreak":
+		incident.end_outbreak()
+		beat_time = maxf(beat_time, OUTBREAK_LENGTH - .5)
+		return
 	if incident.stage == incident.Stage.ALERT:
 		opening_seen = true
 		declare_incident()
@@ -458,7 +497,7 @@ func introduce(kind: String, actor: Node3D) -> void:
 		say(INTRODUCTIONS[kind])
 	elif kind == "record" and incident.stage == incident.Stage.ENCOUNTER_ONE:
 		say("enemy")
-	if kind != "record":
+	if kind != "record" and beat_shot != "outbreak":
 		slow_beat()
 	var card: Label3D = Label3D.new()
 	card.text = "%s\n%s" % [actor.title, actor.motto]
@@ -499,6 +538,88 @@ func vault_entered() -> void:
 	beat_time = 0.0
 
 
+## A wave is due: cut to one employee as the ticket lands, watch them turn, hand back.
+## Every other employee in the wave turns at the same moment, wherever they are.
+func outbreak(actor: CharacterBody3D, area: String) -> void:
+	if not is_instance_valid(actor) or (not beat_shot.is_empty() and beat_shot != "outbreak"):
+		return
+	beat_shot = "outbreak"
+	beat_time = 0.0
+	outbreak_burst = false
+	outbreak_actor = actor
+	# Frame from the engineer's side when the view is clear, so the geography reads.
+	var eye: Vector3 = actor.global_position + Vector3.UP * 1.1
+	var toward: Vector3 = incident.player.global_position - actor.global_position
+	toward.y = 0
+	toward = toward.normalized() if toward.length() > .1 else Vector3.BACK
+	var space: PhysicsDirectSpaceState3D = actor.get_world_3d().direct_space_state
+	var chosen: Vector3 = toward
+	for step in range(12):
+		var angle: float = ceili(step / 2.0) * PI / 6.0 * (1.0 if step % 2 == 0 else -1.0)
+		var direction: Vector3 = toward.rotated(Vector3.UP, angle)
+		var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(eye, eye + direction * 3.8 + Vector3.UP * .5, 1)
+		query.exclude = [actor.get_rid()]
+		if space.intersect_ray(query).is_empty() and not _crowds_shot(eye, eye + direction * 3.4, actor):
+			chosen = direction
+			break
+	# The employee turns to the camera as the ticket lands; the monster keeps that facing.
+	if actor.disguised():
+		actor.host.rotation.y = atan2(chosen.x, chosen.z)
+		actor.visual.rotation.y = actor.host.rotation.y + PI
+	outbreak_from = eye + chosen * 3.3 + Vector3.UP * .5
+	outbreak_to = eye + chosen * 2.3 + Vector3.UP * .2
+	camera.global_position = outbreak_from
+	camera.look_at(eye)
+	var who: Dictionary = actor.host.identity if actor.disguised() and "identity" in actor.host else {}
+	var minutes: int = maxi(0, int((incident.elapsed - 13.4) / 20.0))
+	lower_kicker.text = "%d:%02d PM  ·  %s" % [5 + minutes / 60, minutes % 60, area.to_upper() if not area.is_empty() else "THE FLOOR"]
+	lower_kicker.add_theme_color_override("font_color", Color(.6, .85, .9))
+	lower_name.text = "%s  ·  %s" % [who.get("name", "OVERTIME"), who.get("team", "Payments Platform")]
+	lower_name.add_theme_color_override("font_color", Color(.94, .96, 1))
+	lower_note.text = who.get("quip", "Still online.")
+	lower_note.add_theme_color_override("font_color", Color(.75, .8, .85))
+	sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -6)
+
+
+## Talking: over the engineer's shoulder onto the speaker, pulled in if a wall is behind.
+func dialogue_shot(speaker: Node3D, standing: bool) -> void:
+	var from: Vector3 = incident.player.global_position
+	var head: Vector3 = speaker.global_position + Vector3.UP * (1.2 if standing else .95)
+	var toward: Vector3 = speaker.global_position - from
+	toward.y = 0
+	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
+	var side: Vector3 = toward.cross(Vector3.UP).normalized()
+	var spot: Vector3 = from - toward * 2.1 + side * 1.15 + Vector3.UP * 1.75
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(head, spot, 1)
+	var hit: Dictionary = incident.get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		spot = hit.position + (head - hit.position).normalized() * .25
+	camera.global_position = spot
+	# Aim low so the pair sits in the upper frame, clear of the dialogue box.
+	camera.look_at(head.lerp(from + Vector3.UP * 1.1, .3) - Vector3.UP * .55)
+	camera.fov = 46.0
+	camera.make_current()
+	incident.main.get_node("HUD").visible = false
+
+
+## True when a bystander (no collision, so rays miss them) would stand in the shot.
+func _crowds_shot(from: Vector3, to: Vector3, actor: Node3D) -> bool:
+	var bodies: Array[Node3D] = []
+	if incident.coworkers != null:
+		for someone: Dictionary in incident.coworkers.people:
+			bodies.append(someone.body)
+	for other: CharacterBody3D in incident.alive + incident.sync_alive:
+		if other != actor and is_instance_valid(other):
+			bodies.append(other)
+	var a: Vector2 = Vector2(from.x, from.z)
+	var b: Vector2 = Vector2(to.x, to.z)
+	for body in bodies:
+		var at: Vector2 = Vector2(body.global_position.x, body.global_position.z)
+		if at.distance_to(Geometry2D.get_closest_point_to_segment(at, a, b)) < .75 and at.distance_to(a) > .5:
+			return true
+	return false
+
+
 ## Evidence opens: a short push onto the wall where three systems disagree.
 func evidence_shot() -> void:
 	if beat_shot.is_empty() and not incident.modal_pending():
@@ -513,6 +634,8 @@ func _beats(delta: float) -> void:
 	beat_time += delta
 	var rig: Camera3D = incident.player.get_node("CameraRig/SpringArm3D/Camera3D")
 	match beat_shot:
+		"outbreak":
+			_outbreak_shot(delta, rig)
 		"evidence":
 			if incident.modal_pending() or incident.stage != incident.Stage.INVESTIGATION or beat_time > 2.6:
 				beat_shot = ""
@@ -544,6 +667,65 @@ func _beats(delta: float) -> void:
 				beat_shot = ""
 				for bar in letterbox:
 					bar.hide()
+
+
+func _outbreak_shot(delta: float, rig: Camera3D) -> void:
+	var actor: CharacterBody3D = outbreak_actor
+	if not is_instance_valid(actor) or beat_time >= OUTBREAK_LENGTH or incident.modal_pending():
+		beat_shot = ""
+		outbreak_actor = null
+		lower_third.hide()
+		for bar in letterbox:
+			bar.hide()
+		release_camera()
+		return
+	var burst: float = incident.OUTBREAK_BURST
+	incident.player.narrative_hold = true
+	incident.player.invulnerable_left = maxf(incident.player.invulnerable_left, .3)
+	incident.main.get_node("HUD").visible = false
+	feed.visible = false
+	hint.visible = true
+	lower_third.visible = beat_time > .25 and beat_time < OUTBREAK_LENGTH - .5
+	lower_third.modulate.a = smoothstep(.25, .6, beat_time) * (1.0 - smoothstep(OUTBREAK_LENGTH - 1.0, OUTBREAK_LENGTH - .5, beat_time))
+	if not outbreak_burst and (beat_time >= burst or not actor.disguised()):
+		outbreak_burst = true
+		shake = 1.0
+		sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -4)
+		sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)
+		ElementFx.freeze(self, .1, .05)
+		lower_kicker.text = "TICKET REASSIGNED"
+		lower_kicker.add_theme_color_override("font_color", Color(1, .5, .35))
+		lower_name.text = actor.title
+		lower_name.add_theme_color_override("font_color", Color(1, .42, .3))
+		lower_note.text = actor.motto
+	# Before: a slow push onto the employee. After: back off to fit the monster.
+	var height: float = MonsterRig.KINDS[actor.rig_kind].height if actor.rig != null else 2.0
+	var eye: Vector3 = actor.global_position + Vector3.UP * (1.1 if not outbreak_burst else lerpf(1.1, height * .6, smoothstep(burst, burst + .5, beat_time)))
+	var spot: Vector3
+	if beat_time < burst:
+		spot = outbreak_from.lerp(outbreak_to, smoothstep(0.0, burst, beat_time))
+	else:
+		var back: Vector3 = outbreak_from + (outbreak_from - eye).normalized() * maxf(0.0, height - 2.0) + Vector3.UP * .3
+		spot = outbreak_to.lerp(back, smoothstep(burst, burst + .7, beat_time))
+	camera.global_position = spot
+	camera.look_at(eye)
+	camera.fov = 46.0
+	if beat_time > burst - .9 and beat_time < burst:
+		camera.rotation += Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), 0) * .004
+	shake = maxf(0, shake - delta * 2.0)
+	if shake > 0:
+		camera.rotation += Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), 0) * .014 * shake
+	# The last half second hands back to the gameplay camera.
+	var handover: float = smoothstep(OUTBREAK_LENGTH - .6, OUTBREAK_LENGTH, beat_time)
+	if handover > 0:
+		camera.global_transform = camera.global_transform.interpolate_with(rig.global_transform, handover)
+		camera.fov = lerpf(camera.fov, rig.fov, handover)
+	camera.make_current()
+	var bars: float = 56.0 * smoothstep(0, .35, beat_time) * (1.0 - smoothstep(OUTBREAK_LENGTH - .6, OUTBREAK_LENGTH, beat_time))
+	for side in [0, 1]:
+		letterbox[side].visible = bars > .5
+		letterbox[side].offset_top = 0.0 if side == 0 else -bars
+		letterbox[side].offset_bottom = bars if side == 0 else 0.0
 
 
 ## Terminal: the camera leaves the engineer slowly while the postmortem is read.

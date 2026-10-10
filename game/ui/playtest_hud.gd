@@ -10,6 +10,7 @@ var vitals: PanelContainer
 var guide: HBoxContainer
 var guide_arrow: Label
 var guide_text: Label
+var minimap: Control
 var health_bar: ProgressBar
 var health_value: Label
 var burnout_bar: ProgressBar
@@ -145,6 +146,10 @@ func _build_incident_hud() -> void:
 		label.add_theme_color_override("font_color", Color(.62, .68, .72))
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.custom_minimum_size.x = 240
+	minimap = preload("res://game/ui/minimap.gd").new()
+	minimap.name = "Minimap"
+	minimap.incident = get_parent().get_node("Incident")
+	add_child(minimap)
 	buff = Label.new()
 	buff.theme_type_variation = "Subhead"
 	buff.add_theme_font_size_override("font_size", 13)
