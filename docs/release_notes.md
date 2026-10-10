@@ -1,5 +1,31 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.2 — Enemies that are not boxes (10 October 2026)
+
+Creator feedback on 0.2.1: the enemies still looked like boxes. Combat rules, AI,
+timing and balance are unchanged; this is presentation.
+
+- **New bodies.** Every enemy is now a rigged, animated CC0 Quaternius model wearing a
+  "corrupted production" skin: its original texture under a glowing rim and glitch
+  bands that crawl up the body in the enemy's spell colour.
+  - **Corrupted Record:** a lean, rust-streaked mech with the loading halo still
+    spinning over its head.
+  - **The Blocker:** a hazard-striped boxy mech carrying the BLOCKED sign as a riot shield.
+  - **The Meeting Invite:** a tall antenna mech with the MANDATORY invite hovering above it.
+  - **Scope Creep:** a slime with sticky notes plastered over it, which visibly swells as
+    requirements are added.
+  - **The Variance:** a 3-metre mech wearing its crown of SUCCESS / FAILED / NOT FOUND
+    screens; its false-positive copies are ghostly projections of the same body.
+- **Animated from the AI.** They idle, walk and run while pursuing, flare bright and
+  wind up during the telegraph (the blow lands on the existing damage frame), stagger
+  when hit, raise an arm to cast, and die with their own death animation before
+  dissolving.
+
+Limits: the mech attack animations are stock slashes, punches and kicks, so the limb
+does not trace the telegraph arc exactly; the slime has no hit reaction. Performance
+(M2 Pro, 1280×720 preview): five rigged enemies held 119.9 FPS mean (p95 9.6 ms, max
+13.4 ms). Validation: 639 assertions across 15 headless suites.
+
 ## 0.2.1 — "This is an action game" (10 October 2026)
 
 Answers the creator's review of 0.2.0: the engineer still looked like the old boring

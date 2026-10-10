@@ -2057,3 +2057,8 @@ SEV-1 rigged engineer
 ---------------------
 Character model and animations from Quaternius (quaternius.com): "Ultimate Animated Character Pack" and "Lowpoly Animated Knight", both distributed on OpenGameArt.org under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
 Attribution is not required; credit is given voluntarily. Files, modifications and the retargeting step are listed in assets/characters/README.md.
+
+SEV-1 enemy bodies
+------------------
+Enemy models and animations from Quaternius (quaternius.com): "Animated Mech Pack" and "LowPoly Animated Monsters", distributed on OpenGameArt.org under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
+Attribution is not required; credit is given voluntarily. Files and their use are listed in assets/enemies/README.md.

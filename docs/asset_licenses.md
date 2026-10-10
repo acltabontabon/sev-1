@@ -53,6 +53,8 @@ Kenney's furniture chair and round table were evaluated and rejected as toy-like
 | Rigged engineer body and office clips | Quaternius "Ultimate Animated Character Pack" (`Casual_Male`), OpenGameArt; CC0 1.0 | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
 | Action clips (run, roll, death, jump, sword idles) | Quaternius "Lowpoly Animated Knight", OpenGameArt; CC0 1.0, retargeted at build time | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
 
+| Enemy bodies (four mechs, slime) | Quaternius "Animated Mech Pack" and "LowPoly Animated Monsters", OpenGameArt; CC0 1.0 | [assets/enemies](../assets/enemies/README.md) |
+
 The rigged engineer replaced the native procedural engineer after creator feedback;
 the native scene and generator remain as a fallback. Elemental effects, enemy spells
 and the battle-mode grade are original procedural work (shaders and particles in code).

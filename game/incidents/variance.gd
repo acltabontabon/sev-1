@@ -10,6 +10,7 @@ var seal: MeshInstance3D
 
 
 func _ready() -> void:
+	rig_kind = "variance"
 	super._ready()
 	title = "THE VARIANCE"
 	magic_color = Color(1, .22, .28)
@@ -18,7 +19,7 @@ func _ready() -> void:
 	magic_radius = 2.4
 	motto = "Difference detected. Explanation unavailable."
 	marker = Label3D.new()
-	marker.position.y = 3.1
+	marker.position.y = 4.1
 	marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	marker.font_size = 44
 	marker.modulate = Color(.5, 1, .95)
@@ -28,7 +29,7 @@ func _ready() -> void:
 	var shape: BoxMesh = BoxMesh.new()
 	shape.size = Vector3(.36, .36, .12)
 	seal.mesh = shape
-	seal.position.y = 2.4
+	seal.position.y = 3.5
 	seal.rotation.z = PI / 4
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -44,7 +45,7 @@ var crown: Node3D
 
 func _crown() -> void:
 	crown = Node3D.new()
-	crown.position.y = 2.9
+	crown.position.y = 3.6
 	visual.add_child(crown)
 	for index in range(3):
 		var state: Array = [["SUCCESS", Color(.3, 1, .6)], ["FAILED", Color(1, .3, .18)], ["NOT FOUND", Color(1, .75, .25)]][index]
@@ -107,7 +108,7 @@ func _physics_process(delta: float) -> void:
 		super._physics_process(delta)
 		return
 	crown.rotation.y += delta * (1.6 if exposed else .5)
-	crown.position.y = 2.9 + sin(phase_time * 2.0) * .08
+	crown.position.y = 3.6 + sin(phase_time * 2.0) * .08
 	phase_time = fmod(phase_time + delta, 8.0)
 	var was_exposed: bool = exposed
 	exposed = phase_time >= 4.5

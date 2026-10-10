@@ -21,7 +21,8 @@ func reset_pose() -> void:
 	details.rotation = Vector3.ZERO
 	details.position = Vector3.ZERO
 	details.get_node("Throbber").show()
-	details.get_node("Pages").show()
+	# The rigged body has no room for the orbiting ledger pages; the halo stays.
+	details.get_node("Pages").visible = actor.rig == null
 	$Body.rotation = Vector3.ZERO
 	$LeftArm.rotation = Vector3.ZERO
 	$RightArm.rotation = Vector3.ZERO
@@ -29,7 +30,8 @@ func reset_pose() -> void:
 
 
 func defeat() -> void:
-	position.y = -.25
+	# A rigged body plays its own death clip; only the native slabs need to sink.
+	position.y = -.25 if actor.rig == null else 0.0
 	details.rotation.z = -.35
 	details.position.y = -.35
 	for i in range(4):

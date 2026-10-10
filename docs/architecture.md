@@ -546,6 +546,15 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   telegraph, shards and a glyph on the strike, a burst on defeat; archetypes override
   it and add their own (Blocker cast and shield, Meeting Invite booking, Scope Creep
   growth, Variance phase lightning). Effects never deal damage or change timing.
+- **Enemy bodies.** `incident.gd` creates a `MonsterRig` (`game/enemies/monster_rig.gd`)
+  for its `rig_kind` (record, blocker, invite, scope, variance; archetypes set it before
+  `super._ready()`) and hides the native boxes, keeping the record's loading halo and
+  each archetype's prop (BLOCKED sign, invite card, sticky notes, status crown). The rig
+  plays the CC0 model's clips from AI state with a manually advanced AnimationPlayer
+  (attack scrubbed to the melee windows, hit, cast, death and dissolve) under
+  `corruption.gdshader`. Scope Creep scales the rig with its growth; The Variance's
+  false positives are `projection()` copies of its rig. Provenance in
+  `assets/enemies/README.md`.
 - **Battle mode.** `game/incidents/battle_mode.gd`, owned by the incident, watches for an
   ENGAGED enemy. Onset: sting, flash, chromatic split and speed lines from
   `battle_overlay.gdshader` (a CanvasLayer at layer -1, under the HUD). Held: vignette

@@ -25,6 +25,7 @@ func _ready() -> void:
 	magic_accent = Color(1, .86, .32)
 	magic_words = ["BLOCKED", "WAITING ON", "DEPENDENCY", "PENDING APPROVAL"]
 	magic_radius = 1.4
+	rig_kind = "blocker"
 	motto = "Awaiting dependency."
 	max_health = 260
 	speed_scale = .7
@@ -34,6 +35,11 @@ func _ready() -> void:
 		get_node(part).hide()
 	details = VISUAL.instantiate()
 	visual.add_child(details)
+	# The rig is the body now; it carries the hazard-striped excuse as its shield.
+	for part: String in ["Torso", "Head", "Leg-1", "Leg1"]:
+		details.get_node(part).hide()
+	details.get_node("Shield").scale = Vector3.ONE * .68
+	details.get_node("Shield").position.y = .95
 	melee.damage = 18
 	melee.reach = 2.0
 	melee.half_angle_degrees = 50
@@ -153,6 +159,7 @@ func _physics_process(delta: float) -> void:
 		ring.show()
 		beam.show()
 		ElementFx.sigil(self, global_position, magic_color, shield_radius * .5, cast_time + .2, 1.2)
+		rig.cast(cast_time)
 		ElementFx.glyphs(self, global_position + Vector3.UP * 2.3, magic_color, ["AWAITING DEPENDENCY"], cast_time, 0.0)
 		if DisplayServer.get_name() != "headless":
 			hum.play()

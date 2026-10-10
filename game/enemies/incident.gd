@@ -63,6 +63,9 @@ var magic_accent: Color = Color(.3, 1, .55)
 var magic_words: Array = ["NULL", "404", "NaN", "0x0", "ROLLBACK?", "DUPLICATE"]
 var magic_radius: float = 1.1
 var last_state: State = State.IDLE
+## Which CC0 rigged body to wear (MonsterRig.KINDS); archetypes set it before super._ready().
+var rig_kind: String = "record"
+var rig: MonsterRig
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
 @onready var melee: Node3D = $Visual/Melee
@@ -84,6 +87,20 @@ func _ready() -> void:
 	flash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	flash_material.albedo_color = Color(1, 0.9, 0.65)
 	tell.mesh = melee.arc.mesh
+	if rig_kind != "":
+		rig = MonsterRig.create(rig_kind, self)
+		visual.add_child(rig)
+		for part: String in ["Visual/Body", "Visual/Eye", "Visual/LeftArm", "Visual/RightArm"]:
+			get_node(part).hide()
+		# Keep the record's never-finishing loading halo and orbiting pages; drop the slabs.
+		for child: Node in $Visual/RecordDetails.get_children():
+			if child.name != "Throbber" and child.name != "Pages":
+				(child as Node3D).hide()
+		# Bars and labels clear the head of taller bodies.
+		var top: float = maxf(2.35, MonsterRig.KINDS[rig_kind].height + .35)
+		$HealthBack.position.y = top
+		$HealthFill.position.y = top
+		label.position.y = maxf(label.position.y, top + .2)
 	reset_enemy()
 
 
@@ -105,6 +122,8 @@ func reset_enemy() -> void:
 	$ImpactSparks.clear()
 	ElementFx.clear_from(self)
 	last_state = State.IDLE
+	if rig != null:
+		rig.reset()
 	melee.cancel()
 	visual.reset_pose()
 	tell.hide()

@@ -23,6 +23,7 @@ func _ready() -> void:
 	magic_color = Color(.72, 1, .3)
 	magic_accent = Color(1, .9, .3)
 	magic_words = ["+1 REQ", "JUST ONE MORE", "NICE TO HAVE", "ALSO MOBILE"]
+	rig_kind = "scope"
 	motto = "One tiny additional requirement."
 	max_health = 90
 	speed_scale = 1.35
@@ -31,6 +32,21 @@ func _ready() -> void:
 		get_node(part).hide()
 	details = VISUAL.instantiate()
 	visual.add_child(details)
+	# A slime wearing every requirement anyone stuck on it: notes plastered over the dome.
+	for part: String in ["Eye-1", "Eye1", "Leg-1", "Leg1"]:
+		details.get_node(part).hide()
+	var dome: AABB = rig.bounds()
+	var radius: Vector3 = Vector3(dome.size.x * .5, dome.size.y, dome.size.z * .5)
+	for index in range(12):
+		var angle: float = index * 2.39996 + .6
+		var rise: float = .2 + 1.1 * fmod(index * .618, 1.0)
+		var out: Vector3 = Vector3(cos(angle) * cos(rise), sin(rise), sin(angle) * cos(rise))
+		var note: Node3D = details.get_node("Note%d" % index)
+		note.position = Vector3(dome.get_center().x, dome.position.y, dome.get_center().z) + out * radius * .97
+		# Flat against the slime: the note's thin axis follows the surface normal.
+		var normal: Vector3 = (out / radius).normalized()
+		var side: Vector3 = normal.cross(Vector3.UP if absf(normal.y) < .95 else Vector3.RIGHT).normalized()
+		note.basis = Basis(side, normal, side.cross(normal)).rotated(normal, index * .7) * Basis.from_scale(Vector3(.55, 1, .55))
 	pop = Label3D.new()
 	pop.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	pop.font_size = 64
@@ -59,6 +75,8 @@ func _apply_growth() -> void:
 	# Only the model grows; the strike arc and telegraph stay in world units so the
 	# warning always shows the true reach.
 	details.scale = Vector3.ONE * size
+	if rig != null:
+		rig.scale = Vector3.ONE * size
 	melee.damage = roundi(base_damage * (1.0 + .3 * growth))
 	melee.reach = base_reach * size / SCALES[0]
 	melee.windup = .45

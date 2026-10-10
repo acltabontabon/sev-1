@@ -664,8 +664,13 @@ func _make_copies() -> void:
 		material.albedo_color = Color(.65, .3, .6, .55)
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		var rig: MonsterRig = active_enemy.rig
+		if rig != null:
+			copy.add_child(rig.projection(material))
 		for original in active_enemy.visual.find_children("*", "MeshInstance3D", true, false):
 			if original.mesh == null or original == active_enemy.tell or original == active_enemy.melee.arc:
+				continue
+			if not original.is_visible_in_tree() or (rig != null and rig.is_ancestor_of(original)):
 				continue
 			var mesh: MeshInstance3D = MeshInstance3D.new()
 			mesh.mesh = original.mesh
@@ -675,7 +680,7 @@ func _make_copies() -> void:
 			copy.add_child(mesh)
 		var tag: Label3D = Label3D.new()
 		tag.text = "◇  UNVERIFIED COPY\nSUCCESS?"
-		tag.position.y = 3.1
+		tag.position.y = 4.1
 		tag.font_size = 32
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		copy.add_child(tag)

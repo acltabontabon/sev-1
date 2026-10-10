@@ -58,6 +58,13 @@ func _run() -> void:
 			if a != b:
 				closest = minf(closest, a.global_position.distance_to(b.global_position))
 	check(closest > .5, "separation keeps a crowd from fusing into one silhouette")
+	# Every archetype wears its own CC0 rigged body; the native boxes stay hidden.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var worn: Array = []
+	for kind: String in ["record", "blocker", "invite", "scope"]:
+		var body: CharacterBody3D = spawn(kind, Vector3(worn.size() * 2.5 - 4, .05, -6))
+		worn.append([body.rig.kind if body.rig != null else "", body.get_node("Visual/Body").visible])
+	check(worn == [["record", false], ["blocker", false], ["invite", false], ["scope", false]], "each archetype wears its own rigged body")
 	# Blocker: cast, refuse damage, interrupt, release on death.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 9)

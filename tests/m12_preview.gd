@@ -367,8 +367,10 @@ func cast() -> void:
 	player.position = Vector3(0, .05, 4)
 	player.visual.rotation.y = PI
 	var lineup: Array = [["record", -5.0], ["blocker", -2.6], ["invite", 2.6], ["scope", 5.0]]
+	var cast_actors: Array[CharacterBody3D] = []
 	for entry: Array in lineup:
 		var actor: CharacterBody3D = incident._spawn_entry([entry[0], "A1"], incident.alive)
+		cast_actors.append(actor)
 		actor.position = Vector3(entry[1], .05, 1.5)
 		actor.set_physics_process(false)
 		actor.visual.rotation.y = PI
@@ -395,6 +397,16 @@ func cast() -> void:
 	app.session.get_node("HUD").hide()
 	await live(1.5)
 	await shot("cast_front")
+	boss.position = Vector3(0, .05, -4.5)
+	for index in range(lineup.size() + 1):
+		var subject: CharacterBody3D = cast_actors[index] if index < lineup.size() else boss
+		var tall: float = 1.9 if index < lineup.size() else 3.0
+		camera.position = subject.global_position + Vector3(.9, tall * .75, 2.6 + tall * .6)
+		camera.look_at(subject.global_position + Vector3(0, tall * .55, 0))
+		camera.fov = 45
+		await live(.25)
+		await shot("cast_close_%s" % (lineup[index][0] if index < lineup.size() else "variance"))
+	camera.fov = 58
 	camera.position = Vector3(1.1, 1.9, 1.6)
 	camera.look_at(player.position + Vector3(0, 1.2, 0))
 	camera.fov = 40
