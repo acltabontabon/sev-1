@@ -424,6 +424,26 @@ func _swing(melee: Node3D, _delta: float) -> void:
 	_pose_swing(maxi(actor.combo_index, 0), melee.elapsed, melee.windup, melee.active_time, melee.recovery)
 
 
+## Specials resolve after the rig's tick. Pose the contact before hit-stop holds it,
+## so a counter/pulse never freezes the previous wind-up or shoulder-rest pose.
+func refresh_skill_contact() -> void:
+	if actor == null or not actor.melee.attacking or story_pose >= Pose.TYPING:
+		return
+	held = 0.0
+	shoulder_rest = 0.0
+	right_reach = 1.0
+	left_reach = 0.0
+	spin = 0.0
+	lunge = 0.0
+	lift = 0.0
+	yaw_lag = 0.0
+	animator.advance(0.0)
+	_swing(actor.melee, 0.0)
+	rotation.y = spin
+	position = Vector3(0, lift, -lunge)
+	_solve(0.0)
+
+
 ## One authored strike at `elapsed` seconds into its wind-up/strike/recovery timeline:
 ## the combo steps on the melee clock, the finisher on the kill cam's.
 func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: float, recovery: float) -> void:

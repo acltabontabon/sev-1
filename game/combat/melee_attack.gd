@@ -22,6 +22,8 @@ var hit_targets: Array[int] = []
 var arc: MeshInstance3D
 var audio: AudioStreamPlayer3D
 var freeze_left: float = 0.0
+## Special moves can use the authored swing while resolving their own damage.
+var presentation_only: bool = false
 
 
 func _ready() -> void:
@@ -87,6 +89,7 @@ func start() -> bool:
 
 func cancel() -> void:
 	freeze_left = 0.0
+	presentation_only = false
 	attacking = false
 	elapsed = 0.0
 	hit_targets.clear()
@@ -106,7 +109,7 @@ func _physics_process(delta: float) -> void:
 		audio.stream = swing_sound
 		audio.play()
 	# Test even if a long physics step crosses the complete active window.
-	if elapsed >= windup and previous < windup + active_time:
+	if not presentation_only and elapsed >= windup and previous < windup + active_time:
 		_resolve_hits()
 	arc.visible = attacking and elapsed >= windup and elapsed < windup + active_time
 	if elapsed >= windup + active_time + recovery:

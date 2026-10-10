@@ -614,10 +614,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   with an armed host, or `ARMED_PATIENCE` running out. The triggering host becomes the
   wave's first member so the cutscene watches it. `next_step()` returns tag `???`.
 - **Special moves.** `game/player/special_moves.gd` (child of the player): `reply_all()`
-  and `rollback()` start combo steps 0 and 2 for the body and fire on the swing's active
-  frame (except `rollback()`, the omnislash: `_omni_step()` on unscaled time blinks the
+  releases its blade on combo step 0's active frame, with a 70 ms wind-up and 160 ms
+  recovery. `rollback()` begins an omnislash: `_omni_step()` on unscaled time blinks the
   player between `omni_targets` and emits `omnislash_step`, which the presentation turns
-  into hard camera cuts avoiding walls and bodies (`_blocks_view()`), then `_slam()`); the wave is a top-level crescent swept against the `enemies` group each tick
+  into hard camera cuts avoiding walls and bodies (`_blocks_view()`), then queues the
+  return slam on step 2's active frame after a 100 ms wind-up. The wave is a top-level crescent swept against the `enemies` group each tick
   (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
   `game/ui/skill_bar.gd` (the HUD's `SkillBar`, bottom centre) shows the moves as drawn
   icons with keycaps: a clockwise sweep and seconds while one cools down (each tracks
@@ -633,6 +634,19 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `try_counter()` first, which cancels the hit, finds the nearest enemy to the hit's source
   and answers it; while the stance or its whiff recovery runs the player is rooted and
   cannot attack.
+  The 11 October skill contact refinement reuses the rig's authored swings with
+  `melee.presentation_only` for dash, whirlwind, counter and ultimate, so those poses
+  cannot add unrelated combo damage. Four whirlwind pulses each release a backhand;
+  the successful counter immediately releases its riposte facing the attacker.
+  `rigged_engineer.refresh_skill_contact()` places the sword, grip and body before
+  hit-stop holds the pose. Landed special hits play the existing impact sound and
+  apply victim hit-stop/sparks; whirlwind, riposte and slam also briefly hold the
+  engineer. Dash/projectile contact preserves travel. Hit-stop and particle preferences
+  apply to this feedback. Omnislash pose time follows its unscaled blink cadence.
+  `tests/skill_impact_tests.gd` checks real damage timing, exact pulse counts, released
+  rig contacts, facing, shield rejection, preferences and reset. Its `--preview` mode
+  captures contact images with the real renderer. Feel and listening acceptance remain
+  a human playtest gate.
 - **Physical deaths.** `MonsterRig._break_apart()` (rendered only, or `gore_in_headless`)
   reads `kill_style` meta (set by `special_moves._strike()`) or `incident.last_damage`:
   `_slice()` clones the model into a top-level RigidBody3D and holds the `HUMANOID_CUT`

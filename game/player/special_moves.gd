@@ -107,6 +107,7 @@ var trail_flash: float = 0.0
 var spin_cooldown: float = 0.0
 var spin_left: float = 0.0
 var spin_tick: float = 0.0
+var spin_hits: int = 0
 static var blade_mesh: ArrayMesh
 static var blade_material: StandardMaterial3D
 
@@ -178,6 +179,7 @@ func reset() -> void:
 	dash_cooldown = 0.0
 	spin_cooldown = 0.0
 	spin_left = 0.0
+	spin_hits = 0
 	counter_cooldown = 0.0
 	counter_left = 0.0
 	counter_recover = 0.0
@@ -222,6 +224,40 @@ func _strike(target: Node3D, amount: int, source: Vector3, style: String) -> boo
 	return landed
 
 
+## Reuse the rig's phased poses without an extra, unrelated combo hit.
+func _swing(index: int, windup: float, active: float, recovery: float, contact: bool = false) -> void:
+	player.melee.cancel()
+	player.clear_combo()
+	player._start_step(index)
+	player.melee.presentation_only = true
+	player.melee.windup = windup
+	player.melee.active_time = active
+	player.melee.recovery = recovery
+	if contact:
+		player.melee.elapsed = windup + minf(.025, active * .2)
+
+
+## Confirm actual damage on contact. Travelling cuts never arrest the dash/blinks.
+func _impact(target: Node3D, color: Color, duration: float, impulse: float, hold_actor: bool = true, build_focus: bool = true) -> void:
+	var pause: float = duration if player.hitstop_enabled else 0.0
+	if is_instance_valid(target):
+		if target.has_method("apply_hitstop"):
+			target.apply_hitstop(pause)
+		if player.impact_particles_enabled and target.has_method("show_impact"):
+			target.show_impact(color)
+	if hold_actor:
+		var character: Node3D = player.get_node("Visual/Character")
+		if player.melee.presentation_only and character.has_method("refresh_skill_contact"):
+			character.refresh_skill_contact()
+		player.hitstop_left = maxf(player.hitstop_left, pause)
+		player.melee.freeze_left = maxf(player.melee.freeze_left, pause)
+	if DisplayServer.get_name() != "headless":
+		player.get_node("HitSound").play()
+	player.camera_rig.add_impulse(impulse)
+	if build_focus:
+		player.hit_confirmed.emit()
+
+
 func add_focus(amount: float) -> void:
 	focus = clampf(focus + amount, 0.0, 100.0)
 	focus_changed.emit(focus)
@@ -250,6 +286,8 @@ func reply_all() -> bool:
 	player.clear_combo()
 	if not player._start_step(0):
 		return false
+	player.melee.windup = .07
+	player.melee.recovery = .16
 	queued = "wave"
 	wave_cooldown = WAVE_COOLDOWN
 	_shout("reply_all", "REPLY ALL")
@@ -275,7 +313,7 @@ func rollback() -> bool:
 	omni_clock = OMNI_LEAD
 	player.narrative_hold = true
 	player.invulnerable_left = maxf(player.invulnerable_left, 5.0)
-	player._start_step(2)
+	_swing(2, OMNI_LEAD, .12, .12)
 	ElementFx.glyphs(player, at + Vector3.UP * 2.6, ROLLBACK_COLOR, ["FORCE ROLLBACK"], .9, 0.0)
 	_shout("rollback", "FORCE ROLLBACK", true)
 	ElementFx.motes(player, at + Vector3.UP * .4, ROLLBACK_COLOR, 30, 3.0, .8, 4.0, .16)
@@ -300,8 +338,8 @@ func _omni_step() -> void:
 		ElementFx.slow_motion(&"omnislash", 1.0)
 		player.narrative_hold = false
 		player.visual.rotation.y = player.camera_rig.rotation.y
-		player._start_step(2)
-		_slam()
+		_swing(2, .10, .16, .22)
+		queued = "rollback"
 		return
 	var live: Array[Node3D] = omni_targets.filter(func(enemy: Node3D) -> bool: return is_instance_valid(enemy) and enemy.get("health") != 0)
 	var angle: float = omni_index * 2.39996 + randf_range(-.25, .25)
@@ -318,12 +356,10 @@ func _omni_step() -> void:
 	var toward: Vector3 = Vector3(focus.x - spot.x, 0, focus.z - spot.z)
 	if toward.length() > .01:
 		player.visual.rotation.y = atan2(-toward.x, -toward.z)
-	player.melee.cancel()
-	player._start_step(omni_index % 2)
-	# Blinks outpace the wind-up in crawling time: show each cut already landed (the
-	# follow-through) rather than a string of wind-ups. Past the active window, so the
-	# melee itself deals nothing extra.
-	player.melee.elapsed = player.melee.windup + player.melee.active_time
+	_swing(omni_index % 2, .04, .08, .08, true)
+	if toward.length() > .01:
+		player.visual.rotation.y = atan2(-toward.x, -toward.z)
+	# The pose follows the unscaled blink beat while the rest of the office crawls.
 	var mid: Vector3 = focus + Vector3.UP * 1.0
 	var across: Vector3 = toward.normalized().cross(Vector3.UP) if toward.length() > .01 else Vector3.RIGHT
 	var tilt: float = 1.0 if omni_index % 2 == 0 else -1.0
@@ -332,8 +368,7 @@ func _omni_step() -> void:
 	if target != null:
 		ElementFx.shards(player, mid, ROLLBACK_COLOR, 4, 5.0, .3, toward.normalized())
 		if _strike(target, OMNI_DAMAGE, spot, "slice"):
-			if target.has_method("apply_hitstop"):
-				target.apply_hitstop(.05)
+			_impact(target, ROLLBACK_COLOR, .05, .35, false, false)
 			if "stagger_left" in target:
 				target.stagger_left = .6
 	whoosh.stream = WHOOSH.reply_all
@@ -371,7 +406,8 @@ func blame_shift() -> bool:
 	var wall: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(eye, eye + direction * DASH_DISTANCE, 1))
 	if not wall.is_empty():
 		distance = maxf(.8, eye.distance_to(wall.position) - .6)
-	# No swing on the way through: the cuts come from the dash itself.
+	# The diagonal pose accompanies the dash; only its swept cuts deal damage.
+	_swing(0, .025, DASH_TIME, .12)
 	player.visual.rotation.y = atan2(-direction.x, -direction.z)
 	dash_from = player.global_position
 	dash_direction = direction
@@ -395,9 +431,10 @@ func circle_back() -> bool:
 		return false
 	player.melee.cancel()
 	player.clear_combo()
-	player._start_step(1)
+	_swing(1, .08, .20, .07)
 	spin_left = SPIN_TIME
-	spin_tick = .12
+	spin_tick = .08
+	spin_hits = 0
 	spin_cooldown = SPIN_COOLDOWN
 	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.4, SPIN_COLOR, ["LET'S CIRCLE BACK"], .8, 0.0)
 	_shout("circle_back", "CIRCLE BACK")
@@ -463,7 +500,8 @@ func try_counter(_amount: int, source: Vector3) -> bool:
 	player.invulnerable_left = maxf(player.invulnerable_left, .6)
 	ElementFx.flash(player, at + Vector3.UP, COUNTER_COLOR, 4.0, 5.0, .3)
 	ElementFx.shockwave(player, at, COUNTER_COLOR, 2.4, .35)
-	ElementFx.freeze(player, .14, .04)
+	if player.hitstop_enabled:
+		ElementFx.freeze(player, .07, .04)
 	player.camera_rig.add_impulse(1.2)
 	_shout("works_on_my_machine", "WORKS ON MY MACHINE")
 	counter_cooldown = .8
@@ -475,7 +513,10 @@ func try_counter(_amount: int, source: Vector3) -> bool:
 		player.visual.rotation.y = atan2(-away.x, -away.z)
 		if "melee" in attacker and attacker.melee != null:
 			attacker.melee.cancel()
-		_strike(attacker, COUNTER_DAMAGE, at, "slice")
+		_swing(1, .04, .16, .14, true)
+		player.visual.rotation.y = atan2(-away.x, -away.z)
+		if _strike(attacker, COUNTER_DAMAGE, at, "slice"):
+			_impact(attacker, COUNTER_COLOR, .065, .5, true, false)
 		if attacker.get("health") != 0:
 			if "stagger_left" in attacker:
 				attacker.stagger_left = 1.0
@@ -483,7 +524,6 @@ func try_counter(_amount: int, source: Vector3) -> bool:
 				attacker.knockback = away * 9.0
 		ElementFx.glyphs(player, attacker.global_position + Vector3.UP * 2.2, COUNTER_COLOR, ["CANNOT REPRODUCE"], 1.0, 0.0)
 		ElementFx.shards(player, attacker.global_position + Vector3.UP, COUNTER_COLOR, 14, 6.0, .5, away)
-		player._start_step(1)
 	return true
 
 
@@ -520,9 +560,8 @@ func _tick_dash(delta: float) -> void:
 		ElementFx.bolt(player, dash_from + Vector3.UP * .7, here + Vector3.UP * .7, DASH_COLOR, .55, .05)
 		trail_flash = 1.0
 		dash_marked.clear()
-		player._start_step(1)
+		_swing(1, .04, .12, .12, true)
 		if dash_landed:
-			ElementFx.freeze(player, .08)
 			player.camera_rig.add_impulse(1.0)
 
 
@@ -536,29 +575,25 @@ func _cut(target: Node3D) -> bool:
 	ElementFx.flash(player, at, DASH_COLOR, 2.0, 3.0, .15)
 	if not _strike(target, DASH_DAMAGE, at - dash_direction * 2.0, "slice"):
 		return false
-	if target.has_method("apply_hitstop"):
-		target.apply_hitstop(.08)
-	if target.has_method("show_impact"):
-		target.show_impact(DASH_COLOR)
+	_impact(target, DASH_COLOR, .055, .4, false)
 	# Shifted onto them: blamed incidents take more from everything for a while.
 	if "blamed_left" in target and target.get("health") != 0:
 		target.blamed_left = BLAME_SECONDS
 		ElementFx.glyphs(player, at + Vector3.UP * 1.3, Color(1, .4, .3), ["BLAMED"], .9, 0.0)
-	player.hit_confirmed.emit()
-	player.camera_rig.add_impulse(.4)
 	return true
 
 
 func _tick_spin(delta: float) -> void:
+	if player.hitstop_left > 0:
+		return
 	spin_left -= delta
 	spin_tick -= delta
-	# Keep the spinning backhand going for the whole whirlwind.
-	if not player.melee.attacking and spin_left > .2:
-		player._start_step(1)
-	if spin_tick > 0:
+	if spin_tick > 0 or spin_hits >= SPIN_TICKS:
 		return
 	spin_tick = SPIN_TIME / SPIN_TICKS
-	var last: bool = spin_left < spin_tick * .5
+	spin_hits += 1
+	var last: bool = spin_hits == SPIN_TICKS
+	_swing(1, .08, .20, .07, true)
 	var at: Vector3 = player.global_position
 	ElementFx.shockwave(player, at + Vector3.UP * .1, SPIN_COLOR, SPIN_RADIUS, .3)
 	ElementFx.flame_ring(player, at, SPIN_RADIUS * .8, .35)
@@ -573,6 +608,7 @@ func _tick_spin(delta: float) -> void:
 			continue
 		if _strike(target, SPIN_DAMAGE, at, "tumble"):
 			landed = true
+			_impact(target, SPIN_COLOR, .035, .15, true, false)
 			# Into the whirlwind, not away from it.
 			if "knockback" in target:
 				target.knockback = -Vector3(offset.x, 0, offset.z).normalized() * 4.0
@@ -582,11 +618,12 @@ func _tick_spin(delta: float) -> void:
 				ElementFx.glyphs(player, target.global_position + Vector3.UP * 2.2, Color(.95, .8, .4), ["PARKING LOT"], .9, 0.0)
 	if landed:
 		player.hit_confirmed.emit()
-		player.camera_rig.add_impulse(.35)
 
 
 func _physics_process(delta: float) -> void:
 	if omni_index >= 0:
+		if player.melee.attacking:
+			player.melee.elapsed += delta * (1.0 / maxf(Engine.time_scale, .01) - 1.0)
 		omni_clock -= delta / maxf(Engine.time_scale, .01)
 		if omni_clock <= 0:
 			omni_clock = OMNI_BEAT
@@ -685,14 +722,9 @@ func _advance(blade: Dictionary, delta: float) -> void:
 			continue
 		blade.hit.append(target)
 		if _strike(target, WAVE_DAMAGE, after - blade.direction * 2.0, "slice"):
-			if target.has_method("apply_hitstop"):
-				target.apply_hitstop(.06)
-			if target.has_method("show_impact"):
-				target.show_impact(WAVE_COLOR)
+			_impact(target, WAVE_COLOR, .045, .5, false)
 			ElementFx.shards(player, center, WAVE_COLOR, 10, 6.0, .5, blade.direction)
 			ElementFx.glyphs(player, center + Vector3.UP * 1.2, WAVE_COLOR, ["RE: RE: RE:"], .6, 0.0)
-			player.camera_rig.add_impulse(.5)
-			player.hit_confirmed.emit()
 	if not wall.is_empty() or blade.travelled >= WAVE_RANGE - .01:
 		ElementFx.flash(player, after, WAVE_COLOR, 3.0, 4.0, .25)
 		ElementFx.shards(player, after, WAVE_COLOR, 16, 5.0, .6, -blade.direction)
@@ -712,7 +744,8 @@ func _slam() -> void:
 	ElementFx.glyphs(player, at + Vector3.UP * 3.0, Color(1, 1, 1), ["git reset --hard"], 1.4, 0.0)
 	_shout("reset_hard", "GIT RESET --HARD", true)
 	ElementFx.tremor(player, at, 1.4, 16.0)
-	ElementFx.freeze(player, .14, .04)
+	if player.hitstop_enabled:
+		ElementFx.freeze(player, .10, .04)
 	player.camera_rig.add_impulse(2.2)
 	for candidate in player.get_tree().get_nodes_in_group("enemies"):
 		var target: Node3D = candidate as Node3D
@@ -725,8 +758,7 @@ func _slam() -> void:
 		if target.has_method("drop_shield"):
 			target.drop_shield()
 		if _strike(target, ROLLBACK_DAMAGE, at, "launch"):
-			if target.has_method("show_impact"):
-				target.show_impact(ROLLBACK_COLOR)
+			_impact(target, ROLLBACK_COLOR, .08, .2, true, false)
 
 
 ## An upright crescent facing back at the thrower (so it reads from the camera), in
