@@ -28,6 +28,15 @@ personal-effects pickup and ordinary voiced memories; see the
 [Incident 001 aftermath](game_design.md#incident-001-aftermath-implemented-prototype-11-october-2026).
 Human emotional, animation and listening acceptance remain pending.
 
+The 11 October outbreak pacing refinement stages a collision-limited step back to
+3.8 m for close talk/hover reveals and the Quick Sync. Revealed monsters and BUGs
+stay planted through the camera sequence, then give the engineer two playable
+seconds before pursuit or attack; TAB preserves that window. Hitting first still
+lands the surprise strike without a camera cut, with the same retreat window.
+Human checkpoint: trigger a strange employee at close range, watch the full body
+change, then run/dodge away; repeat beside furniture and in the Quick Sync.
+Accept only if the staging reads clearly and the retreat feels fair.
+
 ## Next acceptance increment
 
 Run the packaged Friday Deployment slice with the creator and a few external testers.

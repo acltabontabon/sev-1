@@ -416,12 +416,26 @@ func _run() -> void:
 	var patient: CharacterBody3D = incident.alive[0]
 	check(patient.disguised() and not patient.visual.visible and incident.presentation.beat_shot == "outbreak" and player.narrative_hold, "hovering too long sets them off: the camera watches the employee turn")
 	check(Vector2(patient.global_position.x - odd_at.x, patient.global_position.z - odd_at.z).length() < 1.0, "the cutscene follows the employee the engineer set off")
+	check(Vector2(player.global_position.x - patient.global_position.x, player.global_position.z - patient.global_position.z).length() > 2.0, "close-range reveal stages the engineer back to see the transformation")
 	check(not incident.request_attack(patient) and incident.bugs.is_empty(), "nobody swings and no bugs arrive before the burst")
 	await frames(roundi(incident.OUTBREAK_BURST * 60) + 12)
 	check(incident.alive.size() == 2 and incident.alive.all(func(actor: CharacterBody3D) -> bool: return not actor.disguised() and actor.visual.visible) and incident.bugs.size() == 3, "the burst turns every employee in the wave and releases the swarm")
 	check(incident.hosts.size() == 2, "the next wave's employees take their places as this one breaks out")
-	await frames(150)
+	var reveal_at: Vector3 = patient.global_position
+	await frames(30)
+	check(patient.global_position.distance_to(reveal_at) < .08 and patient.reveal_grace_left > 1.9, "the revealed monster stays planted while the camera holds the engineer")
+	while incident.presentation.beat_shot == "outbreak":
+		await frames(1)
 	check(incident.presentation.beat_shot == "" and not player.narrative_hold and scene.get_node("HUD").visible, "the cutscene hands control back")
+	var retreat_from: Vector3 = player.global_position
+	Input.action_press("move_back")
+	await frames(45)
+	Input.action_release("move_back")
+	check(player.global_position.distance_to(retreat_from) > .5, "the engineer can run during the post-reveal breathing room")
+	check(patient.global_position.distance_to(reveal_at) < .08 and incident.bugs.all(func(bug: CharacterBody3D) -> bool: return bug.reveal_grace_left > 0 and not bug.melee.attacking), "the whole wave and swarm wait while the engineer retreats")
+	check(not incident.request_attack(patient), "no attack permission during the retreat window")
+	await frames(150)
+	check(patient.reveal_grace_left == 0 and incident.request_attack(patient), "enemies resume normal combat after the breathing room")
 	scene.reset_encounter()
 	player.camera_rig.set_capture(true)
 	incident.presentation.skip()
@@ -432,6 +446,7 @@ func _run() -> void:
 	incident.presentation.skip()
 	await frames(2)
 	check(not incident.alive[0].disguised() and incident.outbreak_left == 0 and incident.bugs.size() == 3, "TAB skips the cutscene straight to the burst")
+	check(incident.alive[0].reveal_grace_left > 1.9 and not incident.request_attack(incident.alive[0]), "skipping the reveal preserves the escape window")
 	# Hitting first: no cutscene, the wave turns on the spot and the first blow lands double.
 	scene.reset_encounter()
 	player.camera_rig.set_capture(true)

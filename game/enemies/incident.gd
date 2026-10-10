@@ -84,6 +84,9 @@ var rig_kind: String = "record"
 ## until it breaks out. Set by `disguise()` before the enemy enters the tree.
 var host: Node3D
 var disguise_left: float = 0.0
+## Outbreak arrivals stay planted until the reveal camera releases the engineer,
+## then allow a short playable retreat before any pursuit (even after a hit).
+var reveal_grace_left: float = 0.0
 ## Blame Shift: while blamed, every hit lands 30% harder.
 var blamed_left: float = 0.0
 ## Monsters talk: overworked employees who lost their minds, voiced from talk.json
@@ -689,6 +692,16 @@ func _physics_process(delta: float) -> void:
 		if shield_left == 0:
 			drop_shield()
 	if health <= 0:
+		return
+	if reveal_grace_left > 0 and not disguised():
+		if awareness == Awareness.MANIFESTING:
+			_awareness(delta)
+		if not is_instance_valid(target) or not target.narrative_hold:
+			reveal_grace_left = maxf(0.0, reveal_grace_left - delta)
+		knockback = Vector3.ZERO
+		velocity = Vector3(0, 0 if is_on_floor() else velocity.y - 22.0 * delta, 0)
+		move_and_slide()
+		tell.hide()
 		return
 	stagger_left = maxf(0.0, stagger_left - delta)
 	blamed_left = maxf(0.0, blamed_left - delta)

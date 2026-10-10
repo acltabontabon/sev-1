@@ -45,6 +45,8 @@ const ROAM_DISTANCE: float = 14.0
 ## break out OUTBREAK_BURST seconds later. Headless runs skip the turn unless asked.
 const HOST: Script = preload("res://game/enemies/employee_host.gd")
 const OUTBREAK_BURST: float = 2.4
+@export_range(0.5, 4.0) var outbreak_retreat_seconds: float = 2.0
+@export_range(2.0, 5.0) var outbreak_reveal_distance: float = 3.8
 @export var outbreak_in_headless: bool = false
 ## Employees planted for the next wave (in wave order) and for the Quick Sync.
 var hosts: Array[Node3D] = []
@@ -567,6 +569,7 @@ func _release_swarm(index: int, site: String) -> void:
 	for count in range(sizes[index]):
 		var bug: CharacterBody3D = RECORD.instantiate()
 		bug.set_script(ARCHETYPES["bug"])
+		bug.reveal_grace_left = outbreak_retreat_seconds if outbreaks() else 0.0
 		bug.starts_aware = false
 		bug.process_mode = Node.PROCESS_MODE_PAUSABLE
 		bug.position = _near_site(origin - wave_site + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2) if wave_area != "" else origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4
@@ -735,12 +738,46 @@ func _break_out(host: Node3D, reason: String) -> void:
 	hosts.erase(host)
 	hosts.push_front(host)
 	log_event("%s set off the wave (%s)" % [str(host.identity.get("name", "Someone")).capitalize(), reason])
+	if reason != "hit" and outbreaks():
+		_make_reveal_space(host.global_position)
 	_spawn()
 	if reason == "hit" and not alive.is_empty():
 		# No cutscene for a swing: the whole wave turns on the spot, and the blow lands as
 		# the surprise review.
 		end_outbreak()
 		alive[0].receive_damage(player.melee.effective_damage(), player.global_position)
+
+
+## Stage a clear view before the reveal camera takes over. Sweep the player's body
+## so this step back stops at furniture/walls; never step off the walkable floor.
+func _make_reveal_space(at: Vector3) -> void:
+	var away: Vector3 = player.global_position - at
+	away.y = 0
+	var distance: float = away.length()
+	if distance >= outbreak_reveal_distance:
+		return
+	away = away.normalized() if distance > .1 else player.visual.global_basis.z
+	var floor_height: float = _on_floor(player.global_position).y
+	var best: Vector3 = Vector3.ZERO
+	var clearance: float = distance
+	for angle: float in [0.0, PI / 6.0, -PI / 6.0, PI / 3.0, -PI / 3.0, PI / 2.0, -PI / 2.0]:
+		var destination: Vector3 = _on_floor(at + away.rotated(Vector3.UP, angle) * outbreak_reveal_distance)
+		if not reachable(destination) or absf(destination.y - floor_height) > .4:
+			continue
+		var motion: Vector3 = destination - player.global_position
+		motion.y = 0
+		var collision: KinematicCollision3D = player.move_and_collide(motion, true)
+		var travel: Vector3 = collision.get_travel() if collision != null else motion
+		var end: Vector3 = player.global_position + travel
+		var gap: float = Vector2(end.x - at.x, end.z - at.z).length()
+		if gap > clearance and reachable(_on_floor(end)):
+			best = travel
+			clearance = gap
+		if clearance >= outbreak_reveal_distance - .05:
+			break
+	player.move_and_collide(best)
+	player.velocity = Vector3.ZERO
+	player.reset_physics_interpolation()
 
 
 ## Swinging at an employee who is not part of the due wave: paperwork, not violence.
@@ -995,6 +1032,7 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D], host: Node3D = nu
 		if host == null:
 			host = _make_host(kind, actor.position)
 		actors.erase(host)
+		actor.reveal_grace_left = outbreak_retreat_seconds
 		actor.disguise(host, maxf(outbreak_left, .05))
 	elif host != null:
 		actors.erase(host)
@@ -1061,7 +1099,7 @@ func on_surprise(_actor: Node) -> void:
 ## At most a few enemies wind up at once, so a crowd reads as a sequence of tells.
 func request_attack(actor: Node) -> bool:
 	# Nobody swings while the camera is watching an employee turn.
-	if outbreak_left > 0:
+	if outbreak_left > 0 or actor.get("reveal_grace_left") != null and actor.reveal_grace_left > 0:
 		return false
 	var busy: int = 0
 	# Bugs nip freely and never queue the real threats behind them.
@@ -1123,6 +1161,7 @@ func _start_quick_sync() -> void:
 		_spawn_entry(QUICK_SYNC[index], sync_alive, sync_hosts[index] if index < sync_hosts.size() else null)
 	sync_hosts.clear()
 	if outbreaks():
+		_make_reveal_space(sync_alive[0].global_position)
 		presentation.outbreak(sync_alive[0], "Meeting Room 3")
 
 
