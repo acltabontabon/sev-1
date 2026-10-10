@@ -166,3 +166,19 @@ direction; the Variance's harmless copies are unchanged.
 After The Root Cause falls, production stabilizes and the office returns to normal. A company-wide message thanks leadership for the resolution. The protagonist earns “Exceeds Expectations,” with a 0% salary increase, and finally leaves. A final notification announces “Monday, 9:00 AM — Sprint Planning.” Credits.
 
 This is a proposed payoff, subject to refinement. Preserve the systemic revelation and the protagonist's humanity rather than using the ending solely as a punchline.
+
+### Coworker emergency aid (implemented prototype)
+
+Awake, living overtime coworkers within 6 metres and a clear line through the office
+can restore 25 health during battle when the engineer has at most 25% health remaining.
+The crew rolls a shared 45% chance every two seconds while eligible, then shares a
+45-second gameplay cooldown after a successful heal. Seated coworkers can help; the
+sleeper, charging cavalry and casualties cannot. Aid never revives the engineer and
+stops during paused choices, dialogue and cinematic camera beats. It changes neither
+Burnout nor debt. A green transfer, health popup naming the helper and coworker caption
+explain the rescue; this caption has no new voiced clip. Retry resets aid.
+
+Playtest checkpoint: take damage near the night shift, look for an occasional rescue,
+then keep fighting or retreat and retry with R. Judge whether the helper is readable
+and the rescue feels welcome without removing danger. Timing and balance await human
+acceptance.

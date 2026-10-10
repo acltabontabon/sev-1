@@ -1,8 +1,22 @@
 extends Node3D
 ## The rest of the Friday-night floor: CC0 office workers on their own overtime routines.
-## Presentation only. They have no collision, take no damage and never block the fight.
+## They have no collision, take no damage and never block the fight.
+## Awake coworkers can occasionally patch up a nearby critically wounded engineer.
 ## They cower while an enemy is engaged, and each has one line for when the engineer
 ## walks past. When a fight ends, the manager on the call takes the credit.
+
+signal emergency_aid(who: String, amount: int)
+
+@export_range(0.0, 1.0) var aid_threshold: float = .25
+@export var aid_health: int = 25
+@export_range(1.0, 10.0) var aid_range: float = 6.0
+@export_range(0.0, 1.0) var aid_chance: float = .45
+@export_range(1.0, 10.0) var aid_check_seconds: float = 2.0
+@export_range(1.0, 120.0) var aid_cooldown_seconds: float = 45.0
+var aid_cooldown: float = 0.0
+var aid_check_left: float = 0.0
+var aid_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var aid_label: Label3D
 
 const ROOT: String = "res://assets/characters/quaternius/"
 ## The boss fight: the night shift charges in to help, and loses, loudly. Who goes, in
@@ -103,6 +117,7 @@ var was_fighting: bool = false
 
 
 func _ready() -> void:
+	aid_rng.randomize()
 	player = get_tree().get_first_node_in_group("players") as Node3D
 	for entry: Dictionary in CAST:
 		var body: Node3D = load(ROOT + entry.body).instantiate()
@@ -134,7 +149,7 @@ func _ready() -> void:
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
 			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0,
 			"charging": false, "doom": 0.0, "fate": "", "engaged": false, "lapping": false, "fighting_for": 0.0, "wind": -1.0, "orbit": 0.0, "spin": 1.0,
-			"dead": false, "pieces": [], "slot": 0})
+			"dead": false, "pieces": [], "slot": 0, "aid_hold": 0.0})
 	reset()
 
 
@@ -175,6 +190,12 @@ func person(name: String) -> Dictionary:
 
 
 func reset() -> void:
+	aid_cooldown = 0.0
+	aid_check_left = 0.0
+	if is_instance_valid(aid_label):
+		aid_label.queue_free()
+	aid_label = null
+	ElementFx.clear_from(self)
 	was_fighting = false
 	cavalry_target = null
 	cavalry_clock = -1.0
@@ -213,6 +234,7 @@ func reset() -> void:
 		body.rotation.y = someone.entry.facing
 		if someone.entry.routine in ["sit", "asleep"]:
 			_seat(body)
+		someone.aid_hold = 0.0
 		someone.said = false
 		someone.line_left = 0.0
 		someone.clock = 0.0
@@ -227,6 +249,7 @@ func reset() -> void:
 
 func _process(delta: float) -> void:
 	var fighting: bool = _fighting()
+	_emergency_aid(delta, fighting)
 	for someone: Dictionary in people:
 		someone.clock += delta
 		var body: Node3D = someone.body
@@ -236,6 +259,8 @@ func _process(delta: float) -> void:
 			someone.line_left = 3.2
 		# Lines time out in real time, like the voices they caption (kill cams slow the game).
 		someone.line_left = maxf(0.0, someone.line_left - delta / maxf(Engine.time_scale, .01))
+		if someone.line_left <= 0.0:
+			line.text = someone.entry.line
 		line.modulate.a = minf(1.0, someone.line_left * 2.0)
 		line.outline_modulate.a = line.modulate.a
 		# Remarks stay out of cutscenes and kill cams.
@@ -245,6 +270,11 @@ func _process(delta: float) -> void:
 		if someone.charging:
 			_charge(someone, delta)
 			continue
+		if someone.aid_hold > 0.0:
+			someone.aid_hold = maxf(0.0, someone.aid_hold - delta)
+			if someone.aid_hold > 0.0:
+				continue
+			_routine(someone, false)
 		var routine: String = someone.entry.routine
 		if fighting and routine != "asleep" and routine != "sit":
 			_play(someone, "Defeat", .25, false)
@@ -266,6 +296,83 @@ func _process(delta: float) -> void:
 	if was_fighting and not fighting:
 		_applaud()
 	was_fighting = fighting
+
+
+## Checks are per interval, never per frame or per coworker. The shared cooldown
+## prevents a crowd from supplying several heals on the same critical-health moment.
+func _emergency_aid(delta: float, fighting: bool) -> void:
+	if not is_instance_valid(player) or player.health <= 0 or player.narrative_hold or get_tree().paused:
+		return
+	if incident == null or incident.modal_pending() or (incident.presentation != null and not incident.presentation.beat_shot.is_empty()):
+		return
+	aid_cooldown = maxf(0.0, aid_cooldown - delta)
+	if not fighting or player.health > player.max_health * aid_threshold or aid_cooldown > 0.0:
+		aid_check_left = 0.0
+		return
+	aid_check_left -= delta
+	if aid_check_left > 0.0:
+		return
+	aid_check_left = aid_check_seconds
+	var candidates: Array[Dictionary] = []
+	for someone: Dictionary in people:
+		var body: Node3D = someone.body
+		if someone.dead or someone.charging or someone.entry.routine == "asleep" or not body.is_visible_in_tree():
+			continue
+		if player.global_position.distance_to(body.global_position) > aid_range:
+			continue
+		# Layer 1 is the office's physical geometry; exclude the engineer's body.
+		var sight: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+			body.global_position + Vector3.UP * 1.2, player.global_position + Vector3.UP, 1, [player.get_rid()])
+		if not get_world_3d().direct_space_state.intersect_ray(sight).is_empty():
+			continue
+		candidates.append(someone)
+	if candidates.is_empty() or aid_rng.randf() >= aid_chance:
+		return
+	var helper: Dictionary = candidates[aid_rng.randi_range(0, candidates.size() - 1)]
+	var restored: int = mini(maxi(0, aid_health), player.max_health - player.health)
+	if restored <= 0:
+		return
+	player.health += restored
+	player.health_changed.emit(player.health)
+	aid_cooldown = aid_cooldown_seconds
+	helper.aid_hold = 1.4
+	helper.line_left = 3.0
+	helper.said = true
+	(helper.line as Label3D).text = "I've got you. Benefits finally kicked in."
+	var body: Node3D = helper.body
+	var toward: Vector3 = player.global_position - body.global_position
+	body.rotation.y = atan2(toward.x, toward.z)
+	# Seated coworkers stay on their furniture; standing helpers reach out.
+	if helper.entry.routine != "sit":
+		_play(helper, "ual/interact", .15, false)
+	_aid_feedback(str(helper.entry.name), restored, body.global_position)
+	emergency_aid.emit(str(helper.entry.name), restored)
+
+
+func _aid_feedback(who: String, amount: int, from: Vector3) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var green: Color = Color(.35, 1.0, .65)
+	var at: Vector3 = player.global_position + Vector3.UP
+	ElementFx.bolt(self, from + Vector3.UP * 1.2, at, green, .45, .025)
+	ElementFx.motes(self, at, green, 14, 1.2, .8, .2, .07)
+	if is_instance_valid(aid_label):
+		aid_label.queue_free()
+	aid_label = Label3D.new()
+	aid_label.text = "+%d HP · %s" % [amount, who.to_upper()]
+	aid_label.font = preload("res://assets/fonts/inter_variable.ttf")
+	aid_label.font_size = 40
+	aid_label.pixel_size = .004
+	aid_label.outline_size = 10
+	aid_label.modulate = green
+	aid_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	aid_label.no_depth_test = true
+	player.add_child(aid_label)
+	aid_label.position = Vector3(0, 2.6, 0)
+	var fade: Tween = aid_label.create_tween()
+	fade.tween_interval(1.2)
+	fade.tween_property(aid_label, "modulate:a", 0.0, .6)
+	fade.tween_callback(aid_label.queue_free)
 
 
 ## The gate is open: the night shift sprints past the engineer down the corridor to take
