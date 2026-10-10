@@ -1,5 +1,17 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.31 — Notices are one line (11 October 2026)
+
+Creator report: the "night shift is not okay…" box at the start is too big, a wall of
+text.
+
+- That box is the HUD notice (not a cutscene): it shows the incident's latest status
+  message. Its opening tutorial repeated what the NEXT line and the objective already
+  say. Notices are now one short line each (the joke plus, at most, one new rule: hit
+  first for double damage, the boss's solid ◆, breaking the Blocker), in a slim toast
+  that hugs its text above the skill bar and fades out after five seconds.
+- The new office textures are now imported as compressed GPU textures, like the rest.
+
 ## 0.2.30 — Finishers swing (11 October 2026)
 
 Creator request: the finisher should be the sword swinging, not a pose.

@@ -47,6 +47,7 @@ const EVIDENCE: Array = [
 	["PAYMENT PROCESSING", "NOT FOUND", "Delivery log stops before arrival.", Color(1, .75, .3)]]
 var last_message: String = ""
 var message_age: float = 99.0
+const NOTICE_SECONDS: float = 5.0
 const STATUS: Array[String] = ["NEW", "TRIAGE", "INVESTIGATING", "CONTAINING", "ESCALATED TO: YOU", "RESOLVED", "REOPENED"]
 @onready var comfort: HBoxContainer = $CapturePrompt/Panel/Padding/VBox/Comfort
 @onready var player: CharacterBody3D = %Player
@@ -223,17 +224,18 @@ func _build_incident_hud() -> void:
 	notice.theme_type_variation = "Card"
 	notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	notice.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	notice.offset_left = -330
-	notice.offset_right = 330
-	# Above the skill bar.
-	notice.offset_top = -190
-	notice.offset_bottom = -110
+	# A slim toast, hugging its line just above the skill bar; gone in a few seconds.
+	notice.offset_left = 0
+	notice.offset_right = 0
+	notice.offset_top = -112
+	notice.offset_bottom = -112
+	notice.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(notice)
 	notice_text = Label.new()
 	notice_text.theme_type_variation = "MonoLabel"
-	notice_text.add_theme_font_size_override("font_size", 14)
-	notice_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	notice_text.add_theme_font_size_override("font_size", 13)
+	notice_text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	notice_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	notice.add_child(notice_text)
 	_build_evidence()
@@ -518,7 +520,13 @@ func _refresh_incident(incident: Node) -> void:
 	if incident.message != last_message:
 		last_message = incident.message
 		message_age = 0.0
-	notice_text.text = incident.message
+		notice_text.text = incident.message
+		# Hug the new line, centred just above the skill bar (containers only grow).
+		var fit: Vector2 = notice.get_combined_minimum_size()
+		notice.offset_left = -fit.x * .5
+		notice.offset_right = fit.x * .5
+		notice.offset_top = -112.0 - fit.y
+		notice.offset_bottom = -112.0
 	health_bar.max_value = player.max_health
 	health_bar.value = player.health
 	health_value.text = "%d / %d" % [player.health, player.max_health]
@@ -599,7 +607,8 @@ func _refresh_incident(incident: Node) -> void:
 	evidence.visible = $Margin.visible and incident.stage == incident.Stage.INVESTIGATION and incident.inspected and incident.near_console()
 	vitals.visible = vitals.visible and not evidence.visible
 	skill_bar.visible = skill_bar.visible and not evidence.visible
-	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < 7.0
+	notice.visible = $Margin.visible and not evidence.visible and not incident.message.is_empty() and message_age < NOTICE_SECONDS
+	notice.modulate.a = smoothstep(0.0, .2, message_age) * (1.0 - smoothstep(NOTICE_SECONDS - .7, NOTICE_SECONDS, message_age))
 	boss_box.visible = boss_box.visible and $Margin.visible
 	_refresh_guide(incident)
 	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)

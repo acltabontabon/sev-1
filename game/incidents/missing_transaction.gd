@@ -343,11 +343,11 @@ func _enter(next: Stage) -> void:
 			remaining = stage_total()
 			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
 			_plant(0)
-			message = "The night shift is not okay. Find the coworker acting strange (▼).\nHit them before they spot you for double damage. Orange arc: dodge, then counter."
+			message = "The night shift is not okay.  •  Hit first: double damage."
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
-			message = "DISCREPANCY CONFIRMED • RECONCILIATION FAILED\nINVESTIGATION REQUIRED • East wing: the pantry still has coffee; Meeting Room 3 has an ongoing sync."
+			message = "DISCREPANCY CONFIRMED  •  The pantry still has coffee."
 			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
 			_plant_sync()
 			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
@@ -362,7 +362,7 @@ func _enter(next: Stage) -> void:
 					host.queue_free()
 			sync_hosts.clear()
 			_plant(0)
-			message = "Payment Processing is missing the delivered record.\nCore saved it. Delivery stopped downstream. These records pursue faster."
+			message = "Payment Processing lost the record.  •  These ones are faster."
 			console_marker.text = ""
 			light_target = 3.2
 			_dashboard("DELIVERY\nFAILED", "MISSING: PAYMENT RECORD")
@@ -372,7 +372,7 @@ func _enter(next: Stage) -> void:
 			spawn_delay = 9999.0
 			boss_triggered = false
 			objective = "3 / 3 — The Variance: enter the production core, north through the server corridor."
-			message = "The original always carries a solid ◆ and VERIFIED ORIGINAL.\nFalse copies have broken ◇ markers. Trust the steady shape."
+			message = "The original carries a solid ◆. Copies are hollow ◇."
 			_dashboard("FALSE\nPOSITIVES", "VERIFY BEFORE RESOLVING")
 		Stage.RESOLVED, Stage.FAILED:
 			_finish()
@@ -672,7 +672,7 @@ func _watch_hosts(delta: float) -> void:
 		armed = true
 		armed_left = ARMED_PATIENCE
 		hover.clear()
-		message = "Something is off with the night shift. Find the coworker acting strange (▼).\nTalk to them, hover too long, or hit first: hitting first lands double."
+		message = "Something is off with the night shift."
 	armed_left -= delta
 	var closest: Node3D = null
 	for host: Node3D in hosts:
@@ -1099,7 +1099,7 @@ func _on_scope_grew(stage_reached: int) -> void:
 
 func _on_shield_cast(count: int) -> void:
 	if count > 0:
-		message = "DEPENDENCY LOCK • %d ally shielded for 5s. Break it: hit the Blocker mid-cast, or take it down." % count
+		message = "DEPENDENCY LOCK  •  %d shielded. Hit the Blocker mid-cast." % count
 
 
 func in_quick_sync() -> bool:
@@ -1455,7 +1455,7 @@ func _make_copies() -> void:
 		tag.font_size = 32
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		copy.add_child(tag)
-	message = "FALSE POSITIVES — two harmless projections.\nFollow the solid ◆. Strike the original when OPEN."
+	message = "FALSE POSITIVES  •  Strike the solid ◆ when it's OPEN."
 
 
 func fail() -> void:
