@@ -114,6 +114,8 @@ var player: Node3D
 var incident: Node
 var people: Array[Dictionary] = []
 var was_fighting: bool = false
+## Frozen reveal poses, restored on skip, completion or restart.
+var stare_poses: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -182,6 +184,40 @@ func _seat(body: Node3D) -> void:
 		body.position = best.global_position + Vector3(sin(turn), 0, cos(turn)) * SOFA_FORWARD
 
 
+## The reveal turns heads, never the seated root: rotating a sitting body would sweep
+## its legs through the desk and move its hips off the chair cushion.
+func stare_at(target: Vector3) -> void:
+	clear_stare()
+	for someone: Dictionary in people:
+		var body: Node3D = someone.body
+		var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
+		var toward: Vector3 = target - body.global_position
+		var yaw: float = clampf(wrapf(atan2(toward.x, toward.z) - body.global_rotation.y, -PI, PI), -1.4, 1.4)
+		for bone: String in ["Neck", "Head"]:
+			var index: int = skeleton.find_bone(bone)
+			if index < 0:
+				continue
+			var original: Quaternion = skeleton.get_bone_pose_rotation(index)
+			stare_poses.append({"skeleton": skeleton, "index": index, "rotation": original})
+			# Imported bones have their own axes. Convert world-up to the bone's
+			# pre-pose frame, so the turn stays horizontal even in a sleeping pose.
+			var parent: int = skeleton.get_bone_parent(index)
+			var frame: Basis = skeleton.global_basis
+			if parent >= 0:
+				frame *= skeleton.get_bone_global_pose(parent).basis
+			frame *= skeleton.get_bone_rest(index).basis
+			var axis: Vector3 = (frame.inverse() * Vector3.UP).normalized()
+			var share: float = .6 if bone == "Neck" else .4
+			skeleton.set_bone_pose_rotation(index, Quaternion(axis, yaw * share) * original)
+
+
+func clear_stare() -> void:
+	for pose: Dictionary in stare_poses:
+		if is_instance_valid(pose.skeleton):
+			(pose.skeleton as Skeleton3D).set_bone_pose_rotation(pose.index, pose.rotation)
+	stare_poses.clear()
+
+
 func person(name: String) -> Dictionary:
 	for candidate: Dictionary in people:
 		if candidate.entry.name == name:
@@ -190,6 +226,7 @@ func person(name: String) -> Dictionary:
 
 
 func reset() -> void:
+	clear_stare()
 	aid_cooldown = 0.0
 	aid_check_left = 0.0
 	if is_instance_valid(aid_label):

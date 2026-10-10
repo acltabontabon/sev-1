@@ -209,7 +209,6 @@ var massacre_look: Vector3 = Vector3(9, 1.2, -38)
 ## transaction is seen only in flashes until it is right behind him.
 var screen_words: Array[Label3D] = []
 var screen_black: StandardMaterial3D
-var crew_facing: Dictionary = {}
 var demon: MonsterRig
 var base_exposure: float = 1.0
 const FLASHES: Array = [[41.8, Vector3(-1.2, 0, -12.0)], [42.5, Vector3(-1.5, 0, -3.5)], [43.15, Vector3(-2.0, 0, 4.5)]]
@@ -1493,10 +1492,8 @@ func _end_opening() -> void:
 	crew_stamp.hide()
 	for word in screen_words:
 		word.hide()
-	for body: Node3D in crew_facing:
-		if is_instance_valid(body):
-			body.rotation.y = crew_facing[body]
-	crew_facing.clear()
+	if incident.coworkers != null:
+		incident.coworkers.clear_stare()
 	demon.hide()
 	incident.main.get_node("WorldEnvironment").environment.tonemap_exposure = base_exposure
 	if incident.coworkers != null:
@@ -1570,11 +1567,7 @@ func _fire(entry: Array) -> void:
 			_screens(entry[2])
 		"heads":
 			# Every one of them, at once, looking straight at you. Then nobody moves.
-			for someone: Dictionary in incident.coworkers.people:
-				var body: Node3D = someone.body
-				crew_facing[body] = body.rotation.y
-				var toward: Vector3 = SEAT - body.global_position
-				body.rotation.y = atan2(toward.x, toward.z)
+			incident.coworkers.stare_at(SEAT)
 			incident.coworkers.process_mode = Node.PROCESS_MODE_DISABLED
 			sting(preload("res://assets/audio/sfx/glitch_a.ogg"), -6)
 			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)

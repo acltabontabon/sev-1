@@ -507,6 +507,9 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `sequence` queue plays lines that belong together through the bounded voice queue;
   stage changes clear it. A small music director cross-fades `assets/audio/music` beds on
   the `Music` bus, which a sidechain compressor ducks under `Voice`.
+  The missing-transaction reveal calls `coworkers.stare_at()` to turn only the neck
+  and head bones (limited yaw); body roots, hips and legs remain fixed on their
+  furniture. Opening cleanup and coworker reset restore the saved bone poses.
 - **Notifications.** `voice_controller.gd` emits `line_started`; `game/ui/notification_feed.gd`
   turns gameplay lines into sender cards (max three, expiring). ALERT-stage lines use
   film subtitles instead.

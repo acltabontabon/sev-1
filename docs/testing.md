@@ -75,3 +75,19 @@ quality, camera comfort, or whether the slice is fun.
 ## Voice candidate listening test
 
 The Milestone 11 candidate adds a Voice volume slider and Subtitles toggle. Follow the [voice listening route](voices.md#validation-and-human-listening-route), especially opening timing, boss spatial speech, choice/pause suspension and terminal reports. Candidate performances have not received human listening acceptance. Existing gameplay and platform acceptance gates remain open.
+
+## Opening head-turn regression
+
+The missing-transaction reveal now turns the coworkers' neck and head bones with a
+limited horizontal glance; their body roots and lower-body poses remain anchored to
+their chairs or standing positions. Skip, natural completion and restart clear the
+reveal poses. `tests/opening_stare_tests.gd` checks the actual reveal event on all twelve
+coworkers, unchanged hips/leg/foot transforms, visible head turns and pose cleanup; it
+runs through `python3 tools/validate.py`.
+
+Human checkpoint: start a fresh incident and watch the night shift when the monitors
+ask “WHERE IS IT?” (about 40 seconds in). The seated coworkers should glance toward
+the engineer while their hips and legs stay on their chairs, with no body swing through
+the desks. Check the return to ordinary routines after the opening; repeat with Tab
+skipping after the glance. Rendered inspection checks furniture support, but the
+creator still accepts the head-turn timing and horror beat.
