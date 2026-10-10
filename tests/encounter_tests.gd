@@ -676,9 +676,16 @@ func _run() -> void:
 	check(incident.presentation.beat_shot == "killcam" and incident.presentation.killcam_start > 0, "kill cams never stack")
 	# The kill cam runs on real time (it plays through its own slow motion).
 	var deadline: int = Time.get_ticks_msec() + 3000
+	var hero: Node3D = player.get_node("Visual/Character")
+	var swung: bool = false
+	var furthest: float = 0.0
 	while incident.presentation.beat_shot == "killcam" and Time.get_ticks_msec() < deadline:
 		await frames(1)
-	check(incident.presentation.beat_shot == "" and player.get_node("CameraRig/SpringArm3D/Camera3D").current and scene.get_node("HUD").visible, "the kill cam hands straight back to play")
+		if hero.story_pose == hero.Pose.FINISH:
+			swung = swung or (hero.right_reach == 1.0 and hero.held == 0.0)
+			furthest = maxf(furthest, hero.finish_progress)
+	check(swung and furthest > .6, "the finisher swings the Monolith through the kill in slow motion (reached %.2f)" % furthest)
+	check(incident.presentation.beat_shot == "" and player.get_node("CameraRig/SpringArm3D/Camera3D").current and scene.get_node("HUD").visible and hero.story_pose == 0, "the kill cam hands straight back to play")
 	incident.presentation.killcam_in_headless = false
 	scene.reset_encounter()
 	await frames(2)

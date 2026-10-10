@@ -1,5 +1,15 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.30 — Finishers swing (11 October 2026)
+
+Creator request: the finisher should be the sword swinging, not a pose.
+
+- The kill cam's hero shot now shows the engineer squared up to the kill, swinging the
+  Legacy Monolith through it in slow motion from a low side angle: a diagonal cleave or
+  a spinning backhand (the same authored strikes as the combo, trail and all), and the
+  leaping overhead slam for the boss. The swing finishes as the camera heads home, then
+  he turns back and shoulders the blade. The folded-arms hero pose is gone.
+
 ## 0.2.29 — Framed prints and a company (10 October 2026)
 
 Creator request: make the wall signs look good (keep the unhinged text), get assets

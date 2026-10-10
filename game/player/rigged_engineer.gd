@@ -8,7 +8,7 @@ extends Node3D
 ## During a swing the keyboard follows an authored arc in character space and two-bone IK
 ## pulls the arms onto its grip, so the visible strike always matches the damage window.
 
-enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, COOL }
+enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, FINISH }
 const SEATED: Array[int] = [Pose.TYPING, Pose.ALERT, Pose.SLUMP, Pose.SIP, Pose.RELAX, Pose.GLANCE]
 const ANIMATIONS: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 ## Weapon space: where each fist closes on the grip.
@@ -39,8 +39,12 @@ var battle: float = 0.0
 var clock: float = 0.0
 var phase: float = -1.0
 var step_clip: StringName = &""
-## 0..1: how far the blade has gone from the hand into the floor for the hero pose.
-var planted: float = 0.0
+## The finisher kill cam's swing (Pose.FINISH): which authored strike (0 cleave, 1
+## spinning backhand, 2 leaping slam) and how far through it (0..1), set by the camera.
+var finish_style: int = 0
+var finish_progress: float = 0.0
+## The finisher's timeline as fractions: wind-up, strike, then the follow-through.
+const FINISH_TIMING: Vector3 = Vector3(.16, .5, .34)
 ## Attacks and specials snap the body's facing to the aim at once (hitboxes need it);
 ## the model catches up over a few frames instead of flipping in one.
 var yaw_lag: float = 0.0
@@ -106,7 +110,7 @@ func reset_pose() -> void:
 	if actor != null:
 		process_mode = Node.PROCESS_MODE_INHERIT
 	phase = -1.0
-	planted = 0.0
+	finish_progress = 0.0
 	yaw_lag = 0.0
 	last_facing = get_parent().rotation.y if get_parent() != null else 0.0
 	clock = 0.0
@@ -139,9 +143,8 @@ func defeat() -> void:
 	held = 0.0
 	right_reach = 0.0
 	left_reach = 0.0
-	# Let go of the shoulder carry and the hero pose: the keyboard stays where it drops.
+	# Let go of the shoulder carry: the keyboard stays where it drops.
 	shoulder_rest = 0.0
-	planted = 0.0
 	trail.clear()
 	animator.play("rig/death", .12)
 	animator.speed_scale = 1.0
@@ -167,12 +170,6 @@ func shoulder_transform() -> Transform3D:
 	# Width (local X) points up: lift the centre line half a blade above the resting edge.
 	var center: Vector3 = edge + basis.x * .22
 	return Transform3D(basis, center - along * .75)
-
-
-## The hero pose: point down in the floor at his right, pommel at shoulder height.
-func planted_transform() -> Transform3D:
-	var down: Vector3 = Vector3(.06, -1, .08).normalized()
-	return Transform3D(Basis.looking_at(down, Vector3.BACK), Vector3(.62, 1.3, .1))
 
 
 func carry_transform() -> Transform3D:
@@ -299,11 +296,16 @@ func _gameplay(speed: float, delta: float) -> void:
 ## a lunging diagonal slash, a spinning backhand, and a leap into an overhead slam.
 ## Wind-ups snap into a held anticipation pose; strikes start at full speed.
 func _swing(melee: Node3D, _delta: float) -> void:
-	var index: int = maxi(actor.combo_index, 0)
-	var windup: float = clampf(melee.elapsed / melee.windup, 0, 1)
-	var strike: float = (melee.elapsed - melee.windup) / melee.active_time
-	var settle: float = clampf((melee.elapsed - melee.windup - melee.active_time) / melee.recovery, 0, 1)
-	var striking_now: bool = melee.elapsed >= melee.windup and strike < 1.0
+	_pose_swing(maxi(actor.combo_index, 0), melee.elapsed, melee.windup, melee.active_time, melee.recovery)
+
+
+## One authored strike at `elapsed` seconds into its wind-up/strike/recovery timeline:
+## the combo steps on the melee clock, the finisher on the kill cam's.
+func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: float, recovery: float) -> void:
+	var windup: float = clampf(elapsed / windup_time, 0, 1)
+	var strike: float = (elapsed - windup_time) / active_time
+	var settle: float = clampf((elapsed - windup_time - active_time) / recovery, 0, 1)
+	var striking_now: bool = elapsed >= windup_time and strike < 1.0
 	var carry: Transform3D = carry_transform()
 	var target: Transform3D
 	var twist: float = 0.0
@@ -366,7 +368,7 @@ func _swing(melee: Node3D, _delta: float) -> void:
 				dip = .22 * release
 				left_reach = release
 	# The ribbon marks the cut itself, not the wind-up.
-	trail.emitting = melee.elapsed >= melee.windup * .9 and (strike < 1.0 or settle < .2)
+	trail.emitting = elapsed >= windup_time * .9 and (strike < 1.0 or settle < .2)
 	weapon.transform = target
 	_turn("Abdomen", Vector3.UP, twist * .45)
 	_turn("Torso", Vector3.UP, twist * .55)
@@ -457,9 +459,8 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.04, 0)
 			target_lean = 0.0
 			reach = 0.0
-		Pose.COOL:
-			# Turned away from the mess, arms folded, the Monolith planted beside him.
-			look = Vector2(.12, -.3)
+		Pose.FINISH:
+			look = Vector2(-.05, 0)
 			target_lean = 0.0
 			reach = 0.0
 	# Hands on the desk stay on the desk while the body is lifted onto the cushion.
@@ -469,8 +470,8 @@ func _staged(delta: float) -> void:
 	head_turn = head_turn.lerp(look, blend)
 	lean = lerpf(lean, target_lean, blend)
 	position = SEATED_OFFSET * sit
-	if story_pose == Pose.COOL:
-		_loop("fold_arms", 1.0, .2, delta)
+	if story_pose == Pose.FINISH:
+		_loop("sword_idle", 1.0, .1, delta)
 	elif seated:
 		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length, .3, delta)
 	elif standing_left > 0:
@@ -491,10 +492,24 @@ func _staged(delta: float) -> void:
 	held = move_toward(held, 0.0 if seated else 1.0, delta * 3.0)
 	if seated:
 		weapon.transform = Transform3D(Basis.from_euler(Vector3(0, -1.2, 0)), Vector3(.3, .8, -.62) - SEATED_OFFSET * sit)
+	if story_pose == Pose.FINISH:
+		# The finisher is a cut: blade in hand at once, then one authored strike played
+		# out across the kill cam in slow motion.
+		held = 0.0
+		shoulder_rest = 0.0
+		spin = 0.0
+		lunge = 0.0
+		lift = 0.0
+		right_reach = 1.0
+		left_reach = 0.0
+		var t: float = clampf(finish_progress, 0.0, 1.0)
+		_pose_swing(finish_style, t, FINISH_TIMING.x, FINISH_TIMING.y, FINISH_TIMING.z)
+		rotation.y = spin
+		position = Vector3(0, lift, -lunge)
 
 
 func _solve(delta: float) -> void:
-	var swinging: bool = actor != null and actor.melee != null and actor.melee.attacking
+	var swinging: bool = actor != null and actor.melee != null and actor.melee.attacking or story_pose == Pose.FINISH
 	if swinging or story_pose in SEATED:
 		right_target.position = weapon.transform * RIGHT_GRIP if not story_pose in SEATED else hands[1]
 		left_target.position = weapon.transform * LEFT_GRIP if not story_pose in SEATED else hands[0]
@@ -504,8 +519,8 @@ func _solve(delta: float) -> void:
 	left_ik.influence = clampf(left_reach, 0, 1)
 	right_ik.active = right_ik.influence > .001
 	left_ik.active = left_ik.influence > .001
-	# The Monolith rests on the right shoulder whenever it is not swinging (and in the
-	# finisher's hero pose); the right hand goes up to hold it there.
+	# The Monolith rests on the right shoulder whenever it is not swinging; the right hand
+	# goes up to hold it there.
 	var resting: bool = (story_pose < Pose.TYPING and actor != null and actor.melee != null \
 		and not actor.melee.attacking and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
 	shoulder_rest = move_toward(shoulder_rest, 1.0 if resting else 0.0, delta * (5.0 if resting else 12.0))
@@ -520,10 +535,6 @@ func _solve(delta: float) -> void:
 		weapon.transform = weapon.transform.interpolate_with(carry_transform(), held)
 	if shoulder_rest > 0.0:
 		weapon.transform = weapon.transform.interpolate_with(shoulder_transform(), smoothstep(0.0, 1.0, shoulder_rest))
-	# The hero pose is a cut (planted at once); leaving it blends the blade back up.
-	planted = 1.0 if story_pose == Pose.COOL else move_toward(planted, 0.0, delta * 6.0)
-	if planted > 0.0:
-		weapon.transform = weapon.transform.interpolate_with(planted_transform(), smoothstep(0.0, 1.0, planted))
 	trail.sample()
 	_glow()
 

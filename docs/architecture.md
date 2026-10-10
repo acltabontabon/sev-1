@@ -644,10 +644,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   texture onto the floor below a point (capped, fading). `MonsterRig._slice()` calls all
   three; the incident's `_cleanup()` clears the `blood` group.
 - **Kill cams.** `presentation.kill_cam(subject, from, force, length)` runs a real-time
-  `killcam` beat: impact punch-in, then a hero shot (the engineer turned to camera in
-  `Pose.COOL`, the blade on `rigged_engineer.shoulder_transform()`), then a blend to the rig
-  camera, during which the engineer turns back and the blade blends from the floor to his
-  shoulder; it slows time through `ElementFx.slow_motion(&"killcam")` and drives
+  `killcam` beat: impact punch-in, then a low side shot of the engineer squared up to the
+  kill in `Pose.FINISH`, swinging one authored strike (`rigged_engineer._pose_swing()`, the
+  same poses as the combo; cleave or spinning backhand, the leaping slam for long boss
+  cams) along `finish_progress`, which the camera advances over the shot; then a blend to
+  the rig camera as he turns back and shoulders the blade; it slows time through `ElementFx.slow_motion(&"killcam")` and drives
   `AudioServer.playback_speed_scale` itself; `missing_transaction._on_record_died()`
   calls it and, in a rendered game, offers the stage's upgrade `UPGRADE_BEAT` real seconds
   after the kill cam ends (`upgrade_delay`, counted in real time).

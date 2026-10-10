@@ -108,6 +108,7 @@ var killcam_roll: float = 0.0
 var killcam_turn: float = 0.0
 var killcam_facing: float = 0.0
 var killcam_hero: bool = false
+var killcam_style: int = 0
 var killcam_ready: int = 0
 var killcam_start: int = 0
 var killcam_from: Vector3
@@ -779,9 +780,10 @@ func dialogue_camera(who: String, time: float, line: int) -> void:
 
 
 ## A finisher, in three beats on real time: an instant of near-freeze punched in on the
-## kill (tilted, flash, boom); then the hero shot: a low angle in front of the engineer,
-## who has turned his back on it with the keyboard on his shoulder while it comes apart
-## behind him in slow motion (sound slows too); then a blend back to the gameplay camera.
+## kill (tilted, flash, boom); then the hero shot: low and from the side while the
+## engineer swings the Monolith through it in slow motion (a cleave or a spinning
+## backhand; the leaping slam for the boss), sound slowed too; then a blend back to the
+## gameplay camera as he turns back and shoulders the blade.
 ## `force` ignores the cooldown (last kills, the boss, the ultimate).
 func kill_cam(subject: Vector3, from: Vector3, force: bool = false, length: float = KILLCAM_SECONDS) -> bool:
 	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
@@ -807,17 +809,20 @@ func kill_cam(subject: Vector3, from: Vector3, force: bool = false, length: floa
 	var side: Vector3 = axis.cross(Vector3.UP).normalized() * sides[0]
 	for sign: float in sides:
 		var across: Vector3 = axis.cross(Vector3.UP).normalized() * sign
-		var spot: Vector3 = head - axis * 3.4 + across * 1.3 - Vector3.UP * .5
+		var spot: Vector3 = head + across * 4.3 - axis * 1.0 - Vector3.UP * .3
 		if space.intersect_ray(PhysicsRayQueryParameters3D.create(head, spot, 1)).is_empty():
 			side = across
 			break
 	killcam_victim = subject + Vector3.UP * 1.0
 	killcam_punch = killcam_victim - axis * 2.8 + side * 1.7 + Vector3.UP * .45
-	killcam_from = head - axis * 3.4 + side * 1.3 - Vector3.UP * .5
-	killcam_to = head - axis * 2.7 + side * 1.0 - Vector3.UP * .42
-	killcam_look = hero + Vector3.UP * 1.0 + axis * .6
+	# Low, from the side: the blade goes through the victim across the frame.
+	killcam_from = head + side * 4.3 - axis * 1.0 - Vector3.UP * .3
+	killcam_to = head + side * 3.7 - axis * .7 - Vector3.UP * .25
+	killcam_look = hero + Vector3.UP * .75 + axis * 1.1
 	killcam_roll = deg_to_rad(8.0) * sides[0]
-	killcam_turn = atan2(axis.x, axis.z)
+	killcam_turn = atan2(-axis.x, -axis.z)
+	# Big kills (the boss, the ultimate) get the leaping slam; the rest a cleave or a spin.
+	killcam_style = 2 if length > KILLCAM_SECONDS else rng.randi_range(0, 1)
 	killcam_facing = player.visual.rotation.y
 	beat_shot = "killcam"
 	killcam_start = now
@@ -849,11 +854,14 @@ func _killcam_shot() -> void:
 		camera.fov = 40.0
 	else:
 		if not killcam_hero:
-			# Cut to the hero: he has already turned his back on it.
+			# Cut to the hero squared up to it, the Monolith already moving.
 			killcam_hero = true
 			player.visual.rotation.y = killcam_turn
-			character.story_pose = CHARACTER.Pose.COOL
+			character.story_pose = CHARACTER.Pose.FINISH
+			character.finish_style = killcam_style
 			sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -6)
+		# The swing plays out over the shot, finishing as the camera starts home.
+		character.finish_progress = clampf((t - .16) / maxf(length - .61, .1), 0.0, 1.0)
 		var u: float = smoothstep(.16, length - .45, t)
 		scale = lerpf(.07, .4, u)
 		camera.global_position = killcam_from.lerp(killcam_to, u)
