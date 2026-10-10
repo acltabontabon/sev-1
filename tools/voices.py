@@ -272,6 +272,8 @@ def talk_lines(talk):
     for name, tree in talk['trees'].items():
         for node, entry in tree['nodes'].items():
             lines.append({'id': f'talk_{name.lower()}_{node}', 'text': entry['text'], 'voice_profile': tree['profile']})
+            for index, text in enumerate(entry.get('text_variants', []), start=1):
+                lines.append({'id': f'talk_{name.lower()}_{node}_variant_{index}', 'text': text, 'voice_profile': tree['profile']})
     for kind, people in talk['crew'].items():
         for person in people:
             key = person['name'].lower()

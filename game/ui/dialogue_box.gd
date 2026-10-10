@@ -155,8 +155,8 @@ func _go(id: String) -> void:
 		close()
 		return
 	node_id = id
-	var node: Dictionary = tree.nodes[id]
-	_say("them", node.text, str(tree.get("voice", "")) + id if tree.has("voice") else "")
+	var line: Dictionary = DIALOGUES.line(tree, id)
+	_say("them", line.text, line.clip)
 	var list: Array = options()
 	for index in range(list.size()):
 		var button: Button = Button.new()

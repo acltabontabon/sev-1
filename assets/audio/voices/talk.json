@@ -535,6 +535,10 @@
               "pager",
               {}
             ]
+          ],
+          "text_variants": [
+            "...no, Kevin... don't escalate the dream... I'm already asleep at the highest priority...",
+            "...if the dashboard asks, I'm a server... servers don't need annual leave..."
           ]
         },
         "wake": {
@@ -550,6 +554,10 @@
               "bleak",
               {}
             ]
+          ],
+          "text_variants": [
+            "Again? Put the fire in the backlog. If it survives until Monday, we'll call it persistent storage.",
+            "I woke up for the last outage. They rewarded me with the next outage. I'm trying a different career strategy."
           ]
         },
         "spirit": {
@@ -607,6 +615,10 @@
               "watch",
               {}
             ]
+          ],
+          "text_variants": [
+            "Before you ask: different incident. Same building, same screaming, separate cost centre.",
+            "I'm observing. If I help, I become accountable. The training was very clear about avoiding that."
           ]
         },
         "which": {
@@ -646,6 +658,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "They only count closed tickets. Kill a monster and it's teamwork. Let it eat the requester and it's a resolved dependency.",
+            "My targets say reduce the queue. They don't specify how. I'm waiting for the queue to develop teeth."
           ]
         },
         "watch": {
@@ -666,6 +682,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "I've added your screaming to the timeline. Under 'stakeholder feedback'. Very strong engagement.",
+            "Still observing. I've moved from concerned to deeply concerned. That's a promotion in this incident."
           ]
         }
       },
@@ -695,6 +715,10 @@
               "home",
               {}
             ]
+          ],
+          "text_variants": [
+            "Oh, excellent, you're here! I told leadership we had ownership. I meant you. The slide just says we.",
+            "One second. Yes, leadership, we're all hands on deck! ...Right. You're the hands. I'm the deck."
           ]
         },
         "eta": {
@@ -718,6 +742,10 @@
               "aligned",
               {}
             ]
+          ],
+          "text_variants": [
+            "Wonderful. Before you fix it, how long will fixing it take? Before you answer, could the answer be smaller?",
+            "I need a number. It doesn't have to be accurate. It has to fit beside the little green arrow."
           ]
         },
         "deck": {
@@ -778,6 +806,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "Any progress? I've changed the channel name to Mission Control. Please deliver a mission we can control.",
+            "Quick update: leadership loves our response. They haven't seen the response. I showed them the font."
           ]
         }
       },
@@ -804,6 +836,10 @@
                 "note": "Shocking teamwork"
               }
             ]
+          ],
+          "text_variants": [
+            "Still waiting on the microwave part. The vendor asked if we needed it urgently. I sent them a photo of my grey hair.",
+            "Me and this microwave are both out of warranty. Only one of us is allowed to stop working."
           ]
         },
         "chain": {
@@ -819,6 +855,10 @@
               "capex",
               {}
             ]
+          ],
+          "text_variants": [
+            "The part needs a purchase order. The order needs a quote. The quote expired while we approved the order. Beautiful machine. Never moves.",
+            "Procurement needs three bids. It's a microwave fuse. At this point I could hire three people to breathe warm air on lunch."
           ]
         },
         "word": {
@@ -854,6 +894,10 @@
               "blockers",
               {}
             ]
+          ],
+          "text_variants": [
+            "Yesterday: waiting for approval. Today: explaining the wait. Tomorrow: approval to stop explaining. No blockers, obviously.",
+            "Quick update. Still updating. If I stop talking, the meeting ends, and someone might expect work."
           ]
         },
         "alone": {
@@ -872,6 +916,10 @@
               "velocity",
               {}
             ]
+          ],
+          "text_variants": [
+            "Everyone left eight hours ago. The meeting bot is still here. It says I'm a key contributor. I think we're engaged.",
+            "The standup. I said 'one more thing' this morning and now I'm legally required to keep finding things."
           ]
         },
         "free": {
@@ -921,6 +969,10 @@
               "swag",
               {}
             ]
+          ],
+          "text_variants": [
+            "First day! They gave me a welcome pack and emergency access. The welcome pack had instructions for emergency access. No welcome.",
+            "Onboarding said ask lots of questions. So I asked when we go home. They took questions off the agenda."
           ]
         },
         "normal": {
@@ -936,6 +988,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "Oh, good. My mentor said 'you've got this' and disabled his account. Is that the handover ceremony?",
+            "Great! They put me on the escalation list. At the top. I thought that meant employee of the month."
           ]
         },
         "loadbearing": {
@@ -977,6 +1033,10 @@
               "certificate",
               {}
             ]
+          ],
+          "text_variants": [
+            "I'm remote. My home is just inside the office now. HR says it counts as culture if I don't call it a housing crisis.",
+            "Return to office, they said. Done. Nobody specified a return from office. I've found a policy gap."
           ]
         },
         "live": {
@@ -987,6 +1047,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "I keep socks in the cable drawer and milk in the server cooling budget. My landlord is a badge scanner. We have our disagreements.",
+            "I've got the sofa and a mug with my name on it. That's more security than my last lease. Please don't tell Facilities about the duvet."
           ]
         },
         "certificate": {
@@ -1014,6 +1078,10 @@
               "denial",
               {}
             ]
+          ],
+          "text_variants": [
+            "The burrito's still spinning. I've started calling each rotation a milestone. Delivery is looking incredible.",
+            "Lunch is delayed. I've given it an extension. It asked for another extension. I think the microwave has learned management."
           ]
         },
         "burrito": {
@@ -1029,6 +1097,10 @@
               "escalate",
               {}
             ]
+          ],
+          "text_variants": [
+            "A burrito with a dependency on a microwave with a dependency on Sam. Lunch has more stakeholders than the product.",
+            "It was lunch when I put it in. It's dinner now. If I wait long enough, Finance can expense it as a retreat."
           ]
         },
         "sunk": {
@@ -1069,6 +1141,10 @@
               "pay",
               {}
             ]
+          ],
+          "text_variants": [
+            "Welcome to the family! No, there's no inheritance. There is a mandatory survey about how loved you feel.",
+            "We don't say understaffed. We say everyone has room to grow. Mostly into the jobs of people who left."
           ]
         },
         "family": {
@@ -1091,6 +1167,10 @@
                 "note": "Culture fit"
               }
             ]
+          ],
+          "text_variants": [
+            "Absolutely. The role covers three teams, pays for half a person, and asks you to bring your whole self. The maths is aspirational.",
+            "We're seeking a rock star. Someone used to no sleep, screaming crowds, and being paid in drink vouchers."
           ]
         },
         "ownership": {
@@ -1135,6 +1215,10 @@
                 "note": "Solidarity"
               }
             ]
+          ],
+          "text_variants": [
+            "My pager's quiet. That's worse. Either production's fine or the alert system's dead. I know which one has budget.",
+            "I turned the pager off. I can still hear it. Apparently the company owns the inside of my head too."
           ]
         },
         "sleep": {
@@ -1149,6 +1233,10 @@
               "",
               {}
             ]
+          ],
+          "text_variants": [
+            "The status page is green, the phones are red, and the printer is smoking. Officially we're investigating customer perception.",
+            "Eleven open. I merged two and got fourteen. Don't ask me how. The ticket system feeds after sunset."
           ]
         },
         "coffee": {
@@ -1176,11 +1264,19 @@
               "deck",
               {}
             ]
+          ],
+          "text_variants": [
+            "Hear me out: premium uptime. We let the free users experience the outage first. That's market segmentation.",
+            "Love the urgency. Can we bottle it? Sell it? The board keeps asking what our panic strategy is."
           ]
         },
         "feature": {
           "text": "Everything is a feature if you believe hard enough. I believed my way into a VP title. I don't know what I do. Nobody does. That's leadership.",
-          "replies": []
+          "replies": [],
+          "text_variants": [
+            "Of course it's a feature. The product is creating a memorable experience. Nobody remembers a normal Friday.",
+            "It's scarcity. Customers value things more when they can't have them. Currently they can't have anything. Incredible value."
+          ]
         },
         "deck": {
           "text": "Too late. Slide forty-seven. It has a rocket on it. The rocket is on fire. The board loved the fire. They think it's a metaphor.",
@@ -1216,11 +1312,19 @@
                 "note": "Permission to leave"
               }
             ]
+          ],
+          "text_variants": [
+            "I made the error page warmer. Production's dead, but at least the corpse feels approachable.",
+            "The error page now apologises in our brand voice. Legal removed the apology. It's just a tasteful rectangle."
           ]
         },
         "great": {
           "text": "Thank you. I gave the five hundred page a gradient. Now when production dies, it dies on brand. My husband says I care too much. He's asleep. I'm here, kerning a catastrophe.",
-          "replies": []
+          "replies": [],
+          "text_variants": [
+            "Thanks. I added rounded corners to the catastrophe. Leadership says it's much less alarming now. Nothing works, but gently.",
+            "Thank you. The button says Try Again in a very reassuring font. It doesn't do anything. Research says people enjoy having a button."
+          ]
         },
         "home": {
           "text": "And miss this? My husband texted 'are you alive' an hour ago. I sent him a mockup of the answer. He wants a revision. Marriage is stakeholder management with better snacks.",

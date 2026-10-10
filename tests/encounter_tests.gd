@@ -531,6 +531,7 @@ func _run() -> void:
 	check(incident.talk_target().is_empty() and not incident.talk_prompt.is_showing(), "nobody chats while something is hunting the engineer")
 	var silent: Array[String] = []
 	var talk_data: Dictionary = preload("res://game/incidents/dialogues.gd").data()
+	_dialogue_variations(talk_data)
 	for tree: Dictionary in talk_data.trees.values():
 		for node: Dictionary in tree.nodes.values():
 			for reply: Array in node.replies:
@@ -679,6 +680,9 @@ func _run() -> void:
 	talker.next_bark_ms = 0
 	check(talker.bark("idle") and talker.bubble.text != "" and talker.mouth.stream != null and talker.last_bark.begins_with("bark_record_idle"), "a monster mutters about its workload, voiced")
 	check(not other_talker.bark("attack") and not talker.bark("attack"), "one bark at a time across the floor, and a pause per monster")
+	# Earlier combat may have consumed the shared last-words slot less than 650 ms ago.
+	# This fixture checks urgent playback, so give it a fresh slot explicitly.
+	preload("res://game/enemies/incident.gd").last_words_ms = -650
 	check(other_talker.bark("death", 1.0, true) and other_talker.last_bark.begins_with("bark_scope_death"), "a dying monster always gets its last words")
 	# Satisfying kills: a stamped death notice, FOCUS, and a streak banner for quick kills.
 	await fresh_stage(incident.Stage.INVESTIGATION)
@@ -918,3 +922,44 @@ func _run() -> void:
 	await frames(3)
 	print("RESULT: ", failures, " failure(s)")
 	quit(0 if failures == 0 else 1)
+
+
+func _dialogue_variations(talk_data: Dictionary) -> void:
+	var dialogues: Script = preload("res://game/incidents/dialogues.gd")
+	var box: CanvasLayer = preload("res://game/ui/dialogue_box.gd").new()
+	root.add_child(box)
+	for name_: String in talk_data.trees:
+		var tree: Dictionary = dialogues.tree(name_)
+		for node_id: String in tree.nodes:
+			var node: Dictionary = tree.nodes[node_id]
+			var variants: Array = node.get("text_variants", [])
+			if variants.is_empty():
+				continue
+			dialogues.variation_bags.erase(tree.voice + node_id)
+			var previous: String = ""
+			var correct: bool = true
+			var seen: Array[String] = []
+			# Three complete bags cover both exhaustion and refill boundaries.
+			for visit in range((variants.size() + 1) * 3):
+				if visit % (variants.size() + 1) == 0:
+					seen.clear()
+				# Fresh tree copies simulate incident retries; target lookups consume nothing.
+				for lookup in range(5):
+					dialogues.tree(name_)
+				box.open(dialogues.tree(name_), Callable())
+				if node_id != tree.start:
+					box._go(node_id)
+				var said: String = box.text_label.text
+				var clip: String = tree.voice + node_id
+				if said != node.text:
+					var index: int = variants.find(said)
+					correct = correct and index >= 0
+					clip += "_variant_%d" % (index + 1)
+				correct = correct and said != previous and not seen.has(said)
+				correct = correct and box.speaker.stream == load(dialogues.audio(clip))
+				correct = correct and box.tree.nodes[node_id].replies == node.replies
+				previous = said
+				seen.append(said)
+				box.close()
+			check(correct, "%s/%s cycles distinct voiced takes across retries with matching captions and unchanged choices" % [name_, node_id])
+	box.queue_free()

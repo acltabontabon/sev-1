@@ -9,10 +9,37 @@ extends RefCounted
 ## A node without replies ends the talk. Effects are tiny and optional:
 ## {"burnout": n, "note": why} goes through the run's normal Burnout bookkeeping.
 ## Every node is voiced as `<voice><node>.ogg` under assets/audio/voices/talk/.
+## Optional text_variants share its choices and use `_variant_<index>.ogg` takes.
 
 const MANIFEST: String = "res://assets/audio/voices/talk.json"
 const AUDIO: String = "res://assets/audio/voices/talk/%s.ogg"
 static var cache: Dictionary = {}
+## Session-local bags survive incident retries; targeting a coworker never consumes one.
+static var variation_bags: Dictionary = {}
+static var last_variations: Dictionary = {}
+
+
+## Choose text and its matching clip only when a line is actually shown.
+## Exhaust each node's authored takes, including the original, before repeating.
+static func line(talk: Dictionary, node_id: String) -> Dictionary:
+	var node: Dictionary = talk.nodes[node_id]
+	var clip: String = str(talk.get("voice", "")) + node_id if talk.has("voice") else ""
+	var variants: Array = node.get("text_variants", [])
+	if variants.is_empty():
+		return {"text": node.text, "clip": clip}
+	var bag: Array = variation_bags.get(clip, [])
+	if bag.is_empty():
+		bag = range(variants.size() + 1)
+		bag.shuffle()
+		if bag.back() == last_variations.get(clip, -1):
+			var swap: int = int(bag[0])
+			bag[0] = bag.back()
+			bag[bag.size() - 1] = swap
+	var take: int = int(bag.pop_back())
+	variation_bags[clip] = bag
+	last_variations[clip] = take
+	return {"text": node.text if take == 0 else variants[take - 1],
+		"clip": clip if take == 0 else "%s_variant_%d" % [clip, take]}
 
 
 static func data() -> Dictionary:

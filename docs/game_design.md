@@ -167,6 +167,20 @@ After The Root Cause falls, production stabilizes and the office returns to norm
 
 This is a proposed payoff, subject to refinement. Preserve the systemic revelation and the protagonist's humanity rather than using the ending solely as a punchline.
 
+### Replay dialogue (implemented prototype)
+
+All twelve overtime coworkers have three takes for their greeting and a key branch
+response, including the original. Pat and Morgan also vary their repeat-visit greeting.
+Takes preserve the same reply choices, character role and Burnout effects. Each visited
+node cycles its voiced takes in shuffled order before repeating, including across
+incident retries within one application session; a new application session starts fresh.
+The variations are authored and prerecorded locally. Planted employees, story cinematics
+and fixed combat callouts retain their current lines.
+
+Playtest checkpoint: press E near a coworker, try the same reply on repeat visits or
+after R to retry, and listen for new lines with matching captions. Judge whether the
+alternatives fit the character and land as well as the originals.
+
 ### Coworker emergency aid (implemented prototype)
 
 Awake, living overtime coworkers within 6 metres and a clear line through the office

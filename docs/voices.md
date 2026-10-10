@@ -64,6 +64,16 @@ numbers for speech only into `assets/audio/voices/talk/` with
 `talk/provenance.json`; `talk-validate` (run by `tools/validate.py`) fails on a missing,
 stale or untracked clip. Status: candidates; human listening acceptance pending.
 
+Replay dialogue adds 52 authored, locally recorded alternate takes in those same stock
+profiles: two greetings and two responses per coworker, plus two repeat-visit greetings
+each for Pat and Morgan. Nodes store `text_variants`; generation uses
+`talk_<character>_<node>_variant_<index>.ogg`, with the original retaining its existing ID.
+Each take has its own fingerprint, checksum and license provenance in
+`talk/provenance.json`. Caption and speech are chosen together from a shuffled bag when
+the line is shown. Retries retain the bags for the application session, and an exhausted
+bag refills without immediately repeating its last take. Acting and joke timing await
+human listening acceptance.
+
 “Clean” preserves the voice, intercom uses a light 180–6500 Hz band limit, and
 Variance adds a quiet 38 ms echo. All clips target −20 LUFS / −2 dB true peak before
 Vorbis encoding; decoded peaks are checked. Runtime voice gain is −3 dB plus the

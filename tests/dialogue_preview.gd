@@ -2,6 +2,9 @@ extends "res://tests/incident_preview.gd"
 
 
 func _run() -> void:
+	if "--variations" in OS.get_cmdline_user_args():
+		await _variations()
+		return
 	preview_prefix = "dialogue"
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -28,5 +31,38 @@ func _run() -> void:
 	incident.dialogue.close()
 	paused = false
 	scene.queue_free()
+	await process_frame
+	quit()
+
+
+func _variations() -> void:
+	preview_prefix = "dialogue_variation"
+	DirAccess.make_dir_recursive_absolute("res://builds")
+	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
+	root.add_child(scene)
+	current_scene = scene
+	player = scene.get_node("Player")
+	incident = scene.get_node("Incident")
+	await create_timer(1.0).timeout
+	incident.presentation.skip()
+	incident._cleanup()
+	incident._enter(incident.Stage.INVESTIGATION)
+	var morgan: Dictionary = incident.coworkers.person("Manager")
+	player.position = morgan.body.global_position + Vector3(0, .05, 1.4)
+	player.camera_rig.set_process_unhandled_input(false)
+	await physics_frame
+	for visit in range(3):
+		incident.talked.clear()
+		incident.talk(incident.talk_target())
+		incident.dialogue.shown = 9999.0
+		await shot("greeting_%d" % visit)
+		incident.dialogue.choose(0)
+		incident.dialogue.advance()
+		incident.dialogue.advance()
+		incident.dialogue.shown = 9999.0
+		await shot("response_%d" % visit)
+		incident.dialogue.close()
+	scene.queue_free()
+	paused = false
 	await process_frame
 	quit()
