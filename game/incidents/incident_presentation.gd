@@ -4,6 +4,7 @@ const DESK_SCREEN: Script = preload("res://game/ui/desk_screen.gd")
 const FEED: Script = preload("res://game/ui/notification_feed.gd")
 const ALERT_SENDERS: Array[String] = ["MONITORING / SEV-1", "PRODUCTION SYSTEM", "STATUS PAGE", "THE VARIANCE"]
 const CHARACTER = preload("res://game/player/rigged_engineer.gd")
+const VARIANCE = preload("res://game/incidents/variance.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
@@ -155,6 +156,8 @@ var crew_shown: int = -1
 ## Casualty cam: one of the night shift falls; a nearly frozen dramatic cut and their record.
 var crew_stamp: Label
 var casualty_body: Node3D
+## What the casualty cam frames: [focus, camera height from it, distance] (see casualty()).
+var casualty_frame: Array = []
 var casualty_start: int = 0
 var casualty_side: float = 1.0
 var casualty_angle: float = 999.0
@@ -167,13 +170,27 @@ const MASSACRE_LENGTH: float = 60.0
 const MASSACRE_FIRST: float = .8
 const MASSACRE_GAP: float = .5
 const MASSACRE_PATIENCE: float = 5.0
-const HERO_DELAY: float = 1.4
-const HERO_LENGTH: float = 3.1
+const HERO_WALK: float = 1.9
 var massacre_time: float = 0.0
 var massacre_last: float = 0.0
-var hero_at: float = -1.0
+## The engineer's entrance, after the last of them: "walk", "grief", "roar", "reply".
+var hero_phase: String = ""
+var hero_phase_at: float = 0.0
+var roar_length: float = 2.2
+var roar: AudioStreamPlayer
+var boss_move_strip: PanelContainer
+var boss_move_name: Label
+var boss_move_tagline: Label
 var casualty_resume: String = ""
 var demon_swing: float = 0.0
+## The staged monster's leaps between scenes (leap_t -1 when standing).
+var leap_t: float = -1.0
+var leap_from: Vector3
+var leap_to: Vector3
+var leap_blown: bool = false
+## The wide massacre shot follows the scene in the spotlight.
+var massacre_eye: Vector3 = Vector3(14.5, 3.4, -41.0)
+var massacre_look: Vector3 = Vector3(9, 1.2, -38)
 ## The reveal: every screen asks one question, the night shift turns, and the missing
 ## transaction is seen only in flashes until it is right behind him.
 var screen_words: Array[Label3D] = []
@@ -378,6 +395,7 @@ func _ready() -> void:
 	crew_card.add_child(crew_stamp)
 	crew_card.hide()
 	add_child(crew_card)
+	_build_boss_move()
 	lower_third = VBoxContainer.new()
 	lower_third.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	lower_third.offset_left = 72
@@ -526,6 +544,10 @@ func _caption_layout(cinematic: bool) -> void:
 
 
 func reset_story() -> void:
+	if incident != null and is_instance_valid(incident.player):
+		incident.player.get_node("Visual/Character").overtime(false)
+	if boss_move_strip != null:
+		boss_move_strip.hide()
 	if beat_shot == "killcam":
 		_end_killcam()
 	AudioServer.playback_speed_scale = 1.0
@@ -601,7 +623,8 @@ func in_cinematic() -> bool:
 
 func _on_line_started(id: String) -> void:
 	var entry: Dictionary = voice.lines[id]
-	if in_cinematic() or entry.character == "NARRATOR":
+	# Cutscenes in the vault stay on the people in them: no chat cards over the shot.
+	if in_cinematic() or entry.character == "NARRATOR" or beat_shot in ["massacre", "casualty"]:
 		return
 	var minutes: int = maxi(0, int((incident.elapsed - 29.1) / 20.0))
 	feed.post(entry.character, entry.subtitle, voice.line_left, "%d:%02d PM" % [5 + minutes / 60, minutes % 60])
@@ -780,6 +803,9 @@ func skip() -> void:
 			for bar in letterbox:
 				bar.hide()
 			release_camera()
+			boss_move_strip.hide()
+			roar.stop()
+			incident.player.get_node("Visual/Character").story_pose = CHARACTER.Pose.NONE
 			incident.player.global_position = Vector3(9, .05, -31.0)
 		boss_seen = true
 		incident.boss_triggered = true
@@ -869,6 +895,7 @@ func _stage_vault_fight() -> void:
 		return
 	demon.global_position = incident.arrival_site()
 	demon.rotation.y = PI
+	leap_t = -1.0
 	demon.show()
 	demon.animator.play(demon.clips.idle, 0.0)
 	incident.coworkers.charge(demon)
@@ -884,7 +911,9 @@ func vault_entered() -> void:
 		boss_length = MASSACRE_LENGTH
 		massacre_time = 0.0
 		massacre_last = 0.0
-		hero_at = -1.0
+		massacre_eye = incident.coworkers.stage_camera()
+		massacre_look = incident.coworkers.stage_focus()
+		hero_phase = ""
 		# Whatever they were shouting in the corridor stops: the vault has the floor.
 		incident.coworkers.hush()
 		incident.player.global_position = Vector3(9, .05, -26.8)
@@ -1644,7 +1673,7 @@ func _opening(time: float, delta: float) -> void:
 
 ## One of the night shift falls in the boss fight: cut to them, nearly frozen, and file
 ## their record. Skipped (card only) while another beat owns the camera.
-func casualty(body: Node3D, who: String, epitaph: String, stamp: String) -> void:
+func casualty(body: Node3D, who: String, epitaph: String, stamp: String, frame: Array = []) -> void:
 	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
 		return
 	crew_name.text = who
@@ -1665,6 +1694,7 @@ func casualty(body: Node3D, who: String, epitaph: String, stamp: String) -> void
 		casualty_resume = beat_shot
 		beat_shot = "casualty"
 		casualty_body = body
+		casualty_frame = frame
 
 
 ## The real Variance waits for the massacre (casualty cams pause this clock, not the
@@ -1682,46 +1712,81 @@ func _massacre_shot(delta: float) -> void:
 	player.invulnerable_left = maxf(player.invulnerable_left, .3)
 	incident.main.get_node("HUD").visible = false
 	var crew: Node = incident.coworkers
-	if hero_at < 0.0:
+	if hero_phase.is_empty():
+		# The next one gets their move once the last one has finished talking.
 		var waited: float = massacre_time - massacre_last
-		var first: bool = crew.cavalry_fallen() == 0
-		if waited >= (MASSACRE_FIRST if first else MASSACRE_GAP) and (crew.victim_ready() or waited >= MASSACRE_PATIENCE):
+		var first: bool = crew.cavalry_fallen() == 0 and not crew.executing()
+		if crew.cavalry_standing() > 0 and not crew.executing() and waited >= (MASSACRE_FIRST if first else MASSACRE_GAP) \
+				and (crew.victim_ready() and voices_idle() or waited >= MASSACRE_PATIENCE):
 			massacre_last = massacre_time
-			crew.fall_next()
-		if crew.cavalry_standing() == 0:
-			hero_at = massacre_last + HERO_DELAY
-			boss_length = hero_at + HERO_LENGTH
+			crew.execute_next()
+		if crew.cavalry_standing() == 0 and (voices_idle() or massacre_time - massacre_last > MASSACRE_PATIENCE):
+			_hero_phase("walk")
 		if beat_shot != "massacre":
 			return
+	var hero_time: float = massacre_time - hero_phase_at
+	match hero_phase:
+		"walk":
+			if hero_time >= HERO_WALK:
+				_hero_phase("grief")
+		"grief":
+			if hero_time >= .9 and voices_idle():
+				_hero_phase("roar")
+		"roar":
+			if hero_time >= roar_length + .2:
+				_hero_phase("reply")
 	var bars: float = 54.0 * smoothstep(0.0, .4, massacre_time) * (1.0 - smoothstep(boss_length - .5, boss_length, massacre_time))
 	for side in [0, 1]:
 		letterbox[side].visible = bars > .5
 		letterbox[side].offset_top = 0.0 if side == 0 else -bars
 		letterbox[side].offset_bottom = bars if side == 0 else 0.0
 	var boss_at: Vector3 = demon.global_position
-	if hero_at < 0.0 or massacre_time < hero_at:
-		# From deep in the vault: the fight, the bodies, the door he will come through.
-		var drift: float = 1.0 - exp(-massacre_time / 8.0)
-		camera.global_position = Vector3(15.2, 3.4, -41.5).lerp(Vector3(14.0, 2.6, -40.0), drift)
-		camera.look_at(boss_at + Vector3.UP * 1.2)
-		camera.fov = 52.0
-	else:
-		# Hero entrance: over the monster's shoulder, he walks in over his colleagues.
-		var walk: float = smoothstep(hero_at, hero_at + 2.2, massacre_time)
-		player.global_position = Vector3(9, .05, -26.8).lerp(Vector3(9, .05, -30.4), walk)
-		player.visual.rotation.y = 0.0
-		if massacre_time - delta < hero_at:
-			say("variance_intro")
-			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
-		var push: float = smoothstep(hero_at, boss_length, massacre_time)
-		camera.global_position = boss_at + Vector3(1.5, 2.9, -1.7) + Vector3(0, -.6, 1.0) * push
-		camera.look_at(player.global_position + Vector3.UP * 1.25)
-		camera.fov = lerpf(40.0, 32.0, push)
-		camera.rotate_object_local(Vector3.BACK, deg_to_rad(-6.0 * (1.0 - push)))
-	if massacre_time >= boss_length:
+	hero_time = massacre_time - hero_phase_at
+	var face: Vector3 = player.global_position + Vector3.UP * 1.45
+	match hero_phase:
+		"":
+			# Wide on whichever scene it is on, drifting over as it leaps to the next one.
+			massacre_eye = massacre_eye.lerp(crew.stage_camera(), 1.0 - exp(-1.8 * delta))
+			massacre_look = massacre_look.lerp(crew.stage_focus(), 1.0 - exp(-3.0 * delta))
+			camera.global_position = massacre_eye
+			camera.look_at(massacre_look)
+			camera.fov = 52.0
+		"walk":
+			# Over the monster's shoulder: he walks in over his colleagues.
+			var walk: float = smoothstep(0.0, HERO_WALK, hero_time)
+			player.global_position = Vector3(9, .05, -26.8).lerp(Vector3(9, .05, -30.4), walk)
+			player.visual.rotation.y = 0.0
+			camera.global_position = boss_at + Vector3(1.5, 2.9, -1.7) + Vector3(0, -.3, .5) * walk
+			camera.look_at(player.global_position + Vector3.UP * 1.25)
+			camera.fov = lerpf(40.0, 36.0, walk)
+			camera.rotate_object_local(Vector3.BACK, deg_to_rad(-6.0 * (1.0 - walk)))
+		"grief":
+			# Close, low, in front of him: he looks down at them.
+			var push: float = smoothstep(0.0, 2.0, hero_time)
+			camera.global_position = player.global_position + Vector3(.5, 1.05, -1.6).lerp(Vector3(.4, 1.15, -1.25), push)
+			camera.look_at(face)
+			camera.fov = 38.0
+		"roar":
+			# He snaps: the camera is thrown back, shaking, as the floor catches fire.
+			var back: float = ease(minf(1.0, hero_time / .35), .3)
+			var shake: float = .12 * maxf(0.0, 1.0 - hero_time / 1.6)
+			camera.global_position = player.global_position + Vector3(.4, 1.15, -1.25).lerp(Vector3(2.0, .45, -4.0), back) \
+				+ Vector3(randf_range(-shake, shake), randf_range(-shake, shake), 0.0)
+			camera.look_at(player.global_position + Vector3.UP * 1.3)
+			camera.fov = lerpf(38.0, 54.0, back)
+			camera.rotate_object_local(Vector3.BACK, deg_to_rad(8.0 * back))
+		"reply":
+			# Over his shoulder, up at it. It is not impressed.
+			var push: float = smoothstep(0.0, boss_length - hero_phase_at, hero_time)
+			camera.global_position = player.global_position + Vector3(1.6, 2.3, 2.6).lerp(Vector3(1.3, 2.1, 1.9), push)
+			camera.look_at(boss_at + Vector3.UP * 2.2)
+			camera.fov = 46.0
+	# Its length is only real once its answer starts (until then it is a placeholder).
+	if hero_phase == "reply" and massacre_time >= boss_length:
 		beat_shot = ""
 		incident.boss_time = boss_length
 		incident.spawn_delay = 0.0
+		player.get_node("Visual/Character").story_pose = CHARACTER.Pose.NONE
 		for bar in letterbox:
 			bar.hide()
 		release_camera()
@@ -1729,8 +1794,121 @@ func _massacre_shot(delta: float) -> void:
 	camera.make_current()
 
 
+## The engineer arrives: walk in, grief, the roar, its answer, then the fight.
+func _hero_phase(phase: String) -> void:
+	hero_phase = phase
+	hero_phase_at = massacre_time
+	var player: CharacterBody3D = incident.player
+	var character: Node = player.get_node("Visual/Character")
+	match phase:
+		"walk":
+			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
+		"grief":
+			# Their blood runs to his shoes.
+			character.story_pose = CHARACTER.Pose.LOOK_DOWN
+			say("rage_quiet")
+			var ahead: Vector3 = Vector3(player.global_position.x, .02, player.global_position.z - .7)
+			Blood.splat(incident, ahead, Vector3.UP, 1.6)
+			Blood.splat(incident, ahead + Vector3(.35, 0, -.5), Vector3.UP, 1.1)
+			Blood.burst(incident, ahead + Vector3.UP * .3, Vector3(0, .4, 1), 18)
+		"roar":
+			# He snaps, and goes gold: Unpaid Overtime. The blast throws it back across the vault.
+			character.story_pose = CHARACTER.Pose.ARMED
+			character.overtime(true)
+			incident.coworkers.blown_home = true
+			var stream: AudioStream = load("res://assets/audio/voices/talk/call_rage.ogg") if ResourceLoader.exists("res://assets/audio/voices/talk/call_rage.ogg") else null
+			roar_length = stream.get_length() if stream != null else 2.2
+			if DisplayServer.get_name() != "headless" and stream != null:
+				roar.stream = stream
+				roar.play()
+			var feet: Vector3 = player.global_position
+			ElementFx.pillar(incident, feet, Color(1, .8, .3), 1.3, 0.0)
+			ElementFx.flame_ring(incident, feet, 3.4, 1.6)
+			ElementFx.motes(incident, feet + Vector3.UP * .4, Color(1, .8, .3), 70, 3.5, 2.0, -3.0, .16)
+			# The floor gives way under it: debris floats up around him.
+			ElementFx.debris(incident, feet + Vector3.UP * .1, 26, 2.5, 2.2)
+			ElementFx.cracks(incident, feet, Color(1, .7, .2), 3.0, 9, 2.2)
+			ElementFx.shockwave(incident, feet + Vector3.UP * .05, Color(1, .75, .25), 5.0, .5)
+			ElementFx.flash(incident, feet + Vector3.UP * 1.4, Color(1, .75, .3), 7.0, 10.0, .5)
+			for arc in range(6):
+				var angle: float = arc * TAU / 6.0
+				ElementFx.bolt(incident, feet + Vector3.UP * 2.6, feet + Vector3(cos(angle), 0, sin(angle)) * 2.2, Color(1, .9, .5), .35, .06)
+			ElementFx.tremor(incident, feet, .6, 14.0)
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -2)
+		"reply":
+			say("variance_budget")
+			var answer: float = voice.lines.get("variance_budget", {}).get("fallback_duration", 2.6)
+			boss_length = massacre_time + maxf(2.2, float(answer)) + .3
+
+
+func voices_idle() -> bool:
+	return voice.current_line.is_empty() and voice.queue.is_empty() and Time.get_ticks_msec() >= incident.coworkers.voice_until
+
+
+## The Variance names the move it is about to use, in a red strip from the right.
+func boss_move(move: String) -> void:
+	var entry: Dictionary = VARIANCE.MOVES.get(move, {})
+	if entry.is_empty():
+		return
+	say(entry.line)
+	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+		return
+	# Real time, so slow motion does not stall it.
+	var view: Vector2 = get_viewport().get_visible_rect().size
+	boss_move_name.text = entry.name
+	boss_move_tagline.text = entry.tagline
+	boss_move_strip.reset_size()
+	boss_move_strip.size.x = view.x * 1.3
+	boss_move_strip.pivot_offset = boss_move_strip.size * .5
+	boss_move_strip.position = Vector2(view.x * 1.4, view.y * .16)
+	boss_move_strip.show()
+	var slide: Tween = boss_move_strip.create_tween()
+	slide.set_ignore_time_scale(true)
+	slide.tween_property(boss_move_strip, "position:x", -view.x * .12, .14).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	slide.tween_property(boss_move_strip, "position:x", -view.x * .18, 1.1)
+	slide.tween_property(boss_move_strip, "position:x", -view.x * 1.5, .14).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+	slide.tween_callback(boss_move_strip.hide)
+
+
+func _build_boss_move() -> void:
+	boss_move_strip = PanelContainer.new()
+	boss_move_strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_move_strip.rotation = deg_to_rad(5.0)
+	var strip: StyleBoxFlat = StyleBoxFlat.new()
+	strip.bg_color = Color(.12, 0, .01, .86)
+	strip.border_color = Color(1, .18, .12)
+	strip.border_width_top = 4
+	strip.border_width_bottom = 4
+	strip.content_margin_top = 6
+	strip.content_margin_bottom = 10
+	boss_move_strip.add_theme_stylebox_override("panel", strip)
+	var lines: VBoxContainer = VBoxContainer.new()
+	lines.add_theme_constant_override("separation", -8)
+	lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_move_strip.add_child(lines)
+	boss_move_name = Label.new()
+	boss_move_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_move_name.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_bold.ttf"))
+	boss_move_name.add_theme_font_size_override("font_size", 76)
+	boss_move_name.add_theme_color_override("font_color", Color(1, .25, .18))
+	boss_move_name.add_theme_constant_override("outline_size", 8)
+	boss_move_name.add_theme_color_override("font_outline_color", Color(0, 0, 0, .85))
+	lines.add_child(boss_move_name)
+	boss_move_tagline = Label.new()
+	boss_move_tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_move_tagline.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_semibold.ttf"))
+	boss_move_tagline.add_theme_font_size_override("font_size", 30)
+	boss_move_tagline.add_theme_color_override("font_color", Color(1, .85, .8))
+	lines.add_child(boss_move_tagline)
+	boss_move_strip.hide()
+	add_child(boss_move_strip)
+	roar = AudioStreamPlayer.new()
+	roar.bus = &"Voice"
+	add_child(roar)
+
+
 ## The first angle round them with a clear line: no wall, and not through the boss.
-func _clear_angle(at: Vector3) -> float:
+func _clear_angle(at: Vector3, lift: float = -.35, reach: float = 2.4) -> float:
 	var space: PhysicsDirectSpaceState3D = incident.get_world_3d().direct_space_state
 	# The real boss, or the vault's staged one (bigger, and right next to its victim).
 	var monsters: Array[Array] = []
@@ -1740,12 +1918,12 @@ func _clear_angle(at: Vector3) -> float:
 		monsters.append([demon.global_position + Vector3.UP * 1.2, 1.8])
 	for step in range(12):
 		var angle: float = casualty_side * (.9 + step * TAU / 12.0)
-		var spot: Vector3 = at + Vector3(sin(angle), 0, cos(angle)) * 2.4 + Vector3.UP * -.35
+		var spot: Vector3 = at + Vector3(sin(angle), 0, cos(angle)) * reach + Vector3.UP * lift
 		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(at, spot + (spot - at).normalized() * .4, 1)).is_empty():
 			continue
 		# Clear of it for the whole drift round them, not just where the shot starts.
 		var drifted: float = angle + casualty_side * CASUALTY_SECONDS * .35
-		var end: Vector3 = at + Vector3(sin(drifted), 0, cos(drifted)) * 2.4 + Vector3.UP * -.35
+		var end: Vector3 = at + Vector3(sin(drifted), 0, cos(drifted)) * reach + Vector3.UP * lift
 		var blocked: bool = false
 		for monster: Array in monsters:
 			for camera_at: Vector3 in [spot, end]:
@@ -1777,12 +1955,15 @@ func _casualty_shot() -> void:
 	if casualty_resume == "massacre":
 		_hold_boss()
 	# Low, tilted, drifting round them while the world all but stops.
-	var at: Vector3 = casualty_body.global_position + Vector3.UP * .9
+	# Some deaths frame elsewhere: a flattened manager from above, an intern from below.
+	var at: Vector3 = casualty_frame[0] if not casualty_frame.is_empty() else casualty_body.global_position + Vector3.UP * .9
+	var lift: float = casualty_frame[1] if not casualty_frame.is_empty() else -.35
+	var reach: float = casualty_frame[2] if not casualty_frame.is_empty() else 2.4
 	if t - get_process_delta_time() <= 0.0 or casualty_angle > 99.0:
-		casualty_angle = _clear_angle(at)
+		casualty_angle = _clear_angle(at, lift, reach)
 	var orbit: float = casualty_angle + casualty_side * t * .35
-	camera.global_position = at + Vector3(sin(orbit), 0, cos(orbit)) * 2.4 + Vector3.UP * -.35
-	camera.look_at(at + Vector3.UP * .2)
+	camera.global_position = at + Vector3(sin(orbit), 0, cos(orbit)) * reach + Vector3.UP * lift
+	camera.look_at(at + Vector3.UP * (.2 if absf(lift) < 1.0 else 0.0))
 	camera.rotate_object_local(Vector3.BACK, deg_to_rad(11.0 * casualty_side))
 	camera.fov = lerpf(40.0, 34.0, t / CASUALTY_SECONDS)
 	var handover: float = smoothstep(CASUALTY_SECONDS - .3, CASUALTY_SECONDS, t) if casualty_resume.is_empty() else 0.0
@@ -1975,14 +2156,39 @@ func _vault_demon(delta: float) -> void:
 	if is_instance_valid(incident.boss):
 		demon.hide()
 		return
+	var crew: Node = incident.coworkers
+	# Across the vault to whoever is next, in one leap; or blown back by the engineer.
+	var spot: Vector3 = crew.demon_spot()
+	if leap_t < 0.0 and Vector2(spot.x - demon.global_position.x, spot.z - demon.global_position.z).length() > .3:
+		leap_t = 0.0
+		leap_from = demon.global_position
+		leap_to = spot
+		leap_blown = crew.blown_home
+		demon.animator.play(demon.clips.get("hit", demon.clips.attack) if leap_blown else demon.clips.attack, .05)
+		sting(preload("res://assets/audio/sfx/whoosh_dash.ogg"), -6)
+	if leap_t >= 0.0:
+		leap_t = minf(1.0, leap_t + delta / (.55 if leap_blown else .75))
+		var arc: float = sin(leap_t * PI) * (.5 if leap_blown else 2.4)
+		var glide: float = ease(leap_t, -2.0) if not leap_blown else 1.0 - pow(1.0 - leap_t, 3.0)
+		demon.global_position = leap_from.lerp(leap_to, glide) + Vector3.UP * arc
+		if leap_t >= 1.0:
+			leap_t = -1.0
+			demon.global_position = leap_to
+			var floor_at: Vector3 = Vector3(leap_to.x, .05, leap_to.z)
+			ElementFx.quake(incident, floor_at, Color(.9, .15, .1), 2.6, .7)
+			ElementFx.dust(incident, floor_at, 2.0)
+			ElementFx.tremor(incident, floor_at, .3, 14.0)
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -4)
 	# It only has eyes for whoever it is taking apart; then for the engineer.
-	var prey: Dictionary = incident.coworkers.victim()
+	var prey: Dictionary = crew.spotlight if not crew.spotlight.is_empty() and not crew.spotlight.dead else crew.victim()
 	var focus: Vector3 = prey.body.global_position if not prey.is_empty() else incident.player.global_position
+	if leap_t >= 0.0 and not leap_blown:
+		focus = leap_to
 	var toward: Vector3 = focus - demon.global_position
 	if Vector2(toward.x, toward.z).length() > .3:
-		demon.rotation.y = lerp_angle(demon.rotation.y, atan2(-toward.x, -toward.z), 1.0 - exp(-5.0 * delta))
+		demon.rotation.y = lerp_angle(demon.rotation.y, atan2(-toward.x, -toward.z), 1.0 - exp(-(9.0 if leap_blown else 5.0) * delta))
 	demon_swing -= delta
-	if demon_swing <= 0.0 and incident.coworkers.cavalry_standing() > 0:
+	if leap_t < 0.0 and demon_swing <= 0.0 and crew.cavalry_standing() > 0 and not crew.executing() and crew.landed():
 		demon_swing = randf_range(1.1, 1.8)
 		demon.animator.play(demon.clips.attack, .1)
 	elif not demon.animator.is_playing():
@@ -2006,7 +2212,7 @@ func _process(delta: float) -> void:
 		_killcam_shot()
 	var visible_play: bool = not get_tree().paused and not incident.terminal() and not incident.modal_pending()
 	panel.visible = visible_play and line_left > 0
-	feed.visible = visible_play
+	feed.visible = visible_play and not beat_shot in ["massacre", "casualty"]
 	if visible_play:
 		feed.tick(delta)
 	title.visible = false

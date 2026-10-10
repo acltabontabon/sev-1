@@ -757,16 +757,33 @@ func _run() -> void:
 			if worker.charging or worker.dead:
 				talking += 1 if worker.line_left > 0.0 else 0
 				if worker.charging and not is_same(worker, prey) and not prey.is_empty() and prey.engaged:
-					crowded = crowded or worker.body.global_position.distance_to(incident.presentation.demon.global_position) < 3.0
+					# (It may sail over someone mid-leap; on the ground it keeps to its victim.)
+					crowded = crowded or night_shift.landed() and worker.body.global_position.distance_to(incident.presentation.demon.global_position) < 2.5
 		talking_at_once = maxi(talking_at_once, talking)
 	check(incident.coworkers.cavalry_fallen() == 5 and is_instance_valid(incident.boss) and not incident.presentation.demon.visible, "all five fall, then the real Variance takes over")
 	check(talking_at_once == 1, "the night shift take turns: never two of them talking at once")
 	check(not crowded, "The Variance takes them one at a time while the rest run laps out of reach")
+	var fate: Callable = func(name: String) -> Dictionary: return night_shift.person(name)
+	check(fate.call("Manager").body.scale.y < .1 and not fate.call("SRE").pieces.is_empty() and not fate.call("Designer").body.visible \
+		and fate.call("Intern").body.find_child("Skeleton3D", true, false).get_bone_pose_scale(fate.call("Intern").body.find_child("Skeleton3D", true, false).find_bone("Abdomen")).x < .01 \
+		and fate.call("Director").body.scale.y < .05,
+		"each of them goes to their own move: flattened, sliced, popped, paid in exposure down to the legs, shrunk and stepped on")
+	var spots: Array[Vector3] = []
+	for worker: Dictionary in night_shift.people:
+		if worker.dead:
+			spots.append(worker.body.global_position * Vector3(1, 0, 1))
+	var apart: bool = spots.size() == 5
+	for index in range(spots.size()):
+		for other in range(index + 1, spots.size()):
+			apart = apart and spots[index].distance_to(spots[other]) > 2.5
+	check(apart, "each of them dies somewhere else in the vault")
+	check(player.get_node("Visual/Character").overtime_on, "watching them die sends the engineer into Unpaid Overtime")
 	incident.coworkers.cavalry_in_headless = false
 	incident.presentation.killcam_in_headless = false
 	scene.reset_encounter()
 	await frames(3)
 	check(incident.coworkers.cavalry_fallen() == 0 and incident.coworkers.cavalry_standing() == 0 and scene.find_children("*", "", true, false).size() <= crew_count + 2, "a restart brings the night shift back and leaves no gore behind")
+	check(not player.get_node("Visual/Character").overtime_on and night_shift.person("Intern").body.position.y < 1.0 and night_shift.person("Manager").body.scale.y > .5, "a restart ends the overtime and puts everyone back on the floor")
 	# Reset cleans every new actor kind.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	spawn("blocker", Vector3(-3, .05, -2))

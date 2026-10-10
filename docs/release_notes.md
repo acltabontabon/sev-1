@@ -1,5 +1,39 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.42 — Corporate euphemisms, done literally (11 October 2026)
+
+Creator requests: the butchering was repetitive and in one spot; make each kill unique
+and satirically funny, give the boss a creative moveset, and have the engineer arrive
+enraged, transform like a super-powered anime hero over the blood of his colleagues, with
+an enraged voice, an aura that pushes the boss back, and nothing on screen but him.
+
+- **The Variance has a named moveset**, announced in a red strip and in its own voice,
+  and it uses one on each of the night shift, each somewhere else in the vault. It leaps
+  across the room to each scene; the wide shot watches side-on; the rest run panicked
+  laps away from wherever it is going.
+  - **DELAYERING** (mid-vault, "removing one layer of management"): a shadow grows under
+    MORGAN, who shakes his head at it; flattened into the floor. Stamp: DELAYERED.
+  - **DECOMMISSION** (at the server racks, mid-rollback): an end-of-life scan, then in
+    half; the pager on the upper half keeps ringing. Stamp: DECOMMISSIONED.
+  - **MAKE IT POP** (at the ledger, giving the monster notes): JUN inflates, wobbling,
+    and pops in brand colours. Stamp: MADE IT POP.
+  - **PAID IN EXPOSURE** (the intern, bouncing by the west racks): paparazzi flashes,
+    +EXPOSURE with every one, JO posing and going whiter, until one flash too many leaves
+    a pair of smoking legs, which still ask whether this counts for college credit.
+    Stamp: OVEREXPOSED.
+  - **DOWNSIZING** (VAL, on the phone at the exit): a beam shrinks her to a rounding
+    error; her last words come out squeaky; then it steps on her. Stamp: DOWNSIZED.
+- **Unpaid Overtime.** Their blood runs to the engineer's shoes. Close on him: "They were
+  my team." Then he snaps — a distorted, octave-doubled roar ("YOU LAID OFF MY TEAM… ON A
+  FRIDAY?!") — and goes gold: glowing hair and eyes, a gold flame aura, crackling arcs,
+  the floor cracking and debris floating up. The blast throws The Variance back across
+  the vault. It is unmoved: "Your team… was never in the budget." Then the fight, still
+  gold. No chat cards or banners over any of this.
+- Seven new lines in The Variance's and the engineer's voices and a new rage voice chain,
+  all local. The fight itself is unchanged in this build; its moveset is next.
+- New checks: each of them dies to their own move, in a different place; the engineer is
+  in Unpaid Overtime when the fight starts and out of it after a restart.
+
 ## 0.2.41 — No apologies (11 October 2026)
 
 Creator feedback: the apologetic last words don't land; make them unhinged and funny.

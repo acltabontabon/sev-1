@@ -1262,7 +1262,8 @@ func talk_target() -> Dictionary:
 	var best_distance: float = TALK_RANGE
 	for someone: Dictionary in coworkers.people:
 		var distance: float = _flat(someone.body.global_position)
-		if distance < best_distance and DIALOGUES.has_tree(someone.entry.name):
+		# The dead, and the ones charging a monster, are not taking questions.
+		if distance < best_distance and DIALOGUES.has_tree(someone.entry.name) and not someone.dead and not someone.charging:
 			best_distance = distance
 			best = {"body": someone.body, "tree": DIALOGUES.tree(someone.entry.name), "name": someone.entry.name,
 				"standing": someone.entry.routine not in ["asleep", "sit"], "animator": someone.animator}

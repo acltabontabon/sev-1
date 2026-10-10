@@ -2,6 +2,16 @@ extends "res://game/enemies/incident.gd"
 ## The existing pursuer with one bounded false-positive event and visible openings.
 signal false_positives
 
+## Its moveset: corporate euphemisms, done literally. Each has a name for the banner, a
+## line it says as it does it, and what it means. It used them on the night shift first.
+const MOVES: Dictionary = {
+	"delayer": {"name": "DELAYERING", "tagline": "removing one layer of management", "line": "move_delayer"},
+	"decommission": {"name": "DECOMMISSION", "tagline": "service has reached end of life", "line": "move_decommission"},
+	"pop": {"name": "MAKE IT POP", "tagline": "feedback has been provided", "line": "move_pop"},
+	"expose": {"name": "PAID IN EXPOSURE", "tagline": "unpaid internship, fully compensated", "line": "move_expose"},
+	"downsize": {"name": "DOWNSIZING", "tagline": "headcount adjusted", "line": "move_downsize"},
+}
+
 var duplicated: bool = false
 var phase_time: float = 0.0
 var exposed: bool = false

@@ -6,29 +6,50 @@ extends Node3D
 
 const ROOT: String = "res://assets/characters/quaternius/"
 ## The boss fight: the night shift charges in to help, and loses, loudly. Who goes, in
-## what order, and how: "slice" (in half at the waist) or "fling" (across the vault).
-## Each gets an epitaph about their worth for the casualty cam.
+## what order, to which of The Variance's moves (a corporate euphemism, done literally),
+## and the epitaph and stamp for their casualty cam.
 const CAVALRY: Array = [
-	["Manager", "fling", "ESCALATED ONE LAST TIME\nSURVIVED BY 14 RECURRING INVITES"],
-	["SRE", "slice", "FINALLY OFF CALL\nPAGER STILL RINGING"],
-	["Designer", "fling", "DIED ON BRAND\nLAST FILE: final_FINAL_v4.fig"],
-	["Intern", "slice", "TENURE: ONE DAY\nEXIT INTERVIEW: MONDAY, 9:00"],
-	["Director", "slice", "VALUE ADDED: ONE (1) DECK\nREPLACED BY: A SLIDE"]]
+	["Manager", "delayer", "ESCALATED ONE LAST TIME\nSURVIVED BY 14 RECURRING INVITES", "DELAYERED"],
+	["SRE", "decommission", "FINALLY OFF CALL\nPAGER STILL RINGING", "DECOMMISSIONED"],
+	["Designer", "pop", "DIED ON BRAND\nLAST FILE: final_FINAL_v4.fig", "MADE IT POP"],
+	["Intern", "expose", "TENURE: ONE DAY\nCOMPENSATION: EXPOSURE", "OVEREXPOSED"],
+	["Director", "downsize", "VALUE ADDED: ONE (1) DECK\nREPLACED BY: A SLIDE", "DOWNSIZED"]]
+## How long each move winds up on its victim before it lands.
+const WINDUP: Dictionary = {"delayer": 1.5, "decommission": 1.6, "pop": 1.7, "expose": 2.2, "downsize": 1.6}
+
 const CAVALRY_ENTRY: Vector3 = Vector3(9.0, 0, -24.0)
 const CAVALRY_SPEED: float = 5.0
 const CAVALRY_FIRST: float = 4.5
 const CAVALRY_GAP: float = 3.0
-const STAMPS: Array[String] = ["OFFBOARDED", "RIGHT-SIZED", "LAID OFF", "RESTRUCTURED", "PIP'D"]
 const GORE_LAYER: int = 1 << 7
 ## Headless suites skip the charge unless a test opts in.
 static var cavalry_in_headless: bool = false
 var cavalry_target: Node3D
 var cavalry_clock: float = -1.0
-## The Variance takes them one at a time: the first still standing fights it up close, on
-## the side the cameras see, while the rest run screaming laps round the vault.
-const VICTIM_SPOT: Vector3 = Vector3(.85, 0, .53)
-const VICTIM_RANGE: float = 1.9
+## Where the monster stood when the gate opened (mid-vault), and whose scene the camera
+## and the monster are on: the latest victim to square up, kept until the next one does.
+var cavalry_home: Vector3
+var spotlight: Dictionary = {}
+## Set when the engineer's roar blows it back to the middle of the vault.
+var blown_home: bool = false
+## The Variance takes them one at a time, each where they make their stand: the manager
+## squares up mid-vault, the SRE tries a rollback at the racks, the designer gives notes
+## by the ledger, the intern bounces by the west racks, the director tries to leave.
+## It leaps across the vault to each ("demon"); the wide shot watches side-on.
+const STAGE: Dictionary = {
+	"Manager": {"spot": Vector3(9.0, 0, -35.9), "demon": Vector3(9.0, 0, -38.0), "busy": "CharacterArmature|Punch"},
+	"SRE": {"spot": Vector3(15.7, 0, -38.0), "demon": Vector3(13.3, 0, -37.4), "busy": "ual/interact", "face": Vector3(1, 0, 0)},
+	"Designer": {"spot": Vector3(9.0, 0, -44.0), "demon": Vector3(9.6, 0, -41.7), "busy": "ual/talking"},
+	"Intern": {"spot": Vector3(3.6, 0, -40.0), "demon": Vector3(6.0, 0, -38.6), "busy": "ual/jump"},
+	"Director": {"spot": Vector3(11.0, 0, -31.4), "demon": Vector3(9.4, 0, -33.6), "busy": "ual/phone", "face": Vector3(0, 0, 1)},
+}
+## The rest run laps away from wherever it is: round the vault when it is mid-floor, round
+## the far side when it is at a wall.
 const PANIC_RADIUS: float = 4.3
+const FLEE_RADIUS: float = 2.4
+const FLEE_OFFSET: float = 3.0
+## The intern is paid in exposure: flashes until they are overexposed.
+const FLASH_EVERY: float = .26
 const PANIC_SPEED: float = 4.2
 ## One voice at a time, in real time (casualty cams slow the game, not the audio): a line
 ## waits its turn or is dropped, and only last words cut anyone off.
@@ -112,7 +133,7 @@ func _ready() -> void:
 		body.add_child(voice)
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
 			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0,
-			"charging": false, "doom": 0.0, "fate": "", "engaged": false, "lapping": false, "screams": 0, "orbit": 0.0, "spin": 1.0,
+			"charging": false, "doom": 0.0, "fate": "", "engaged": false, "lapping": false, "fighting_for": 0.0, "wind": -1.0, "orbit": 0.0, "spin": 1.0,
 			"dead": false, "pieces": [], "slot": 0})
 	reset()
 
@@ -157,6 +178,8 @@ func reset() -> void:
 	was_fighting = false
 	cavalry_target = null
 	cavalry_clock = -1.0
+	spotlight = {}
+	blown_home = false
 	hush()
 	for index in range(people.size()):
 		var someone: Dictionary = people[index]
@@ -174,8 +197,13 @@ func reset() -> void:
 		someone.dead = false
 		someone.engaged = false
 		someone.lapping = false
-		someone.screams = 0
+		someone.fighting_for = 0.0
+		someone.wind = -1.0
 		someone.fate = ""
+		body.get_node("Voice").pitch_scale = 1.0
+		for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
+			(mesh as MeshInstance3D).material_overlay = null
+		body.rotation = Vector3.ZERO
 		body.show()
 		var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
 		for bone in ["Abdomen", "UpperLeg.L", "UpperLeg.R"]:
@@ -247,6 +275,9 @@ func charge(target: Node3D) -> void:
 		return
 	cavalry_target = target
 	cavalry_clock = 0.0
+	cavalry_home = target.global_position
+	spotlight = {}
+	blown_home = false
 	for index in range(CAVALRY.size()):
 		var someone: Dictionary = person(CAVALRY[index][0])
 		if someone.is_empty():
@@ -257,7 +288,8 @@ func charge(target: Node3D) -> void:
 		someone.slot = index
 		someone.engaged = false
 		someone.lapping = false
-		someone.screams = 0
+		someone.fighting_for = 0.0
+		someone.wind = -1.0
 		someone.doom = 0.0
 		someone.spin = 1.0 if index % 2 == 0 else -1.0
 		someone.line_left = 0.0
@@ -285,10 +317,65 @@ func victim() -> Dictionary:
 	return {}
 
 
-## The victim has taken their beating and finished screaming about it: they can go.
+## The victim has been up against it long enough to read, and nobody is talking.
 func victim_ready() -> bool:
 	var someone: Dictionary = victim()
-	return not someone.is_empty() and someone.engaged and someone.screams > 0 and Time.get_ticks_msec() >= voice_until
+	return not someone.is_empty() and someone.engaged and someone.fighting_for > .6 and someone.wind < 0.0 \
+		and Time.get_ticks_msec() >= voice_until and landed()
+
+
+## Where the monster should be: on the scene in the spotlight, or blown back mid-vault.
+func demon_spot() -> Vector3:
+	if blown_home or spotlight.is_empty():
+		return cavalry_home
+	var spot: Vector3 = STAGE[spotlight.entry.name].demon
+	return Vector3(spot.x, cavalry_home.y, spot.z)
+
+
+func landed() -> bool:
+	return is_instance_valid(cavalry_target) and cavalry_target.global_position.distance_to(demon_spot()) < .05
+
+
+## Where the wide shot watches the scene in the spotlight from, and what it looks at.
+## Side-on to the pair, so it never stands between the lens and its victim, from the
+## side nearer the middle of the vault (away from the walls). The intern's from low down.
+func stage_camera() -> Vector3:
+	if spotlight.is_empty():
+		return Vector3(14.5, 3.4, -41.0)
+	var stage: Dictionary = STAGE[spotlight.entry.name]
+	var line: Vector3 = stage.spot - stage.demon
+	var middle: Vector3 = (stage.spot + stage.demon) * .5
+	var side: Vector3 = line.cross(Vector3.UP).normalized()
+	if (middle + side).distance_to(cavalry_home) > (middle - side).distance_to(cavalry_home):
+		side = -side
+	var low: bool = false
+	return middle + side * (6.5 if low else 5.6) + (side.cross(Vector3.UP) * .8) + Vector3.UP * (1.2 if low else 2.6)
+
+
+func stage_focus() -> Vector3:
+	if spotlight.is_empty() or not is_instance_valid(cavalry_target):
+		return cavalry_home + Vector3.UP * 1.2
+	var body: Node3D = spotlight.body
+	var middle: Vector3 = (body.global_position + cavalry_target.global_position) * .5
+	# Look up with whoever goes up (the intern's climb).
+	return Vector3(middle.x, maxf(1.3, body.global_position.y + .9), middle.z)
+
+
+## The Variance finishes the victim with their move: it calls it, it winds up on them,
+## it lands (see _fall). Returns the move, or "" when nobody is up.
+func execute_next() -> String:
+	var someone: Dictionary = victim()
+	if someone.is_empty() or someone.wind >= 0.0:
+		return ""
+	someone.wind = 0.0
+	if incident != null and incident.get("presentation") != null:
+		incident.presentation.boss_move(someone.fate)
+	_wind(someone, 0.0)
+	return someone.fate
+
+
+func executing() -> bool:
+	return people.any(func(someone: Dictionary) -> bool: return someone.charging and someone.wind >= 0.0)
 
 
 ## Cut everyone off and forget anything waiting to be said (the massacre takes the floor).
@@ -298,11 +385,9 @@ func hush() -> void:
 	if is_instance_valid(speaking):
 		speaking.stop()
 	speaking = null
-	# Nobody has had their say yet: whoever is up next screams on camera.
 	for someone: Dictionary in people:
 		if someone.charging:
 			someone.line_left = 0.0
-			someone.screams = 0
 
 
 ## The next of them goes down (for the arrival cutscene); "" when nobody is left.
@@ -372,25 +457,30 @@ func _charge(someone: Dictionary, delta: float) -> void:
 		return
 	var centre: Vector3 = cavalry_target.global_position
 	var fighting: bool = is_same(someone, victim())
+	var stage: Dictionary = STAGE.get(someone.entry.name, {})
 	var spot: Vector3
-	if body.position.z > centre.z + 6.5:
+	if body.position.z > cavalry_home.z + 6.5:
 		# Through the vault door first, not the wall beside it.
-		spot = Vector3(centre.x + (someone.slot - 2) * .4, 0, centre.z + 6.0)
+		spot = Vector3(cavalry_home.x + (someone.slot - 2) * .4, 0, cavalry_home.z + 6.0)
 	elif fighting:
-		spot = centre + VICTIM_SPOT.normalized() * VICTIM_RANGE
+		spot = stage.spot
 	else:
-		# Panic: laps round the vault, changing their mind about which way is safer. The lap
-		# starts where they come in, never across the monster.
+		# Panic: laps away from where it is going, changing their mind about which way is
+		# safer. The lap starts where they come in, never across the monster.
+		var away: Vector3 = cavalry_home - demon_spot()
+		away.y = 0
+		var hub: Vector3 = cavalry_home if away.length() < .5 else cavalry_home + away.normalized() * FLEE_OFFSET
+		var radius: float = PANIC_RADIUS if away.length() < .5 else FLEE_RADIUS
 		if not someone.lapping:
 			someone.lapping = true
-			someone.orbit = atan2(body.position.x - centre.x, body.position.z - centre.z)
-		someone.orbit += someone.spin * PANIC_SPEED / PANIC_RADIUS * delta
+			someone.orbit = atan2(body.position.x - hub.x, body.position.z - hub.z)
+		someone.orbit += someone.spin * PANIC_SPEED / radius * delta
 		someone.doom -= delta
 		if someone.doom <= 0.0:
 			someone.doom = randf_range(1.6, 3.4)
 			someone.spin = -someone.spin if randf() < .5 else someone.spin
-		var lap: float = PANIC_RADIUS + sin(someone.clock * .8 + someone.slot) * .6
-		spot = centre + Vector3(sin(someone.orbit), 0, cos(someone.orbit)) * lap
+		var lap: float = radius + sin(someone.clock * .8 + someone.slot) * (.6 if radius == PANIC_RADIUS else .3)
+		spot = hub + Vector3(sin(someone.orbit), 0, cos(someone.orbit)) * lap
 	spot.y = body.position.y
 	var step: Vector3 = spot - body.position
 	step.y = 0
@@ -402,20 +492,26 @@ func _charge(someone: Dictionary, delta: float) -> void:
 			body.rotation.y = lerp_angle(body.rotation.y, atan2(step.x, step.z), 1.0 - exp(-10.0 * delta))
 		_play(someone, "ual/sprint", .15, true)
 		return
-	body.rotation.y = lerp_angle(body.rotation.y, atan2(toward.x, toward.z), 1.0 - exp(-10.0 * delta))
+	var facing: Vector3 = stage.get("face", toward)
+	body.rotation.y = lerp_angle(body.rotation.y, atan2(facing.x, facing.z), 1.0 - exp(-10.0 * delta))
 	if not someone.engaged:
 		someone.engaged = true
 		someone.doom = .3
-	# Up close: swing, get hit, scream about it (when nobody else is), swing again. A fresh
-	# victim is hit as soon as the floor is theirs.
+		spotlight = someone
+	someone.fighting_for += delta
+	if someone.wind >= 0.0:
+		someone.wind += delta
+		if someone.wind >= WINDUP[someone.fate]:
+			_fall(someone, (body.position - centre).normalized())
+		else:
+			_wind(someone, delta)
+		return
+	# Up close: swing, get hit, scream about it (when nobody else is), swing again.
 	someone.doom -= delta
-	if someone.screams == 0 and Time.get_ticks_msec() >= voice_until:
-		someone.doom = minf(someone.doom, .15)
 	if someone.doom <= 0.0:
 		someone.doom = randf_range(1.3, 2.1)
 		someone.animator.play("CharacterArmature|RecieveHit", .05)
-		if _say(someone, "pain", "quiet", randi()):
-			someone.screams += 1
+		_say(someone, "pain", "quiet", randi())
 		ElementFx.flash(body, body.global_position + Vector3.UP * 1.0, Color(1, .3, .2), 2.0, 3.0, .12)
 		Blood.burst(incident if incident != null else self, body.global_position + Vector3.UP * 1.0, (body.global_position - centre).normalized() + Vector3.UP * .5, 14)
 		var hit: AudioStreamPlayer3D = body.get_node("Voice")
@@ -429,7 +525,8 @@ func _charge(someone: Dictionary, delta: float) -> void:
 			thud.play()
 			thud.finished.connect(thud.queue_free)
 	elif not someone.animator.is_playing() or someone.animator.assigned_animation == "ual/sprint":
-		someone.animator.play("CharacterArmature|Punch", .1)
+		# Busy with their thing while it comes for them.
+		someone.animator.play(stage.get("busy", "CharacterArmature|Punch"), .1)
 
 
 ## Before the engineer walks in, whoever is running laps begs for help when there is a gap.
@@ -443,37 +540,201 @@ func _panic_cries(delta: float) -> void:
 		_say(runners.pick_random(), "help", "quiet")
 
 
-## One of the night shift meets The Variance.
+## The wind-up of the move on its victim, frame by frame (`delta` 0 on the first).
+func _wind(someone: Dictionary, delta: float) -> void:
+	var body: Node3D = someone.body
+	var t: float = someone.wind
+	var level: Node = incident if incident != null else self
+	match someone.fate:
+		"delayer":
+			# A shadow grows under the manager; they look up at it, then it comes down.
+			if delta == 0.0:
+				ElementFx.sigil(level, body.global_position, Color(.9, .1, .1), 1.3, WINDUP.delayer, -.6)
+				_play(someone, "ual/no", .2, true)
+			if t - delta < WINDUP.delayer - .55 and t >= WINDUP.delayer - .55:
+				_demon_swing()
+		"decommission":
+			# A red end-of-life scan sweeps up the SRE, twice.
+			if delta == 0.0:
+				_play(someone, "Defeat", .2, false)
+			var sweep: float = fmod(t * 1.4, 1.0)
+			if int(t * 20.0) != int((t - delta) * 20.0):
+				var height: float = sweep * 1.3
+				var side: Vector3 = body.global_basis.x.normalized() * .55
+				ElementFx.bolt(level, body.global_position + Vector3.UP * height - side, body.global_position + Vector3.UP * height + side, Color(1, .15, .1), .08, .03)
+			if t - delta < WINDUP.decommission - .4 and t >= WINDUP.decommission - .4:
+				_demon_swing()
+		"pop":
+			# Feedback: the designer inflates, wobbling, until they are very much popping.
+			var swell: float = 1.0 + .9 * smoothstep(0.0, WINDUP.pop, t)
+			var wobble: float = sin(t * 26.0) * .07 * swell
+			body.scale = Vector3(swell + wobble, swell - wobble, swell + wobble) * .62
+			if delta == 0.0:
+				_play(someone, "ual/hit_chest", .1, false)
+		"expose":
+			# Paparazzi: flash after flash, +EXPOSURE every time, and the intern loves it
+			# (finally, visibility), whiter and whiter.
+			if delta == 0.0:
+				_play(someone, "ual/yes", .2, true)
+			if int(t / FLASH_EVERY) != int((t - delta) / FLASH_EVERY) or delta == 0.0:
+				var bulb: Vector3 = body.global_position + Vector3(randf_range(-1.6, 1.6), randf_range(.6, 2.2), randf_range(-1.6, 1.6))
+				ElementFx.flash(level, bulb, Color(1, 1, .95), 5.0, 4.0, .08)
+				ElementFx.glyphs(level, body.global_position + Vector3(randf_range(-.6, .6), 1.5, randf_range(-.6, .6)), Color(1, .95, .6), ["+EXPOSURE"], .7, .4)
+				_shutter(body)
+			_expose(body, smoothstep(0.0, WINDUP.expose, t) * .85, Color(1, 1, 1))
+		"downsize":
+			# A beam from the crown, and the director gets smaller, and smaller.
+			if int(t * 8.0) != int((t - delta) * 8.0) and is_instance_valid(cavalry_target):
+				ElementFx.bolt(level, cavalry_target.global_position + Vector3.UP * 3.2, body.global_position + Vector3.UP * .5 * body.scale.y / .62, Color(.5, 1, .7), .14, .06)
+			body.scale = Vector3.ONE * .62 * lerpf(1.0, .22, smoothstep(0.0, WINDUP.downsize, t))
+			if delta == 0.0:
+				_play(someone, "Defeat", .2, false)
+
+
+func _demon_swing() -> void:
+	if is_instance_valid(cavalry_target) and cavalry_target.get("animator") != null:
+		cavalry_target.animator.play(cavalry_target.clips.attack, .05)
+
+
+## One of the night shift meets The Variance: the move lands, the casualty cam freezes on
+## it, and they get their last words. `quiet` (skips, retries) leaves only the result.
 func _fall(someone: Dictionary, away: Vector3, quiet: bool = false) -> void:
 	var body: Node3D = someone.body
 	someone.charging = false
 	someone.dead = true
+	someone.wind = -1.0
 	away.y = 0
 	away = away.normalized() if away.length() > .1 else Vector3.BACK
-	var at: Vector3 = body.global_position + Vector3.UP * .9
 	var level: Node = incident if incident != null else self
-	var stamp: String = STAMPS[someone.slot % STAMPS.size()]
-	if not quiet:
-		ElementFx.glyphs(body, at + Vector3.UP * 1.3, Color(1, .3, .25), [stamp], 1.4, 0.0)
-	if not quiet and incident != null and incident.get("presentation") != null:
-		var who: String = DIALOGUES.data().trees.get(someone.entry.name, {}).get("who", str(someone.entry.name).to_upper())
-		incident.presentation.casualty(body, who, CAVALRY[someone.slot][2], stamp)
-	# Last words: denial, branding and paperwork to the very end.
-	if not quiet:
-		_say(someone, "last", "now", -1, .2)
+	var floor_at: Vector3 = Vector3(body.global_position.x, 0.0, body.global_position.z)
+	# What the casualty cam frames: [focus, height of the camera from it, distance].
+	var frame: Array = [body.global_position + Vector3.UP * .9, -.35, 2.4]
+	match someone.fate:
+		"delayer":
+			# Flattened: one fewer layer in the org chart.
+			someone.animator.pause()
+			body.scale = Vector3(1.7, .07, 1.7) * .62
+			ElementFx.quake(level, floor_at, Color(.9, .12, .1), 2.2, .9)
+			ElementFx.cracks(level, floor_at, Color(.8, .1, .08), 1.8)
+			ElementFx.dust(level, floor_at, 1.6)
+			Blood.burst(level, floor_at + Vector3.UP * .1, Vector3.UP, 40)
+			Blood.splat(level, floor_at + Vector3.UP * .02, Vector3.UP, 1.8)
+			frame = [floor_at + Vector3.UP * .1, 1.7, 1.5]
+		"decommission":
+			_slice(someone, away)
+			# The pager does not know they are off call.
+			var beeps: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+			beeps.stream = preload("res://assets/audio/sfx/chat_ping.ogg")
+			beeps.bus = &"Effects"
+			beeps.pitch_scale = 1.6
+			(someone.pieces[0] as Node3D).add_child(beeps)
+			if DisplayServer.get_name() != "headless" and not quiet:
+				for ring in range(6):
+					get_tree().create_timer(1.8 + ring * .7, false).timeout.connect(func() -> void:
+						if is_instance_valid(beeps):
+							beeps.play())
+		"pop":
+			# Frozen at full inflation for the cam; then the note lands.
+			someone.animator.pause()
+			frame = [body.global_position + Vector3.UP * 1.1, -.2, 3.0]
+			if quiet:
+				_pop(someone)
+			else:
+				get_tree().create_timer(.35, false).timeout.connect(_pop.bind(someone))
+		"expose":
+			# One flash too many: everything above the belt goes to ash. The legs stay,
+			# smoking, and they still have last words.
+			var skeleton: Skeleton3D = body.find_child("Skeleton3D", true, false)
+			skeleton.set_bone_pose_scale(skeleton.find_bone("Abdomen"), Vector3.ONE * .001)
+			someone.animator.pause()
+			_expose(body, .7, Color(.08, .07, .06))
+			var waist: Vector3 = body.global_position + Vector3.UP * .55
+			ElementFx.flash(level, waist + Vector3.UP * .6, Color(1, 1, .95), 9.0, 9.0, .3)
+			ElementFx.shockwave(level, floor_at + Vector3.UP * .05, Color(1, 1, .9), 3.0, .4)
+			ElementFx.motes(level, waist + Vector3.UP * .4, Color(.35, .33, .3), 50, 2.0, 2.2, -1.2, .14)
+			ElementFx.motes(level, waist, Color(.12, .11, .1), 24, .6, 4.0, -.8, .3)
+			Blood.spurt(body, Vector3.UP * .55, Vector3.UP, 1.0)
+			Blood.splat(level, floor_at + Vector3.UP * .02, Vector3.UP, 1.1)
+			_shutter(body)
+			frame = [floor_at + Vector3.UP * .45, .15, 1.6]
+		"downsize":
+			# Shrunk to a rounding error. Their last words come out squeaky; then a stomp.
+			someone.animator.pause()
+			body.scale = Vector3.ONE * .62 * .22
+			body.get_node("Voice").pitch_scale = 1.8
+			frame = [floor_at + Vector3.UP * .2, .25, 1.3]
+			if quiet:
+				_stomp(someone)
+			else:
+				get_tree().create_timer(2.2, false).timeout.connect(_stomp.bind(someone))
+	if quiet:
+		return
+	var at: Vector3 = body.global_position + Vector3.UP * .9
+	var stamp: String = CAVALRY[someone.slot][3]
 	ElementFx.bolt(body, at - away.cross(Vector3.UP) * 1.2, at + away.cross(Vector3.UP) * 1.2, Color(1, .95, .8), .3, .1)
-	if someone.fate == "slice":
-		_slice(someone, away)
-	else:
-		# Thrown: knocked across the vault and left where they land.
-		someone.animator.play("ual/hit_knockback", .05)
-		var landing: Vector3 = body.position + away * 4.5
-		var throw: Tween = body.create_tween()
-		throw.tween_property(body, "position", landing + Vector3.UP * 1.4, .3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
-		throw.tween_property(body, "position", landing, .3).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-		throw.tween_callback(func() -> void: someone.animator.play("ual/death_ual", .1))
-		Blood.burst(level, at, away + Vector3.UP * .6, 30)
-		Blood.splat(level, body.global_position + away * 4.5, away, 1.2)
+	if incident != null and incident.get("presentation") != null:
+		var who: String = DIALOGUES.data().trees.get(someone.entry.name, {}).get("who", str(someone.entry.name).to_upper())
+		incident.presentation.casualty(body, who, CAVALRY[someone.slot][2], stamp, frame)
+	# Last words: denial, branding and paperwork to the very end.
+	_say(someone, "last", "now", -1, .2)
+
+
+## Wash a body towards `colour` (overexposed white; charred), `amount` 0 to 1.
+func _expose(body: Node3D, amount: float, colour: Color) -> void:
+	for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
+		var wash: StandardMaterial3D = (mesh as MeshInstance3D).material_overlay as StandardMaterial3D
+		if wash == null:
+			wash = StandardMaterial3D.new()
+			wash.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			wash.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			(mesh as MeshInstance3D).material_overlay = wash
+		wash.albedo_color = Color(colour, amount)
+
+
+func _shutter(body: Node3D) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var click: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+	click.stream = preload("res://assets/audio/sfx/light_relay.ogg")
+	click.bus = &"Effects"
+	click.pitch_scale = randf_range(1.3, 1.6)
+	click.unit_size = 8.0
+	body.add_child(click)
+	click.play()
+	click.finished.connect(click.queue_free)
+
+
+## The designer's note lands: all of them, everywhere, in brand colours.
+func _pop(someone: Dictionary) -> void:
+	var body: Node3D = someone.body
+	if not someone.dead or not body.visible:
+		return
+	var level: Node = incident if incident != null else self
+	var at: Vector3 = body.global_position + Vector3.UP * 1.0
+	body.hide()
+	Blood.burst(level, at, Vector3.UP, 90)
+	for side in range(5):
+		var out: Vector3 = Vector3.FORWARD.rotated(Vector3.UP, side * TAU / 5.0)
+		Blood.burst(level, at, out + Vector3.UP * .3, 24)
+		Blood.splat(level, Vector3(at.x, .02, at.z) + out * randf_range(1.0, 2.6), Vector3.UP, randf_range(.8, 1.4))
+	for colour: Color in [Color(1, .3, .7), Color(.3, .8, 1), Color(1, .85, .2)]:
+		ElementFx.shards(level, at, colour, 16, 6.0, 1.4)
+	ElementFx.shockwave(level, at, Color(1, .4, .6), 2.4, .35)
+	ElementFx.flash(level, at, Color(1, .5, .7), 4.0, 6.0, .2)
+
+
+## The demon steps on what is left of the director.
+func _stomp(someone: Dictionary) -> void:
+	var body: Node3D = someone.body
+	if not someone.dead or not body.visible or body.scale.y < .05:
+		return
+	_demon_swing()
+	var level: Node = incident if incident != null else self
+	var floor_at: Vector3 = Vector3(body.global_position.x, 0.0, body.global_position.z)
+	body.scale = Vector3(.3, .01, .3)
+	Blood.burst(level, floor_at + Vector3.UP * .05, Vector3.UP, 26)
+	Blood.splat(level, floor_at + Vector3.UP * .02, Vector3.UP, .9)
+	ElementFx.dust(level, floor_at, .8)
 
 
 ## In half at the waist: the legs stay standing a moment; the rest goes flying.

@@ -102,6 +102,17 @@ def process(master, output, profile):
                     'acompressor=threshold=-24dB:ratio=9:attack=2:release=90:makeup=9',
                     'chorus=0.7:0.9:22|36:0.35|0.3:0.3|0.45:1.8|1.2', 'aecho=0.85:0.55:70|150:0.3|0.16',
                     'asoftclip=type=tanh']
+    if profile['processing'] == 'rage':
+        # Losing it completely: the line driven into distortion, a growl an octave down
+        # mixed in hard, a throat-shredding presence peak, crushed compression and a vault
+        # of echo. Still every word readable.
+        filters += ['highpass=f=90',
+                    'asplit=2[dry][low];[low]asetrate=12000,aresample=24000,atempo=2.0,volume=0.7[growl];'
+                    '[dry][growl]amix=inputs=2:weights=1 0.8:normalize=0',
+                    'aexciter=amount=4:drive=9', 'equalizer=f=1800:t=q:w=1.0:g=7', 'equalizer=f=120:t=q:w=1.0:g=4',
+                    'acompressor=threshold=-28dB:ratio=14:attack=1:release=80:makeup=12',
+                    'asoftclip=type=hard:threshold=0.6', 'aecho=0.85:0.6:60|130|240:0.35|0.22|0.12',
+                    'asoftclip=type=tanh']
     loudness = profile.get('loudness', -20)
     filters += ['loudnorm=I=-20:TP=-2:LRA=11' if loudness == -20 else f'loudnorm=I={loudness}:TP=-1:LRA=7']
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -226,7 +237,7 @@ def validate(data):
             assert entry['duration'] > 0 and 0 < entry['peak'] < 1
         else:
             assert not path.exists(), f'Untracked voice provenance: {path}'
-    assert len(ids) == 59 and len(data['profiles']) == 7
+    assert len(ids) == 66 and len(data['profiles']) == 7
     print(f'PASS voice manifest: {len(ids)} lines; {sum(x["status"] != "missing" for x in data["lines"])} assets; remaining entries use subtitles.')
 
 
@@ -282,7 +293,7 @@ def talk_lines(talk):
                 lines.append({'id': f'bark_{kind}_{moment}_{index}', 'text': text, 'voice_profile': f'monster_{kind}'})
     # Move callouts, shouted anime style by the engineer.
     for key, call in talk.get('callouts', {}).items():
-        lines.append({'id': f'call_{key}', 'text': call['text'], 'voice_profile': 'shout', 'pronunciation_text': call['say']})
+        lines.append({'id': f'call_{key}', 'text': call['text'], 'voice_profile': call.get('profile', 'shout'), 'pronunciation_text': call['say']})
     for line in lines:
         if line['id'] in talk.get('pronunciation', {}):
             line['pronunciation_text'] = talk['pronunciation'][line['id']]

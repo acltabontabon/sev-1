@@ -70,6 +70,12 @@ var animator: AnimationPlayer
 var right_ik: TwoBoneIK3D
 var left_ik: TwoBoneIK3D
 var eye_material: StandardMaterial3D
+var hair_material: StandardMaterial3D
+## Unpaid Overtime: the form he takes after watching the night shift die. Gold hair and
+## eyes, a gold flame aura and crackling arcs, until the run restarts. Presentation only.
+var overtime_on: bool = false
+var overtime_aura: Node3D
+var overtime_crackle: float = 0.0
 var rim_materials: Array[StandardMaterial3D] = []
 var bones: Dictionary = {}
 var striking: bool = false
@@ -196,7 +202,57 @@ var preview_clip: String = ""
 var preview_at: float = 0.0
 
 
+func overtime(on: bool) -> void:
+	overtime_on = on
+	if hair_material != null:
+		hair_material.albedo_color = Color(1, .8, .25) if on else Color(.05, .04, .04)
+		hair_material.emission_energy_multiplier = 1.1 if on else 0.0
+	if eye_material != null:
+		eye_material.emission = Color(1, .8, .3) if on else Color(.35, .95, 1.0)
+	if is_instance_valid(overtime_aura):
+		overtime_aura.queue_free()
+		overtime_aura = null
+	if not on:
+		return
+	overtime_aura = Node3D.new()
+	add_child(overtime_aura)
+	var flames: CPUParticles3D = CPUParticles3D.new()
+	flames.amount = 70
+	flames.lifetime = .7
+	flames.mesh = ElementFx._dot_mesh(.3)
+	flames.local_coords = false
+	flames.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	flames.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	flames.emission_sphere_radius = .45
+	flames.position = Vector3.UP * .8
+	flames.direction = Vector3.UP
+	flames.spread = 12.0
+	flames.gravity = Vector3.UP * 2.5
+	flames.initial_velocity_min = 1.2
+	flames.initial_velocity_max = 2.6
+	flames.scale_amount_min = .7
+	flames.scale_amount_max = 1.5
+	var ramp: Gradient = Gradient.new()
+	ramp.set_color(0, Color(1, .95, .6, .9))
+	ramp.set_color(1, Color(1, .55, .1, 0.0))
+	flames.color_ramp = ramp
+	overtime_aura.add_child(flames)
+	var glow: OmniLight3D = OmniLight3D.new()
+	glow.light_color = Color(1, .75, .3)
+	glow.light_energy = 2.2
+	glow.omni_range = 4.0
+	glow.position = Vector3.UP * 1.1
+	overtime_aura.add_child(glow)
+
+
 func _physics_process(delta: float) -> void:
+	if overtime_on:
+		# Arcs crackle round him, and the light breathes with them.
+		overtime_crackle -= delta
+		if overtime_crackle <= 0.0 and is_inside_tree():
+			overtime_crackle = randf_range(.18, .45)
+			var at: Vector3 = global_position + Vector3(randf_range(-.4, .4), randf_range(.4, 1.6), randf_range(-.4, .4))
+			ElementFx.bolt(self, at, at + Vector3(randf_range(-.5, .5), randf_range(-.4, .4), randf_range(-.5, .5)), Color(1, .9, .45), .08, .025)
 	if not preview_clip.is_empty():
 		_scrub(preview_clip, animator.get_animation("rig/" + preview_clip).length * preview_at, 0.0, delta)
 		right_ik.active = false
@@ -617,6 +673,11 @@ func _dress() -> void:
 		var material: StandardMaterial3D = (source as StandardMaterial3D).duplicate()
 		material.albedo_color = palette[source.resource_name]
 		material.roughness = .85
+		if source.resource_name == "Hair":
+			material.emission_enabled = true
+			material.emission = Color(1, .78, .2)
+			material.emission_energy_multiplier = 0.0
+			hair_material = material
 		if source.resource_name == "Face":
 			material.emission_enabled = true
 			material.emission = Color(.35, .95, 1.0)

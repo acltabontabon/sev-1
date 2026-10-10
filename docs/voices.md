@@ -56,7 +56,10 @@ presence EQ, gentle compression, atan soft clip, short echo) at −16 LUFS; tune
 for intelligibility after the creator found 0.2.20 too distorted. Move callouts (`callouts`, `call_<move>.ogg`) use the `shout` profile: the protagonist
 voice at 1.18× and +1.5 semitones through the `hype` processing (EQ presence, exciter,
 9:1 compression, chorus doubling, arena echo, tanh soft clip) mastered at −13 LUFS target
-(measured −14), and played +4 dB in game. Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
+(measured −14), and played +4 dB in game. A callout may name its own profile: the engineer's roar
+when he goes into Unpaid Overtime (`call_rage`) uses `rage`, the protagonist voice at 1.08× and −1.5 semitones
+through the `rage` chain (an octave-down growl mixed in hard, exciter drive, presence and low boosts, 14:1
+compression, hard then tanh clipping, a long vault echo) at −12 LUFS. Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
 numbers for speech only into `assets/audio/voices/talk/` with
 `talk/provenance.json`; `talk-validate` (run by `tools/validate.py`) fails on a missing,
 stale or untracked clip. Status: candidates; human listening acceptance pending.

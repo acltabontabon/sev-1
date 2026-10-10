@@ -390,6 +390,17 @@
       "pitch": 1,
       "processing": "clean",
       "direction": "Witty, theatrical exasperation; exhausted designer."
+    },
+    "rage": {
+      "blend": {
+        "am_michael": 1.0
+      },
+      "language": "a",
+      "speed": 1.08,
+      "pitch": -1.5,
+      "loudness": -12,
+      "processing": "rage",
+      "direction": "The engineer losing it over his dead team: a held breath, then a roar. Distorted, doubled an octave down, crushed and echoing; every word readable."
     }
   },
   "crew": {
@@ -1261,6 +1272,11 @@
     "works_on_my_machine": {
       "text": "Works… on my MACHINE!!",
       "say": "Works! ... on my machine!!!"
+    },
+    "rage": {
+      "text": "YOU LAID OFF MY TEAM… ON A FRIDAY?!",
+      "say": "You laid off my TEAM!! ... On a FRIDAY?!!",
+      "profile": "rage"
     }
   },
   "barks": {
