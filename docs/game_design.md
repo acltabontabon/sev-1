@@ -146,6 +146,21 @@ Keep writing dry, absurd, occasionally dark, and capable of unexpected empathy. 
 
 Reuse one office footprint, existing interaction conventions, and a small coherent asset set. Establish combat, visuals, and teaching in separate playable increments before combining them. Acceptance requires readable truth/falsehood cues, understandable stakes for a non-developer, a rewarding replay without upgrades, clean death/retry, and measured performance in the complete scene. The duration is a playtest target, not a delivery estimate.
 
+### Milestone 12 implementation (prototype, 10 October 2026)
+
+Implemented to answer the first external feedback; human acceptance pending. The office
+now has five purposeful areas: desks (start, environmental stories), Production
+Operations (investigation), a meeting wing with the optional Quick Sync trap, a pantry
+with one useful interaction (coffee) and three reactions, and a gated server corridor
+leading to the vault where The Variance arrives. Encounters run authored waves with four
+regular archetypes: the Corrupted Record (melee), The Blocker (shields allies; interrupt
+or kill it), The Meeting Invite (telegraphed slowing zones; step out or close in) and
+Scope Creep (grows when ignored; any hit resets it). Enemies start unaware and must
+notice the engineer; a surprise hit deals double. Comedy is delivered through play (the
+coffee policy, Quick Sync, Scope Creep's escalation, the status page that stays green)
+and through chat cards from named senders. The beat list above remains the creative
+direction; the Variance's harmless copies are unchanged.
+
 ## Proposed ending
 
 After The Root Cause falls, production stabilizes and the office returns to normal. A company-wide message thanks leadership for the resolution. The protagonist earns “Exceeds Expectations,” with a 0% salary increase, and finally leaves. A final notification announces “Monday, 9:00 AM — Sprint Planning.” Credits.

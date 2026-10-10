@@ -15,7 +15,7 @@ notification, rewrites `eta` ("Hi! Just checking if we have an ETA."), adds `lea
 and replaces the `start` profanity with the creator-requested "Tangina naman." The
 Tagalog line uses a phonetic `pronunciation_text` override (`/tɑŋˈinɑ/ /nɑmˈɑn/`) with
 the English protagonist voice; its pronunciation is a candidate pending the creator's
-listening review, and the subtitle intentionally stays untranslated. 23 clips now ship.
+listening review, and the subtitle intentionally stays untranslated. Later Milestone 12 phases added lines for the pantry, the gate and corridor, every new archetype, Quick Sync, the status page, management replies, victory, the postmortem, awareness and protagonist barks: 53 clips ship, all subtitled and all candidates pending listening review.
 
 These are **candidate performances, not human-approved performances**. Automated
 checks and observed audio-player state cannot establish acting, intelligibility,

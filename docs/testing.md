@@ -21,17 +21,19 @@ the opening and boss arrival. Nothing is saved except device preferences.
 1. Move with WASD/arrows and look with the mouse. Left mouse/F attacks; press again
    late in recovery to chain up to three hits. Q/right mouse dodges. Space jumps;
    Shift sprints. Watch the orange warning arc, move aside, then counterattack.
-2. Defeat two records, appearing one at a time. Select an upgrade with mouse,
-   arrows/Enter, or 1/2/3. Read its benefit and Technical Debt cost.
-3. Follow OPERATIONS to the far wall. Press E nearby to inspect three records.
-   Select the system missing the transaction. Wrong guesses provide another clue.
-   If stuck: Payment Processing is option 3.
-4. Choose a management response. Review the Burnout change and any extra record or
-   optional containment timer. Defeat the containment records and choose again.
-5. Fight The Variance. Evade during SHIELDED; attack during OPEN. The solid diamond
-   and VERIFIED ORIGINAL label identify the real boss; hollow projections are harmless.
-6. Read the victory or defeat postmortem. **Restart Incident** or R retries with
-   neutral health/modifiers. **Return to Main Menu** unloads the run.
+2. Clear two waves (Corrupted Records, then Scope Creep). Enemies start unaware; a hit
+   before they notice you deals double. Approve a change request with mouse,
+   arrows/Enter, or 1/2/3: read its benefit and Technical Debt cost.
+3. Follow OPERATIONS to the far wall. Press E nearby: the evidence board shows three
+   systems; press the number of the one that never received the payment (if stuck:
+   3, Payment Processing). Optional before that: the east wing. Press E at the pantry's
+   coffee machine; walk into Meeting Room 3 if you want the Quick Sync ambush.
+4. Reply to Leadership's DM. Contain two waves: hit The Blocker mid-cast or kill it
+   first; step out of Meeting Invite circles before they start; don't ignore Scope Creep.
+5. Walk through the lifted gate and the server corridor into the vault. Fight The
+   Variance: evade during SHIELDED, attack during OPEN, trust the solid diamond.
+6. Read the postmortem. **Restart Incident** or R retries with neutral health and
+   modifiers. **Back to Desk** returns to the title.
 
 Escape pauses, including during decision screens. Resume returns to the pending
 choice. Pause offers settings, controls, restart, menu and quit. Losing app focus
@@ -40,7 +42,7 @@ the run while adjusting preferences. Use Quit or the window close action to exit
 
 ## Report a bug
 
-Include version **0.1.0**, Mac model/chip, macOS version, resolution, graphics setting,
+Include version **0.2.0**, Mac model/chip, macOS version, resolution, graphics setting,
 the incident stage, choices made, what you expected, what happened, and repeat steps.
 A screenshot or short clip is useful. Note whether retry fixed it. Local logs and
 `settings.cfg` live in `~/Library/Application Support/SEV-1/`. Share logs only after
@@ -60,6 +62,10 @@ Answer briefly; use 1 (poor) to 5 (strong) where helpful.
 8. What confused or frustrated you? Any bug or uncomfortable effect?
 9. Would you play another run? Why?
 10. What was the most memorable moment? How long did your run take?
+11. Did the title screen and the opening make you want to start? Was 36 seconds right?
+12. Could you tell the four enemy types apart, and what each wanted you to do?
+13. Did the chat cards, change-request tickets and Leadership DM read easily in a fight?
+14. Did you visit the pantry or the Quick Sync room? Why or why not?
 
 Creator acceptance should include a normal win, a defeat/retry, all three management
 choices across runs, settings across a fresh launch, and a copied ZIP on another Mac.

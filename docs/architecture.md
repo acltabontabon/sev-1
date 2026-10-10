@@ -474,3 +474,57 @@ packaging supersede their former persistence/export limitations.
 Incident now owns a local voice controller with a single active line, three pending requests, two audio players and a four-stream cache. The 22-entry JSON manifest supplies speech text and subtitles. Existing presentation triggers delegate to this controller; gameplay timing and camera staging remain unchanged. Variance speech follows the boss in 3D; other roles use flat playback with baked Production filtering. The Voice bus is independent of Effects and feeds Master.
 
 Saved preferences add Voice volume and Subtitles with backward-compatible defaults. Application page state suspends speech except on the terminal report, whose dedicated subtitle slot displays victory/defeat and postmortem speech while gameplay remains paused. Restart and scene removal stop all speech. Development-only Kokoro generation and import tooling, lifecycle behavior, provenance and validation are described in [the voice guide](voices.md). This supersedes Milestone 9's fixed 4.5-second caption queue; no runtime AI or autoload is introduced.
+
+## Milestone 12 creative revitalization
+
+No autoloads or frameworks were added; new behavior lives with its owners.
+
+- **Interface identity.** `tools/build_ui_theme.gd` writes `game/ui/sev1_theme.tres` and
+  three font variations; `project.godot` sets it as the project theme. Type variations
+  (DisplayTitle, Headline, Subhead, Eyebrow, Caption, MonoLabel, Card, MenuEntry,
+  MenuSub) carry the styling. `game/ui/frosted.gdshader` blurs the scene behind menus
+  and dialogs.
+- **Front end.** `game/release/front_end.gd` keeps its page model. The title page lays a
+  left column over `game/release/menu_backdrop.tscn` (office instance, seated engineer,
+  monitor screen, notification bag, music). The backdrop leaves the tree before an
+  incident is instanced and returns on Back to Desk. `preferences.gd` adds `music` and
+  `opening_seen` (device-only; it unlocks skipping the opening).
+- **Desk screen.** `game/ui/desk_screen.gd` renders a SubViewport interface onto the
+  engineer's monitor (chat, log-off dialog, SEV-1 takeover). It updates live while on
+  camera and freezes afterwards.
+- **Opening and beats.** `incident_presentation.gd` stages the opening from `SHOTS` and
+  `BEATS` tables (36 s; 3 s on retry), the evidence push-in, the vault arrival (no
+  control loss), first-sighting slow motion and the terminal ending shot. A
+  `sequence` queue plays lines that belong together through the bounded voice queue;
+  stage changes clear it. A small music director cross-fades `assets/audio/music` beds on
+  the `Music` bus, which a sidechain compressor ducks under `Voice`.
+- **Notifications.** `voice_controller.gd` emits `line_started`; `game/ui/notification_feed.gd`
+  turns gameplay lines into sender cards (max three, expiring). ALERT-stage lines use
+  film subtitles instead.
+- **HUD and dialogs.** `playtest_hud.gd` restyles its labels into a ticket header and adds
+  a vitals card, boss bar, notice and evidence board. `upgrade_selection.gd` builds
+  change-request tickets or a leadership DM inside its three buttons and stores each
+  card's plain summary in meta `summary`; closing clears card contents.
+- **Office.** `tools/build_office.py` adds the meeting wing, pantry, gate, corridor, vault,
+  `SpawnPoints` markers, PBR materials (triplanar), Kenney props (tinted by
+  `prop_tint.gd`) and `calendar_drift.gd`. `tools/bake_office_navigation.gd` bakes the
+  larger footprint. The gate and Quick Sync doors are generated without collision so
+  navigation bakes through them; the incident enables collision while they are shut.
+- **Interactions.** `game/incidents/interaction_point.gd` is a distance-checked prompt;
+  `missing_transaction.gd` owns what each pantry object does. Coffee adds
+  `run.motivation` (outgoing damage) and `player.move_multiplier` for 40 s.
+- **Encounters.** `missing_transaction.gd` keeps `active_enemy` as a computed view (boss,
+  else first live enemy). `WAVES` authors each stage; `alive`/`sync_alive` track foes;
+  `request_attack()` caps simultaneous telegraphs; corpses free after three seconds.
+  Archetypes extend `game/enemies/incident.gd` via `set_script` like The Variance:
+  `blocker.gd`, `meeting_invite.gd` (with `meeting_zone.gd`) and `scope_creep.gd`, each
+  with a generated visual. Meeting zones slow through `player.zone_multiplier`.
+- **Awareness.** `incident.gd` adds MANIFESTING / UNAWARE / NOTICING / ENGAGED /
+  SEARCHING. `starts_aware` keeps the lab opponent, boss and Quick Sync ambush always
+  hunting; incident waves start unaware. Senses: forward cone with line of sight,
+  hearing of attacks, dodges and sprinting, touch, ally alerts and a patience limit.
+  Engaged foes flank, orbit when waiting for a turn, back off after swinging and search
+  the last known position. Damage while unaware is doubled.
+- **Tests.** New suites: `environment_tests.gd`, `encounter_tests.gd`,
+  `interface_tests.gd`. `tests/m12_preview.gd` captures the menu, opening, areas,
+  roster, UI, finale and cast for visual review.

@@ -1,4 +1,9 @@
-# Release engineering — Friday Deployment 0.1.0
+# Release engineering — Friday Deployment 0.2.0
+
+Milestone 12 moved the version to **0.2.0**; `tools/release.py` derives archive and
+staging names from `VERSION`. The sections below describe the 0.1.0 baseline workflow,
+which is unchanged apart from the version and the larger asset set (fonts, textures,
+props, sound effects and music, all inside the resource package).
 
 ## Baseline and disposition
 
@@ -46,10 +51,10 @@ errors fail the build even with exit code zero. Logs live under ignored `logs/`.
 A failed rebuild removes the old success manifest but preserves prior artifacts;
 do not distribute an old ZIP as evidence that a failed build passed.
 
-Outputs under ignored `builds/releases/0.1.0/`:
+Outputs under ignored `builds/releases/<version>/` (now `0.2.0`):
 
 - `SEV-1 Friday Deployment.app`
-- `SEV-1-Friday-Deployment-0.1.0-macOS.zip` containing the app and tester/license notes
+- `SEV-1-Friday-Deployment-<version>-macOS.zip` containing the app and tester/license notes
 - `manifest.json` with source revision/dirty state/content digest, template hash,
   archive hash, validation/smoke results and honest signing/platform limits
 
@@ -71,7 +76,7 @@ Graphical mode additionally captures title/opening/combat/boss/victory under the
 user directory. The regular release script runs headless; graphical checks are separate.
 
 ```sh
-"builds/releases/0.1.0/SEV-1 Friday Deployment.app/Contents/MacOS/SEV-1 Friday Deployment" --resolution 1920x1080 --fixed-fps 60 -- --release-smoke
+"builds/releases/0.2.0/SEV-1 Friday Deployment.app/Contents/MacOS/SEV-1 Friday Deployment" --resolution 1920x1080 --fixed-fps 60 -- --release-smoke
 ```
 
 This accelerated graphical probe is not a frame-time benchmark. Source graphical
