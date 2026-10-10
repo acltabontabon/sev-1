@@ -86,6 +86,8 @@ var host: Node3D
 var disguise_left: float = 0.0
 ## Blame Shift: while blamed, every hit lands 30% harder.
 var blamed_left: float = 0.0
+## The last accepted hit (after multipliers): monster_rig.gd picks a death from it.
+var last_damage: int = 0
 var rig: MonsterRig
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
@@ -233,6 +235,7 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 			get_parent().on_surprise(self)
 	if blamed_left > 0:
 		amount = roundi(amount * 1.3)
+	last_damage = amount
 	health = maxi(health - amount, 0)
 	health_changed.emit(health)
 	flash_left = hit_flash_duration

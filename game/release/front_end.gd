@@ -3,7 +3,7 @@ extends Node
 const INCIDENT: PackedScene = preload("res://game/incidents/missing_transaction.tscn")
 const PREFERENCES: Script = preload("res://game/release/preferences.gd")
 const BACKDROP: PackedScene = preload("res://game/release/menu_backdrop.tscn")
-const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Reply All: a crescent that hits everyone in line\nX / dodge + attack Blame Shift: dash through; they take +30% for 4 s\nZ                  Circle Back: fire whirlwind; survivors parked\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
+const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Reply All: a crescent that hits everyone in line\nX / dodge + attack Blame Shift: dash through; they take +30% for 4 s\nZ                  Circle Back: fire whirlwind; survivors parked\nG                  Works On My Machine: counter stance (time it)\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
 const KEYS: Array = [
 	[["W", "A", "S", "D"], "Move, relative to the camera"], [["MOUSE"], "Look  ·  wheel zooms"],
 	[["SHIFT"], "Sprint"], [["SPACE"], "Jump"],
@@ -12,6 +12,7 @@ const KEYS: Array = [
 	[["C", "MMB"], "Reply All  ·  a crescent that hits everyone in line"],
 	[["X"], "Blame Shift  ·  dash through enemies; the blamed take +30% (or attack out of a dodge)"],
 	[["Z"], "Circle Back  ·  a fire whirlwind; the last pulse parks survivors"],
+	[["G"], "Works On My Machine  ·  counter stance: get hit in it and they take the blame"],
 	[["V"], "Force Rollback  ·  ultimate; landing hits fills FOCUS"],
 	[["E"], "Use: the console, the coffee machine, everything else"],
 	[["1", "2", "3"], "Choose evidence, change requests and replies"],

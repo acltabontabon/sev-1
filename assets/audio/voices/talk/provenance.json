@@ -2510,5 +2510,21 @@
     "duration": 1.3213333333333332,
     "peak": 0.8664587736129761,
     "review_status": "candidate; human listening acceptance pending"
+  },
+  "call_works_on_my_machine": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "blend am_michael 1.0",
+    "generation_date": "2026-10-10T11:43:27.915470+00:00",
+    "usage_rights": "Apache-2.0 model; blended stock voices; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/hype/pitch1.5",
+    "fingerprint": "b1b5e8a94474a2c599d4a0c5eefcbbeafb0b086ff473fff422e1520e2655c165",
+    "sha256": "243b23a92e3f86f5f93d25e63764ea9ed40c59cb2e0320ba1a1c8a6a8ab2ba68",
+    "master_sha256": "afe91b41c80371c535234696e7d7015b483a5a29efb627f987b49055186ae7e1",
+    "duration": 1.4375416666666667,
+    "peak": 0.8230421543121338,
+    "review_status": "candidate; human listening acceptance pending"
   }
 }

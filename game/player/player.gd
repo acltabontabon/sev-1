@@ -93,9 +93,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif camera_rig.controls_active and event.is_action_pressed("whirlwind") and not event.is_echo():
 		specials.circle_back()
 		get_viewport().set_input_as_handled()
+	elif camera_rig.controls_active and event.is_action_pressed("counter") and not event.is_echo():
+		specials.works_on_my_machine()
+		get_viewport().set_input_as_handled()
 
 
 func request_attack() -> bool:
+	if specials != null and (specials.counter_left > 0 or specials.counter_recover > 0):
+		return false
 	if narrative_hold or health <= 0 or hurt_left > 0 or dodging or not is_on_floor() or combo.is_empty():
 		return false
 	if melee.attacking:
@@ -170,8 +175,11 @@ func _on_hit_landed(target: Node3D) -> void:
 			target.show_impact(combo[combo_index].color)
 
 
-func receive_damage(amount: int, _source: Vector3) -> bool:
+func receive_damage(amount: int, source: Vector3) -> bool:
 	if health <= 0 or invulnerable_left > 0 or dodge_is_invulnerable():
+		return false
+	# Works On My Machine: a hit inside the stance is cancelled and answered.
+	if specials != null and specials.try_counter(amount, source):
 		return false
 	health = maxi(0, health - roundi(amount * incoming_damage_multiplier))
 	invulnerable_left = damage_invulnerability
@@ -260,7 +268,7 @@ func _physics_process(delta: float) -> void:
 	var speed: float = sprint_speed if Input.is_action_pressed("sprint") else walk_speed
 	if melee.attacking:
 		speed = walk_speed * attack_movement_scale
-	if hurt_left > 0:
+	if hurt_left > 0 or (specials != null and (specials.counter_left > 0 or specials.counter_recover > 0)):
 		speed = 0.0
 	speed *= move_multiplier * zone_multiplier
 	var rate: float = acceleration if not input_vector.is_zero_approx() else braking

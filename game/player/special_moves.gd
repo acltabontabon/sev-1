@@ -13,6 +13,11 @@ extends Node
 ## CIRCLE BACK (Z): a steerable fire whirlwind for 1.4 s that hits everything within 3 m
 ## four times and drags it inward; the last pulse sends survivors to the PARKING LOT
 ## (stunned 1.2 s). 6 s cooldown.
+## WORKS ON MY MACHINE (G): a 0.6 s counter stance inside a "localhost" dome. Anything
+## that hits the engineer in the window does nothing; the attacker takes the blame instead
+## (60 damage, knocked back, staggered, CANNOT REPRODUCE) and the engineer spins into a
+## riposte; most of the cooldown comes back and FOCUS +20. A whiff leaves a short,
+## vulnerable recovery and the full 3 s cooldown.
 
 signal focus_changed(value: float)
 ## A move was called out loud (anime style): its name, and whether it is the ultimate.
@@ -63,11 +68,22 @@ const WHOOSH: Dictionary = {
 	"circle_back": preload("res://assets/audio/sfx/whoosh_spin.ogg"),
 	"rollback": preload("res://assets/audio/sfx/whoosh_rise.ogg"),
 	"reset_hard": preload("res://assets/audio/sfx/heavy_impact.ogg"),
+	"works_on_my_machine": preload("res://assets/audio/sfx/heavy_impact.ogg"),
 }
+const COUNTER_WINDOW: float = .6
+const COUNTER_COOLDOWN: float = 3.0
+const COUNTER_DAMAGE: int = 60
+const COUNTER_WHIFF: float = .35
+const COUNTER_COLOR: Color = Color(.45, 1, .6)
 const BLAME_SECONDS: float = 4.0
 const PARKING_SECONDS: float = 1.2
 var voice: AudioStreamPlayer
 var whoosh: AudioStreamPlayer
+var counter_cooldown: float = 0.0
+## Seconds left in the stance, then in the whiff recovery.
+var counter_left: float = 0.0
+var counter_recover: float = 0.0
+var dome: MeshInstance3D
 var last_call: String = ""
 var trail_left: float = 0.0
 var trail_flash: float = 0.0
@@ -101,6 +117,32 @@ func _ready() -> void:
 	# Calls sit on top of the fight, not inside the dialogue mix.
 	voice.volume_db = 4.0
 	add_child(voice)
+	# The "localhost" dome: shown only while the stance is up.
+	dome = MeshInstance3D.new()
+	dome.name = "LocalhostDome"
+	var sphere: SphereMesh = SphereMesh.new()
+	sphere.radius = 1.05
+	sphere.height = 2.3
+	dome.mesh = sphere
+	dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var glass: StandardMaterial3D = StandardMaterial3D.new()
+	glass.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glass.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	glass.albedo_color = Color(COUNTER_COLOR, .16)
+	glass.rim_enabled = false
+	dome.material_override = glass
+	var tag: Label3D = Label3D.new()
+	tag.text = "localhost:3000"
+	tag.font_size = 30
+	tag.pixel_size = .004
+	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tag.modulate = COUNTER_COLOR
+	tag.outline_size = 8
+	tag.position.y = 1.35
+	dome.add_child(tag)
+	dome.hide()
+	add_child(dome)
 	whoosh = AudioStreamPlayer.new()
 	whoosh.bus = &"Effects"
 	whoosh.volume_db = -2.0
@@ -113,6 +155,11 @@ func reset() -> void:
 	dash_cooldown = 0.0
 	spin_cooldown = 0.0
 	spin_left = 0.0
+	counter_cooldown = 0.0
+	counter_left = 0.0
+	counter_recover = 0.0
+	if dome != null:
+		dome.hide()
 	dash_marked.clear()
 	_end_dash()
 	trail_left = 0.0
@@ -142,6 +189,16 @@ func _shout(key: String, title: String, ultimate: bool = false) -> void:
 	called.emit(title, ultimate)
 
 
+## Hit with a special, telling the target how to die if this kills it (monster_rig.gd):
+## blades slice, the slam launches, the whirlwind sends bodies tumbling.
+func _strike(target: Node3D, amount: int, source: Vector3, style: String) -> bool:
+	target.set_meta("kill_style", style)
+	var landed: bool = target.receive_damage(roundi(amount * player.melee.damage_multiplier), source)
+	if is_instance_valid(target) and target.get("health") != 0:
+		target.remove_meta("kill_style")
+	return landed
+
+
 func add_focus(amount: float) -> void:
 	focus = clampf(focus + amount, 0.0, 100.0)
 	focus_changed.emit(focus)
@@ -160,7 +217,7 @@ func _on_hit() -> void:
 func _can_act() -> bool:
 	return not player.narrative_hold and player.health > 0 and not player.dodging and player.is_on_floor() \
 		and player.hurt_left <= 0 and not player.melee.is_active() and player.hitstop_left <= 0 and queued.is_empty() \
-		and dash_left <= 0 and spin_left <= 0
+		and dash_left <= 0 and spin_left <= 0 and counter_left <= 0 and counter_recover <= 0
 
 
 func reply_all() -> bool:
@@ -270,6 +327,63 @@ func _draw_trail(from: Vector3, to: Vector3) -> void:
 	mesh.surface_end()
 
 
+func works_on_my_machine() -> bool:
+	if counter_cooldown > 0 or not _can_act():
+		return false
+	player.melee.cancel()
+	player.clear_combo()
+	counter_left = COUNTER_WINDOW
+	counter_cooldown = COUNTER_COOLDOWN
+	dome.global_position = player.global_position + Vector3.UP
+	dome.show()
+	ElementFx.sigil(player, player.global_position, COUNTER_COLOR, 1.3, COUNTER_WINDOW, 3.0)
+	whoosh.stream = preload("res://assets/audio/sfx/force_field.ogg")
+	if DisplayServer.get_name() != "headless":
+		whoosh.play()
+	return true
+
+
+## The stance is how the counter hears about a hit: true means the hit is cancelled.
+func try_counter(_amount: int, source: Vector3) -> bool:
+	if counter_left <= 0:
+		return false
+	counter_left = 0.0
+	dome.hide()
+	var attacker: Node3D = null
+	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+		var enemy: Node3D = candidate as Node3D
+		if enemy == null or enemy.get("health") == 0:
+			continue
+		if enemy.global_position.distance_to(source) < 2.8 and (attacker == null or enemy.global_position.distance_to(source) < attacker.global_position.distance_to(source)):
+			attacker = enemy
+	var at: Vector3 = player.global_position
+	player.invulnerable_left = maxf(player.invulnerable_left, .6)
+	ElementFx.flash(player, at + Vector3.UP, COUNTER_COLOR, 4.0, 5.0, .3)
+	ElementFx.shockwave(player, at, COUNTER_COLOR, 2.4, .35)
+	ElementFx.freeze(player, .14, .04)
+	player.camera_rig.add_impulse(1.2)
+	_shout("works_on_my_machine", "WORKS ON MY MACHINE")
+	counter_cooldown = .8
+	add_focus(20.0)
+	if attacker != null:
+		var away: Vector3 = attacker.global_position - at
+		away.y = 0
+		away = away.normalized() if away.length() > .01 else Vector3.FORWARD
+		player.visual.rotation.y = atan2(-away.x, -away.z)
+		if "melee" in attacker and attacker.melee != null:
+			attacker.melee.cancel()
+		_strike(attacker, COUNTER_DAMAGE, at, "slice")
+		if attacker.get("health") != 0:
+			if "stagger_left" in attacker:
+				attacker.stagger_left = 1.0
+			if "knockback" in attacker:
+				attacker.knockback = away * 9.0
+		ElementFx.glyphs(player, attacker.global_position + Vector3.UP * 2.2, COUNTER_COLOR, ["CANNOT REPRODUCE"], 1.0, 0.0)
+		ElementFx.shards(player, attacker.global_position + Vector3.UP, COUNTER_COLOR, 14, 6.0, .5, away)
+		player._start_step(1)
+	return true
+
+
 func _end_dash() -> void:
 	dash_left = 0.0
 	if player != null:
@@ -317,7 +431,7 @@ func _cut(target: Node3D) -> bool:
 		ElementFx.bolt(player, at - across * 1.3 + Vector3.UP * .8 * tilt, at + across * 1.3 - Vector3.UP * .8 * tilt, Color(1, .97, .8), .35, .13)
 	ElementFx.shards(player, at, DASH_COLOR, 12, 6.0, .5, dash_direction)
 	ElementFx.flash(player, at, DASH_COLOR, 2.0, 3.0, .15)
-	if not target.receive_damage(roundi(DASH_DAMAGE * player.melee.damage_multiplier), at - dash_direction * 2.0):
+	if not _strike(target, DASH_DAMAGE, at - dash_direction * 2.0, "slice"):
 		return false
 	if target.has_method("apply_hitstop"):
 		target.apply_hitstop(.08)
@@ -354,7 +468,7 @@ func _tick_spin(delta: float) -> void:
 		var offset: Vector3 = target.global_position - at
 		if absf(offset.y) > 1.8 or Vector2(offset.x, offset.z).length() > SPIN_RADIUS:
 			continue
-		if target.receive_damage(roundi(SPIN_DAMAGE * player.melee.damage_multiplier), at):
+		if _strike(target, SPIN_DAMAGE, at, "tumble"):
 			landed = true
 			# Into the whirlwind, not away from it.
 			if "knockback" in target:
@@ -376,6 +490,17 @@ func _physics_process(delta: float) -> void:
 		_tick_dash(delta)
 	if spin_left > 0:
 		_tick_spin(delta)
+	counter_cooldown = maxf(0.0, counter_cooldown - delta)
+	counter_recover = maxf(0.0, counter_recover - delta)
+	if counter_left > 0:
+		counter_left -= delta
+		dome.global_position = player.global_position + Vector3.UP
+		dome.scale = Vector3.ONE * (1.0 + .04 * sin(counter_left * 40.0))
+		if counter_left <= 0:
+			# Nothing came: it worked on nobody's machine. A short, open recovery.
+			dome.hide()
+			counter_recover = COUNTER_WHIFF
+			ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.2, Color(.7, .75, .8), ["…works on my machine?"], .8, 0.0)
 	if trail_left > 0 and dash_left <= 0:
 		trail_left = maxf(0.0, trail_left - delta)
 		trail_flash = maxf(0.0, trail_flash - delta * 3.0)
@@ -451,7 +576,7 @@ func _advance(blade: Dictionary, delta: float) -> void:
 		if Vector2(closest.x - center.x, closest.z - center.z).length() > WAVE_HALF_WIDTH:
 			continue
 		blade.hit.append(target)
-		if target.receive_damage(roundi(WAVE_DAMAGE * player.melee.damage_multiplier), after - blade.direction * 2.0):
+		if _strike(target, WAVE_DAMAGE, after - blade.direction * 2.0, "slice"):
 			if target.has_method("apply_hitstop"):
 				target.apply_hitstop(.06)
 			if target.has_method("show_impact"):
@@ -491,7 +616,7 @@ func _slam() -> void:
 		# A rollback restores the state before any shield went up.
 		if target.has_method("drop_shield"):
 			target.drop_shield()
-		if target.receive_damage(roundi(ROLLBACK_DAMAGE * player.melee.damage_multiplier), at):
+		if _strike(target, ROLLBACK_DAMAGE, at, "launch"):
 			if target.has_method("show_impact"):
 				target.show_impact(ROLLBACK_COLOR)
 

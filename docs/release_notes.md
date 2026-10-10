@@ -1,5 +1,44 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.16 — Works On My Machine, sliced in half, and kill cams (10 October 2026)
+
+Creator requests: add the "Works On My Machine" counter move; ragdolls or enemies getting
+dismembered for better battle feedback; mini cutscenes for the finishers; make killing
+enemies satisfying.
+
+- **Every kill lands.** The body's label slams in as a red corporate death notice
+  (CLOSED, WONTFIX, DEPRECATED, OFFBOARDED, SUNSET, RIGHT-SIZED…; bugs get FIXED,
+  SQUASHED, NOT A BUG), with a shock ring, a flash, a layered impact, a short freeze-frame
+  and a camera punch. Kills pay FOCUS (6, bugs 2), and quick kills chain into a streak
+  banner (DOUBLE MERGE, TRIPLE MERGE, QUAD DEPLOY, MASS LAYOFF, RESTRUCTURING ×N) worth
+  +3 FOCUS per extra kill.
+
+- **Physical deaths.** Kills now come apart (rendered game; visual only). A heavy blade
+  kill (35+ damage: the finisher, Reply All, Blame Shift, the counter, any surprise
+  double) slices a humanoid (Corrupted Record, Blocker, The Variance) in half at the
+  waist: the legs stay and buckle while the upper half flies off spinning. Lighter kills,
+  and bodies that cannot be cut (flyers, the blob), launch the whole body tumbling as a
+  physics object; Force Rollback launches them high. Every kill sprays bouncing data
+  chunks in the monster's colours. Pieces settle, then dissolve. (The models are single
+  skinned meshes: the cut hides the other half's bones on each copy rather than splitting
+  geometry.)
+- **Finisher kill cams.** A cut to a low side angle with a beat of slow motion, letterbox
+  and a white flash, then straight back: on the last kill of every wave (the change
+  request waits a second for it), the Quick Sync's last attendee, The Variance, the Force
+  Rollback slam, and big slicing kills at most every 7 s.
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 120.3 FPS mean (p95
+9.6 ms, max 11.7 ms). Validation: 739 assertions across 15 headless suites, plus the
+talk-voice manifest check.
+
+- **WORKS ON MY MACHINE (G).** A 0.6 s counter stance inside a green "localhost:3000"
+  dome. Any hit that lands in the window does nothing; the engineer shouts "Works… on my
+  MACHINE!!" and the attacker takes the blame: 60 damage, knocked back, staggered,
+  CANNOT REPRODUCE, while the engineer spins into a riposte. A clean counter refunds most
+  of the 3 s cooldown and adds 20 FOCUS. A whiff ("…works on my machine?") leaves a short,
+  rooted recovery with no attacks. Read the orange arc, raise it late.
+- The HUD key strip is two short lines between the vitals card and the minimap.
+
 ## 0.2.15 — Reply All, Blame Shift, Circle Back (10 October 2026)
 
 Creator feedback on 0.2.14: put a whoosh under each call; "Hot Swap" is cringe; a

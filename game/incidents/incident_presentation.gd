@@ -98,6 +98,15 @@ var sequence: Array[String] = []
 var corridor_lights: Array[OmniLight3D] = []
 var corridor_leds: Array[MeshInstance3D] = []
 var alert_material: Material = preload("res://game/rooms/office/alert.tres")
+## Finisher kill cam: a beat of slow motion from a low side angle, then straight back.
+const KILLCAM_SECONDS: float = .85
+var killcam_in_headless: bool = false
+var killcam_ready: int = 0
+var killcam_start: int = 0
+var killcam_from: Vector3
+var killcam_to: Vector3
+var killcam_look: Vector3
+var killflash: ColorRect
 ## Outbreak cutscene: the employee being watched, and the camera's dolly ends.
 const OUTBREAK_LENGTH: float = 4.1
 var outbreak_actor: CharacterBody3D
@@ -141,6 +150,7 @@ func _ready() -> void:
 	pinger.volume_db = -14
 	add_child(pinger)
 	voice.line_started.connect(_on_line_started)
+	incident.player.specials.called.connect(_on_move_called)
 	music = AudioStreamPlayer.new()
 	music.bus = &"Music"
 	music.volume_db = -60
@@ -217,6 +227,12 @@ func _ready() -> void:
 	lower_note = lower_third.get_child(2)
 	lower_third.hide()
 	add_child(lower_third)
+	killflash = ColorRect.new()
+	killflash.color = Color(1, 1, 1, 0)
+	killflash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	killflash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	killflash.hide()
+	add_child(killflash)
 	fade = ColorRect.new()
 	fade.color = Color.BLACK
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -392,6 +408,46 @@ func _on_line_started(id: String) -> void:
 		pinger.stream = preload("res://assets/audio/notification.wav") if alert else preload("res://assets/audio/sfx/chat_ping.ogg")
 		pinger.pitch_scale = .85 if alert else 1.0
 		pinger.play()
+
+
+const STREAKS: Array[String] = ["", "", "DOUBLE MERGE", "TRIPLE MERGE", "QUAD DEPLOY", "MASS LAYOFF"]
+
+
+## The kill itself: the body's label becomes a stamped death notice that slams in, a
+## shock ring and flash where it fell, a crunch; streaks go to the HUD banner.
+func kill_pop(actor: CharacterBody3D, stamp: String, minor: bool, streak: int) -> void:
+	var at: Vector3 = actor.global_position
+	var red: Color = Color(1, .3, .24)
+	ElementFx.shockwave(actor, at + Vector3.UP * .05, Color(1, .95, .9), 1.4 if minor else 2.6, .3)
+	ElementFx.flash(actor, at + Vector3.UP, Color(1, .9, .8), 2.0 if minor else 4.0, 4.0, .18)
+	var label: Label3D = actor.label
+	if minor or label == null or not label.visible:
+		ElementFx.glyphs(actor, at + Vector3.UP * 1.4, red, [stamp], .7, 0.0)
+	else:
+		label.text = stamp
+		label.modulate = red
+		label.outline_modulate = Color(.15, 0, 0)
+		var base: Vector3 = Vector3.ONE
+		label.scale = base * 2.6
+		var slam: Tween = label.create_tween()
+		slam.set_ignore_time_scale(true)
+		slam.tween_property(label, "scale", base * .9, .12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		slam.tween_property(label, "scale", base, .1)
+	sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -14.0 if minor else -4.0)
+	if not minor:
+		sting(preload("res://assets/audio/sfx/glitch_b.ogg"), -12)
+	if streak >= 2:
+		var title: String = STREAKS[mini(streak, STREAKS.size() - 1)]
+		if streak > STREAKS.size() - 1:
+			title = "RESTRUCTURING ×%d" % streak
+		incident.main.get_node("HUD").show_streak(title, streak)
+
+
+## The ultimate's slam gets its own kill cam, on the engineer.
+func _on_move_called(title: String, ultimate: bool) -> void:
+	if ultimate and title.begins_with("GIT RESET"):
+		var player: Node3D = incident.player
+		kill_cam(player.global_position, player.global_position + player.camera_rig.global_basis.z * 4.0, true)
 
 
 func sound(path: String) -> void:
@@ -648,6 +704,60 @@ func dialogue_camera(who: String, time: float, line: int) -> void:
 	camera.make_current()
 
 
+## A finisher: cut to a low side angle on `subject`, drop into slow motion for a moment,
+## flash, and hand straight back. `force` ignores the cooldown (last kills, the boss).
+func kill_cam(subject: Vector3, from: Vector3, force: bool = false) -> bool:
+	if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+		return false
+	if not beat_shot.is_empty() or incident.modal_pending() or incident.terminal() and not force:
+		return false
+	var now: int = Time.get_ticks_msec()
+	if not force and now < killcam_ready:
+		return false
+	killcam_ready = now + 7000
+	var toward: Vector3 = Vector3(subject.x - from.x, 0, subject.z - from.z)
+	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
+	var side: Vector3 = toward.cross(Vector3.UP).normalized()
+	var look: Vector3 = subject + Vector3.UP * .9
+	var space: PhysicsDirectSpaceState3D = incident.get_world_3d().direct_space_state
+	for sign in [1.0, -1.0]:
+		var spot: Vector3 = look + side * sign * 4.4 - toward * 2.2 - Vector3.UP * .25
+		if space.intersect_ray(PhysicsRayQueryParameters3D.create(look, spot, 1)).is_empty() or sign < 0:
+			killcam_from = spot
+			killcam_to = look + side * sign * 3.6 - toward * 1.4 - Vector3.UP * .1
+			break
+	killcam_look = look
+	beat_shot = "killcam"
+	killcam_start = now
+	ElementFx.freeze(self, KILLCAM_SECONDS, .14)
+	sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)
+	return true
+
+
+func _killcam_shot() -> void:
+	var t: float = (Time.get_ticks_msec() - killcam_start) / 1000.0
+	if t >= KILLCAM_SECONDS:
+		beat_shot = ""
+		killflash.hide()
+		for bar in letterbox:
+			bar.hide()
+		release_camera()
+		return
+	incident.main.get_node("HUD").visible = false
+	var weight: float = smoothstep(0.0, KILLCAM_SECONDS, t)
+	camera.global_position = killcam_from.lerp(killcam_to, weight)
+	camera.look_at(killcam_look)
+	camera.fov = lerpf(44.0, 38.0, weight)
+	camera.make_current()
+	killflash.visible = t < .2
+	killflash.color.a = maxf(0.0, .55 - t * 3.0)
+	var bars: float = 48.0 * smoothstep(0.0, .08, t) * (1.0 - smoothstep(KILLCAM_SECONDS - .12, KILLCAM_SECONDS, t))
+	for side in [0, 1]:
+		letterbox[side].visible = bars > .5
+		letterbox[side].offset_top = 0.0 if side == 0 else -bars
+		letterbox[side].offset_bottom = bars if side == 0 else 0.0
+
+
 ## True when a bystander (no collision, so rays miss them) would stand in the shot.
 func _crowds_shot(from: Vector3, to: Vector3, actor: Node3D) -> bool:
 	var bodies: Array[Node3D] = []
@@ -680,6 +790,8 @@ func _beats(delta: float) -> void:
 	beat_time += delta
 	var rig: Camera3D = incident.player.get_node("CameraRig/SpringArm3D/Camera3D")
 	match beat_shot:
+		"killcam":
+			_killcam_shot()
 		"outbreak":
 			_outbreak_shot(delta, rig)
 		"evidence":

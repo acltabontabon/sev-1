@@ -17,6 +17,10 @@ var focus_full: bool = false
 ## Anime cut-in: a slanted strip with the move's name, sliding through.
 var cut_in: PanelContainer
 var cut_in_text: Label
+## Kill streak banner: DOUBLE MERGE, TRIPLE MERGE, … slams in on the right and fades.
+var streak: VBoxContainer
+var streak_title: Label
+var streak_note: Label
 var health_bar: ProgressBar
 var health_value: Label
 var burnout_bar: ProgressBar
@@ -155,6 +159,7 @@ func _build_incident_hud() -> void:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.custom_minimum_size.x = 240
 	_build_cut_in()
+	_build_streak()
 	player.specials.called.connect(_on_move_called)
 	minimap = preload("res://game/ui/minimap.gd").new()
 	minimap.name = "Minimap"
@@ -228,7 +233,12 @@ func _build_incident_hud() -> void:
 	$Controls.theme_type_variation = "Eyebrow"
 	$Controls.remove_theme_font_size_override("font_size")
 	$Controls.add_theme_font_size_override("font_size", 12)
-	$Controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# Two lines in the gap between the vitals card (up to ~560 px wide) and the minimap.
+	$Controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	$Controls.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	$Controls.offset_left = -730
+	$Controls.offset_right = -232
+	$Controls.offset_bottom = -10
 
 
 func _set_shake(enabled: bool) -> void:
@@ -318,6 +328,48 @@ func _build_cut_in() -> void:
 	cut_in.add_child(cut_in_text)
 	cut_in.hide()
 	add_child(cut_in)
+
+
+func _build_streak() -> void:
+	streak = VBoxContainer.new()
+	streak.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	streak.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	streak.offset_left = -520
+	streak.offset_right = -60
+	streak.offset_top = -150
+	streak.offset_bottom = -60
+	streak.alignment = BoxContainer.ALIGNMENT_CENTER
+	streak_title = Label.new()
+	streak_title.theme_type_variation = "DisplayTitle"
+	streak_title.add_theme_font_size_override("font_size", 52)
+	streak_title.add_theme_color_override("font_color", Color(1, .82, .35))
+	streak_title.add_theme_constant_override("outline_size", 10)
+	streak_title.add_theme_color_override("font_outline_color", Color(.2, .05, 0, .9))
+	streak_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	streak.add_child(streak_title)
+	streak_note = Label.new()
+	streak_note.theme_type_variation = "MonoLabel"
+	streak_note.add_theme_font_size_override("font_size", 14)
+	streak_note.add_theme_color_override("font_color", Color(1, .9, .7))
+	streak_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	streak.add_child(streak_note)
+	streak.hide()
+	add_child(streak)
+
+
+func show_streak(title: String, count: int) -> void:
+	streak_title.text = title
+	streak_note.text = "%d KILLS  ·  STREAK FOCUS BONUS" % count
+	streak.show()
+	streak.modulate.a = 1.0
+	streak.pivot_offset = streak.size * Vector2(1, .5)
+	streak.scale = Vector2.ONE * 1.6
+	var pop: Tween = streak.create_tween()
+	pop.set_ignore_time_scale(true)
+	pop.tween_property(streak, "scale", Vector2.ONE, .14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pop.tween_interval(1.2)
+	pop.tween_property(streak, "modulate:a", 0.0, .35)
+	pop.tween_callback(streak.hide)
 
 
 ## The move's name crosses the screen as it is shouted: a wide slanted strip for the
@@ -452,8 +504,8 @@ func _refresh_incident(incident: Node) -> void:
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
-	$Controls.text = "E  USE    LMB / F  COMBO    Q / RMB  DODGE    C  REPLY ALL    X  BLAME SHIFT    Z  CIRCLE BACK    V  ROLLBACK    R  RESTART    ESC  PAUSE"
-	$Controls.offset_top = -30
+	$Controls.text = "E USE   LMB COMBO   Q DODGE   R RESTART   ESC PAUSE\nC REPLY ALL   X BLAME   Z CIRCLE   G COUNTER   V ULT"
+	$Controls.offset_top = -46
 	if incident.message != last_message:
 		last_message = incident.message
 		message_age = 0.0
@@ -470,7 +522,7 @@ func _refresh_incident(incident: Node) -> void:
 	var specials: Node = player.specials
 	focus_bar.value = specials.focus
 	var skills: Array[String] = []
-	for entry: Array in [["C", specials.wave_cooldown], ["X", specials.dash_cooldown], ["Z", specials.spin_cooldown]]:
+	for entry: Array in [["C", specials.wave_cooldown], ["X", specials.dash_cooldown], ["Z", specials.spin_cooldown], ["G", specials.counter_cooldown]]:
 		skills.append("%s %s" % [entry[0], "%.1f" % entry[1] if entry[1] > 0 else "✓"])
 	focus_value.text = ("V ROLLBACK READY" if specials.ultimate_ready() else "%d%%" % roundi(specials.focus)) + "  ·  " + "  ".join(skills)
 	focus_value.add_theme_color_override("font_color", Color(.8, .7, 1) if specials.ultimate_ready() else Color(.75, .8, .85))

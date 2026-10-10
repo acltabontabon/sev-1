@@ -520,10 +520,10 @@ func _run() -> void:
 	for foe: CharacterBody3D in [behind, beyond]:
 		foe.set_physics_process(false)
 	await frames(30)
-	check(player.specials.rollback(), "V unleashes Force Rollback when FOCUS is full")
+	check(player.specials.rollback() and player.specials.focus == 0, "V unleashes Force Rollback when FOCUS is full, spending all of it")
 	await frames(60)
 	check(player.specials.last_call == "reset_hard", "the ultimate is called twice: on the leap and on the slam")
-	check(behind.health < behind.max_health and beyond.health == beyond.max_health and player.specials.focus < 10, "Force Rollback hits everything around the engineer, nothing beyond its radius, and spends FOCUS")
+	check(behind.health < behind.max_health and beyond.health == beyond.max_health, "Force Rollback hits everything around the engineer, nothing beyond its radius")
 	# Blame Shift: dash through a line, cutting and blaming everything passed.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 6)
@@ -568,6 +568,85 @@ func _run() -> void:
 	await frames(roundi(player.specials.SPIN_TIME * 60) + 10)
 	check(ring.all(func(foe: CharacterBody3D) -> bool: return foe.max_health - foe.health >= player.specials.SPIN_DAMAGE * 3), "the whirlwind hits everything around the engineer again and again")
 	check(ring.all(func(foe: CharacterBody3D) -> bool: return foe.stagger_left > 1.0), "the last pulse sends survivors to the parking lot")
+	# Works On My Machine: a timed counter. A hit in the stance is cancelled and answered.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 5)
+	await frames(4)
+	var heckler: CharacterBody3D = spawn("record", Vector3(0, .05, 3.6), true)
+	heckler.set_physics_process(false)
+	var steady: int = player.health
+	var focus_before: float = player.specials.focus
+	check(player.specials.works_on_my_machine() and player.specials.dome.visible and not player.request_attack(), "G raises the localhost stance; no swinging inside it")
+	await frames(6)
+	check(not player.receive_damage(30, heckler.global_position) and player.health == steady, "a hit inside the stance does nothing")
+	check(heckler.health < heckler.max_health and heckler.stagger_left > 0 and player.specials.last_call == "works_on_my_machine" and player.specials.focus >= focus_before + 20, "the attacker takes the blame instead: damaged, staggered, called out, FOCUS +20")
+	check(player.specials.counter_cooldown < 1.0, "a clean counter refunds most of the cooldown")
+	await frames(70)
+	player.invulnerable_left = 0.0
+	player.specials.counter_cooldown = 0.0
+	check(player.specials.works_on_my_machine(), "the stance comes back up")
+	await frames(roundi(player.specials.COUNTER_WINDOW * 60) + 3)
+	check(player.specials.counter_recover > 0 and not player.request_attack() and player.specials.counter_cooldown > 2.0, "a whiff leaves a short, open recovery and the full cooldown")
+	check(player.receive_damage(5, Vector3(40, 0, 40)) and player.health < steady, "outside the stance, hits land as usual")
+	# Physical deaths: blade kills slice humanoids in half, others tumble, chunks spray.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	MonsterRig.gore_in_headless = true
+	var halved: CharacterBody3D = spawn("record", Vector3(-3, .05, -2), true)
+	var rolled: CharacterBody3D = spawn("record", Vector3(3, .05, -2), true)
+	var flung: CharacterBody3D = spawn("bug", Vector3(0, .05, -6), true)
+	# One left standing, so clearing these does not end the stage (and pause for upgrades).
+	var spare: CharacterBody3D = spawn("record", Vector3(-9, .05, -12), false)
+	spare.set_physics_process(false)
+	await frames(3)
+	halved.receive_damage(1000, Vector3(-3, .05, 0))
+	rolled.health = 5
+	rolled.receive_damage(10, Vector3(3, .05, 0))
+	flung.set_meta("kill_style", "slice")
+	flung.receive_damage(100, Vector3(0, .05, -4))
+	await frames(2)
+	check(halved.rig.death_style == "slice" and halved.rig.pieces.size() == 1 and halved.rig.collapsed.size() == 2, "a heavy blade kill slices a humanoid in half: the legs stay, the upper half flies")
+	check(rolled.rig.death_style == "tumble" and rolled.rig.model.get_parent() is RigidBody3D, "a light kill launches the whole body tumbling")
+	check(flung.rig.death_style == "tumble", "bodies that cannot be cut (flyers, blobs) tumble instead")
+	var chunks: int = halved.get_children().filter(func(node: Node) -> bool: return node.has_meta("gib")).size()
+	check(chunks >= 6, "data chunks spray from the kill")
+	var lifted: float = halved.rig.pieces[0].global_position.y
+	await frames(20)
+	check(halved.rig.pieces[0].global_position.y > lifted - .2 or halved.rig.pieces[0].linear_velocity.length() > .5, "the severed half is a live physics body")
+	await frames(110)
+	check(halved.rig.pieces.all(func(body: RigidBody3D) -> bool: return body.freeze), "pieces come to rest before they dissolve")
+	MonsterRig.gore_in_headless = false
+	# Satisfying kills: a stamped death notice, FOCUS, and a streak banner for quick kills.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var stamped: CharacterBody3D = spawn("record", Vector3(-3, .05, 0), true)
+	var streaked: CharacterBody3D = spawn("record", Vector3(3, .05, 0), true)
+	var holdout: CharacterBody3D = spawn("record", Vector3(-9, .05, -12), false)
+	holdout.set_physics_process(false)
+	await frames(3)
+	var focus_start: float = player.specials.focus
+	stamped.receive_damage(1000, player.global_position)
+	check(incident.STAMPS.has(stamped.label.text) and player.specials.focus >= focus_start + 6, "a kill stamps the body with a corporate death notice and pays FOCUS")
+	streaked.receive_damage(1000, player.global_position)
+	check(incident.kill_streak == 2 and scene.get_node("HUD").streak.visible and scene.get_node("HUD").streak_title.text == "DOUBLE MERGE", "two quick kills: DOUBLE MERGE")
+	# Finisher kill cam: slow motion from a low side angle, then straight back to play.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	incident.presentation.killcam_in_headless = true
+	incident.presentation.killcam_ready = 0
+	var finished: CharacterBody3D = spawn("record", Vector3(-3, .05, 0), true)
+	var second_kill: CharacterBody3D = spawn("record", Vector3(3, .05, 0), true)
+	var survivor: CharacterBody3D = spawn("record", Vector3(-9, .05, -12), false)
+	survivor.set_physics_process(false)
+	await frames(3)
+	finished.receive_damage(1000, player.global_position)
+	await frames(2)
+	check(incident.presentation.beat_shot == "killcam" and incident.presentation.camera.current, "a big finishing blow cuts to the kill cam")
+	second_kill.receive_damage(1000, player.global_position)
+	check(incident.presentation.beat_shot == "killcam" and incident.presentation.killcam_start > 0, "kill cams never stack")
+	# The kill cam runs on real time (it plays through its own slow motion).
+	var deadline: int = Time.get_ticks_msec() + 3000
+	while incident.presentation.beat_shot == "killcam" and Time.get_ticks_msec() < deadline:
+		await frames(1)
+	check(incident.presentation.beat_shot == "" and player.get_node("CameraRig/SpringArm3D/Camera3D").current and scene.get_node("HUD").visible, "the kill cam hands straight back to play")
+	incident.presentation.killcam_in_headless = false
 	scene.reset_encounter()
 	await frames(2)
 	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty() and player.specials.dash_cooldown == 0 and player.specials.spin_left == 0, "restart clears FOCUS, cooldowns and blades")

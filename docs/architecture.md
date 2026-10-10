@@ -610,7 +610,23 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   moment it is passed; `circle_back()` repeats combo step 1 and pulses
   radial damage with an inward knockback (the last pulse staggers: the parking lot);
   `blame_shift()` sets `incident.blamed_left`, which multiplies incoming damage by 1.3.
-  A synthesized whoosh (`assets/audio/sfx/whoosh_*.ogg`) plays under each call. Each move `_shout()`s its callout
+  A synthesized whoosh (`assets/audio/sfx/whoosh_*.ogg`) plays under each call.
+  `works_on_my_machine()` opens `counter_left`; `player.receive_damage()` asks
+  `try_counter()` first, which cancels the hit, finds the nearest enemy to the hit's source
+  and answers it; while the stance or its whiff recovery runs the player is rooted and
+  cannot attack.
+- **Physical deaths.** `MonsterRig._break_apart()` (rendered only, or `gore_in_headless`)
+  reads `kill_style` meta (set by `special_moves._strike()`) or `incident.last_damage`:
+  `_slice()` clones the model into a top-level RigidBody3D and holds the `HUMANOID_CUT`
+  bones at zero scale on each half (`collapsed`); `_tumble()` reparents the model into one;
+  `_gibs()` spawns short-lived chunk bodies. All are children of the actor (freed with it)
+  on collision layer 8 against the world only.
+- **Kill cams.** `presentation.kill_cam(subject, from, force)` runs a real-time `killcam`
+  beat (slow motion through `ElementFx.freeze`); `missing_transaction._on_record_died()`
+  calls it and, in a rendered game, delays the stage's upgrade offer by `upgrade_delay`.
+- **Kill feedback.** `missing_transaction._kill_feedback()` (every record and bug death,
+  not the WONTFIX sweep) tracks `kill_streak`, pays FOCUS and calls
+  `presentation.kill_pop()` (stamp, ring, flash, sounds; `HUD.show_streak()` banner). Each move `_shout()`s its callout
   (`assets/audio/voices/talk/call_*.ogg`, the `shout` profile in `talk.json` `callouts`) and
   emits `called`, which the HUD turns into a cut-in strip on unscaled time.
 - **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one

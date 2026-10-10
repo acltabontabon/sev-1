@@ -1029,6 +1029,10 @@
   "reset_hard": {
    "text": "git reset… HARD!!!",
    "say": "Git reset! ... Hard!!!"
+  },
+  "works_on_my_machine": {
+   "text": "Works… on my MACHINE!!",
+   "say": "Works! ... on my machine!!!"
   }
  }
 }

@@ -63,6 +63,15 @@ var armed_left: float = 0.0
 var hover: Dictionary = {}
 var trigger_reason: String = ""
 var hr_cooldown: float = 0.0
+## A cleared stage waits a beat for its kill cam before the change request appears.
+var upgrade_delay: float = 0.0
+## Kill feedback: corporate death notices, and streaks for kills in quick succession.
+const STAMPS: Array[String] = ["CLOSED", "RESOLVED", "WONTFIX", "DEPRECATED", "OFFBOARDED", "SUNSET", "ARCHIVED", "MERGED", "ROLLED BACK", "RIGHT-SIZED"]
+const BUG_STAMPS: Array[String] = ["FIXED", "SQUASHED", "PATCHED", "NOT A BUG"]
+const STREAK_WINDOW: float = 2.2
+var kill_streak: int = 0
+var last_kill_at: float = -99.0
+var closing_bugs: bool = false
 ## Talking to the night shift: RPG-style dialogue while nothing is hunting the engineer.
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const TALK_RANGE: float = 2.4
@@ -296,6 +305,9 @@ func _cleanup() -> void:
 	armed = false
 	hover.clear()
 	trigger_reason = ""
+	upgrade_delay = 0.0
+	kill_streak = 0
+	last_kill_at = -99.0
 	wave_area = ""
 	if beacon != null:
 		beacon.hide()
@@ -384,6 +396,10 @@ func _process(delta: float) -> void:
 			player.move_multiplier = 1.0
 			run.apply_to(player)
 			message = "Motivation expired. Productivity returns to baseline."
+	if upgrade_delay > 0:
+		upgrade_delay = maxf(0.0, upgrade_delay - delta)
+		if upgrade_delay == 0:
+			_offer_upgrade(upgrade_next)
 	if outbreak_left > 0:
 		outbreak_left = maxf(0.0, outbreak_left - delta)
 		if outbreak_left == 0:
@@ -550,15 +566,32 @@ func _on_bug_died(bug: CharacterBody3D) -> void:
 	bugs.erase(bug)
 	bugs_fixed += 1
 	corpses[bug] = 1.4
+	if not closing_bugs:
+		_kill_feedback(bug, true)
+
+
+## Every kill lands: a stamp, an impact, a punch, a little FOCUS, and a streak banner for
+## kills in quick succession. The finisher kill cam replaces the freeze-frame.
+func _kill_feedback(actor: CharacterBody3D, minor: bool) -> void:
+	kill_streak = kill_streak + 1 if elapsed - last_kill_at < STREAK_WINDOW else 1
+	last_kill_at = elapsed
+	var stamp: String = (BUG_STAMPS if minor else STAMPS)[randi() % (BUG_STAMPS if minor else STAMPS).size()]
+	player.specials.add_focus((2.0 if minor else 6.0) + 3.0 * (kill_streak - 1))
+	if presentation.beat_shot != "killcam":
+		ElementFx.freeze(self, .035 if minor else .07, .05)
+	player.camera_rig.add_impulse(.35 if minor else .9)
+	presentation.kill_pop(actor, stamp, minor, kill_streak)
 
 
 ## The stage is clear: whatever bugs are left get triaged the usual way.
 func _close_bugs() -> void:
 	var open: Array[CharacterBody3D] = bugs.duplicate()
+	closing_bugs = true
 	for bug: CharacterBody3D in open:
 		if is_instance_valid(bug) and bug.health > 0:
 			ElementFx.glyphs(bug, bug.global_position + Vector3.UP * 1.1, Color(.7, .75, .8), ["WONTFIX"], .9, 0.0)
 			bug.receive_damage(bug.health, bug.global_position)
+	closing_bugs = false
 	if not open.is_empty():
 		log_event("%d bug%s closed as WONTFIX" % [open.size(), "" if open.size() == 1 else "s"])
 
@@ -1072,6 +1105,7 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal():
 		return
 	if actor == boss:
+		presentation.kill_cam(actor.global_position, player.global_position, true)
 		ElementFx.freeze(self, .3, .05)
 		enemies_defeated += 1
 		_enter(Stage.RESOLVED)
@@ -1081,8 +1115,6 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 		return
 	enemies_defeated += 1
 	corpses[actor] = 3.0
-	if actor.label != null:
-		actor.label.text = "RECORD RECONCILED"
 	if actor.has_node("RecordMarker"):
 		actor.get_node("RecordMarker").hide()
 	if actor.get("growth") != null and actor.growth >= 2:
@@ -1091,17 +1123,29 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 		presentation.say("descoped")
 	if in_sync:
 		sync_alive.erase(actor)
+		_kill_feedback(actor, false)
 		if sync_alive.is_empty():
+			presentation.kill_cam(actor.global_position, player.global_position, true)
 			_end_quick_sync()
 		return
 	alive.erase(actor)
 	remaining -= 1
+	# Finishers: the last kill of a wave always gets the kill cam; big cuts now and then.
+	var last_kill: bool = alive.is_empty() and pending.is_empty()
+	if last_kill or actor.last_damage >= MonsterRig.SLICE_DAMAGE:
+		presentation.kill_cam(actor.global_position, player.global_position, last_kill)
+	_kill_feedback(actor, false)
 	if alive.is_empty() and pending.is_empty():
 		if wave_index >= waves().size():
 			_close_bugs()
 			if stage == Stage.ENCOUNTER_TWO:
 				_complete_containment()
-			_offer_upgrade(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)
+			var next: Stage = Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS
+			if outbreaks():
+				upgrade_next = next
+				upgrade_delay = presentation.KILLCAM_SECONDS + .35
+			else:
+				_offer_upgrade(next)
 		else:
 			spawn_delay = wave_breather
 

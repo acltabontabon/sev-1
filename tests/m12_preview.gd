@@ -95,6 +95,10 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "finishers":
+		await finishers()
+		quit()
+		return
 	if only == "specials":
 		await specials()
 		quit()
@@ -294,6 +298,85 @@ func battle() -> void:
 	await frames(5)
 
 
+## Finishers: a Reply All that slices a line (kill cam), the aftermath, and the
+## rollback slam's own kill cam.
+func finishers() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.5)
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.feed.modulate.a = 0.0
+	player.global_position = Vector3(0, .05, 6)
+	player.camera_rig.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	var spare: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+	spare.position = Vector3(-9, .05, -12)
+	spare.reveal()
+	spare.set_physics_process(false)
+	for at: Vector3 in [Vector3(-.4, .05, 2.5), Vector3(.5, .05, .5), Vector3(-.2, .05, -1.5)]:
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = at
+		foe.reveal()
+		foe.max_health = 40
+		foe.health = 40
+		foe.set_physics_process(false)
+	await live(1.0)
+	player.visual.rotation.y = 0.0
+	player.specials.reply_all()
+	while incident.presentation.beat_shot != "killcam":
+		await live(.01)
+	await live(.2)
+	await shot("finisher_killcam")
+	while incident.presentation.beat_shot == "killcam":
+		await live(.02)
+	await live(.05)
+	await shot("finisher_streak")
+	await live(.5)
+	await shot("finisher_aftermath")
+	# One clean cut, up close, from the gameplay camera.
+	incident.presentation.killcam_ready = Time.get_ticks_msec() + 60000
+	var cut: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+	cut.position = player.global_position + Vector3(0, 0, -3.2)
+	cut.reveal()
+	cut.set_physics_process(false)
+	await live(.6)
+	var side_cam: Camera3D = incident.presentation.camera
+	side_cam.global_position = cut.global_position + Vector3(4.2, 1.4, .6)
+	side_cam.look_at(cut.global_position + Vector3.UP * .9)
+	side_cam.fov = 50.0
+	side_cam.make_current()
+	app.session.get_node("HUD").visible = false
+	cut.set_meta("kill_style", "slice")
+	cut.receive_damage(1000, player.global_position)
+	for mark: Array in [[.12, "finisher_slice_cut"], [.35, "finisher_slice_close"], [.9, "finisher_slice_landed"]]:
+		var until: int = Time.get_ticks_msec() + int(mark[0] * 1000)
+		while Time.get_ticks_msec() < until:
+			side_cam.make_current()
+			await process_frame
+		await shot(mark[1])
+	app.session.get_node("HUD").visible = true
+	incident.presentation.killcam_ready = 0
+	for index in range(4):
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = player.global_position + Vector3(cos(index * 1.6), 0, sin(index * 1.6)) * 2.5
+		foe.reveal()
+		foe.set_physics_process(false)
+	await live(.5)
+	player.specials.add_focus(100)
+	player.specials.rollback()
+	while incident.presentation.beat_shot != "killcam":
+		await live(.01)
+	await live(.15)
+	await shot("finisher_rollback_cam")
+	await live(1.2)
+	await shot("finisher_rollback_after")
+	app.main_menu()
+	await frames(5)
+
+
 ## The special moves: Reply All mid-flight, then Force Rollback's leap and slam.
 func specials() -> void:
 	app.start_incident()
@@ -375,6 +458,24 @@ func specials() -> void:
 	player.specials.circle_back()
 	await live(.5)
 	await shot("special_spin")
+	# Works On My Machine: the stance, then a hit answered.
+	await live(2.0)
+	player.global_position = Vector3(-3, .05, 2)
+	var heckler: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+	heckler.position = Vector3(-3, .05, .4)
+	heckler.reveal()
+	heckler.set_physics_process(false)
+	player.camera_rig.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	player.specials.counter_cooldown = 0.0
+	player.invulnerable_left = 0.0
+	await live(.4)
+	player.specials.works_on_my_machine()
+	await live(.15)
+	await shot("special_counter_stance")
+	player.receive_damage(20, heckler.global_position)
+	await live(.12)
+	await shot("special_counter_hit")
 	app.main_menu()
 	await frames(5)
 
