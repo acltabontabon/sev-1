@@ -19,7 +19,7 @@ materials = {
  'carpet': ((.62,.66,.7,1), 1, 0), 'plaster': ((.5,.53,.54,1), 1, 0),
  'walnut': ((.85,.7,.6,1), 1, 0), 'metal': ((.45,.5,.55,1), 1, 1),
  'plastic': ((.022,.028,.033,1), .65, 0), 'fabric': ((.08,.11,.12,1), .98, 0),
- 'stone': ((.55,.58,.6,1), 1, 0), 'paper': ((.7,.69,.61,1), .9, 0),
+ 'stone': ((.55,.58,.6,1), 1, 0), 'paper': ((.93,.91,.85,1), .9, 0),
  'ceramic': ((.38,.40,.36,1), .25, 0), 'black': ((.012,.017,.025,1), .85, 0),
  'screen': ((.015,.055,.068,1), .42, 0), 'warm': ((1,.74,.43,1), .45, 0),
  'cool': ((.67,.81,.85,1), .5, 0), 'alert': ((.85,.10,.035,1), .5, 0),
@@ -30,10 +30,18 @@ materials = {
  'neon_pink': ((1,.22,.62,1), .4, 0), 'neon_cyan': ((.2,.88,1,1), .4, 0), 'neon_amber': ((1,.7,.25,1), .4, 0),
  'poster_red': ((.78,.2,.18,1), .8, 0), 'poster_teal': ((.12,.5,.52,1), .8, 0), 'poster_gold': ((.85,.66,.25,1), .8, 0),
  'poster_violet': ((.42,.26,.66,1), .8, 0),
+ # Framed prints: satin black frame, a clear glass skin, a white photo border.
+ 'frame': ((.035,.035,.04,1), .32, .65), 'poster_glass': ((1,1,1,.02), .04, 0),
+ 'print_white': ((.92,.91,.88,1), .7, 0), 'tape': ((.93,.9,.78,.55), .45, 0),
+ 'pin_red': ((.8,.08,.06,1), .3, 0), 'sticky_yellow': ((.98,.86,.32,1), .85, 0),
+ 'sticky_pink': ((.98,.55,.72,1), .85, 0), 'sticky_green': ((.62,.92,.55,1), .85, 0),
+ 'wellness_purple': ((.36,.24,.6,1), .8, 0),
 }
+# CC0 photographs for the culture-deck prints (assets/environment/posters, see its README).
+photos = ['family', 'fail_fast', 'wellbeing', 'machine', 'wellness']
 textured = {'carpet': ('carpet', .45), 'plaster': ('painted_plaster', .35), 'walnut': ('walnut_veneer', 1.0),
  'stone': ('polished_concrete', .3), 'metal': ('brushed_metal', 1.0), 'vault_floor': ('vault_floor', .5),
- 'ceiling_tile': ('ceiling_tile', .42)}
+ 'ceiling_tile': ('ceiling_tile', .42), 'paper': ('paper', 1.4)}
 for name,(color,rough,metallic) in materials.items():
     extra=''; resources=''; header=''
     if name in textured:
@@ -67,7 +75,13 @@ color_ramp = SubResource("Grain")
     if name.startswith('neon_'):
         extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = 3.2\n'
     if name=='glass': extra+='transparency = 1\ncull_mode = 2\n'
+    if name in ('poster_glass','tape'): extra+='transparency = 1\n'
+    if name=='poster_glass': extra+='metallic_specular = 1.0\n'
     (OUT/f'{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n{header}{resources}\n[resource]\nalbedo_color = {col(color)}\nroughness = {rough}\nmetallic = {metallic}\n'+extra)
+for name in photos:
+    (OUT/f'photo_{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n[ext_resource type="Texture2D" path="res://assets/environment/posters/{name}.jpg" id="1"]\n\n[resource]\nalbedo_texture = ExtResource("1")\nroughness = 0.6\nemission_enabled = true\nemission_texture = ExtResource("1")\nemission_energy_multiplier = 0.35\n')
+# Poster titles: Cinzel Bold, tracked out like a framed corporate print.
+(OUT/'poster_title_font.tres').write_text('[gd_resource type="FontVariation" format=3]\n\n[ext_resource type="FontFile" path="res://assets/fonts/cinzel_variable.ttf" id="1"]\n\n[resource]\nbase_font = ExtResource("1")\nvariation_opentype = {2003265652: 700}\nspacing_glyph = 6\n')
 
 class Scene:
     def __init__(self, name):
@@ -109,8 +123,14 @@ class Scene:
         m=self.external(f'res://game/rooms/office/{mat}.tres','Material')
         mesh=self.resource('CylinderMesh',f'top_radius = {radius}\nbottom_radius = {radius}\nheight = {height}\nradial_segments = 12\nmaterial = {m}')
         self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\n'+('' if rot is None else f'rotation_degrees = {vec(rot)}'))
-    def text(self,name,text,pos,size=.008,font=40,color=(.65,.77,.77,1),rot=(0,0,0),parent='.'):
-        self.node(name,'Label3D',pos,parent,f'text = {quote(text)}\nfont_size = {font}\npixel_size = {size}\nmodulate = {col(color)}\noutline_size = 0\nrotation_degrees = {vec(rot)}\n')
+    def text(self,name,text,pos,size=.008,font=40,color=(.65,.77,.77,1),rot=(0,0,0),parent='.',face=None):
+        typeface='' if face is None else 'font = '+self.external(face,'FontFile' if face.endswith('.ttf') else 'FontVariation')+'\n'
+        self.node(name,'Label3D',pos,parent,f'text = {quote(text)}\n{typeface}font_size = {font}\npixel_size = {size}\nmodulate = {col(color)}\noutline_size = 0\nrotation_degrees = {vec(rot)}\n')
+    def quad(self,name,pos,size,mat,rot=(0,0,0),parent='.'):
+        # UV-mapped flat face (photos and prints), facing +Z before rotation.
+        m=self.external(f'res://game/rooms/office/{mat}.tres','Material')
+        mesh=self.resource('QuadMesh',f'size = Vector2({size[0]}, {size[1]})\nmaterial = {m}')
+        self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\nrotation_degrees = {vec(rot)}\ncast_shadow = 0\n')
     def instance(self,name,file,pos,rot=0):
         ref=self.external(f'res://game/rooms/office/{file}.tscn','PackedScene')
         self.nodes.append(f'[node name="{name}" parent="." instance={ref}]\nposition = {vec(pos)}\nrotation_degrees = Vector3(0, {rot}, 0)')
@@ -176,6 +196,17 @@ lite.box('Vent',(-.05,1.2,.495),(.42,2.0,.006),'metal')
 lite.save('server_rack_lite')
 
 s=Scene('OfficeAfterHours')
+TITLE_FONT='res://game/rooms/office/poster_title_font.tres'
+BODY_FONT='res://assets/fonts/inter_variable.ttf'
+SIGN_FONT='res://assets/fonts/barlow_condensed_bold.ttf'
+def frame(path,w,h,depth=.06,bar=.06):
+    """A satin black frame around a w x h print, its glass just inside the bars."""
+    for side,pos,size in [('Top',(0,h/2-bar/2,depth/2-.01),(w,bar,depth)),('Bottom',(0,-h/2+bar/2,depth/2-.01),(w,bar,depth)),
+        ('Left',(-w/2+bar/2,0,depth/2-.01),(bar,h-2*bar,depth)),('Right',(w/2-bar/2,0,depth/2-.01),(bar,h-2*bar,depth))]:
+        s.box('Frame'+side,pos,size,'frame',parent=path)
+    s.quad('Glass',(0,0,depth-.02),(w-2*bar,h-2*bar),'poster_glass',parent=path)
+# Camera-only blockers for large architecture without collision (see the script).
+s.nodes[0]+='\nscript = '+s.external('res://game/rooms/office/office_after_hours.gd','Script')
 s.box('Floor',(0,-.25,0),(28,.5,32),'carpet',True)
 # North wall opens at x 7..11 onto the restricted corridor; the gate seals it until the boss.
 s.box('North',(-3.5,3,-16),(21,6,.5),'plaster',True)
@@ -277,14 +308,18 @@ for i in range(6): s.box(f'Cable{i}',(-9.5+i*.09,1.8,-14.1),(.022,3.2,.022),'bla
 # the incident enables it until the boss stage and lifts it into the header.
 s.box('VaultGate',(9,2,-16),(4,4,.22),'shutter',True,body='collision_layer = 0\n')
 for i in range(7): s.box(f'GateSlat{i}',(0,-1.6+i*.55,.12),(3.9,.05,.01),'black',parent='VaultGate')
-s.text('GateSign','RESTRICTED  ·  PRODUCTION CORE',(0,.6,.13),.006,44,(1,.62,.2,1),parent='VaultGate')
+s.text('GateSign','RESTRICTED  ·  PRODUCTION CORE',(0,.6,.13),.00453,44,(1,.62,.2,1),parent='VaultGate')
 s.text('GateSubsign','Authorized personnel and whoever is on call',(0,.2,.13),.003,30,(1,.8,.5,1),parent='VaultGate')
 s.text('DoorNotice','B2  ·  SERVER CORRIDOR',(9,4.45,-15.72),.005,44,(1,.62,.2,1))
 s.text('Wayfinding','OPERATIONS  /  04',(-8.3,3.4,-15.6),.005,48)
 # Selective dry humor, not a wall of jokes.
-s.box('Poster',(13.70,2.4,7),(.07,1.65,1.12),'paper')
-s.text('PosterText','ALL SYSTEMS\nOPERATIONAL*',(13.65,2.6,7),.004,46,(.06,.10,.12,1),rot=(0,-90,0))
-s.text('PosterFootnote','*Except the important ones.',(13.64,1.88,7),.003,23,(.06,.10,.12,1),rot=(0,-90,0))
+# A status-page printout, framed like an award: green dot and all.
+status=s.node('StatusPrint','Node3D',(13.70,2.4,7),props='rotation_degrees = Vector3(0, -90, 0)\n')
+s.box('Poster',(0,0,0),(1.12,1.65,.03),'paper',parent=status)
+frame(status,1.12,1.65,.05,.045)
+s.cylinder('StatusDot',(0,.42,.018),.11,.01,'green',parent=status,rot=(90,0,0))
+s.text('PosterText','ALL SYSTEMS\nOPERATIONAL*',(0,.05,.018),.00276,46,(.06,.10,.12,1),parent=status,face=SIGN_FONT)
+s.text('PosterFootnote','*Except the important ones.',(0,-.5,.018),.003,23,(.06,.10,.12,1),parent=status,face=BODY_FONT)
 s.text('OfficeIdentity','SEV / 01',(0,3.7,15.69),.008,85,rot=(0,180,0))
 s.text('OfficeSubtitle','ENGINEERING  ·  AFTER HOURS',(0,2.8,15.68),.005,40,rot=(0,180,0))
 # Fixtures have a visible housing and diffuser. Two shadowed pools only.
@@ -306,9 +341,9 @@ s.box('SleepingBag',(-6.5,.13,-5.25),(1.7,.24,.55),'fabric',rot=(0,4,0))
 s.box('SleepingPillow',(-5.85,.2,-5.25),(.4,.12,.32),'paper')
 s.text('BuildFailed','BUILD #4,812   FAILED\nretrying (attempt 37)',(-9,1.36,-6.18),.0021,30,(1,.35,.25,1))
 # Desk z is the workstation origin; the monitor face sits 0.215 m behind it.
-for idx,(x,z,text,color) in enumerate([(-6.15,0,'WHO DEPLOYED\nON FRIDAY?',(1,.85,.3,1)),(-9.35,5,'DO NOT\nTOUCH PROD',(1,.6,.75,1)),(-6.85,5,'works on\nmy machine',(.6,.95,.6,1))]):
-    s.box(f'StickyNote{idx}',(x,1.5,z-.205),(.14,.14,.01),'paper')
-    s.text(f'StickyText{idx}',text,(x,1.5,z-.198),.0011,26,(.15,.15,.2,1))
+for idx,(x,z,text,mat,size,tilt) in enumerate([(-6.15,0,'WHO DEPLOYED\nON FRIDAY?','sticky_yellow',.00058,-4),(-9.35,5,'DO NOT\nTOUCH PROD','sticky_pink',.0007,3),(-6.85,5,'works on\nmy machine','sticky_green',.00081,-2)]):
+    s.box(f'StickyNote{idx}',(x,1.5,z-.205),(.14,.14,.01),mat,rot=(0,0,tilt))
+    s.text(f'StickyText{idx}',text,(x,1.5,z-.198),size,26,(.15,.15,.2,1),rot=(0,0,tilt))
 s.box('Whiteboard',(-12.0,2.2,-3.65),(1.7,1.1,.04),'paper')
 s.text('WhiteboardText','ON-CALL ROTATION\nMon  YOU\nTue  YOU\nWed  YOU (backup: you)',(-12.0,2.25,-3.62),.0028,40,(.15,.2,.3,1))
 s.text('Uptime','UPTIME 99.999%',(-1.7,1.05,-15.6),.004,48,(.3,.95,.7,1))
@@ -342,8 +377,8 @@ for x,rot in [(21.15,90),(24.35,-90)]:
     for z in [-11,-9.5,-8,-6.5]: s.instance(f'SyncChair{x}_{z}','chair',(x,0,z),rot)
 s.box('SyncScreen',(26.95,2.0,-8.75),(.06,1.4,2.6),'plastic')
 s.box('SyncDisplay',(26.91,2.0,-8.75),(.01,1.25,2.45),'screen')
-s.text('SyncTitle','QUICK SYNC  (15 MIN)',(26.89,2.4,-8.75),.0045,52,(.95,.95,.95,1),rot=(0,-90,0))
-s.text('SyncDetail','Organizer: Leadership  ·  47 guests  ·  0 agenda items\nRecurring: daily, forever',(26.89,1.85,-8.75),.0028,36,(.75,.85,.9,1),rot=(0,-90,0))
+s.text('SyncTitle','QUICK SYNC  (15 MIN)',(26.89,2.4,-8.75),.00405,52,(.95,.95,.95,1),rot=(0,-90,0))
+s.text('SyncDetail','Organizer: Leadership  ·  47 guests  ·  0 agenda items\nRecurring: daily, forever',(26.89,1.85,-8.75),.0025,36,(.75,.85,.9,1),rot=(0,-90,0))
 s.light('QuickSyncLight',(22.75,3.3,-8.75),(1,.86,.68),1.6,9)
 s.light('ProjectorGlow',(25.8,2.0,-8.75),(.4,.75,1),0.0,6)
 # Pantry: one meaningful machine, three honest reactions.
@@ -351,8 +386,11 @@ s.collider('CounterCollision',(26.3,.45,6.8),(.96,.9,6.0))
 for idx,z in enumerate([4.3,5.16,6.02,7.74,8.6,9.46]): s.glb(f'Cabinet{idx}','kitchen_cabinet',(26.3,0,z),-90,2.0)
 s.glb('Sink','kitchen_sink',(26.3,0,6.88),-90,2.0)
 s.glb('CoffeeMachine','kitchen_coffee_machine',(26.45,.9,5.2),-90,2.0)
-s.text('CoffeeNotice','PLEASE LIMIT COFFEE TO\nONE CUP PER EMPLOYEE',(26.95,1.9,5.2),.0026,34,(.15,.15,.18,1),rot=(0,-90,0))
-s.box('CoffeeNoticePaper',(26.98,1.9,5.2),(.01,.32,.62),'paper')
+# Printed in a hurry, taped up crooked by someone who has given up.
+notice=s.node('CoffeeNoticeSheet','Node3D',(26.98,1.9,5.2),props='rotation_degrees = Vector3(0, -90, -2.5)\n')
+s.box('CoffeeNoticePaper',(0,0,0),(.62,.32,.01),'paper',parent=notice)
+s.text('CoffeeNotice','PLEASE LIMIT COFFEE TO\nONE CUP PER EMPLOYEE',(0,0,.008),.00136,34,(.15,.15,.18,1),parent=notice,face=SIGN_FONT)
+for side in (-1,1): s.box(f'Tape{side+1}',(side*.28,.15,.007),(.14,.04,.002),'tape',parent=notice,rot=(0,0,side*-35))
 s.glb('Microwave','kitchen_microwave',(26.45,.9,8.8),-90,2.0)
 s.text('MicrowaveNotice','DO NOT USE\nTICKET OPEN SINCE 2019',(26.95,1.75,8.8),.0024,32,(.85,.15,.1,1),rot=(0,-90,0))
 s.glb('Toaster','toaster',(26.4,.9,9.6),-90,2.0)
@@ -361,8 +399,8 @@ s.collider('FridgeCollision',(26.35,.95,11.55),(.6,1.9,1.15))
 s.box('VendingBody',(20.4,1.0,12.45),(1.1,2.0,.8),'black',True)
 s.box('VendingGlass',(20.25,1.15,12.04),(.75,1.45,.02),'cool')
 s.box('VendingPanel',(20.83,1.15,12.04),(.2,1.0,.02),'plastic')
-s.text('VendingName','SNACK-O-MATIC',(20.4,1.98,12.03),.0035,40,(1,.85,.3,1),rot=(0,180,0))
-s.text('VendingError','ERR: ITEM 404',(20.83,1.4,12.02),.0018,30,(1,.35,.25,1),rot=(0,180,0))
+s.text('VendingName','SNACK-O-MATIC',(20.4,1.94,12.03),.00205,40,(1,.85,.3,1),rot=(0,180,0))
+s.text('VendingError','ERR: ITEM 404',(20.83,1.4,12.02),.00081,30,(1,.35,.25,1),rot=(0,180,0))
 s.cylinder('PantryTableTop',(22.6,.74,8.1),.6,.04,'walnut')
 s.cylinder('PantryTableStem',(22.6,.37,8.1),.06,.72,'metal')
 s.collider('PantryTableCollision',(22.6,.4,8.1),(1.1,.8,1.1))
@@ -371,9 +409,14 @@ for idx,(x,z,rot) in enumerate([(21.6,8.1,-90),(23.6,8.1,90),(22.6,9.1,180)]): s
 s.node('PropTint','Node',props='script = '+s.external('res://game/rooms/office/prop_tint.gd','Script'))
 s.glb('PantryPlant','potted_plant',(19.2,0,4.2),0,2.4)
 s.glb('PantryTrash','trashcan',(25.7,0,12.4),0,1.4)
-s.box('WellnessPoster',(22.4,1.75,3.62),(1.2,1.6,.03),'paper')
-s.text('WellnessTitle','BURNOUT IS\nA MINDSET',(22.4,2.15,3.64),.0045,60,(.35,.25,.6,1))
-s.text('WellnessBody','Wellness Week: take one deep breath\n(between meetings)',(22.4,1.45,3.64),.0024,34,(.2,.2,.25,1))
+# People & Culture flyer: purple header, a calming stock sky, four pins.
+flyer=s.node('WellnessFlyer','Node3D',(22.4,1.75,3.62))
+s.box('WellnessPoster',(0,0,0),(1.2,1.6,.01),'paper',parent=flyer)
+s.box('WellnessBand',(0,.56,.006),(1.2,.48,.004),'wellness_purple',parent=flyer)
+s.text('WellnessTitle','BURNOUT IS\nA MINDSET',(0,.56,.01),.00229,60,(1,.97,.92,1),parent=flyer,face=TITLE_FONT)
+s.quad('WellnessPhoto',(0,-.02,.007),(1.0,.66),'photo_wellness',parent=flyer)
+s.text('WellnessBody','Wellness Week: take one deep breath\n(between meetings)',(0,-.56,.008),.00163,34,(.2,.2,.25,1),parent=flyer,face=BODY_FONT)
+for idx,(x,y) in enumerate([(-.54,.74),(.54,.74),(-.54,-.74),(.54,-.74)]): s.cylinder(f'Pin{idx}',(x,y,.012),.018,.02,'pin_red',parent=flyer,rot=(90,0,0))
 s.light('PantryLight',(22.75,3.3,8.25),(1,.78,.55),1.8,8)
 for idx,z in enumerate([-10,0,10]): s.light(f'WingLight{idx}',(16.3,3.4,z),(.68,.8,.88),1.2,7)
 s.node('CalendarDrift','Node3D',(16.3,0,0),props='script = '+s.external('res://game/rooms/office/calendar_drift.gd','Script'))
@@ -392,7 +435,7 @@ for idx,z in enumerate([-18,-22,-26,-29]): s.light(f'CorridorLight{idx}',(9,3.6,
 # A confident dashboard surrounded by racks that are visibly not fine.
 s.box('DeploymentBoard',(5.55,2.0,-23.25),(.08,1.4,2.4),'plastic')
 s.box('DeploymentFace',(5.6,2.0,-23.25),(.01,1.28,2.28),'screen')
-s.text('DeploymentTitle','DEPLOYMENT SUCCESSFUL',(5.62,2.35,-23.25),.0045,56,(.3,1,.6,1),rot=(0,90,0))
+s.text('DeploymentTitle','DEPLOYMENT SUCCESSFUL',(5.62,2.35,-23.25),.00273,56,(.3,1,.6,1),rot=(0,90,0))
 s.text('DeploymentDetail','100% complete  ·  0 errors  ·  0 warnings\n0 monitors configured',(5.62,1.8,-23.25),.0027,36,(.6,.95,.75,1),rot=(0,90,0))
 for idx,z in enumerate([-21.2,-25.3]):
     s.light(f'SparkLight{idx}',(6.6,1.6,z),(1,.6,.25),0.0,2.5)
@@ -488,13 +531,35 @@ for name,text,pos,rot,mat,color in [
     s.node(name+'Tube','MeshInstance3D',(pos[0],pos[1]-.75 if '\n' not in text else pos[1]-1.05,pos[2]),props=f'mesh = {tube}\nrotation_degrees = {vec((0,rot,0))}')
     light_offset=(0,0,.6) if rot==0 else ((0,0,-.6) if rot==180 else (.6,0,0))
     s.light(name+'Light',(pos[0]+light_offset[0],pos[1]-.3,pos[2]+light_offset[2]),color,1.4,6)
-# Posters: the culture deck, framed in colour on the south and north walls.
-for idx,(text,x,z,rot,mat) in enumerate([
-    ('WE ARE A FAMILY*\n*terms apply',-9.5,15.7,180,'poster_red'),
-    ('FAIL FAST\n(NOT IN PROD)',3.0,15.7,180,'poster_teal'),
-    ('YOUR WELLBEING\nIS A KPI',-12.0,-15.7,0,'poster_gold'),
-    ('IT WORKED\nON MY MACHINE',12.0,-15.7,0,'poster_violet')]):
-    s.box(f'Poster{idx}',(x,2.4,z),(1.7,2.2,.04),mat,rot=(0,rot,0))
-    s.text(f'PosterText{idx}',text,(x,2.4,z+(-.03 if rot==180 else .03)),.0065,64,(1,.97,.9,1),rot=(0,rot,0))
+# Posters: the culture deck as framed motivational prints (black mat, photograph, serif
+# title, the punchline as the caption), on the south and north walls.
+for idx,(title,caption,x,z,rot,photo,accent) in enumerate([
+    ('WE ARE A FAMILY*','*terms apply',-9.5,15.7,180,'family',(.95,.55,.45,1)),
+    ('FAIL FAST','(NOT IN PROD)',3.0,15.7,180,'fail_fast',(.45,.85,.85,1)),
+    ('YOUR WELLBEING','IS A KPI',-12.0,-15.7,0,'wellbeing',(.95,.8,.4,1)),
+    ('IT WORKED','ON MY MACHINE',12.0,-15.7,0,'machine',(.75,.62,1,1))]):
+    print_=s.node(f'CulturePrint{idx}','Node3D',(x,2.4,z),props=f'rotation_degrees = Vector3(0, {rot}, 0)\n')
+    s.box(f'Poster{idx}',(0,0,0),(1.7,2.2,.04),'black',parent=print_)
+    frame(print_,1.7,2.2)
+    s.quad('PhotoBorder',(0,.36,.021),(1.26,.94),'print_white',parent=print_)
+    s.quad('Photo',(0,.36,.022),(1.22,.9),f'photo_{photo}',parent=print_)
+    s.box('Rule',(0,-.68,.021),(.5,.006,.002),'print_white',parent=print_)
+    s.text(f'PosterText{idx}',title,(0,-.36,.022),.00137,96,(.97,.96,.93,1),parent=print_,face=TITLE_FONT)
+    s.text(f'PosterCaption{idx}',caption,(0,-.57,.022),.0023,44,accent,parent=print_,face=BODY_FONT)
+# The company: a lobby logo over the operations wall. The mark is an arrow that only ever
+# circles back to itself.
+logo=s.node('CompanyLogo','Node3D',(-3.5,3.6,15.69),props='rotation_degrees = Vector3(0, 180, 0)\n')
+mark=(0,.86)
+for i in range(13):
+    angle=math.radians(110+i*22)
+    s.box(f'MarkArc{i}',(mark[0]+math.cos(angle)*.42,mark[1]+math.sin(angle)*.42,.04),(.09,.17,.05),'metal',parent=logo,rot=(0,0,math.degrees(angle)))
+tip=math.radians(110+13*22)
+head=s.resource('CylinderMesh','top_radius = 0.0\nbottom_radius = 0.15\nheight = 0.21\nradial_segments = 3\nmaterial = '+s.external('res://game/rooms/office/metal.tres','Material'))
+s.node('MarkHead','MeshInstance3D',(mark[0]+math.cos(tip)*.42,mark[1]+math.sin(tip)*.42,.04),logo,f'mesh = {head}\nrotation_degrees = {vec((0,0,math.degrees(tip)+180))}\n')
+s.cylinder('MarkCore',(mark[0],mark[1],.03),.11,.04,'neon_cyan',parent=logo,rot=(90,0,0))
+s.node('Wordmark','Label3D',(0,0,.03),logo,'text = "SYNERGEX"\nfont = '+s.external(SIGN_FONT,'FontFile')+'\nfont_size = 160\npixel_size = 0.0048\nmodulate = Color(0.93, 0.96, 0.98, 1)\noutline_size = 14\noutline_modulate = Color(0.2, 0.88, 1, 0.35)\nshaded = false\n')
+s.text('Tagline','WE PUT THE \'I\' IN TEAM\u2122',(0,-.4,.03),.0026,64,(.2,.88,1,1),parent=logo,face=SIGN_FONT)
+s.text('SmallPrint','Now with 30% fewer employees.',(0,-.62,.03),.0019,40,(.6,.68,.72,1),parent=logo,face=BODY_FONT)
+s.light('LogoWash',(-3.5,5.0,14.7),(.75,.88,1),1.1,3.4)
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')

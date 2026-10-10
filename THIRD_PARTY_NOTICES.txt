@@ -1953,7 +1953,8 @@ SEV-1 Milestone 12 typefaces
 Barlow Condensed: Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
 Inter: Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)
 JetBrains Mono: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
-All three are used unmodified and licensed under the SIL Open Font License, Version 1.1, reproduced below. Font files ship inside the resource package; per-font license copies are kept at assets/fonts/OFL_*.txt in the source tree.
+Cinzel: Copyright 2020 The Cinzel Project Authors (https://github.com/NDISCOVER/Cinzel)
+All four are used unmodified and licensed under the SIL Open Font License, Version 1.1, reproduced below. Font files ship inside the resource package; per-font license copies are kept at assets/fonts/OFL_*.txt in the source tree.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

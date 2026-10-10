@@ -1,5 +1,26 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.29 — Framed prints and a company (10 October 2026)
+
+Creator request: make the wall signs look good (keep the unhinged text), get assets
+online if useful, and add a stupid company logo.
+
+- **The culture deck is framed.** The four posters are now motivational prints: satin
+  black frame and glass, black mat, a CC0 photograph with a white border, the first
+  line as a Cinzel title and the punchline as the caption. WE ARE A FAMILY* over a
+  wholesome sunrise field, FAIL FAST over a sky on fire, YOUR WELLBEING over an alpine
+  meadow, IT WORKED ON MY MACHINE over a burnt-out warehouse.
+- **Paper that looks like paper.** Notices, flyers and the whiteboard use a CC0 paper
+  texture. The coffee notice is taped up crooked; the BURNOUT IS A MINDSET flyer has a
+  purple People & Culture header, a calming stock sky and four red pins; the
+  ALL SYSTEMS OPERATIONAL* printout is framed like an award with a green status dot;
+  sticky notes are sticky-note yellow, pink and green and sit slightly askew.
+- **SYNERGEX.** A lobby logo on the south wall: an arrow that only circles back to
+  itself, "WE PUT THE 'I' IN TEAM™", small print "Now with 30% fewer employees."
+- Sources: five Poly Haven photographs, ambientCG Paper001, Cinzel (OFL); provenance in
+  [asset licences](asset_licenses.md). The office generator (`tools/build_office.py`) now
+  owns every wall-text size and the camera-blocker script, so regenerating keeps them.
+
 ## 0.2.28 — Wall text fits its frames (10 October 2026)
 
 Creator report: the wall texts are good but overlap their frames.
