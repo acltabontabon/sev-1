@@ -68,6 +68,45 @@ func camera_clipping(room: Node3D) -> float:
 	return float(bad) / maxf(1.0, total)
 
 
+## Wall texts that spill past the panel they are printed on (poster, notice, screen,
+## sign): the nearest surface just behind the text that is not a thin slat or bar.
+func label_overflows(room: Node3D) -> Array[String]:
+	var spilled: Array[String] = []
+	var meshes: Array = room.find_children("*", "MeshInstance3D", true, false)
+	for node in room.find_children("*", "Label3D", true, false):
+		var label: Label3D = node
+		if not label.is_visible_in_tree() or label.text.strip_edges().is_empty() or label.billboard != BaseMaterial3D.BILLBOARD_DISABLED:
+			continue
+		var box: AABB = label.get_aabb()
+		if box.size.x <= 0.0:
+			continue
+		var to_label: Transform3D = label.global_transform.affine_inverse()
+		var centre: Vector2 = Vector2(box.get_center().x, box.get_center().y)
+		var nearest: float = INF
+		var panel: Rect2
+		for candidate in meshes:
+			var mesh_node: MeshInstance3D = candidate
+			if mesh_node.mesh == null or not mesh_node.is_visible_in_tree():
+				continue
+			var lo: Vector3 = Vector3.INF
+			var hi: Vector3 = -Vector3.INF
+			for corner in range(8):
+				var point: Vector3 = to_label * (mesh_node.global_transform * mesh_node.mesh.get_aabb().get_endpoint(corner))
+				lo = lo.min(point)
+				hi = hi.max(point)
+			var rect: Rect2 = Rect2(Vector2(lo.x, lo.y), Vector2(hi.x - lo.x, hi.y - lo.y))
+			if hi.z > .08 or hi.z < -.5 or not rect.has_point(centre) or rect.get_area() > 40.0:
+				continue
+			if rect.size.x < box.size.x * .3 or rect.size.y < box.size.y * .5:
+				continue
+			if -hi.z < nearest:
+				nearest = -hi.z
+				panel = rect
+		if nearest < INF and not panel.grow(.01).encloses(Rect2(Vector2(box.position.x, box.position.y), Vector2(box.size.x, box.size.y))):
+			spilled.append(str(room.get_path_to(label)))
+	return spilled
+
+
 func _run() -> void:
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -141,6 +180,8 @@ func _run() -> void:
 	incident.presentation.skip()
 	# The camera stays out of walls, ceilings, headers and beams all over the floor (a
 	# thin ray let its lens graze through half the time). Small props stay see-through.
+	var spilled: Array[String] = label_overflows(room)
+	check(spilled.is_empty(), "wall texts stay inside their posters, notices and screens %s" % str(spilled))
 	var clipping: float = await camera_clipping(room)
 	check(clipping < .04, "the camera keeps out of the office's walls, ceilings and beams (%.1f%% of views clip)" % (clipping * 100.0))
 	scene.queue_free()

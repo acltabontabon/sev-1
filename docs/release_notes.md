@@ -1,5 +1,16 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.28 — Wall text fits its frames (10 October 2026)
+
+Creator report: the wall texts are good but overlap their frames.
+
+- A probe measured every wall text against the panel it is printed on: 25 spilled
+  over, the four motivational posters by up to a metre each side. Each now scales to
+  fit with a margin: posters, the status-page poster, wellness poster, coffee notice,
+  sticky notes, vending machine, Quick Sync display, deployment board, vault gate sign
+  and the drifting calendar cards. A regression check keeps every wall text inside its
+  panel.
+
 ## 0.2.27 — Skill icons (10 October 2026)
 
 Creator request: show the skills as icons so cooldowns are easy to notice, with less

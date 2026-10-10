@@ -40,7 +40,8 @@ func _ready() -> void:
 		card.add_child(header)
 		var label: Label3D = Label3D.new()
 		label.text = INVITES[index] + "\nAccept · Decline · Maybe"
-		label.pixel_size = .0022
+		# Sized so the longest title ("Brainstorm: fewer meetings") stays on its card.
+		label.pixel_size = .0017
 		label.font_size = 40
 		label.modulate = Color(.12, .15, .22)
 		label.outline_size = 0
