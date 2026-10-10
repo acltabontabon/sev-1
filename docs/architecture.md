@@ -703,8 +703,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `variance_moves.gd` (a child of the boss) runs one move per shield cycle and owns its
   telegraphs and damage. A lethal blow is held (`spared`) and handed to `duel.gd`,
   which plays the duel with the staged monster and calls `final_blow()` on the hidden
-  real boss to slice it; the RESOLVED ending then runs `all_hands.gd` (death, receipts,
-  cent, memorial, all-hands, desk, fly-out) on real time before the report. Each
+  real boss to slice it (severing limbs on the staged monster first and mirroring that on
+  the real one); the RESOLVED ending then runs `all_hands.gd` (death, receipts, cent,
+  memorial, desk, the walk out with memories, street, window; then Monday's statue
+  unveiling) on real time before the report, which then gets the victory lines. Each
   cutscene restores what it touched and TAB ends it.
 - **Freeze-frames and slow motion.** `ElementFx` is the only writer of
   `Engine.time_scale`. `freeze()` drops it for a beat on big impacts (Blocker quake,

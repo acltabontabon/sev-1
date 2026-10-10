@@ -1,5 +1,42 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.44 — The walk out (11 October 2026)
+
+Creator requests: dismember the boss through the final standoff and improve its camera;
+management only congratulates afterwards (they sleep through the night); the ending is
+the hero leaving the building at midnight, wrecked and bloody, a bleak night, the fallen
+remembered, with a sad sound and fading memories of them at work; replace the weak
+all-hands with something funnier; he is clean by then; the receipt looked ugly.
+
+- **The duel** now takes The Variance apart a word at a time: "CLOSED!" an arm, "AS!"
+  the other arm, "WON'T!" the head, "FIX!" the leaping slam that splits what is left.
+  The limbs fly, bleed and stay where they land through the finale; the real Variance
+  dies missing them too. New angles: a wide standoff, a close-up on his face, two-shots
+  for every clash, and an angle on each word that shows what comes off.
+- **The night, in order:** it comes apart into receipts; the gold burns out; the receipt
+  (now a real thermal receipt: TXN 000001, STATUS FOUND, AMOUNT $0.01, COST 5 STAFF,
+  THANK YOU FOR YOUR SACRIFICE); In Memoriam; his desk and a SEV-2. Then **he walks
+  out**, bloody, across the dark floor to an original sad theme, the motion lights
+  clicking off behind him, and the five come back as pale memories at desks along his
+  way (MORGAN on the phone, NADIA typing, JUN giving notes, JO bouncing, VAL on a call),
+  each a fading whisper of the first thing they said to him tonight. Then **the street
+  at midnight**: rain, a sodium lamp, the tower going up into the dark, him walking out
+  of frame; and, from across the city, **the one lit window** with five silhouettes in
+  it. The narrator: "By Monday, the cent was reconciled. The night shift was not."
+  INCIDENT 001 — RESOLVED.
+- **Monday, 9:00 AM: a statue unveiling, attendance mandatory.** Him, showered, unslept,
+  the entire audience. "Incredible work, everyone. And by everyone… I mean leadership."
+  The velvet drops: a bronze Chief Synergy Officer, larger than life, arms raised over
+  the slain Variance. The plaque: IN HONOUR OF BRENT FAIRWEATHER, CHIEF SYNERGY OFFICER,
+  WHO SLEW THE VARIANCE, FRIDAY, 11:58 PM (FROM HOME, ON MUTE). Confetti. Self-thanks,
+  the mandatory fun day, "synergy!", the LinkedIn post ("I personally resolved a SEV-1…
+  thank you to everyone who made this possible (me)") with him cropped out, on call this
+  weekend, STREAM ENDED, and him under the statue. NEXT: INCIDENT 002, MONDAY, 9:05 AM.
+- Management's "Great teamwork, everyone! Special thanks to leadership." and the
+  postmortem lines no longer talk over the boss's death; they play over the report.
+- `mourning.wav`: an original 32-second theme from `tools/build_music.py` (slow minor
+  pads, a falling bell-like line, a hall echo). No new voices.
+
 ## 0.2.43 — Closed as won't fix (11 October 2026)
 
 Creator requests: the boss's moveset should be creative against the engineer too; the

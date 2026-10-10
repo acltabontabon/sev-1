@@ -96,9 +96,12 @@ static func spurt(follow: Node3D, offset: Vector3, direction: Vector3, seconds: 
 	follow.add_child(particles)
 	particles.position = offset
 	particles.emitting = true
+	# Held weakly: the follower (and its spurt) may be gone before the timer is.
+	var spray: WeakRef = weakref(particles)
 	follow.get_tree().create_timer(seconds, false).timeout.connect(func() -> void:
-		if is_instance_valid(particles):
-			particles.emitting = false)
+		var still: CPUParticles3D = spray.get_ref() as CPUParticles3D
+		if still != null:
+			still.emitting = false)
 
 
 static func _droplets(amount: int) -> CPUParticles3D:

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Original, deterministic music beds for SEV-1. Pure synthesis, no samples or deps.
 Loops are seamless: sustained voices use whole cycles per loop and periodic envelopes.
-Writes assets/audio/music/{menu_pad,tension_bed,boss_pulse}.wav (mono, 22.05 kHz)."""
+Writes assets/audio/music/{menu_pad,tension_bed,boss_pulse,mourning}.wav (mono, 22.05 kHz).
+Pass track names to build only those."""
 from pathlib import Path
 import math
 import random
@@ -14,7 +15,7 @@ TAU = math.tau
 
 
 def note(name):
-    names = {'C': -9, 'C#': -8, 'Db': -8, 'D': -7, 'Eb': -6, 'E': -5, 'F': -4, 'F#': -3, 'G': -2, 'Ab': -1, 'A': 0, 'Bb': 1, 'B': 2}
+    names = {'C': -9, 'C#': -8, 'Db': -8, 'D': -7, 'Eb': -6, 'E': -5, 'F': -4, 'F#': -3, 'G': -2, 'G#': -1, 'Ab': -1, 'A': 0, 'Bb': 1, 'B': 2}
     return 440.0 * 2 ** ((names[name[:-1]] + (int(name[-1]) - 4) * 12) / 12)
 
 
@@ -133,7 +134,49 @@ def boss_pulse():
     return lowpass(samples, .5)
 
 
+def mourning():
+    """Walking out at midnight: slow minor pads, a falling piano-like line, a long echo.
+    Not a loop: 32 s, played once under the end of the incident."""
+    length = 32.0
+    count = int(length * RATE)
+    chords = [['A2', 'E3', 'A3', 'C4'], ['F2', 'C3', 'A3', 'C4'], ['C3', 'G3', 'C4', 'E4'], ['E2', 'B2', 'E3', 'G#3']] * 2
+    span = 4.0
+    line = [(0, 'E5'), (1.5, 'D5'), (2, 'C5'), (4, 'C5'), (5.5, 'B4'), (6, 'A4'), (8, 'G4'), (9.5, 'A4'), (10, 'E4'),
+            (12, 'G#4'), (13.5, 'B4'), (14, 'E5'), (16, 'E5'), (17.5, 'D5'), (18, 'C5'), (20, 'F5'), (21.5, 'E5'),
+            (22, 'C5'), (24, 'D5'), (25.5, 'C5'), (26, 'B4'), (28, 'A4')]
+    dry = []
+    for i in range(count):
+        t = i / RATE
+        value = 0.0
+        index = int(t / span)
+        if index < len(chords):
+            local = t - index * span
+            for pitch in chords[index]:
+                base = note(pitch)
+                env = min(1.0, local / 1.6) * min(1.0, (span + 1.2 - local) / 1.2)
+                value += env * (math.sin(TAU * base * t) + .5 * math.sin(TAU * base * 1.003 * t)) * .05
+        for start, pitch in line:
+            local = t - start
+            if local < 0 or local > 6:
+                continue
+            base = note(pitch)
+            attack = min(1.0, local / .006)
+            value += attack * (math.sin(TAU * base * local) * math.exp(-local * .9) + .35 * math.sin(TAU * 2 * base * local) * math.exp(-local * 1.6)
+                               + .12 * math.sin(TAU * 3 * base * local) * math.exp(-local * 2.6)) * .16
+        # Fade the very end to silence.
+        value *= min(1.0, (length - t) / 3.0)
+        dry.append(value)
+    # A hall: two echoes, a little dulled.
+    wet = list(dry)
+    for delay, gain in ((.38, .32), (.76, .18), (1.21, .09)):
+        offset = int(delay * RATE)
+        for i in range(offset, count):
+            wet[i] += dry[i - offset] * gain
+    return lowpass(wet, .22)
+
+
 if __name__ == '__main__':
-    write('menu_pad', menu_pad())
-    write('tension_bed', tension_bed())
-    write('boss_pulse', boss_pulse())
+    import sys
+    tracks = {'menu_pad': menu_pad, 'tension_bed': tension_bed, 'boss_pulse': boss_pulse, 'mourning': mourning}
+    for name in sys.argv[1:] or list(tracks):
+        write(name, tracks[name]())

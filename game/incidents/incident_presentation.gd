@@ -185,6 +185,8 @@ var all_hands: Node3D
 var all_hands_played: bool = false
 ## The final blow's cutscene (see duel.gd), while it plays.
 var duel_scene: Node3D
+## The limbs the duel cut off, lying where they landed until the next run.
+var duel_pieces: Array[Node3D] = []
 var boss_move_strip: PanelContainer
 var boss_move_name: Label
 var boss_move_tagline: Label
@@ -552,11 +554,17 @@ func _caption_layout(cinematic: bool) -> void:
 
 func reset_story() -> void:
 	if is_instance_valid(all_hands):
-		all_hands.finish()
+		all_hands.finish(false)
 	all_hands = null
 	if is_instance_valid(duel_scene):
 		duel_scene.queue_free()
 	duel_scene = null
+	for piece in duel_pieces:
+		if is_instance_valid(piece):
+			piece.queue_free()
+	duel_pieces.clear()
+	if demon != null:
+		DUEL.restore(demon)
 	all_hands_played = false
 	if incident != null and is_instance_valid(incident.player):
 		incident.player.get_node("Visual/Character").overtime(false)
@@ -860,7 +868,9 @@ func stage_changed() -> void:
 			sting(preload("res://assets/audio/sfx/door_open.ogg"), -4)
 		incident.Stage.RESOLVED, incident.Stage.FAILED:
 			if incident.stage == incident.Stage.RESOLVED:
-				say_sequence(["victory_thanks", "victory", "postmortem", "postmortem_owner"])
+				# With the finale they wait for its end (leadership is asleep until Monday).
+				if DisplayServer.get_name() == "headless" and not killcam_in_headless:
+					say_sequence(ALL_HANDS.VICTORY_LINES)
 			else:
 				say_sequence(["defeat", "postmortem", "postmortem_owner"])
 			ambient.stop()
@@ -917,6 +927,7 @@ func _stage_vault_fight() -> void:
 		return
 	demon.global_position = incident.arrival_site()
 	demon.rotation.y = PI
+	DUEL.restore(demon)
 	leap_t = -1.0
 	demon.show()
 	demon.animator.play(demon.clips.idle, 0.0)
@@ -2299,7 +2310,7 @@ func _process(delta: float) -> void:
 			_opening(time, delta)
 	elif incident.stage == incident.Stage.BOSS and incident.boss_triggered and incident.boss_time < boss_length + 2:
 		time = incident.boss_time
-		title.visible = not (beat_shot in ["massacre", "casualty"]) or time >= boss_length - 2
+		title.visible = not (beat_shot in ["massacre", "casualty", "duel"]) or beat_shot != "duel" and time >= boss_length - 2
 		title.text = "DISCREPANCY CONVERGING" if time < boss_length - 2 else "THE VARIANCE\nDifference detected. Explanation unavailable."
 		hint.visible = not is_instance_valid(incident.active_enemy)
 		if hint.visible and not demon.visible:

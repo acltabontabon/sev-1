@@ -1,32 +1,38 @@
 extends Node3D
-## The victory ending of Incident 001, after the boss's kill cam:
+## The victory ending of Incident 001, after the duel (duel.gd). The night:
 ##  "death"     slow motion, low: The Variance comes apart into a burst of receipts; the
 ##              ledger behind it reconciles one screen at a time.
-##  "receipts"  receipts snow over the vault; a low orbit round the engineer as his Unpaid
-##              Overtime slowly burns out; one gold receipt drifts down to him.
-##  "cent"      close on it: the missing transaction, one cent (the narrator).
+##  "receipts"  receipts snow over the vault; a low orbit round the engineer, wrecked and
+##              bloody, as his Unpaid Overtime slowly burns out; a receipt drifts down.
+##  "cent"      close on it: the missing transaction, $0.01, cost: 5 staff (the narrator).
 ##  "memorial"  In Memoriam: a glide past each of the five where they fell.
-##  "card"      11:58 PM. Mandatory all-hands.
-##  "arrival".. the lobby under the SYNERGEX logo, lit like a keynote, an audience of one
-##              in the dark: leadership thanks itself, announces a mandatory fun day,
-##              poses ("synergy!") for a LinkedIn post that crops him out (the real frame,
-##              cropped), and puts him on call this weekend. The spotlight clunks off.
-##  "desk"      back at his desk: a new ticket. Head down.
-##  "flyout"    the opening's fly-in in reverse, out of the tower into the night; the
-##              narrator; the title card.
+##  "desk"      back at his desk: a new ticket. He stands up.
+##  "exit"      he walks out across the dark floor to a sad theme; the five come back as
+##              fading memories at desks along his way, each a whisper of what they said
+##              to him tonight; the motion lights click off behind him.
+##  "street"    midnight, street level, rain: he walks out of the tower and away.
+##  "window"    up in the one lit window: five silhouettes watching him go. The narrator.
+##  "resolved"  INCIDENT 001 — RESOLVED.
+## Monday (leadership slept through all of it):
+##  "card"      MONDAY, 9:00 AM. Statue unveiling. Attendance mandatory.
+##  "arrival".. the lobby under the SYNERGEX logo: a covered statue, leadership, an audience
+##              of one (him, cleaned up). The curtain drops on a bronze Chief Synergy
+##              Officer standing on The Variance ("WHO SLEW THE VARIANCE · FROM HOME, ON
+##              MUTE"). Self-thanks, a mandatory fun day, a photo for LinkedIn that crops
+##              him out (the real frame, cropped), on call this weekend; the stream ends.
+##  "next"      NEXT: INCIDENT 002.
 ## Presentation only, on real time (the photo freezes the world, not the scene). TAB skips.
 
 const ROOT: String = "res://assets/characters/quaternius/"
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 const CREW = preload("res://game/incidents/coworkers.gd")
-## Leadership: body, palette (shirt, pants, skin, hair), and a spot on the "stage" under
-## the logo, 1.6 m apart. They walk in single file from the east, in the order they stand
-## (nobody passes anybody), and out to the west the same way.
+## Leadership: body, palette (shirt, pants, skin, hair), and where they stand by the statue.
 const LEADERSHIP: Array = [
-	["suit_male.fbx", [Color(.12, .12, .14), Color(.1, .1, .12), Color(.86, .66, .52), Color(.55, .5, .45)], Vector3(-.3, 0, 14.0)],
-	["suit_female.fbx", [Color(.55, .1, .2), Color(.12, .1, .14), Color(.5, .33, .24), Color(.12, .08, .06)], Vector3(-1.9, 0, 14.0)],
-	["casual2_female.fbx", [Color(.95, .85, .4), Color(.3, .32, .38), Color(.78, .58, .45), Color(.6, .35, .2)], Vector3(1.3, 0, 14.0)]]
-const WINGS: float = 6.5
+	["suit_male.fbx", [Color(.12, .12, .14), Color(.1, .1, .12), Color(.86, .66, .52), Color(.55, .5, .45)], Vector3(1.5, 0, 13.5)],
+	["suit_female.fbx", [Color(.55, .1, .2), Color(.12, .1, .14), Color(.5, .33, .24), Color(.12, .08, .06)], Vector3(-2.1, 0, 13.5)],
+	["casual2_female.fbx", [Color(.95, .85, .4), Color(.3, .32, .38), Color(.78, .58, .45), Color(.6, .35, .2)], Vector3(2.9, 0, 13.3)]]
+const STATUE_AT: Vector3 = Vector3(-.3, 0, 14.6)
+const PLAQUE: String = "IN HONOUR OF\nBRENT FAIRWEATHER\nCHIEF SYNERGY OFFICER\nWHO SLEW THE VARIANCE\nFRIDAY, 11:58 PM\n(FROM HOME, ON MUTE)"
 ## In Memoriam, in the order they fell.
 const MEMORIAL: Array = [
 	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "His calendar is still full."],
@@ -35,12 +41,31 @@ const MEMORIAL: Array = [
 	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Never got a badge photo."],
 	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Her deck will be presented by someone else."]]
 const MEMORIAL_EACH: float = 2.4
+## The way out: their memories at desks along his path, doing what they did ([who, where,
+## clip, facing]); each whispers the first thing they said to him tonight.
+const MEMORIES: Array = [
+	["Manager", Vector3(-1.2, 0, 13.4), "ual/phone", PI],
+	["SRE", Vector3(.2, 0, 9.7), "ual/interact", 0.0],
+	["Designer", Vector3(1.6, 0, 13.5), "ual/talking", PI],
+	["Intern", Vector3(3.0, 0, 9.8), "ual/yes", 0.0],
+	["Director", Vector3(4.4, 0, 13.5), "ual/phone", PI]]
+## What used to play the moment it died, now the epilogue over the report.
+const VICTORY_LINES: Array[String] = ["victory_thanks", "victory", "postmortem", "postmortem_owner"]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const ENGINEER_AT: Vector3 = Vector3(-.3, .05, 10.2)
-## At the end of the line for the photo, just outside the crop.
-const PHOTO_EDGE: Vector3 = Vector3(2.9, .05, 13.8)
+## At the far end of the line for the photo, at the very edge of the frame (cropped).
+const PHOTO_EDGE: Vector3 = Vector3(3.6, .05, 13.2)
 const WALK_SPEED: float = 1.25
-const POST: String = "Humbled to share that our leadership team resolved a SEV-1 tonight.\n\nProud of what we built. Grateful for our people. Thank you to everyone who made this possible (leadership).\n\n#leadership #resilience #weareafamily #grateful"
+const EXIT_PATH: Array[Vector3] = [Vector3(-2.5, .05, 11.4), Vector3(5.6, .05, 11.8)]
+const EXIT_SECONDS: float = 9.0
+## The street at the foot of the tower (its west face), and his way away from it.
+const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 5.0), Vector3(-23.0, -69.95, 8.0)]
+const STREET_SECONDS: float = 7.5
+## The office's west window, where the night shift stands to watch him go.
+const WINDOW: Vector3 = Vector3(-13.3, .05, 2.0)
+const POST: String = "Humbled to share that I personally resolved a SEV-1 this weekend. Proud to unveil a small token of our team's gratitude.\n\nGrateful for our people. Thank you to everyone who made this possible (me).\n\n#leadership #courage #fromhome #grateful"
+## Every line the same width (monospace), so a centred block reads as a printed column.
+const RECEIPT: String = "  SYNERGEX PAYMENTS  \nFRI 23:58   VAULT 01\n- - - - - - - - - - \nTXN           000001\nSTATUS         FOUND\nAMOUNT         $0.01\n- - - - - - - - - - \nCOST         5 STAFF\n- - - - - - - - - - \n THANK YOU FOR YOUR \n     SACRIFICE      "
 
 var story: Node
 var incident: Node
@@ -51,17 +76,20 @@ var beat_at: float = 0.0
 var clock: float = 0.0
 var done: bool = false
 var leaders: Array[Dictionary] = []
+var memories: Array[Dictionary] = []
 var props: Array[Node] = []
 var receipt: Node3D
 var receipt_from: Vector3
 var snow: CPUParticles3D
 var spot: SpotLight3D
-var rim: OmniLight3D
+var live: Label3D
+var curtain: MeshInstance3D
+var mourn: AudioStreamPlayer
 var focus: CameraAttributesPractical
 var saved_attributes: CameraAttributes
 var ledger: Array[Array] = []
 var desk_texts: Array[String] = []
-var fly: Array[Array] = []
+var bloodied: Array[MeshInstance3D] = []
 var card: PanelContainer
 var photo: TextureRect
 var fade: ColorRect
@@ -88,6 +116,10 @@ func start() -> void:
 	saved_attributes = story.camera.attributes
 	focus = CameraAttributesPractical.new()
 	story.camera.attributes = focus
+	mourn = AudioStreamPlayer.new()
+	mourn.bus = &"Music"
+	mourn.stream = load("res://assets/audio/music/mourning.wav")
+	add_child(mourn)
 	player.global_position = VAULT_AT
 	player.velocity = Vector3.ZERO
 	player.visual.rotation.y = 0.0
@@ -110,6 +142,7 @@ func _beat(next: String) -> void:
 			_snowfall()
 		"receipts":
 			ElementFx.slow_motion(&"finale", 1.0)
+			_bloody()
 			character.story_pose = character.Pose.LOOK_DOWN
 			character.overtime_fade(5.0)
 			_drop_receipt()
@@ -118,66 +151,14 @@ func _beat(next: String) -> void:
 		"memorial":
 			memorial_name.show()
 			memorial_line.show()
-		"card":
+		"desk":
+			# Back at his desk. A new ticket.
 			memorial_name.hide()
 			memorial_line.hide()
-			titles.text = "11:58 PM\nMANDATORY ALL-HANDS"
-			titles.show()
-			fade.show()
-			story.sting(preload("res://assets/audio/sfx/low_boom.ogg"), -8)
-		"arrival":
-			_stage_lobby()
-			titles.hide()
-			# Leadership, in the wings until now.
-			for entry: Array in LEADERSHIP:
-				var body: Node3D = load(ROOT + entry[0]).instantiate()
-				incident.add_child(body)
-				body.scale = Vector3.ONE * .62
-				CREW.dress(body, entry[1])
-				var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
-				animator.add_animation_library("ual", MOTION)
-				body.global_position = Vector3(WINGS + (entry[2].x + 1.9) / 1.6 * 1.2, 0, entry[2].z)
-				leaders.append({"body": body, "animator": animator, "spot": entry[2], "going": true})
-			story.say("allhands_ceo")
-			for ping in range(6):
-				get_tree().create_timer(ping * .22, false).timeout.connect(story.sting.bind(preload("res://assets/audio/sfx/chat_ping.ogg"), -12))
-		"thanks":
-			story.say("allhands_vp")
-		"fun_day":
-			story.say("allhands_people")
-		"pose":
-			# A cut: he has been waved to the end of the line.
-			player.global_position = PHOTO_EDGE
-			player.visual.rotation.y = PI
-			for leader: Dictionary in leaders:
-				leader.going = false
-				leader.body.global_position = leader.spot
-				leader.body.rotation.y = PI
-				leader.animator.play("ual/victory", .2)
-			story.say("allhands_photo")
-		"photo":
-			_snap()
-		"leave":
-			ElementFx.slow_motion(&"photo", 1.0)
-			story.crew_freeze.hide()
-			card.hide()
-			# The keynote is over: the spotlight clunks off and he is left in the dark.
-			spot.visible = false
-			story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -2)
-			_exposure(.22)
-			player.global_position = ENGINEER_AT
-			player.visual.rotation.y = PI
-			for leader: Dictionary in leaders:
-				leader.going = true
-				leader.spot = leader.spot - Vector3(WINGS, 0, 0)
-			story.say("allhands_oncall")
-		"alone":
-			story.say("allhands_engineer")
-		"desk":
-			# Back at his desk. A new ticket. Head down.
-			for leader: Dictionary in leaders:
-				leader.body.hide()
-			rim.visible = false
+			if is_instance_valid(snow):
+				snow.emitting = false
+			if is_instance_valid(receipt):
+				receipt.hide()
 			_exposure(.6)
 			player.global_position = story.SEAT
 			player.visual.rotation.y = 0.0
@@ -188,12 +169,83 @@ func _beat(next: String) -> void:
 			story.desk.set_live(true)
 			story.desk.alarm(true)
 			story.sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -4)
-		"flyout":
+		"exit":
+			character.story_pose = 0
+			character.sit = 0.0
+			player.global_position = EXIT_PATH[0]
+			if DisplayServer.get_name() != "headless":
+				mourn.volume_db = -30.0
+				mourn.play()
+				mourn.create_tween().tween_property(mourn, "volume_db", -8.0, 2.5)
+			_summon_memories()
+		"street":
+			# A cut to the street: rain, a sodium lamp, the tower going up into the dark.
+			for memory: Dictionary in memories:
+				memory.body.hide()
+			_exposure(.5)
+			story._restore_lights()
+			_stage_street()
+			player.global_position = STREET_PATH[0]
+			var away: Vector3 = STREET_PATH[1] - STREET_PATH[0]
+			player.visual.rotation.y = atan2(-away.x, -away.z)
 			story.say("doc_end")
-			# The opening's fly-in, backwards: from his shoulder, out of the window, up.
-			fly = [[story.camera.global_position, story.MONITOR]]
-			for index in range(story.FLY.size() - 1, -1, -1):
-				fly.append(story.FLY[index])
+		"window":
+			_stage_window()
+		"resolved":
+			fade.show()
+			titles.show()
+			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did."
+		"card":
+			titles.text = "MONDAY, 9:00 AM\nSTATUE UNVEILING  ·  ATTENDANCE MANDATORY"
+			if mourn.playing:
+				var out: Tween = mourn.create_tween()
+				out.tween_property(mourn, "volume_db", -40.0, 1.8)
+				out.tween_callback(mourn.stop)
+			# Monday: he has showered. He has not slept.
+			_unbloody()
+		"arrival":
+			_stage_unveiling()
+			titles.hide()
+			story.say("allhands_ceo")
+			for ping in range(6):
+				get_tree().create_timer(ping * .22, false).timeout.connect(story.sting.bind(preload("res://assets/audio/sfx/chat_ping.ogg"), -12))
+		"unveil":
+			# The curtain comes down on him: bronze, on top of it.
+			var drop: Tween = curtain.create_tween()
+			drop.tween_interval(.25)
+			drop.tween_property(curtain, "scale:y", .03, .55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+			drop.parallel().tween_property(curtain, "position:y", .05, .55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+			get_tree().create_timer(.8, false).timeout.connect(_ta_da)
+		"thanks":
+			story.say("allhands_vp")
+		"fun_day":
+			story.say("allhands_people")
+		"pose":
+			# A cut: he has been waved to the far end of the line.
+			player.global_position = PHOTO_EDGE
+			player.visual.rotation.y = PI
+			for leader: Dictionary in leaders:
+				leader.animator.play("ual/victory", .2)
+			story.say("allhands_photo")
+		"photo":
+			_snap()
+		"leave":
+			ElementFx.slow_motion(&"photo", 1.0)
+			story.crew_freeze.hide()
+			card.hide()
+			live.text = "■  STREAM ENDED  ·  0 WATCHING"
+			live.modulate = Color(.6, .6, .65)
+			story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -2)
+			player.global_position = ENGINEER_AT
+			player.visual.rotation.y = PI
+			for leader: Dictionary in leaders:
+				leader.going = true
+				leader.spot = leader.spot - Vector3(7.0, 0, 0)
+			story.say("allhands_oncall")
+		"alone":
+			story.say("allhands_engineer")
+		"next":
+			titles.text = "NEXT: INCIDENT 002\nMONDAY, 9:05 AM"
 
 
 ## Returns false when it is over (or skipped).
@@ -205,8 +257,9 @@ func tick(delta: float) -> bool:
 	var t: float = clock - beat_at
 	var quiet: bool = story.voice.current_line.is_empty() and story.voice.queue.is_empty()
 	incident.main.get_node("HUD").visible = false
+	player.narrative_hold = true
 	story.caption.text = story.voice.subtitle
-	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card"]
+	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card", "resolved", "next"]
 	_walk(delta)
 	var camera: Camera3D = story.camera
 	var engineer: Vector3 = player.global_position
@@ -242,10 +295,10 @@ func tick(delta: float) -> bool:
 			# Close on it, him soft behind it: one cent.
 			_float_receipt(5.5 + t)
 			var at: Vector3 = receipt.global_position
-			camera.global_position = at + Vector3(.18, .06, -.95) + Vector3(0, 0, .25) * minf(1.0, t / 4.0)
+			camera.global_position = at + Vector3(.1, .02, -.9) + Vector3(0, 0, .18) * minf(1.0, t / 4.0)
 			camera.look_at(at)
-			camera.fov = 34.0
-			_focus_far(1.1)
+			camera.fov = 36.0
+			_focus_far(1.0)
 			if t >= 2.0 and quiet:
 				_beat("memorial")
 		"memorial":
@@ -266,32 +319,95 @@ func tick(delta: float) -> bool:
 			memorial_name.modulate.a = alpha
 			memorial_line.modulate.a = alpha
 			if t >= MEMORIAL_EACH * MEMORIAL.size():
+				_beat("desk")
+		"desk":
+			# Over his shoulder at the new ticket. He just looks at it.
+			camera.global_position = story.SEAT + Vector3(-.75, 1.55, 1.15) + Vector3(.1, -.05, -.2) * minf(1.0, t / 3.0)
+			camera.look_at(story.MONITOR)
+			camera.fov = 40.0
+			if t >= 3.0:
+				_beat("exit")
+		"exit":
+			# Out across the floor, slowly, past them; each light goes out behind him.
+			var walk: float = minf(1.0, t / EXIT_SECONDS)
+			player.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], walk)
+			var heading: Vector3 = EXIT_PATH[1] - EXIT_PATH[0]
+			player.visual.rotation.y = atan2(-heading.x, -heading.z)
+			for pool: Light3D in story.pools:
+				if pool.light_energy > 0.0 and pool.global_position.x < engineer.x - 1.8 and absf(pool.global_position.z - engineer.z) < 6.0:
+					pool.light_energy = 0.0
+					story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -14)
+			_haunt(real)
+			if t < EXIT_SECONDS * .55:
+				# Side on, a little ahead of him: the memories pass between us.
+				camera.global_position = engineer + Vector3(1.6, 1.35, -3.4)
+				camera.look_at(engineer + Vector3(.8, 1.0, 0))
+				camera.fov = 46.0
+			else:
+				camera.global_position = engineer - heading.normalized() * 3.6 + Vector3(0, 1.5, .5)
+				camera.look_at(engineer + Vector3.UP * 1.0 + heading.normalized() * 2.0)
+				camera.fov = 48.0
+			if t >= EXIT_SECONDS:
+				_beat("street")
+		"street":
+			# Low across the wet street, the tower behind him; he walks out of frame.
+			var walk: float = minf(1.0, t / STREET_SECONDS)
+			player.global_position = STREET_PATH[0].lerp(STREET_PATH[1], walk)
+			camera.global_position = Vector3(-28.0, -69.25, 11.8) + Vector3(.6, .15, -.4) * walk
+			camera.look_at(Vector3(-18.0, -67.4, 6.0) + Vector3(0, 2.5, 0) * smoothstep(.6, 1.0, walk))
+			camera.fov = 46.0
+			if t >= STREET_SECONDS:
+				_beat("window")
+		"window":
+			# Long lens from across the city, up to the one lit window: the night shift.
+			camera.global_position = Vector3(-74.0, 13.0, 28.0)
+			camera.look_at(WINDOW + Vector3.UP * .9)
+			camera.fov = lerpf(3.2, 2.6, minf(1.0, t / 5.0))
+			if t >= 4.5 and quiet:
+				_beat("resolved")
+		"resolved":
+			fade.color.a = smoothstep(0.0, .8, t)
+			titles.modulate.a = smoothstep(.8, 1.3, t) * (1.0 - smoothstep(3.4, 3.8, t))
+			if t >= 3.9:
 				_beat("card")
 		"card":
 			fade.color.a = 1.0
-			titles.modulate.a = smoothstep(0.0, .35, t) * (1.0 - smoothstep(1.7, 2.1, t))
-			if t >= 2.2:
+			titles.modulate.a = smoothstep(0.0, .35, t) * (1.0 - smoothstep(1.9, 2.3, t))
+			if t >= 2.4:
 				_beat("arrival")
 		"arrival":
-			# Behind him, low: one silhouette in the dark, the keynote lit up ahead.
+			# Behind him, low: one man, a covered statue in a spotlight, leadership beaming.
 			fade.color.a = 1.0 - smoothstep(0.0, .7, t)
-			camera.global_position = Vector3(-1.0, 1.05, 8.2) + Vector3(.2, 0, .7) * minf(1.0, t / 6.0)
-			camera.look_at(Vector3(-.3, 1.5, 14.0))
-			camera.fov = 44.0
+			camera.global_position = Vector3(-2.6, 1.7, 7.4) + Vector3(.3, 0, .8) * minf(1.0, t / 6.0)
+			camera.look_at(STATUE_AT + Vector3(.6, 1.4, 0))
+			camera.fov = 46.0
 			_focus_near(1.6)
 			if t >= 4.0 and quiet:
+				_beat("unveil")
+		"unveil":
+			# Low and slow up the statue as the cloth comes down; then the plaque.
+			if t < 2.6:
+				var rise: float = smoothstep(.2, 2.6, t)
+				camera.global_position = STATUE_AT + Vector3(.9, .4 + rise * .5, -3.2)
+				camera.look_at(STATUE_AT + Vector3.UP * lerpf(1.2, 2.6, rise))
+				camera.fov = 40.0
+			else:
+				camera.global_position = STATUE_AT + Vector3(.2, .7, -2.6)
+				camera.look_at(STATUE_AT + Vector3(0, .55, -.71))
+				camera.fov = 26.0
+			if t >= 5.0:
 				_beat("thanks")
 		"thanks":
-			# Close on her in the spotlight.
-			camera.global_position = Vector3(-1.45, 1.4, 12.0)
-			camera.look_at(Vector3(-1.9, 1.12, 14.0))
-			camera.fov = 30.0
-			_focus_far(2.4)
+			# Her, in the light, the statue over her shoulder.
+			camera.global_position = Vector3(-1.2, 1.45, 11.4)
+			camera.look_at(Vector3(-2.1, 1.15, 13.5))
+			camera.fov = 34.0
+			_focus_far(2.6)
 			if t >= 1.0 and quiet:
 				_beat("fun_day")
 		"fun_day":
-			# The reverse, from the stage: the whole audience, small, alone, in the dark.
-			camera.global_position = Vector3(1.4, 2.1, 13.5)
+			# The reverse, from the stage: the whole audience, small, under the statue's gaze.
+			camera.global_position = STATUE_AT + Vector3(.6, 2.6, -.9)
 			camera.look_at(engineer + Vector3.UP * .9)
 			camera.fov = 40.0
 			if t >= 1.0 and quiet:
@@ -313,38 +429,18 @@ func tick(delta: float) -> bool:
 			if t >= 1.2 and quiet:
 				_beat("alone")
 		"alone":
-			camera.global_position = engineer + Vector3(-.45, 1.15, 1.35) + Vector3(0, .05, .2) * minf(1.0, t / 2.0)
-			camera.look_at(engineer + Vector3.UP * 1.45)
-			_focus_far(1.8)
-			if t >= 1.0 and quiet:
-				_beat("desk")
-		"desk":
-			# Over his shoulder at the new ticket; then his head goes down on the desk.
-			camera.global_position = story.SEAT + Vector3(-.75, 1.55, 1.15) + Vector3(.1, -.05, -.2) * minf(1.0, t / 3.0)
-			camera.look_at(story.MONITOR)
-			camera.fov = 40.0
-			if t - real < 1.6 and t >= 1.6:
-				character.story_pose = character.Pose.SLUMP
-			if t >= 3.4:
-				_beat("flyout")
-		"flyout":
-			var u: float = smoothstep(0.0, 9.0, t) * (fly.size() - 1)
-			var segment: int = mini(int(u), fly.size() - 2)
-			var points: Array[Vector3] = []
-			var looks: Array[Vector3] = []
-			for offset in [-1, 0, 1, 2]:
-				var index: int = clampi(segment + offset, 0, fly.size() - 1)
-				points.append(fly[index][0])
-				looks.append(fly[index][1])
-			camera.global_position = story._catmull(points, u - segment)
-			camera.look_at(story._catmull(looks, u - segment))
-			camera.fov = lerpf(42.0, 32.0, smoothstep(0.0, 9.0, t))
+			# Low behind him, looking up past him at it.
+			camera.global_position = engineer + Vector3(.5, .7, -1.6)
+			camera.look_at(STATUE_AT + Vector3.UP * 2.4)
+			camera.fov = 44.0
+			if t >= 1.4 and quiet:
+				_beat("next")
+		"next":
 			fade.show()
-			fade.color.a = smoothstep(8.2, 9.4, t)
+			fade.color.a = smoothstep(0.0, .8, t)
 			titles.show()
-			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did." if t < 12.0 else "NEXT: INCIDENT 002\nMONDAY, 9:00 AM"
-			titles.modulate.a = smoothstep(9.4, 9.9, t) * (1.0 - smoothstep(11.6, 12.0, t)) + smoothstep(12.0, 12.4, t) * (1.0 - smoothstep(14.2, 14.6, t))
-			if t >= 14.6:
+			titles.modulate.a = smoothstep(.8, 1.3, t) * (1.0 - smoothstep(3.0, 3.4, t))
+			if t >= 3.5:
 				finish()
 				return false
 	camera.make_current()
@@ -352,10 +448,13 @@ func tick(delta: float) -> bool:
 
 
 ## Skipped or over: everything it made goes, and the world is left as the ending found it.
-func finish() -> void:
+## Then (unless a restart is ending it) the night's last lines play over the report.
+func finish(epilogue: bool = true) -> void:
 	if done:
 		return
 	done = true
+	if epilogue:
+		story.say_sequence(VICTORY_LINES)
 	ElementFx.slow_motion(&"photo", 1.0)
 	ElementFx.slow_motion(&"finale", 1.0)
 	story.crew_freeze.hide()
@@ -364,6 +463,8 @@ func finish() -> void:
 	character.story_pose = 0
 	character.sit = 0.0
 	player.global_position = VAULT_AT
+	_unbloody()
+	story._restore_lights()
 	_exposure(1.0)
 	story.camera.attributes = saved_attributes
 	for index in range(story.vault_lights.size()):
@@ -378,10 +479,11 @@ func finish() -> void:
 		story.desk.alarm_detail.text = desk_texts[1]
 	# The report follows straight on; the orbit it usually waits for has been had.
 	incident.ending_hold = minf(incident.ending_hold, .3)
-	for leader: Dictionary in leaders:
-		if is_instance_valid(leader.body):
-			leader.body.queue_free()
-	leaders.clear()
+	for group: Array[Dictionary] in [leaders, memories]:
+		for someone: Dictionary in group:
+			if is_instance_valid(someone.body):
+				someone.body.queue_free()
+		group.clear()
 	for node: Node in props + [card, fade, titles, memorial_name, memorial_line]:
 		if is_instance_valid(node):
 			node.queue_free()
@@ -391,7 +493,78 @@ func finish() -> void:
 
 func _exit_tree() -> void:
 	if not done:
-		finish()
+		finish(false)
+
+
+## Wrecked: his clothes dark and wet with it, from the vault to the street.
+func _bloody() -> void:
+	var gore: StandardMaterial3D = StandardMaterial3D.new()
+	gore.albedo_color = Color(.32, .015, .02, .55)
+	gore.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	gore.roughness = .25
+	for mesh: Node in player.visual.find_children("*", "MeshInstance3D", true, false):
+		if (mesh as MeshInstance3D).material_overlay == null:
+			(mesh as MeshInstance3D).material_overlay = gore
+			bloodied.append(mesh)
+
+
+func _unbloody() -> void:
+	for mesh in bloodied:
+		if is_instance_valid(mesh):
+			mesh.material_overlay = null
+	bloodied.clear()
+
+
+## The five, as he remembers them tonight: pale, translucent, at desks along his way.
+func _summon_memories() -> void:
+	for entry: Array in MEMORIES:
+		var cast: Dictionary = {}
+		for member: Dictionary in CREW.CAST:
+			if member.name == entry[0]:
+				cast = member
+		var body: Node3D = load(ROOT + cast.body).instantiate()
+		incident.add_child(body)
+		body.scale = Vector3.ONE * .62
+		body.global_position = entry[1]
+		body.rotation.y = entry[3]
+		var ghost: StandardMaterial3D = StandardMaterial3D.new()
+		ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		ghost.albedo_color = Color(.72, .86, 1.0, 0.0)
+		for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
+			(mesh as MeshInstance3D).material_override = ghost
+			(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
+		animator.add_animation_library("ual", MOTION)
+		animator.play(entry[2])
+		var whisper: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		whisper.bus = &"Voice"
+		whisper.stream = load("res://assets/audio/voices/talk/talk_%s_a.ogg" % str(entry[0]).to_lower())
+		whisper.pitch_scale = .94
+		whisper.unit_size = 4.0
+		whisper.position.y = 1.4
+		body.add_child(whisper)
+		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false, "glow": 0.0})
+
+
+## Each memory comes up as he nears it, whispers, and fades once he has passed.
+func _haunt(delta: float) -> void:
+	for memory: Dictionary in memories:
+		var body: Node3D = memory.body
+		var along: float = player.global_position.x - body.global_position.x
+		var near: bool = along > -2.6 and along < 1.4
+		memory.glow = move_toward(memory.glow, .42 if near else 0.0, delta * (.5 if near else .3))
+		memory.ghost.albedo_color.a = memory.glow
+		if near and not memory.seen:
+			memory.seen = true
+			if DisplayServer.get_name() != "headless":
+				var whisper: AudioStreamPlayer3D = memory.whisper
+				whisper.volume_db = -6.0
+				whisper.play()
+				var hush: Tween = whisper.create_tween()
+				hush.tween_interval(1.8)
+				hush.tween_property(whisper, "volume_db", -40.0, 1.6)
+				hush.tween_callback(whisper.stop)
 
 
 func _boss_at() -> Vector3:
@@ -459,35 +632,37 @@ func _snowfall() -> void:
 	props.append(snow)
 
 
-## The missing transaction, in gold, drifting down to him.
+## The missing transaction: a thermal-paper receipt, drifting down to him.
 func _drop_receipt() -> void:
 	receipt = Node3D.new()
 	var slip: MeshInstance3D = MeshInstance3D.new()
 	var face: QuadMesh = QuadMesh.new()
-	face.size = Vector2(.3, .46)
+	face.size = Vector2(.24, .5)
 	slip.mesh = face
-	var gold: StandardMaterial3D = StandardMaterial3D.new()
-	gold.albedo_color = Color(1, .92, .7)
-	gold.cull_mode = BaseMaterial3D.CULL_DISABLED
-	gold.emission_enabled = true
-	gold.emission = Color(1, .75, .35)
-	gold.emission_energy_multiplier = 1.4
-	slip.material_override = gold
+	var paper: StandardMaterial3D = StandardMaterial3D.new()
+	paper.albedo_color = Color(.96, .95, .91)
+	paper.cull_mode = BaseMaterial3D.CULL_DISABLED
+	paper.roughness = .9
+	paper.emission_enabled = true
+	paper.emission = Color(.95, .93, .88)
+	paper.emission_energy_multiplier = .35
+	slip.material_override = paper
 	receipt.add_child(slip)
 	var printed: Label3D = Label3D.new()
-	printed.text = "SYNERGEX PAYMENTS\n— — — — — —\nTXN 000001\nAMOUNT  $0.01\nSTATUS  FOUND"
-	printed.font = preload("res://assets/fonts/barlow_condensed_semibold.ttf")
-	printed.font_size = 40
-	printed.pixel_size = .0016
-	printed.modulate = Color(.15, .1, .05)
+	printed.text = RECEIPT
+	printed.font = preload("res://assets/fonts/jetbrains_mono_variable.ttf")
+	printed.font_size = 32
+	printed.pixel_size = .00052
+	printed.modulate = Color(.12, .12, .13)
 	printed.outline_size = 0
 	printed.double_sided = true
+	printed.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	printed.position.z = .002
 	receipt.add_child(printed)
 	var glow: OmniLight3D = OmniLight3D.new()
-	glow.light_color = Color(1, .8, .45)
-	glow.light_energy = 1.2
-	glow.omni_range = 1.8
+	glow.light_color = Color(1, .9, .75)
+	glow.light_energy = .6
+	glow.omni_range = 1.4
 	receipt.add_child(glow)
 	incident.add_child(receipt)
 	receipt_from = player.global_position + Vector3(.4, 4.2, -1.4)
@@ -505,45 +680,211 @@ func _float_receipt(t: float) -> void:
 	receipt.rotation = Vector3(sin(t * 2.1) * .5 * (1.0 - settle), PI + sin(t * 1.1) * .4 * (1.0 - settle), sin(t * 1.6) * .3 * (1.0 - settle))
 
 
-## The lobby as a keynote: a warm spot on the stage, a LIVE sign, the room dim, a cold
-## edge of light on him.
-func _stage_lobby() -> void:
-	if is_instance_valid(snow):
-		snow.emitting = false
-	if is_instance_valid(receipt):
-		receipt.hide()
+## Midnight at the foot of the tower: rain, a sodium streetlamp, a cold fill.
+func _stage_street() -> void:
+	var rain: CPUParticles3D = CPUParticles3D.new()
+	rain.amount = 900
+	rain.lifetime = 1.2
+	rain.preprocess = 1.2
+	rain.local_coords = false
+	rain.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	rain.emission_box_extents = Vector3(16, .5, 12)
+	rain.direction = Vector3(.15, -1, .05)
+	rain.spread = 3.0
+	rain.gravity = Vector3(0, -20, 0)
+	rain.initial_velocity_min = 12.0
+	rain.initial_velocity_max = 15.0
+	rain.particle_flag_align_y = true
+	var streak: QuadMesh = QuadMesh.new()
+	streak.size = Vector2(.012, .45)
+	var wet: StandardMaterial3D = StandardMaterial3D.new()
+	wet.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wet.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	wet.albedo_color = Color(.65, .72, .85, .35)
+	wet.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
+	streak.material = wet
+	rain.mesh = streak
+	rain.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	incident.add_child(rain)
+	rain.global_position = Vector3(-22, -60, 9)
+	props.append(rain)
+	var lamp: OmniLight3D = OmniLight3D.new()
+	lamp.light_color = Color(1, .62, .3)
+	lamp.light_energy = 3.0
+	lamp.omni_range = 9.0
+	lamp.shadow_enabled = true
+	incident.add_child(lamp)
+	lamp.global_position = Vector3(-20.5, -64.5, 9.5)
+	props.append(lamp)
+	var cold: OmniLight3D = OmniLight3D.new()
+	cold.light_color = Color(.45, .55, .85)
+	cold.light_energy = 1.2
+	cold.omni_range = 14.0
+	incident.add_child(cold)
+	cold.global_position = Vector3(-26, -67, 13)
+	props.append(cold)
+
+
+## Five of them in the lit window, black against the light, watching him go.
+func _stage_window() -> void:
+	var black: StandardMaterial3D = StandardMaterial3D.new()
+	black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	black.albedo_color = Color(.01, .01, .012)
+	for index in range(5):
+		var figure: Node3D = Node3D.new()
+		var body: MeshInstance3D = MeshInstance3D.new()
+		var torso: CapsuleMesh = CapsuleMesh.new()
+		torso.radius = .2
+		torso.height = 1.15
+		body.mesh = torso
+		body.material_override = black
+		body.position.y = .58
+		figure.add_child(body)
+		var head: MeshInstance3D = MeshInstance3D.new()
+		var ball: SphereMesh = SphereMesh.new()
+		ball.radius = .14
+		ball.height = .28
+		head.mesh = ball
+		head.material_override = black
+		head.position.y = 1.32
+		figure.add_child(head)
+		incident.add_child(figure)
+		figure.global_position = WINDOW + Vector3(0, 0, (index - 2) * .62)
+		props.append(figure)
+	var warm: OmniLight3D = OmniLight3D.new()
+	warm.light_color = Color(1, .8, .55)
+	warm.light_energy = 6.0
+	warm.omni_range = 7.0
+	incident.add_child(warm)
+	warm.global_position = WINDOW + Vector3(2.6, 1.4, 0)
+	props.append(warm)
+
+
+## Monday in the lobby: a statue under red velvet in a spotlight, a LIVE sign, leadership
+## either side of it, and him, cleaned up, the whole audience.
+func _stage_unveiling() -> void:
+	story.desk.alarm(false)
+	character.sit = 0.0
 	character.story_pose = 0
 	player.global_position = ENGINEER_AT
 	player.visual.rotation.y = PI
-	_exposure(.4)
+	_exposure(.55)
+	var marble: StandardMaterial3D = StandardMaterial3D.new()
+	marble.albedo_color = Color(.86, .85, .82)
+	marble.roughness = .25
+	var pedestal: MeshInstance3D = MeshInstance3D.new()
+	var block: BoxMesh = BoxMesh.new()
+	block.size = Vector3(1.4, 1.1, 1.4)
+	pedestal.mesh = block
+	pedestal.material_override = marble
+	incident.add_child(pedestal)
+	pedestal.global_position = STATUE_AT + Vector3.UP * .55
+	props.append(pedestal)
+	var plaque: Label3D = Label3D.new()
+	plaque.text = PLAQUE
+	plaque.font = preload("res://assets/fonts/cinzel_variable.ttf")
+	plaque.font_size = 40
+	plaque.pixel_size = .0024
+	plaque.modulate = Color(.36, .22, .07)
+	plaque.outline_size = 0
+	plaque.rotation.y = PI
+	incident.add_child(plaque)
+	plaque.global_position = STATUE_AT + Vector3(0, .55, -.71)
+	props.append(plaque)
+	var bronze: StandardMaterial3D = StandardMaterial3D.new()
+	bronze.albedo_color = Color(.55, .36, .18)
+	bronze.metallic = .85
+	bronze.roughness = .35
+	# The Variance, slain, under his feet.
+	var beast: Node3D = load("res://assets/enemies/ultimate_monsters/demon.gltf").instantiate()
+	incident.add_child(beast)
+	beast.scale = Vector3.ONE * .42
+	beast.global_position = STATUE_AT + Vector3(0, 1.1, .15)
+	beast.rotation.y = PI * .5
+	_freeze_pose(beast, "Death", 1.0)
+	_cast(beast, bronze)
+	props.append(beast)
+	# Him: heroic, a little larger than life, arms up.
+	var hero: Node3D = load(ROOT + "suit_male.fbx").instantiate()
+	incident.add_child(hero)
+	hero.scale = Vector3.ONE * .62 * 1.3
+	hero.global_position = STATUE_AT + Vector3(0, 1.32, -.1)
+	hero.rotation.y = PI
+	var pose: AnimationPlayer = hero.find_child("AnimationPlayer", true, false)
+	pose.add_animation_library("ual", MOTION)
+	_freeze_pose(hero, "ual/victory", .45)
+	_cast(hero, bronze)
+	props.append(hero)
+	curtain = MeshInstance3D.new()
+	var drape: BoxMesh = BoxMesh.new()
+	drape.size = Vector3(1.9, 3.8, 1.9)
+	curtain.mesh = drape
+	var velvet: StandardMaterial3D = StandardMaterial3D.new()
+	velvet.albedo_color = Color(.45, .03, .06)
+	velvet.roughness = .95
+	curtain.material_override = velvet
+	incident.add_child(curtain)
+	curtain.global_position = STATUE_AT + Vector3.UP * 1.9
+	props.append(curtain)
 	spot = SpotLight3D.new()
 	spot.light_color = Color(1, .9, .75)
-	spot.light_energy = 22.0
+	spot.light_energy = 24.0
 	spot.spot_range = 12.0
-	spot.spot_angle = 24.0
+	spot.spot_angle = 26.0
 	spot.shadow_enabled = true
 	incident.add_child(spot)
-	spot.global_position = Vector3(-.3, 6.2, 10.6)
-	spot.look_at(Vector3(-.3, 0, 14.0))
+	spot.global_position = Vector3(-.3, 6.4, 10.8)
+	spot.look_at(STATUE_AT + Vector3.UP * 1.2)
 	props.append(spot)
-	rim = OmniLight3D.new()
-	rim.light_color = Color(.4, .55, 1)
-	rim.light_energy = 1.6
-	rim.omni_range = 3.5
-	incident.add_child(rim)
-	rim.global_position = ENGINEER_AT + Vector3(0, 2.0, -1.4)
-	props.append(rim)
-	var live: Label3D = Label3D.new()
-	live.text = "●  LIVE  ·  ALL-HANDS  ·  3,412 WATCHING  ·  3,411 ON MUTE"
+	live = Label3D.new()
+	live.text = "●  LIVE  ·  STATUE UNVEILING  ·  3,412 WATCHING  ·  3,411 ON MUTE"
 	live.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
 	live.font_size = 64
-	live.pixel_size = .006
+	live.pixel_size = .0055
 	live.modulate = Color(1, .3, .25)
 	live.outline_size = 8
-	incident.add_child(live)
-	live.global_position = Vector3(-.3, 2.75, 15.5)
 	live.rotation.y = PI
+	incident.add_child(live)
+	live.global_position = Vector3(-.3, 4.4, 15.5)
 	props.append(live)
+	for entry: Array in LEADERSHIP:
+		var body: Node3D = load(ROOT + entry[0]).instantiate()
+		incident.add_child(body)
+		body.scale = Vector3.ONE * .62
+		CREW.dress(body, entry[1])
+		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
+		animator.add_animation_library("ual", MOTION)
+		body.global_position = entry[2]
+		body.rotation.y = PI
+		animator.play("ual/talking")
+		leaders.append({"body": body, "animator": animator, "spot": entry[2], "going": false})
+
+
+## Ta-da: confetti from both sides, a flash on the bronze.
+func _ta_da() -> void:
+	if done:
+		return
+	story.sting(preload("res://assets/audio/sfx/low_boom.ogg"), -4)
+	story.sting(preload("res://assets/audio/sfx/ui_confirm.ogg"), -2)
+	ElementFx.flash(incident, STATUE_AT + Vector3.UP * 2.4, Color(1, .85, .55), 6.0, 7.0, .4)
+	for side in [-1.0, 1.0]:
+		for colour: Color in [Color(1, .3, .6), Color(.3, .8, 1), Color(1, .85, .2), Color(.5, 1, .5)]:
+			ElementFx.shards(incident, STATUE_AT + Vector3(side * 2.4, .3, -.6), colour, 18, 7.0, 2.0, Vector3(-side * .4, 1, 0), .1)
+
+
+## Hold a model in one frame of a clip, as a statue does.
+func _freeze_pose(model: Node3D, clip: String, at: float) -> void:
+	var animator: AnimationPlayer = model.find_child("AnimationPlayer", true, false)
+	if animator == null or not animator.has_animation(clip):
+		return
+	animator.play(clip)
+	animator.seek(animator.get_animation(clip).length * at, true)
+	animator.pause()
+
+
+func _cast(model: Node3D, metal: Material) -> void:
+	for mesh: Node in model.find_children("*", "MeshInstance3D", true, false):
+		(mesh as MeshInstance3D).material_override = metal
 
 
 func _walk(delta: float) -> void:
@@ -555,9 +896,7 @@ func _walk(delta: float) -> void:
 		to.y = 0
 		if to.length() < .08:
 			leader.going = false
-			# On stage, facing the audience (of one).
-			body.rotation.y = PI
-			leader.animator.play("ual/talking", .3)
+			body.hide()
 			continue
 		body.global_position += to.normalized() * minf(to.length(), WALK_SPEED * delta)
 		body.rotation.y = lerp_angle(body.rotation.y, atan2(to.x, to.z), 1.0 - exp(-8.0 * delta))
@@ -566,23 +905,20 @@ func _walk(delta: float) -> void:
 
 
 func _photo_framing(camera: Camera3D) -> void:
-	camera.global_position = Vector3(-.15, 1.45, 10.1)
-	camera.look_at(Vector3(-.15, 1.3, 13.9))
-	camera.fov = 44.0
+	camera.global_position = Vector3(.4, 1.5, 9.6)
+	camera.look_at(Vector3(.4, 1.7, 14.0))
+	camera.fov = 60.0
 
 
-## Confetti, the flash, the freeze, and the post: the frame itself, cropped to leave him out.
+## The flash, the freeze, and the post: the frame itself, cropped to leave him out.
 func _snap() -> void:
-	for side in [-1.0, 1.0]:
-		for colour: Color in [Color(1, .3, .6), Color(.3, .8, 1), Color(1, .85, .2), Color(.5, 1, .5)]:
-			ElementFx.shards(incident, Vector3(side * 3.6 - .3, .3, 14.2), colour, 18, 7.0, 2.0, Vector3(-side * .5, 1, 0), .1)
-	ElementFx.flash(incident, Vector3(-.15, 1.6, 10.6), Color(1, 1, .95), 8.0, 10.0, .3)
+	ElementFx.flash(incident, Vector3(.4, 1.6, 10.2), Color(1, 1, .95), 8.0, 10.0, .3)
 	story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -2)
 	if DisplayServer.get_name() != "headless":
 		var frame: Image = get_viewport().get_texture().get_image()
 		var size: Vector2i = frame.get_size()
-		# The three of them and the logo; the right edge, where he was standing, goes.
-		var crop: Image = frame.get_region(Rect2i(int(size.x * .12), int(size.y * .1), int(size.x * .62), int(size.y * .7)))
+		# Leadership and the statue; the left edge (his end of the line) goes.
+		var crop: Image = frame.get_region(Rect2i(int(size.x * .26), int(size.y * .05), int(size.x * .74), int(size.y * .78)))
 		photo.texture = ImageTexture.create_from_image(crop)
 		story.whiteout(.35)
 	story.crew_freeze.visible = true
@@ -617,7 +953,7 @@ func _build_ui() -> void:
 	var column: VBoxContainer = VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	card.add_child(column)
-	column.add_child(_text("Brent Fairweather · Chief Synergy Officer at SYNERGEX · 1st\nPosted 11:58 PM · Edited", 15, Color(.35, .37, .4)))
+	column.add_child(_text("Brent Fairweather · Chief Synergy Officer at SYNERGEX · 1st\nPosted Monday, 9:04 AM · Edited", 15, Color(.35, .37, .4)))
 	column.add_child(_text(POST, 17, Color(.1, .1, .12)))
 	photo = TextureRect.new()
 	photo.custom_minimum_size = Vector2(500, 250)
