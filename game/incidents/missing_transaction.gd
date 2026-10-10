@@ -28,12 +28,13 @@ const WAVES: Dictionary = {
 }
 ## Roaming: each main wave breaks out somewhere on the floor, never on top of the
 ## engineer. Sites rotate in this order, skipping any closer than ROAM_DISTANCE and the
-## one just used; positions are snapped to the navigation mesh at spawn time.
+## one just used; positions are snapped to the navigation mesh at spawn time and must be
+## reachable on foot from the main floor (sealed rooms bake their own islands).
 const SITES: Array = [
 	["the desks", Vector3(-8.0, 0, -2.5)],
 	["the pantry", Vector3(22.5, 0, 8.8)],
 	["Operations", Vector3(0.0, 0, -12.0)],
-	["the copy room", Vector3(22.5, 0, -1.0)],
+	["the east corridor", Vector3(16.2, 0, 5.5)],
 	["the conference deck", Vector3(8.0, 1.5, -7.0)],
 	["the lounge", Vector3(9.5, 0, 11.0)],
 	["the meeting wing", Vector3(16.2, 0, -9.5)],
@@ -422,6 +423,7 @@ func _spawn() -> void:
 			return
 		pending = waves()[wave_index].duplicate(true)
 		_choose_site()
+		log_event("Wave %d breaks out across the floor" % (wave_index + 1))
 		_release_swarm(wave_index, pending[0][1])
 		wave_index += 1
 	_spawn_entry(pending.pop_front(), alive)
@@ -438,7 +440,7 @@ func _release_swarm(index: int, site: String) -> void:
 		bug.set_script(ARCHETYPES["bug"])
 		bug.starts_aware = false
 		bug.process_mode = Node.PROCESS_MODE_PAUSABLE
-		bug.position = _on_floor(origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2)
+		bug.position = _near_site(origin - wave_site + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2) if wave_area != "" else origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4
 		bug.detection_distance = 50
 		add_child(bug)
 		bug.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * bug.speed_scale * run.pressure()
@@ -473,15 +475,40 @@ func _choose_site() -> void:
 	for step in range(SITES.size()):
 		var entry: Array = SITES[(site_cursor + step) % SITES.size()]
 		var point: Vector3 = _on_floor(entry[1])
-		if entry[0] != last_area and Vector2(point.x - player.global_position.x, point.z - player.global_position.z).length() >= ROAM_DISTANCE:
+		if entry[0] != last_area and reachable(point) and Vector2(point.x - player.global_position.x, point.z - player.global_position.z).length() >= ROAM_DISTANCE:
 			site_cursor = (site_cursor + step + 1) % SITES.size()
 			wave_area = entry[0]
 			wave_site = point
 			last_area = wave_area
-			_show_beacon()
-			log_event("Incident reported at %s" % wave_area)
 			return
 	wave_area = ""
+
+
+## Where an unaware enemy strolls next: somewhere near another outbreak site, so patrols
+## cross the whole floor instead of loitering where they arrived.
+func patrol_point(from: Vector3) -> Vector3:
+	for attempt in range(6):
+		var entry: Array = SITES[randi() % SITES.size()]
+		var point: Vector3 = _on_floor(entry[1] + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3)))
+		if point.distance_to(from) > 5.0 and reachable(point):
+			return point
+	return from
+
+
+## Spread a spawn around the outbreak, never onto a patch the engineer cannot walk to.
+func _near_site(offset: Vector3) -> Vector3:
+	var point: Vector3 = _on_floor(wave_site + offset)
+	return point if reachable(point) else wave_site
+
+
+## True when a walking path from the main floor ends where the point is.
+func reachable(point: Vector3) -> bool:
+	var map: RID = get_world_3d().navigation_map
+	if NavigationServer3D.map_get_iteration_id(map) == 0:
+		return true
+	var hub: Vector3 = NavigationServer3D.map_get_closest_point(map, Vector3(0, .05, 4))
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(map, hub, point, true)
+	return not path.is_empty() and path[path.size() - 1].distance_to(point) < .6
 
 
 func _on_floor(point: Vector3) -> Vector3:
@@ -491,7 +518,7 @@ func _on_floor(point: Vector3) -> Vector3:
 	return NavigationServer3D.map_get_closest_point(map, point) + Vector3.UP * .05
 
 
-## A column of incident light over the outbreak until someone there notices you.
+## A marker over the nearest unaware threat, so the floor can be hunted.
 func _show_beacon() -> void:
 	beacon.global_position = wave_site
 	beacon.show()
@@ -543,17 +570,32 @@ func _make_beacon() -> void:
 
 
 func _update_beacon() -> void:
-	if beacon == null or not beacon.visible:
+	if beacon == null or stage not in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
+		if beacon != null:
+			beacon.hide()
 		return
-	var distance: int = roundi(Vector2(wave_site.x - player.global_position.x, wave_site.z - player.global_position.z).length())
-	(beacon.get_node("Marker") as Label3D).text = "▼\nINCIDENT · %d m" % distance
-	if wave_area == "" or (pending.is_empty() and alive.is_empty()):
+	var target: CharacterBody3D = nearest_threat()
+	if target == null:
 		beacon.hide()
 		return
+	var distance: int = roundi(Vector2(target.global_position.x - player.global_position.x, target.global_position.z - player.global_position.z).length())
+	beacon.global_position = target.global_position
+	beacon.show()
+	(beacon.get_node("Marker") as Label3D).text = "▼\nTHREAT · %d m" % distance
+
+
+## The closest living wave member that is not already chasing the engineer.
+func nearest_threat() -> CharacterBody3D:
+	var best: CharacterBody3D = null
+	var best_distance: float = INF
 	for actor: CharacterBody3D in alive:
-		if is_instance_valid(actor) and actor.awareness == actor.Awareness.ENGAGED:
-			beacon.hide()
-			return
+		if not is_instance_valid(actor) or actor.health <= 0 or actor.awareness == actor.Awareness.ENGAGED:
+			continue
+		var distance: float = actor.global_position.distance_to(player.global_position)
+		if distance < best_distance:
+			best = actor
+			best_distance = distance
+	return best
 
 
 func spawn_site(name: String) -> Vector3:
@@ -571,9 +613,10 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	actor.starts_aware = is_same(group, sync_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
 	if is_same(group, alive) and wave_area != "":
-		# Spread the wave around its outbreak site instead of the fixed markers.
+		# Each member breaks out at its own site away from the engineer, then patrols.
+		_choose_site()
 		var slot: float = (alive.size() + bugs.size()) * 2.4
-		actor.position = _on_floor(wave_site + Vector3(cos(slot), 0, sin(slot)) * 1.8)
+		actor.position = _near_site(Vector3(cos(slot), 0, sin(slot)) * 1.2)
 	else:
 		actor.position = spawn_site(entry[1])
 	actor.detection_distance = 50
@@ -741,9 +784,10 @@ func near_console() -> bool:
 func encounter_status() -> String:
 	if quick_sync == "active":
 		return "Quick Sync in progress • %d attendee%s remaining" % [sync_alive.size(), "" if sync_alive.size() == 1 else "s"]
-	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and beacon != null and beacon.visible:
-		var distance: int = roundi(Vector2(wave_site.x - player.global_position.x, wave_site.z - player.global_position.z).length())
-		return "Incident reported at %s • %d m • %d threat%s remaining" % [wave_area, distance, remaining, "" if remaining == 1 else "s"]
+	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and nearest_threat() != null:
+		var near: CharacterBody3D = nearest_threat()
+		var distance: int = roundi(Vector2(near.global_position.x - player.global_position.x, near.global_position.z - player.global_position.z).length())
+		return "%d threat%s roaming the floor • nearest %d m" % [remaining, "" if remaining == 1 else "s", distance]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
 		return "%d threat%s remaining • wave %d / %d%s" % [remaining, "" if remaining == 1 else "s", wave_index, waves().size(), " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
 	if stage == Stage.BOSS and not boss_triggered:

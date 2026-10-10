@@ -58,6 +58,17 @@ func _run() -> void:
 			if a != b:
 				closest = minf(closest, a.global_position.distance_to(b.global_position))
 	check(closest > .5, "separation keeps a crowd from fusing into one silhouette")
+	# Every outbreak site, and every spawn slot around it, is reachable on foot.
+	var stranded: Array[String] = []
+	for entry: Array in incident.SITES:
+		incident.wave_site = incident._on_floor(entry[1])
+		if not incident.reachable(incident.wave_site):
+			stranded.append(entry[0])
+		for slot in range(12):
+			var spot: Vector3 = incident._near_site(Vector3(cos(slot * 2.4), 0, sin(slot * 2.4)) * 2.2)
+			if not incident.reachable(spot):
+				stranded.append("%s/%d" % [entry[0], slot])
+	check(stranded.is_empty(), "no outbreak site or spawn slot is stranded in a sealed room: %s" % [stranded])
 	# Roaming: waves break out at named sites away from the engineer, marked by a beacon.
 	scene.reset_encounter()
 	player.camera_rig.set_capture(true)
@@ -73,14 +84,21 @@ func _run() -> void:
 	var nearest: float = INF
 	for foe: CharacterBody3D in incident.alive:
 		nearest = minf(nearest, Vector2(foe.global_position.x - player.global_position.x, foe.global_position.z - player.global_position.z).length())
-	check(first_area != "" and nearest > 10.0 and incident.beacon.visible and incident.encounter_status().begins_with("Incident reported at " + first_area), "the first wave breaks out at a named site away from the engineer, with a beacon")
+	check(first_area != "" and nearest > 10.0 and incident.beacon.visible and incident.encounter_status().contains("roaming the floor"), "the first wave breaks out away from the engineer, marked and roaming")
+	var sites: Dictionary = {}
+	for foe: CharacterBody3D in incident.alive:
+		sites[Vector2i(roundi(foe.home.x / 4.0), roundi(foe.home.z / 4.0))] = true
+	check(sites.size() >= 2, "wave members break out at different sites instead of one group")
 	for foe: CharacterBody3D in incident.alive.duplicate():
 		foe.receive_damage(100000, player.position)
 	for wait in range(600):
 		if not incident.alive.is_empty():
 			break
 		await frames(1)
-	check(incident.wave_area != "" and incident.wave_area != first_area, "the next wave breaks out somewhere else")
+	var second_nearest: float = INF
+	for foe: CharacterBody3D in incident.alive:
+		second_nearest = minf(second_nearest, Vector2(foe.global_position.x - player.global_position.x, foe.global_position.z - player.global_position.z).length())
+	check(incident.wave_area != "" and second_nearest > 10.0, "the next wave also breaks out away from the engineer")
 	# Every archetype wears its own CC0 rigged body; the native boxes stay hidden.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var worn: Array = []
@@ -121,11 +139,11 @@ func _run() -> void:
 	var crew: Node3D = incident.coworkers
 	incident.battle_mode.engaged = true
 	crew._process(.016)
-	var manager: AnimationPlayer = crew.people[2].animator
-	check(crew.people.size() == 4 and manager.current_animation.ends_with("Defeat"), "coworkers cower while an enemy is engaged")
+	var manager: AnimationPlayer = crew.person("Manager").animator
+	check(crew.people.size() == crew.CAST.size() and crew.people.size() >= 9 and manager.current_animation.ends_with("Defeat"), "coworkers cower while an enemy is engaged")
 	incident.battle_mode.engaged = false
 	crew._process(.016)
-	check(manager.current_animation.ends_with("Victory") and (crew.people[2].line as Label3D).text == "Great teamwork, everyone!", "after the fight the manager takes the credit")
+	check(manager.current_animation.ends_with("Victory") and (crew.person("Manager").line as Label3D).text == "Great teamwork, everyone!", "after the fight the manager takes the credit")
 	crew.reset()
 	check(not manager.current_animation.ends_with("Victory") and crew.find_children("*", "CollisionObject3D", true, false).is_empty(), "crew resets and never blocks the fight")
 	# Combat framing: a resting mouse lets the view ease toward the fight; input takes it back.
@@ -243,7 +261,8 @@ func _run() -> void:
 	await frames(10)
 	idler.visual.rotation.y = 0.0
 	await frames(110)
-	check(idler.awareness == idler.Awareness.UNAWARE and idler.global_position.distance_to(Vector3(0, .05, -6)) < 3.2, "an unaware record busies itself near its arrival instead of chasing")
+	check(idler.awareness == idler.Awareness.UNAWARE and idler.global_position.distance_to(player.position) > 6.0, "an unaware record patrols instead of chasing")
+	check(idler.cone.visible, "an unaware enemy shows what it can see")
 	var hp_before: int = idler.health
 	idler.receive_damage(20, player.position)
 	check(hp_before - idler.health == 40 and idler.awareness == idler.Awareness.ENGAGED, "a surprise hit lands double and engages")
@@ -274,12 +293,15 @@ func _run() -> void:
 	await frames(20)
 	check(listener.awareness == listener.Awareness.UNAWARE, "noise behind its back does not start a chase")
 	var bored: CharacterBody3D = spawn("record", Vector3(12, .05, -12), false)
+	bored.sight_range = .5
 	await frames(60 * 20)
 	check(bored.awareness == bored.Awareness.UNAWARE, "an unseen arrival keeps waiting where it broke out, however long it takes")
 	var poked: CharacterBody3D = spawn("record", Vector3(-9, .05, -10), false)
 	await frames(70)
 	poked.receive_damage(5, player.position)
 	check(poked.awareness == poked.Awareness.ENGAGED, "hitting an enemy makes it chase")
+	await frames(2)
+	check(not poked.cone.visible, "a chasing enemy hides its sight cone")
 	# Engaged pursuers lose a hidden engineer and search the last known spot.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var seeker: CharacterBody3D = spawn("record", Vector3(-1, .05, -6))

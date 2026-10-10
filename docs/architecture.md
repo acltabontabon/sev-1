@@ -559,21 +559,27 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   additive `next_pass`. Scope Creep scales the rig with its growth; The Variance's
   false positives are `projection()` copies of its rig. Provenance in
   `assets/enemies/README.md`.
-- **Roaming outbreaks.** `missing_transaction.gd` picks each main wave's site from
-  `SITES` (desks, pantry, Operations, copy room, conference deck, lounge, meeting wing)
-  in rotation, skipping any within `ROAM_DISTANCE` (14 m) of the engineer and the last
-  one used, snapped to the navigation mesh. The wave and its bug swarm spread around the
-  site. An `IncidentBeacon` (light column plus a through-wall "▼ INCIDENT · N m" marker)
-  stays up until someone there engages; `encounter_status()` names the site and
-  distance; the timeline logs each outbreak.
+- **Roaming outbreaks and patrols.** `missing_transaction.gd` gives each wave member its
+  own site from `SITES` (desks, pantry, Operations, east corridor, conference deck,
+  lounge, meeting wing) in rotation, skipping any within `ROAM_DISTANCE` (14 m) of the
+  engineer, the last one used, and any point a walking path from the main floor cannot
+  reach (`reachable()`; sealed rooms bake their own navigation islands). Unaware enemies
+  then patrol: `patrol_point()` picks a reachable spot near another site, they stroll
+  there, pause and look around, and move on. The `IncidentBeacon` (light column plus a
+  through-wall "▼ THREAT · N m" marker) follows `nearest_threat()`, the closest member
+  not yet chasing; `encounter_status()` reports how many roam and the nearest distance.
+- **Sight cones.** `game/enemies/sight_cone.gd` paints each enemy's real field of view
+  (`sight_range` 11 m, `sight_fov` 110°) on the floor as a fan of 22 rays clipped by
+  world collision, rebuilt every 0.15 s with staggered starts. It is pale while UNAWARE,
+  orange while NOTICING, amber while SEARCHING, and hidden when ENGAGED or dead.
 - **Minions.** `game/enemies/bug.gd` is a one-hit archetype (any accepted hit kills).
   `missing_transaction.gd` releases `SWARMS` of bugs with each wave; they live in `bugs`,
   never count toward `remaining` or wave completion, bypass the telegraph cap, and
   `_close_bugs()` kills survivors (WONTFIX, logged to the timeline) when a stage's waves
   are done.
-- **Overtime crew.** `game/incidents/coworkers.gd` (owned by the incident) poses four
-  recoloured CC0 office workers from `assets/characters/quaternius/` on routines
-  (asleep, at a desk, pacing on a call, fixing the vending machine). No collision. Each
+- **Overtime crew.** `game/incidents/coworkers.gd` (owned by the incident) poses nine
+  recoloured CC0 office workers from `assets/characters/quaternius/` from a `CAST` table
+  on routines (asleep, sit, pace, carry, fix, stand with a periodic gesture). No collision. Each
   has one line shown when the engineer walks past; they cower while `battle_mode` is
   engaged and the manager claims credit when a fight ends. `reset()` restores them.
 - **Freeze-frames and framing.** `ElementFx.freeze()` drops `Engine.time_scale` for a

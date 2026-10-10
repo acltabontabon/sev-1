@@ -103,6 +103,10 @@ func _run() -> void:
 		await attacks()
 		quit()
 		return
+	if only == "office":
+		await office_life()
+		quit()
+		return
 	if only == "areas":
 		await tour()
 		quit()
@@ -314,6 +318,39 @@ func attacks() -> void:
 		await live(.25)
 		await shot("attack_%s_after" % kind)
 	incident._cleanup()
+	app.main_menu()
+	await frames(5)
+
+
+## The night shift and the patrols: decor, neon, coworkers, sight cones from above.
+func office_life() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(6.0)
+	incident.presentation.feed.modulate.a = 0.0
+	app.session.get_node("HUD").hide()
+	var camera: Camera3D = Camera3D.new()
+	app.session.add_child(camera)
+	camera.fov = 60
+	camera.make_current()
+	for view: Array in [["office_lounge", Vector3(3.5, 2.6, 6.0), Vector3(9.4, .9, 13.0)],
+			["office_desks", Vector3(-2.5, 2.8, 11.0), Vector3(-10.5, 1.0, -1.0)],
+			["office_north", Vector3(-1.0, 2.6, -5.0), Vector3(-8.8, 3.0, -15.7)],
+			["office_wing", Vector3(16.2, 2.2, 10.0), Vector3(15.0, 1.6, -8.0)]]:
+		camera.position = view[1]
+		camera.look_at(view[2])
+		await live(.3)
+		await shot(view[0])
+	var ceiling: Node3D = incident.room.get_node("Ceiling")
+	ceiling.hide()
+	camera.position = Vector3(2.0, 22.0, 6.0)
+	camera.look_at(Vector3(2.0, 0, -1.0))
+	camera.fov = 70
+	await live(1.5)
+	await shot("office_patrols")
+	ceiling.show()
 	app.main_menu()
 	await frames(5)
 

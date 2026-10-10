@@ -40,8 +40,8 @@ var blocked_cooldown: float = 0.0
 var speed_scale: float = 1.0
 ## Lab opponents and bosses are always hunting; incident waves start unaware.
 @export var starts_aware: bool = true
-@export var sight_range: float = 14.0
-@export_range(30, 360) var sight_fov: float = 140.0
+@export var sight_range: float = 11.0
+@export_range(30, 360) var sight_fov: float = 110.0
 var awareness: Awareness = Awareness.ENGAGED
 var awareness_left: float = 0.0
 var unaware_time: float = 0.0
@@ -55,6 +55,9 @@ var orbit_sign: float = 1.0
 var backoff_left: float = 0.0
 var was_attacking: bool = false
 var activity: String = ""
+## Unaware enemies patrol: stroll to a point, look around for a moment, move on.
+var patrol_pause: float = 0.0
+var cone: MeshInstance3D
 ## Spell identity, overridden by archetypes in _ready. Presentation only: a sigil under
 ## the caster on every telegraph, a release on the strike, a burst on defeat.
 var magic_color: Color = Color(1, .22, .3)
@@ -88,6 +91,9 @@ func _ready() -> void:
 	flash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	flash_material.albedo_color = Color(1, 0.9, 0.65)
 	tell.mesh = melee.arc.mesh
+	cone = preload("res://game/enemies/sight_cone.gd").new()
+	cone.name = "SightCone"
+	add_child(cone)
 	if rig_kind != "":
 		rig = MonsterRig.create(rig_kind, self)
 		visual.add_child(rig)
@@ -134,6 +140,7 @@ func reset_enemy() -> void:
 	unaware_time = 0.0
 	lost_left = 0.0
 	backoff_left = 0.0
+	patrol_pause = 0.0
 	home = global_position
 	wander_target = home
 	last_seen = home
@@ -280,13 +287,22 @@ func _awareness(delta: float) -> Variant:
 			if sensing and _senses():
 				notice()
 				return Vector3.ZERO
-			# Busywork: drift between nearby spots at a stroll.
+			# Patrol: stroll to a point across the floor, stop and look around, move on.
+			if patrol_pause > 0:
+				patrol_pause -= delta
+				visual.rotation.y += delta * .9 * orbit_sign
+				return Vector3.ZERO
 			wander_left -= delta
-			if wander_left <= 0 or global_position.distance_to(wander_target) < .5:
-				wander_left = randf_range(2.5, 4.5)
-				var angle: float = randf() * TAU
-				wander_target = home + Vector3(cos(angle), 0, sin(angle)) * randf_range(.5, 2.5)
-			return _route(wander_target) * .3
+			if wander_left <= 0 or global_position.distance_to(wander_target) < .8:
+				if wander_left > 0:
+					patrol_pause = randf_range(1.2, 2.6)
+				wander_left = randf_range(9.0, 14.0)
+				wander_target = get_parent().patrol_point(global_position) if get_parent().has_method("patrol_point") else home + Vector3(cos(randf() * TAU), 0, sin(randf() * TAU)) * randf_range(.5, 2.5)
+				return Vector3.ZERO
+			var stroll: Vector3 = _route(wander_target)
+			if not stroll.is_zero_approx():
+				visual.rotation.y = lerp_angle(visual.rotation.y, atan2(-stroll.x, -stroll.z), 1.0 - exp(-5.0 * delta))
+			return stroll * .45
 		Awareness.SEARCHING:
 			if sensing and _senses():
 				notice()

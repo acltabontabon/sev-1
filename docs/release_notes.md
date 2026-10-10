@@ -1,5 +1,39 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.7 — Patrols, sight cones and the night shift (10 October 2026)
+
+Creator feedback on 0.2.6: a monster got stuck in a room where it could not be hit; the
+office needed more life; the stats panel was too big; more NPCs doing office nonsense;
+and enemies should roam with visible sight instead of grouping at one spot.
+
+- **Stuck-monster fix.** The copy room in the meeting wing is sealed, and its navigation
+  mesh was an island; monsters spawned there could not be reached. That site is gone
+  (replaced by the east corridor), and every spawn position is now path-checked from
+  the main floor, with an automated check over every site and spawn slot.
+- **Patrols and sight cones.** Each wave member breaks out at its own site and then
+  patrols the office, pausing to look around. Every unaware enemy shows what it can see
+  as a cone on the floor, cut off by walls and furniture: pale when unaware, orange
+  when it is noticing you, amber while searching. Stay out of the cone, hit first. The
+  marker now follows the nearest threat that is not already chasing you, and the HUD
+  reads "4 threats roaming the floor • nearest 17 m". Sight is 11 m over 110°.
+- **A livelier office.** A lounge with rug, sofa, armchairs, coffee table, lamp, TV,
+  speakers and plants; plants and floor lamps along the windows; desk plants, books,
+  unpacked boxes and warm desk lamps; neon signs ("MOVE FAST", "SHIP IT", "THINK
+  DIFFERENT. DEPLOY THE SAME.") with coloured light; culture-deck posters ("WE ARE A
+  FAMILY* *terms apply", "FAIL FAST (NOT IN PROD)", "YOUR WELLBEING IS A KPI", "IT
+  WORKED ON MY MACHINE"); a bench and plants in the wing. Decorative only: no collision,
+  combat lanes untouched.
+- **More coworkers (nine).** New: a one-person standup ("Yesterday: meetings. Today:
+  meetings. Blockers: meetings."), a day-one intern hauling boxes ("Is it normal to be
+  on call on day one?"), someone "working from home" on the lounge sofa, a man waiting
+  forty minutes at the microwave, and a recruiter on the deck ("We're like a family
+  here. A family with KPIs.").
+- **Compact stats.** The lower-left card is about a third of its old size; the debt and
+  Burnout effect lines appear only once they say something.
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 119.5 FPS mean (p95
+9.5 ms, max 17.2 ms). Validation: 658 assertions across 15 headless suites.
+
 ## 0.2.6 — Roam the floor (10 October 2026)
 
 Creator feedback: monsters always spawned in your face, and they should only chase you

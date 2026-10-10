@@ -27,6 +27,9 @@ materials = {
  'vault_floor': ((.36,.4,.44,1), 1, 1), 'ceiling_tile': ((.5,.52,.53,1), 1, 0),
  'shutter': ((.2,.19,.14,1), .5, .7), 'green': ((.25,.95,.55,1), .5, 0),
  'amber': ((1,.62,.2,1), .5, 0), 'purple': ((.55,.25,.95,1), .5, 0),
+ 'neon_pink': ((1,.22,.62,1), .4, 0), 'neon_cyan': ((.2,.88,1,1), .4, 0), 'neon_amber': ((1,.7,.25,1), .4, 0),
+ 'poster_red': ((.78,.2,.18,1), .8, 0), 'poster_teal': ((.12,.5,.52,1), .8, 0), 'poster_gold': ((.85,.66,.25,1), .8, 0),
+ 'poster_violet': ((.42,.26,.66,1), .8, 0),
 }
 textured = {'carpet': ('carpet', .45), 'plaster': ('painted_plaster', .35), 'walnut': ('walnut_veneer', 1.0),
  'stone': ('polished_concrete', .3), 'metal': ('brushed_metal', 1.0), 'vault_floor': ('vault_floor', .5),
@@ -61,6 +64,8 @@ color_ramp = SubResource("Grain")
         extra+='albedo_texture = SubResource("Texture")\nuv1_triplanar = true\nuv1_scale = Vector3(3, 3, 3)\n'
     if name in ('screen','warm','cool','alert','mint','green','amber','purple'):
         extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = {0.65 if name=="screen" else 1.3}\n'
+    if name.startswith('neon_'):
+        extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = 3.2\n'
     if name=='glass': extra+='transparency = 1\ncull_mode = 2\n'
     (OUT/f'{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n{header}{resources}\n[resource]\nalbedo_color = {col(color)}\nroughness = {rough}\nmetallic = {metallic}\n'+extra)
 
@@ -433,5 +438,63 @@ s.box('WallInlay',(13.73,2.6,0),(.025,3.4,7),'walnut')
 for z in range(-3,4): s.box(f'WallSlat{z}',(13.68,2.6,z),(.045,3.4,.04),'metal')
 s.text('QuietNotice','QUIET HOURS',(13.60,3,0),.006,60,rot=(0,-90,0))
 s.text('QuietSubtext','16:59 — UNTIL RESOLVED',(13.60,2.4,0),.0035,38,rot=(0,-90,0))
+# ---------------------------------------------------------------- Night-shift decor
+# Purely decorative (no collision, outside the combat lanes): life left behind by the
+# people who still work here. A brighter PropTint keeps the colour that the after-hours
+# palette strips from the pantry kit.
+s.node('Decor','Node3D')
+s.node('DecorTint','Node',parent='Decor',props='script = '+s.external('res://game/rooms/office/prop_tint.gd','Script')+'\nvalue = 0.85\nsaturation = 0.95')
+def decor(name,file,pos,rot=0,scale=2.0): s.glb(name,file,pos,rot,scale,parent='Decor')
+# Window line: plants and warm floor lamps between the desk clusters and the glass.
+for idx,z in enumerate([-13.2,-8.6,-3.2,2.6,8.2,13.4]): decor(f'WindowPlant{idx}','potted_plant',(-13.1,0,z),idx*40,2.3)
+for idx,z in enumerate([-5.8,5.4]):
+    decor(f'WindowLamp{idx}','lamp_round_floor',(-12.9,0,z),0,2.2)
+    s.light(f'WindowLampLight{idx}',(-12.9,2.4,z),(1,.72,.45),1.1,4.5)
+# Desks: the overtime crew's clutter, a lamp per cluster, boxes nobody unpacked.
+for idx,(x,z) in enumerate([(-9.0,5.0),(-6.5,5.0),(-9.0,0.0),(-6.5,0.0),(-9.0,-6.0),(-6.5,-6.0)]):
+    decor(f'DeskPlant{idx}',['plant_small_1','plant_small_2','plant_small_3'][idx%3],(x-.75,.76,z-.25),idx*55,1.6)
+    decor(f'DeskBooks{idx}','books',(x+.7,.76,z-.2),idx*30,1.5)
+    decor(f'DeskBox{idx}','cardboard_box_open' if idx%2 else 'cardboard_box_closed',(x+.55,0,z+.55),idx*25,1.6)
+for idx,(x,z) in enumerate([(-7.75,5.0),(-7.75,-6.0)]):
+    decor(f'DeskLamp{idx}','lamp_square_table',(x,.76,z-.3),0,1.8)
+    s.light(f'DeskLampLight{idx}',(x,1.35,z-.3),(1,.78,.5),.9,3.2)
+# The lounge (south-east): somewhere to pretend to rest.
+decor('LoungeRug','rug_round',(9.4,.012,11.0),0,3.4)
+decor('LoungeSofa','lounge_design_sofa',(9.4,0,13.9),180,2.1)
+decor('LoungeChairWest','lounge_chair_relax',(7.0,0,10.6),90,2.0)
+decor('LoungeChairEast','lounge_chair_relax',(11.6,0,10.9),-90,2.0)
+decor('LoungeTable','table_coffee',(9.4,0,11.1),0,2.0)
+decor('LoungeLaptop','laptop',(9.2,.43,11.0),20,1.6)
+decor('LoungeLamp','lamp_round_floor',(12.7,0,14.4),0,2.2)
+decor('LoungePlantA','potted_plant',(6.2,0,15.0),0,2.5)
+decor('LoungePlantB','potted_plant',(12.9,0,12.4),70,2.1)
+decor('LoungeTV','television_modern',(9.4,.9,15.55),180,2.0)
+decor('LoungeSpeakerA','speaker',(8.1,0,15.4),180,1.8)
+decor('LoungeSpeakerB','speaker',(10.7,0,15.4),180,1.8)
+decor('LoungeShelf','bookcase_open',(5.6,0,15.35),180,2.0)
+s.light('LoungeLampLight',(12.7,2.3,14.4),(1,.7,.42),1.2,5)
+s.light('LoungeTVGlow',(9.4,1.6,14.9),(.35,.75,1),.8,4)
+# Deck and wing: plants on the deck corners, a bench and greenery along the corridor.
+for idx,x in enumerate([5.6,10.4]): decor(f'DeckPlant{idx}','potted_plant',(x,1.5,-10.5),idx*90,2.0)
+decor('WingBench','bench_cushion',(18.05,0,-1.2),-90,2.0)
+for idx,z in enumerate([-14.6,14.6]): decor(f'WingPlant{idx}','potted_plant',(17.9,0,z),idx*120,2.3)
+# Neon: the company's three beliefs, lit in colour so the floor never reads grey.
+for name,text,pos,rot,mat,color in [
+    ('NeonMoveFast','MOVE FAST',(-8.8,4.3,-15.7),0,'neon_cyan',(.2,.88,1)),
+    ('NeonShipIt','SHIP IT',(9.4,3.6,15.7),180,'neon_pink',(1,.22,.62)),
+    ('NeonDeploy','THINK DIFFERENT.\nDEPLOY THE SAME.',(14.3,3.1,-7.0),90,'neon_amber',(1,.7,.25))]:
+    s.node(name,'Label3D',pos,props=f'text = {quote(text)}\nfont_size = 96\npixel_size = 0.006\nmodulate = {col((color[0]*2.4,color[1]*2.4,color[2]*2.4,1))}\noutline_size = 18\noutline_modulate = {col((color[0],color[1],color[2],.55))}\nshaded = false\nrotation_degrees = {vec((0,rot,0))}\n')
+    tube=s.resource('BoxMesh',f'size = Vector3(4.2, 0.04, 0.04)\nmaterial = '+s.external(f'res://game/rooms/office/{mat}.tres','Material'))
+    s.node(name+'Tube','MeshInstance3D',(pos[0],pos[1]-.75 if '\n' not in text else pos[1]-1.05,pos[2]),props=f'mesh = {tube}\nrotation_degrees = {vec((0,rot,0))}')
+    light_offset=(0,0,.6) if rot==0 else ((0,0,-.6) if rot==180 else (.6,0,0))
+    s.light(name+'Light',(pos[0]+light_offset[0],pos[1]-.3,pos[2]+light_offset[2]),color,1.4,6)
+# Posters: the culture deck, framed in colour on the south and north walls.
+for idx,(text,x,z,rot,mat) in enumerate([
+    ('WE ARE A FAMILY*\n*terms apply',-9.5,15.7,180,'poster_red'),
+    ('FAIL FAST\n(NOT IN PROD)',3.0,15.7,180,'poster_teal'),
+    ('YOUR WELLBEING\nIS A KPI',-12.0,-15.7,0,'poster_gold'),
+    ('IT WORKED\nON MY MACHINE',12.0,-15.7,0,'poster_violet')]):
+    s.box(f'Poster{idx}',(x,2.4,z),(1.7,2.2,.04),mat,rot=(0,rot,0))
+    s.text(f'PosterText{idx}',text,(x,2.4,z+(-.03 if rot==180 else .03)),.0065,64,(1,.97,.9,1),rot=(0,rot,0))
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')

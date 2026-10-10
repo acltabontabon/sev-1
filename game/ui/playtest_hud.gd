@@ -66,7 +66,7 @@ func _ready() -> void:
 func _bar(fill: Color, width: float) -> ProgressBar:
 	var bar: ProgressBar = ProgressBar.new()
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(width, 12)
+	bar.custom_minimum_size = Vector2(width, 9)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var back: StyleBoxFlat = StyleBoxFlat.new()
 	back.bg_color = Color(.08, .1, .12, .9)
@@ -81,17 +81,18 @@ func _bar(fill: Color, width: float) -> ProgressBar:
 
 func _row(parent: Container, caption: String, bar: ProgressBar) -> Label:
 	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	row.add_theme_constant_override("separation", 8)
 	parent.add_child(row)
 	var name_label: Label = Label.new()
 	name_label.text = caption
 	name_label.theme_type_variation = "Eyebrow"
-	name_label.custom_minimum_size.x = 84
+	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.custom_minimum_size.x = 56
 	row.add_child(name_label)
 	row.add_child(bar)
 	var value: Label = Label.new()
 	value.theme_type_variation = "MonoLabel"
-	value.add_theme_font_size_override("font_size", 13)
+	value.add_theme_font_size_override("font_size", 11)
 	row.add_child(value)
 	return value
 
@@ -114,32 +115,35 @@ func _build_incident_hud() -> void:
 	vitals.theme_type_variation = "Card"
 	vitals.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vitals.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	vitals.offset_left = 24
-	vitals.offset_right = 470
-	vitals.offset_top = -222
-	vitals.offset_bottom = -24
+	# Compact: the fight is the picture; vitals read at a glance from the corner.
+	vitals.offset_left = 20
+	vitals.offset_right = 20
+	vitals.offset_top = -20
+	vitals.offset_bottom = -20
+	vitals.grow_horizontal = Control.GROW_DIRECTION_END
 	vitals.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(vitals)
 	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override("separation", 6)
+	column.add_theme_constant_override("separation", 3)
 	vitals.add_child(column)
-	health_bar = _bar(Color(.4, .9, .85), 250)
+	health_bar = _bar(Color(.4, .9, .85), 100)
 	health_value = _row(column, "YOU", health_bar)
-	burnout_bar = _bar(Color(1, .7, .3), 250)
+	burnout_bar = _bar(Color(1, .7, .3), 100)
 	burnout_value = _row(column, "BURNOUT", burnout_bar)
-	debt_bar = _bar(Color(1, .55, .25), 250)
-	debt_value = _row(column, "TECH DEBT", debt_bar)
+	debt_bar = _bar(Color(1, .55, .25), 100)
+	debt_value = _row(column, "DEBT", debt_bar)
 	_build_banner()
 	for node_name: String in ["Debt", "Burnout"]:
 		var label: Label = $Margin/VBox.get_node(node_name)
 		label.reparent(column)
 		label.theme_type_variation = "MonoLabel"
-		label.add_theme_font_size_override("font_size", 13)
+		label.add_theme_font_size_override("font_size", 10)
+		label.add_theme_color_override("font_color", Color(.62, .68, .72))
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size.x = 420
+		label.custom_minimum_size.x = 240
 	buff = Label.new()
 	buff.theme_type_variation = "Subhead"
-	buff.add_theme_font_size_override("font_size", 15)
+	buff.add_theme_font_size_override("font_size", 13)
 	buff.add_theme_color_override("font_color", Color(.55, 1, .7))
 	column.add_child(buff)
 	boss_box = VBoxContainer.new()
@@ -414,6 +418,9 @@ func _refresh_incident(incident: Node) -> void:
 	burnout_label.modulate = [Color(.75, .85, .9), Color(1, .85, .55), Color(1, .65, .5)][run.burnout_band()]
 	if not incident.buff_text().is_empty():
 		burnout_label.text += "  ·  " + incident.buff_text()
+	# Effect lines only appear once there is an effect to read.
+	debt_label.visible = incident.run.pressure() > 1.001
+	burnout_label.visible = run.burnout > 0 or not incident.buff_text().is_empty() or not run.modifier_summary().begins_with("Damage 100% • Taken 100% • Dodge recovery 100%")
 	if incident.challenge_result == "Active":
 		burnout_label.text += "  ·  Committed ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
 	elif incident.corporate_choice == 0:

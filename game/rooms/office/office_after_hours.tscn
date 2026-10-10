@@ -35,6 +35,30 @@
 [ext_resource type="PackedScene" path="res://game/rooms/office/server_rack_lite.tscn" id="33"]
 [ext_resource type="Material" path="res://game/rooms/office/amber.tres" id="34"]
 [ext_resource type="NavigationMesh" path="res://game/rooms/office/navigation.tres" id="35"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/lamp_round_floor.glb" id="36"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/plant_small_1.glb" id="37"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/books.glb" id="38"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/cardboard_box_closed.glb" id="39"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/plant_small_2.glb" id="40"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/cardboard_box_open.glb" id="41"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/plant_small_3.glb" id="42"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/lamp_square_table.glb" id="43"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/rug_round.glb" id="44"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/lounge_design_sofa.glb" id="45"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/lounge_chair_relax.glb" id="46"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/table_coffee.glb" id="47"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/laptop.glb" id="48"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/television_modern.glb" id="49"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/speaker.glb" id="50"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/bookcase_open.glb" id="51"]
+[ext_resource type="PackedScene" path="res://assets/environment/kenney_furniture/bench_cushion.glb" id="52"]
+[ext_resource type="Material" path="res://game/rooms/office/neon_cyan.tres" id="53"]
+[ext_resource type="Material" path="res://game/rooms/office/neon_pink.tres" id="54"]
+[ext_resource type="Material" path="res://game/rooms/office/neon_amber.tres" id="55"]
+[ext_resource type="Material" path="res://game/rooms/office/poster_red.tres" id="56"]
+[ext_resource type="Material" path="res://game/rooms/office/poster_teal.tres" id="57"]
+[ext_resource type="Material" path="res://game/rooms/office/poster_gold.tres" id="58"]
+[ext_resource type="Material" path="res://game/rooms/office/poster_violet.tres" id="59"]
 
 [sub_resource type="BoxMesh" id="r0"]
 size = Vector3(28.00000, 0.50000, 32.00000)
@@ -669,6 +693,34 @@ material = ExtResource("8")
 [sub_resource type="BoxMesh" id="r166"]
 size = Vector3(0.04500, 3.40000, 0.04000)
 material = ExtResource("3")
+
+[sub_resource type="BoxMesh" id="r167"]
+size = Vector3(4.2, 0.04, 0.04)
+material = ExtResource("53")
+
+[sub_resource type="BoxMesh" id="r168"]
+size = Vector3(4.2, 0.04, 0.04)
+material = ExtResource("54")
+
+[sub_resource type="BoxMesh" id="r169"]
+size = Vector3(4.2, 0.04, 0.04)
+material = ExtResource("55")
+
+[sub_resource type="BoxMesh" id="r170"]
+size = Vector3(1.70000, 2.20000, 0.04000)
+material = ExtResource("56")
+
+[sub_resource type="BoxMesh" id="r171"]
+size = Vector3(1.70000, 2.20000, 0.04000)
+material = ExtResource("57")
+
+[sub_resource type="BoxMesh" id="r172"]
+size = Vector3(1.70000, 2.20000, 0.04000)
+material = ExtResource("58")
+
+[sub_resource type="BoxMesh" id="r173"]
+size = Vector3(1.70000, 2.20000, 0.04000)
+material = ExtResource("59")
 
 [node name="OfficeAfterHours" type="Node3D"]
 
@@ -4018,4 +4070,430 @@ pixel_size = 0.0035
 modulate = Color(0.65, 0.77, 0.77, 1)
 outline_size = 0
 rotation_degrees = Vector3(0.00000, -90.00000, 0.00000)
+
+
+[node name="Decor" type="Node3D" parent="."]
+position = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="DecorTint" type="Node" parent="Decor"]
+script = ExtResource("28")
+value = 0.85
+saturation = 0.95
+
+[node name="WindowPlant0" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, -13.20000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowPlant1" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, -8.60000)
+rotation_degrees = Vector3(0, 40, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowPlant2" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, -3.20000)
+rotation_degrees = Vector3(0, 80, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowPlant3" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, 2.60000)
+rotation_degrees = Vector3(0, 120, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowPlant4" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, 8.20000)
+rotation_degrees = Vector3(0, 160, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowPlant5" parent="Decor" instance=ExtResource("29")]
+position = Vector3(-13.10000, 0.00000, 13.40000)
+rotation_degrees = Vector3(0, 200, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WindowLamp0" parent="Decor" instance=ExtResource("36")]
+position = Vector3(-12.90000, 0.00000, -5.80000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+
+[node name="WindowLampLight0" type="OmniLight3D" parent="."]
+position = Vector3(-12.90000, 2.40000, -5.80000)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 1.1
+shadow_enabled = false
+omni_range = 4.5
+omni_attenuation = 1.4
+
+[node name="WindowLamp1" parent="Decor" instance=ExtResource("36")]
+position = Vector3(-12.90000, 0.00000, 5.40000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+
+[node name="WindowLampLight1" type="OmniLight3D" parent="."]
+position = Vector3(-12.90000, 2.40000, 5.40000)
+light_color = Color(1, 0.72, 0.45, 1)
+light_energy = 1.1
+shadow_enabled = false
+omni_range = 4.5
+omni_attenuation = 1.4
+
+[node name="DeskPlant0" parent="Decor" instance=ExtResource("37")]
+position = Vector3(-9.75000, 0.76000, 4.75000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks0" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-8.30000, 0.76000, 4.80000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox0" parent="Decor" instance=ExtResource("39")]
+position = Vector3(-8.45000, 0.00000, 5.55000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskPlant1" parent="Decor" instance=ExtResource("40")]
+position = Vector3(-7.25000, 0.76000, 4.75000)
+rotation_degrees = Vector3(0, 55, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks1" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-5.80000, 0.76000, 4.80000)
+rotation_degrees = Vector3(0, 30, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox1" parent="Decor" instance=ExtResource("41")]
+position = Vector3(-5.95000, 0.00000, 5.55000)
+rotation_degrees = Vector3(0, 25, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskPlant2" parent="Decor" instance=ExtResource("42")]
+position = Vector3(-9.75000, 0.76000, -0.25000)
+rotation_degrees = Vector3(0, 110, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks2" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-8.30000, 0.76000, -0.20000)
+rotation_degrees = Vector3(0, 60, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox2" parent="Decor" instance=ExtResource("39")]
+position = Vector3(-8.45000, 0.00000, 0.55000)
+rotation_degrees = Vector3(0, 50, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskPlant3" parent="Decor" instance=ExtResource("37")]
+position = Vector3(-7.25000, 0.76000, -0.25000)
+rotation_degrees = Vector3(0, 165, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks3" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-5.80000, 0.76000, -0.20000)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox3" parent="Decor" instance=ExtResource("41")]
+position = Vector3(-5.95000, 0.00000, 0.55000)
+rotation_degrees = Vector3(0, 75, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskPlant4" parent="Decor" instance=ExtResource("40")]
+position = Vector3(-9.75000, 0.76000, -6.25000)
+rotation_degrees = Vector3(0, 220, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks4" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-8.30000, 0.76000, -6.20000)
+rotation_degrees = Vector3(0, 120, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox4" parent="Decor" instance=ExtResource("39")]
+position = Vector3(-8.45000, 0.00000, -5.45000)
+rotation_degrees = Vector3(0, 100, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskPlant5" parent="Decor" instance=ExtResource("42")]
+position = Vector3(-7.25000, 0.76000, -6.25000)
+rotation_degrees = Vector3(0, 275, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskBooks5" parent="Decor" instance=ExtResource("38")]
+position = Vector3(-5.80000, 0.76000, -6.20000)
+rotation_degrees = Vector3(0, 150, 0)
+scale = Vector3(1.5, 1.5, 1.5)
+
+[node name="DeskBox5" parent="Decor" instance=ExtResource("41")]
+position = Vector3(-5.95000, 0.00000, -5.45000)
+rotation_degrees = Vector3(0, 125, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="DeskLamp0" parent="Decor" instance=ExtResource("43")]
+position = Vector3(-7.75000, 0.76000, 4.70000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1.8, 1.8, 1.8)
+
+[node name="DeskLampLight0" type="OmniLight3D" parent="."]
+position = Vector3(-7.75000, 1.35000, 4.70000)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 0.9
+shadow_enabled = false
+omni_range = 3.2
+omni_attenuation = 1.4
+
+[node name="DeskLamp1" parent="Decor" instance=ExtResource("43")]
+position = Vector3(-7.75000, 0.76000, -6.30000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(1.8, 1.8, 1.8)
+
+[node name="DeskLampLight1" type="OmniLight3D" parent="."]
+position = Vector3(-7.75000, 1.35000, -6.30000)
+light_color = Color(1, 0.78, 0.5, 1)
+light_energy = 0.9
+shadow_enabled = false
+omni_range = 3.2
+omni_attenuation = 1.4
+
+[node name="LoungeRug" parent="Decor" instance=ExtResource("44")]
+position = Vector3(9.40000, 0.01200, 11.00000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(3.4, 3.4, 3.4)
+
+[node name="LoungeSofa" parent="Decor" instance=ExtResource("45")]
+position = Vector3(9.40000, 0.00000, 13.90000)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(2.1, 2.1, 2.1)
+
+[node name="LoungeChairWest" parent="Decor" instance=ExtResource("46")]
+position = Vector3(7.00000, 0.00000, 10.60000)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="LoungeChairEast" parent="Decor" instance=ExtResource("46")]
+position = Vector3(11.60000, 0.00000, 10.90000)
+rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="LoungeTable" parent="Decor" instance=ExtResource("47")]
+position = Vector3(9.40000, 0.00000, 11.10000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="LoungeLaptop" parent="Decor" instance=ExtResource("48")]
+position = Vector3(9.20000, 0.43000, 11.00000)
+rotation_degrees = Vector3(0, 20, 0)
+scale = Vector3(1.6, 1.6, 1.6)
+
+[node name="LoungeLamp" parent="Decor" instance=ExtResource("36")]
+position = Vector3(12.70000, 0.00000, 14.40000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.2, 2.2, 2.2)
+
+[node name="LoungePlantA" parent="Decor" instance=ExtResource("29")]
+position = Vector3(6.20000, 0.00000, 15.00000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="LoungePlantB" parent="Decor" instance=ExtResource("29")]
+position = Vector3(12.90000, 0.00000, 12.40000)
+rotation_degrees = Vector3(0, 70, 0)
+scale = Vector3(2.1, 2.1, 2.1)
+
+[node name="LoungeTV" parent="Decor" instance=ExtResource("49")]
+position = Vector3(9.40000, 0.90000, 15.55000)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="LoungeSpeakerA" parent="Decor" instance=ExtResource("50")]
+position = Vector3(8.10000, 0.00000, 15.40000)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(1.8, 1.8, 1.8)
+
+[node name="LoungeSpeakerB" parent="Decor" instance=ExtResource("50")]
+position = Vector3(10.70000, 0.00000, 15.40000)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(1.8, 1.8, 1.8)
+
+[node name="LoungeShelf" parent="Decor" instance=ExtResource("51")]
+position = Vector3(5.60000, 0.00000, 15.35000)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="LoungeLampLight" type="OmniLight3D" parent="."]
+position = Vector3(12.70000, 2.30000, 14.40000)
+light_color = Color(1, 0.7, 0.42, 1)
+light_energy = 1.2
+shadow_enabled = false
+omni_range = 5
+omni_attenuation = 1.4
+
+[node name="LoungeTVGlow" type="OmniLight3D" parent="."]
+position = Vector3(9.40000, 1.60000, 14.90000)
+light_color = Color(0.35, 0.75, 1, 1)
+light_energy = 0.8
+shadow_enabled = false
+omni_range = 4
+omni_attenuation = 1.4
+
+[node name="DeckPlant0" parent="Decor" instance=ExtResource("29")]
+position = Vector3(5.60000, 1.50000, -10.50000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="DeckPlant1" parent="Decor" instance=ExtResource("29")]
+position = Vector3(10.40000, 1.50000, -10.50000)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="WingBench" parent="Decor" instance=ExtResource("52")]
+position = Vector3(18.05000, 0.00000, -1.20000)
+rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(2.0, 2.0, 2.0)
+
+[node name="WingPlant0" parent="Decor" instance=ExtResource("29")]
+position = Vector3(17.90000, 0.00000, -14.60000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="WingPlant1" parent="Decor" instance=ExtResource("29")]
+position = Vector3(17.90000, 0.00000, 14.60000)
+rotation_degrees = Vector3(0, 120, 0)
+scale = Vector3(2.3, 2.3, 2.3)
+
+[node name="NeonMoveFast" type="Label3D" parent="."]
+position = Vector3(-8.80000, 4.30000, -15.70000)
+text = "MOVE FAST"
+font_size = 96
+pixel_size = 0.006
+modulate = Color(0.48, 2.112, 2.4, 1)
+outline_size = 18
+outline_modulate = Color(0.2, 0.88, 1, 0.55)
+shaded = false
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="NeonMoveFastTube" type="MeshInstance3D" parent="."]
+position = Vector3(-8.80000, 3.55000, -15.70000)
+mesh = SubResource("r167")
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+[node name="NeonMoveFastLight" type="OmniLight3D" parent="."]
+position = Vector3(-8.80000, 4.00000, -15.10000)
+light_color = Color(0.2, 0.88, 1, 1)
+light_energy = 1.4
+shadow_enabled = false
+omni_range = 6
+omni_attenuation = 1.4
+
+[node name="NeonShipIt" type="Label3D" parent="."]
+position = Vector3(9.40000, 3.60000, 15.70000)
+text = "SHIP IT"
+font_size = 96
+pixel_size = 0.006
+modulate = Color(2.4, 0.528, 1.488, 1)
+outline_size = 18
+outline_modulate = Color(1, 0.22, 0.62, 0.55)
+shaded = false
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+
+[node name="NeonShipItTube" type="MeshInstance3D" parent="."]
+position = Vector3(9.40000, 2.85000, 15.70000)
+mesh = SubResource("r168")
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+[node name="NeonShipItLight" type="OmniLight3D" parent="."]
+position = Vector3(9.40000, 3.30000, 15.10000)
+light_color = Color(1, 0.22, 0.62, 1)
+light_energy = 1.4
+shadow_enabled = false
+omni_range = 6
+omni_attenuation = 1.4
+
+[node name="NeonDeploy" type="Label3D" parent="."]
+position = Vector3(14.30000, 3.10000, -7.00000)
+text = "THINK DIFFERENT.\nDEPLOY THE SAME."
+font_size = 96
+pixel_size = 0.006
+modulate = Color(2.4, 1.68, 0.6, 1)
+outline_size = 18
+outline_modulate = Color(1, 0.7, 0.25, 0.55)
+shaded = false
+rotation_degrees = Vector3(0.00000, 90.00000, 0.00000)
+
+
+[node name="NeonDeployTube" type="MeshInstance3D" parent="."]
+position = Vector3(14.30000, 2.05000, -7.00000)
+mesh = SubResource("r169")
+rotation_degrees = Vector3(0.00000, 90.00000, 0.00000)
+
+[node name="NeonDeployLight" type="OmniLight3D" parent="."]
+position = Vector3(14.90000, 2.80000, -7.00000)
+light_color = Color(1, 0.7, 0.25, 1)
+light_energy = 1.4
+shadow_enabled = false
+omni_range = 6
+omni_attenuation = 1.4
+
+[node name="Poster0" type="MeshInstance3D" parent="."]
+position = Vector3(-9.50000, 2.40000, 15.70000)
+mesh = SubResource("r170")
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+
+[node name="PosterText0" type="Label3D" parent="."]
+position = Vector3(-9.50000, 2.40000, 15.67000)
+text = "WE ARE A FAMILY*\n*terms apply"
+font_size = 64
+pixel_size = 0.0065
+modulate = Color(1, 0.97, 0.9, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+
+[node name="Poster1" type="MeshInstance3D" parent="."]
+position = Vector3(3.00000, 2.40000, 15.70000)
+mesh = SubResource("r171")
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+
+[node name="PosterText1" type="Label3D" parent="."]
+position = Vector3(3.00000, 2.40000, 15.67000)
+text = "FAIL FAST\n(NOT IN PROD)"
+font_size = 64
+pixel_size = 0.0065
+modulate = Color(1, 0.97, 0.9, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 180.00000, 0.00000)
+
+
+[node name="Poster2" type="MeshInstance3D" parent="."]
+position = Vector3(-12.00000, 2.40000, -15.70000)
+mesh = SubResource("r172")
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="PosterText2" type="Label3D" parent="."]
+position = Vector3(-12.00000, 2.40000, -15.67000)
+text = "YOUR WELLBEING\nIS A KPI"
+font_size = 64
+pixel_size = 0.0065
+modulate = Color(1, 0.97, 0.9, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="Poster3" type="MeshInstance3D" parent="."]
+position = Vector3(12.00000, 2.40000, -15.70000)
+mesh = SubResource("r173")
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="PosterText3" type="Label3D" parent="."]
+position = Vector3(12.00000, 2.40000, -15.67000)
+text = "IT WORKED\nON MY MACHINE"
+font_size = 64
+pixel_size = 0.0065
+modulate = Color(1, 0.97, 0.9, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
 
