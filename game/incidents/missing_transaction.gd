@@ -26,6 +26,19 @@ const WAVES: Dictionary = {
 	Stage.ENCOUNTER_ONE: [[["record", "A1"], ["record", "A3"]], [["record", "A2"], ["scope", "A4"]]],
 	Stage.ENCOUNTER_TWO: [[["blocker", "D2"], ["record", "D1"], ["record", "D3"]], [["invite", "D2"], ["record", "D4"], ["scope", "D1"]]],
 }
+## Roaming: each main wave breaks out somewhere on the floor, never on top of the
+## engineer. Sites rotate in this order, skipping any closer than ROAM_DISTANCE and the
+## one just used; positions are snapped to the navigation mesh at spawn time.
+const SITES: Array = [
+	["the desks", Vector3(-8.0, 0, -2.5)],
+	["the pantry", Vector3(22.5, 0, 8.8)],
+	["Operations", Vector3(0.0, 0, -12.0)],
+	["the copy room", Vector3(22.5, 0, -1.0)],
+	["the conference deck", Vector3(8.0, 1.5, -7.0)],
+	["the lounge", Vector3(9.5, 0, 11.0)],
+	["the meeting wing", Vector3(16.2, 0, -9.5)],
+]
+const ROAM_DISTANCE: float = 14.0
 ## The optional meeting: an invite holds the room while two records press in.
 const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
 @export_range(0, 6) var max_telegraphs: int = 2
@@ -86,6 +99,11 @@ var wave_index: int = 0
 var zones: Array[Node3D] = []
 var corpses: Dictionary = {}
 var bugs: Array[CharacterBody3D] = []
+var site_cursor: int = 0
+var wave_area: String = ""
+var wave_site: Vector3 = Vector3.ZERO
+var last_area: String = ""
+var beacon: Node3D
 var bugs_fixed: int = 0
 var seen_kinds: Dictionary = {}
 ## Postmortem timeline: [elapsed seconds, event], recorded as the run happens.
@@ -126,6 +144,7 @@ func _ready() -> void:
 	battle_mode = preload("res://game/incidents/battle_mode.gd").new()
 	battle_mode.name = "BattleMode"
 	add_child(battle_mode)
+	_make_beacon()
 	coworkers = preload("res://game/incidents/coworkers.gd").new()
 	coworkers.name = "Coworkers"
 	coworkers.incident = self
@@ -168,6 +187,8 @@ func reset_incident() -> void:
 	$AlertSound.stop()
 	enemies_defeated = 0
 	bugs_fixed = 0
+	site_cursor = 0
+	last_area = ""
 	boss_encountered = false
 	elapsed = 0
 	stage_time = 0
@@ -212,6 +233,9 @@ func _cleanup() -> void:
 	zones.clear()
 	corpses.clear()
 	bugs.clear()
+	wave_area = ""
+	if beacon != null:
+		beacon.hide()
 	for actor in actors:
 		if is_instance_valid(actor):
 			actor.process_mode = Node.PROCESS_MODE_DISABLED
@@ -239,7 +263,7 @@ func _enter(next: Stage) -> void:
 			wave_index = 0
 			remaining = stage_total()
 			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
-			message = "Orange arc: an attack is coming. Dodge aside, then counter."
+			message = "Incidents break out around the floor: follow the ▼ marker.\nHit them before they spot you for double damage. Orange arc: dodge, then counter."
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
@@ -307,6 +331,7 @@ func _process(delta: float) -> void:
 		spawn_delay -= delta
 		if spawn_delay <= 0:
 			_spawn()
+	_update_beacon()
 	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
 		_start_quick_sync()
 	var attending: bool = false
@@ -396,6 +421,7 @@ func _spawn() -> void:
 		if wave_index >= waves().size():
 			return
 		pending = waves()[wave_index].duplicate(true)
+		_choose_site()
 		_release_swarm(wave_index, pending[0][1])
 		wave_index += 1
 	_spawn_entry(pending.pop_front(), alive)
@@ -406,13 +432,13 @@ func _release_swarm(index: int, site: String) -> void:
 	var sizes: Array = SWARMS.get(stage, [])
 	if index >= sizes.size():
 		return
-	var origin: Vector3 = spawn_site(site)
+	var origin: Vector3 = wave_site if wave_area != "" else spawn_site(site)
 	for count in range(sizes[index]):
 		var bug: CharacterBody3D = RECORD.instantiate()
 		bug.set_script(ARCHETYPES["bug"])
-		bug.starts_aware = true
+		bug.starts_aware = false
 		bug.process_mode = Node.PROCESS_MODE_PAUSABLE
-		bug.position = origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4
+		bug.position = _on_floor(origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2)
 		bug.detection_distance = 50
 		add_child(bug)
 		bug.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * bug.speed_scale * run.pressure()
@@ -441,6 +467,95 @@ func _close_bugs() -> void:
 		log_event("%d bug%s closed as WONTFIX" % [open.size(), "" if open.size() == 1 else "s"])
 
 
+## Pick where the next wave breaks out: the next site in rotation that is far enough
+## from the engineer and not the one just used.
+func _choose_site() -> void:
+	for step in range(SITES.size()):
+		var entry: Array = SITES[(site_cursor + step) % SITES.size()]
+		var point: Vector3 = _on_floor(entry[1])
+		if entry[0] != last_area and Vector2(point.x - player.global_position.x, point.z - player.global_position.z).length() >= ROAM_DISTANCE:
+			site_cursor = (site_cursor + step + 1) % SITES.size()
+			wave_area = entry[0]
+			wave_site = point
+			last_area = wave_area
+			_show_beacon()
+			log_event("Incident reported at %s" % wave_area)
+			return
+	wave_area = ""
+
+
+func _on_floor(point: Vector3) -> Vector3:
+	var map: RID = get_world_3d().navigation_map
+	if NavigationServer3D.map_get_iteration_id(map) == 0:
+		return point
+	return NavigationServer3D.map_get_closest_point(map, point) + Vector3.UP * .05
+
+
+## A column of incident light over the outbreak until someone there notices you.
+func _show_beacon() -> void:
+	beacon.global_position = wave_site
+	beacon.show()
+
+
+func _make_beacon() -> void:
+	if beacon == null:
+		beacon = Node3D.new()
+		beacon.name = "IncidentBeacon"
+		add_child(beacon)
+		var column: MeshInstance3D = MeshInstance3D.new()
+		var tube: CylinderMesh = CylinderMesh.new()
+		tube.top_radius = .05
+		tube.bottom_radius = .9
+		tube.height = 7.0
+		tube.cap_top = false
+		tube.cap_bottom = false
+		var glow: StandardMaterial3D = StandardMaterial3D.new()
+		glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		glow.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		glow.cull_mode = BaseMaterial3D.CULL_DISABLED
+		glow.albedo_color = Color(1, .3, .15, .22)
+		tube.material = glow
+		column.mesh = tube
+		column.position.y = 3.5
+		column.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		beacon.add_child(column)
+		var light: OmniLight3D = OmniLight3D.new()
+		light.light_color = Color(1, .35, .2)
+		light.light_energy = 1.6
+		light.omni_range = 6.0
+		light.position.y = 1.5
+		beacon.add_child(light)
+		# Seen through walls at a constant size: the way to the outbreak from anywhere.
+		var marker: Label3D = Label3D.new()
+		marker.name = "Marker"
+		marker.font = preload("res://assets/fonts/barlow_condensed_bold.ttf")
+		marker.font_size = 40
+		marker.fixed_size = true
+		marker.pixel_size = .0011
+		marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		marker.no_depth_test = true
+		marker.modulate = Color(1, .45, .25)
+		marker.outline_size = 10
+		marker.position.y = 3.4
+		beacon.add_child(marker)
+	beacon.hide()
+
+
+func _update_beacon() -> void:
+	if beacon == null or not beacon.visible:
+		return
+	var distance: int = roundi(Vector2(wave_site.x - player.global_position.x, wave_site.z - player.global_position.z).length())
+	(beacon.get_node("Marker") as Label3D).text = "▼\nINCIDENT · %d m" % distance
+	if wave_area == "" or (pending.is_empty() and alive.is_empty()):
+		beacon.hide()
+		return
+	for actor: CharacterBody3D in alive:
+		if is_instance_valid(actor) and actor.awareness == actor.Awareness.ENGAGED:
+			beacon.hide()
+			return
+
+
 func spawn_site(name: String) -> Vector3:
 	var site: Vector3 = room.get_node("SpawnPoints/Spawn_" + name).position
 	# Never materialize on top of the engineer; fall back to the farthest clear site.
@@ -455,7 +570,12 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D]) -> CharacterBody3
 	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
 	actor.starts_aware = is_same(group, sync_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
-	actor.position = spawn_site(entry[1])
+	if is_same(group, alive) and wave_area != "":
+		# Spread the wave around its outbreak site instead of the fixed markers.
+		var slot: float = (alive.size() + bugs.size()) * 2.4
+		actor.position = _on_floor(wave_site + Vector3(cos(slot), 0, sin(slot)) * 1.8)
+	else:
+		actor.position = spawn_site(entry[1])
 	actor.detection_distance = 50
 	add_child(actor)
 	actor.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * actor.speed_scale * run.pressure()
@@ -621,6 +741,9 @@ func near_console() -> bool:
 func encounter_status() -> String:
 	if quick_sync == "active":
 		return "Quick Sync in progress • %d attendee%s remaining" % [sync_alive.size(), "" if sync_alive.size() == 1 else "s"]
+	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and beacon != null and beacon.visible:
+		var distance: int = roundi(Vector2(wave_site.x - player.global_position.x, wave_site.z - player.global_position.z).length())
+		return "Incident reported at %s • %d m • %d threat%s remaining" % [wave_area, distance, remaining, "" if remaining == 1 else "s"]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO]:
 		return "%d threat%s remaining • wave %d / %d%s" % [remaining, "" if remaining == 1 else "s", wave_index, waves().size(), " • Next arrival in %ds" % maxi(1, ceili(spawn_delay)) if alive.is_empty() and pending.is_empty() and not modal_pending() else ""]
 	if stage == Stage.BOSS and not boss_triggered:

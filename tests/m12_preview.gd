@@ -227,6 +227,11 @@ func battle() -> void:
 	var player: CharacterBody3D = app.session.get_node("Player")
 	incident.presentation.skip()
 	await live(3.5)
+	var to_site: Vector3 = incident.wave_site - player.global_position
+	player.camera_rig.rotation.y = atan2(-to_site.x, -to_site.z)
+	player.camera_rig.focus = Vector3.INF
+	await live(.3)
+	await shot("roam_beacon")
 	player.max_health = 10000
 	player.health = 10000
 	incident.presentation.feed.modulate.a = 0.0

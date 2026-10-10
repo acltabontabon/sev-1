@@ -521,8 +521,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   with a generated visual. Meeting zones slow through `player.zone_multiplier`.
 - **Awareness.** `incident.gd` adds MANIFESTING / UNAWARE / NOTICING / ENGAGED /
   SEARCHING. `starts_aware` keeps the lab opponent, boss and Quick Sync ambush always
-  hunting; incident waves start unaware. Senses: forward cone with line of sight,
-  hearing of attacks, dodges and sprinting, touch, ally alerts and a patience limit.
+  hunting; incident waves (and bugs) start unaware. Since 0.2.6 only sight (forward cone
+  with line of sight, or a bump within 1 m) or being hit starts a chase; noise and time
+  never do. A noticing enemy sends colleagues within 10 m to `investigate()` the spot
+  (SEARCHING), and they chase only if they then see the engineer.
   Engaged foes flank, orbit when waiting for a turn, back off after swinging and search
   the last known position. Damage while unaware is doubled.
 - **Rigged engineer (0.2.1).** `game/player/rigged_engineer.tscn` replaces the native
@@ -557,6 +559,13 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   additive `next_pass`. Scope Creep scales the rig with its growth; The Variance's
   false positives are `projection()` copies of its rig. Provenance in
   `assets/enemies/README.md`.
+- **Roaming outbreaks.** `missing_transaction.gd` picks each main wave's site from
+  `SITES` (desks, pantry, Operations, copy room, conference deck, lounge, meeting wing)
+  in rotation, skipping any within `ROAM_DISTANCE` (14 m) of the engineer and the last
+  one used, snapped to the navigation mesh. The wave and its bug swarm spread around the
+  site. An `IncidentBeacon` (light column plus a through-wall "▼ INCIDENT · N m" marker)
+  stays up until someone there engages; `encounter_status()` names the site and
+  distance; the timeline logs each outbreak.
 - **Minions.** `game/enemies/bug.gd` is a one-hit archetype (any accepted hit kills).
   `missing_transaction.gd` releases `SWARMS` of bugs with each wave; they live in `bugs`,
   never count toward `remaining` or wave completion, bypass the telegraph cap, and

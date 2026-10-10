@@ -6,7 +6,8 @@ signal died
 
 enum State { IDLE, APPROACH, TELEGRAPH, ATTACK, RECOVER, REACT, DEAD }
 ## Incident arrivals are not omniscient: they materialize, go about their "work",
-## and only commit once they see, hear or are told about the engineer.
+## and only commit once they see the engineer or get hit. A colleague's alarm only makes
+## them go and look.
 enum Awareness { MANIFESTING, UNAWARE, NOTICING, ENGAGED, SEARCHING }
 const ACTIVITIES: Array[String] = ["RECONCILING…", "IN A MEETING", "OOO (NOT REALLY)", "WAITING ON QA", "UPDATING THE TICKET", "LOW BATTERY", "SYNCING…", "REFRESHING DASHBOARD"]
 
@@ -41,8 +42,6 @@ var speed_scale: float = 1.0
 @export var starts_aware: bool = true
 @export var sight_range: float = 14.0
 @export_range(30, 360) var sight_fov: float = 140.0
-## Unaware this long, the incident assigns the engineer to them anyway.
-@export var patience: float = 14.0
 var awareness: Awareness = Awareness.ENGAGED
 var awareness_left: float = 0.0
 var unaware_time: float = 0.0
@@ -220,19 +219,27 @@ func notice(propagate: bool = true) -> void:
 
 func _alert_allies() -> void:
 	for other: Node in get_tree().get_nodes_in_group("enemies"):
-		if other != self and other is CharacterBody3D and other.has_method("notice") and other.global_position.distance_to(global_position) < 10.0:
-			other.notice(false)
+		if other != self and other is CharacterBody3D and other.has_method("investigate") and other.global_position.distance_to(global_position) < 10.0:
+			other.investigate(target.global_position if is_instance_valid(target) else global_position)
 
 
-## Sight in a forward cone with line of sight, hearing for loud actions, touch.
+## Told where the engineer was: walk over and look. Only seeing them starts a chase.
+func investigate(point: Vector3) -> void:
+	if health <= 0 or awareness != Awareness.UNAWARE:
+		return
+	awareness = Awareness.SEARCHING
+	awareness_left = 7.0
+	last_seen = point
+
+
+## Sight in a forward cone with line of sight, or being bumped into. Noise does not
+## count: an engineer who stays out of view can always pick the fight.
 func _senses() -> bool:
 	if not is_instance_valid(target) or target.health <= 0:
 		return false
 	var offset: Vector3 = target.global_position - global_position
 	var distance: float = Vector2(offset.x, offset.z).length()
-	if distance < 2.2:
-		return true
-	if (target.melee.attacking and distance < 9.0) or (target.dodging and distance < 6.0) or (Vector2(target.velocity.x, target.velocity.z).length() > 6.5 and distance < 7.0):
+	if distance < 1.0:
 		return true
 	if distance > sight_range:
 		return false
@@ -270,7 +277,7 @@ func _awareness(delta: float) -> Variant:
 			return Vector3.ZERO
 		Awareness.UNAWARE:
 			unaware_time += delta
-			if (sensing and _senses()) or unaware_time > patience:
+			if sensing and _senses():
 				notice()
 				return Vector3.ZERO
 			# Busywork: drift between nearby spots at a stroll.

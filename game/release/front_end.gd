@@ -14,11 +14,11 @@ const KEYS: Array = [
 	[["TAB"], "Skip the opening (after first viewing) or the boss arrival"],
 	[["R"], "Restart the incident"], [["ESC"], "Pause  ·  back"]]
 const FIELD_NOTES: Array[String] = [
+	"Incidents break out around the floor. Follow the ▼ INCIDENT marker to find them.",
+	"Monsters only chase what they see, or whoever hits them. Sneak up for double damage.",
 	"Orange arc: an attack is coming. Dodge aside, then counter during recovery.",
-	"Enemies arrive busy. Hit one before it notices you: Surprise Review, double damage.",
-	"The Blocker shields its friends. Hit it mid-cast, or take it down first.",
-	"Meeting zones start after a countdown. Leave the circle before it does.",
-	"Scope Creep grows if you ignore it. Any hit resets the clock.",
+	"Bugs die in one hit. The Blocker shields friends: hit it mid-cast or take it down first.",
+	"Meeting zones start after a countdown. Scope Creep grows if ignored; any hit resets it.",
 	"The Variance only takes damage while OPEN. Trust the solid ◆."]
 var preferences: RefCounted = PREFERENCES.new()
 var session: Node3D
@@ -320,27 +320,43 @@ func show_page(next: String) -> void:
 		"controls":
 			_label("WIKI  ·  LAST UPDATED: NEVER  ·  3 PEOPLE FOUND THIS HELPFUL", 0, "Eyebrow")
 			_label("Onboarding Docs", 0, "Headline")
+			# Two key columns leave room for the field notes and Back on one page.
 			var grid: GridContainer = GridContainer.new()
-			grid.columns = 2
+			grid.columns = 4
 			grid.add_theme_constant_override("h_separation", 18)
-			grid.add_theme_constant_override("v_separation", 5)
+			grid.add_theme_constant_override("v_separation", 6)
 			box.add_child(grid)
 			for entry: Array in KEYS:
 				var caps: HBoxContainer = HBoxContainer.new()
-				caps.custom_minimum_size.x = 200
+				caps.custom_minimum_size.x = 140
 				caps.add_theme_constant_override("separation", 6)
 				for key_name: String in entry[0]:
 					caps.add_child(_keycap(key_name))
 				grid.add_child(caps)
 				var what: Label = Label.new()
 				what.text = entry[1]
-				what.add_theme_font_size_override("font_size", 17)
+				what.add_theme_font_size_override("font_size", 15)
+				what.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				what.custom_minimum_size.x = 270
 				what.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				grid.add_child(what)
 			_space(6)
 			_label("FIELD NOTES FROM THE PREVIOUS ON-CALL ENGINEER (LEFT THE COMPANY)", 0, "Eyebrow")
+			# Two columns so every note and the Back button fit on one page.
+			var notes: GridContainer = GridContainer.new()
+			notes.columns = 2
+			notes.add_theme_constant_override("h_separation", 28)
+			notes.add_theme_constant_override("v_separation", 4)
+			box.add_child(notes)
 			for note: String in FIELD_NOTES:
-				_label("—  " + note, 14, "Caption").add_theme_color_override("font_color", Color(.8, .86, .88))
+				var line: Label = Label.new()
+				line.text = "—  " + note
+				line.theme_type_variation = "Caption"
+				line.add_theme_font_size_override("font_size", 14)
+				line.add_theme_color_override("font_color", Color(.8, .86, .88))
+				line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				line.custom_minimum_size.x = 420
+				notes.add_child(line)
 			_button("Back", go_back)
 		"settings":
 			_label("DEVICE POLICY  ·  HR IS NOT NOTIFIED", 0, "Eyebrow")

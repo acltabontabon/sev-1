@@ -58,6 +58,29 @@ func _run() -> void:
 			if a != b:
 				closest = minf(closest, a.global_position.distance_to(b.global_position))
 	check(closest > .5, "separation keeps a crowd from fusing into one silhouette")
+	# Roaming: waves break out at named sites away from the engineer, marked by a beacon.
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.skip()
+	for wait in range(400):
+		if not incident.alive.is_empty():
+			break
+		await frames(1)
+	await frames(30)
+	var first_area: String = incident.wave_area
+	var nearest: float = INF
+	for foe: CharacterBody3D in incident.alive:
+		nearest = minf(nearest, Vector2(foe.global_position.x - player.global_position.x, foe.global_position.z - player.global_position.z).length())
+	check(first_area != "" and nearest > 10.0 and incident.beacon.visible and incident.encounter_status().begins_with("Incident reported at " + first_area), "the first wave breaks out at a named site away from the engineer, with a beacon")
+	for foe: CharacterBody3D in incident.alive.duplicate():
+		foe.receive_damage(100000, player.position)
+	for wait in range(600):
+		if not incident.alive.is_empty():
+			break
+		await frames(1)
+	check(incident.wave_area != "" and incident.wave_area != first_area, "the next wave breaks out somewhere else")
 	# Every archetype wears its own CC0 rigged body; the native boxes stay hidden.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var worn: Array = []
@@ -212,7 +235,7 @@ func _run() -> void:
 	check(incident.stage_total() == 7 and incident.waves().back().back()[0] == "blocker", "escalated dependency returns as one extra Blocker")
 	incident.stage = incident.Stage.INVESTIGATION
 	incident.corporate_choice = -1
-	# Awareness: arrivals idle until they see, hear or are told.
+	# Awareness: arrivals idle until they see the engineer or are hit; colleagues investigate.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 11)
 	var idler: CharacterBody3D = spawn("record", Vector3(0, .05, -6), false)
@@ -238,18 +261,25 @@ func _run() -> void:
 			break
 		await frames(1)
 	check(watcher.awareness in [watcher.Awareness.NOTICING, watcher.Awareness.ENGAGED], "a record that faces the engineer within range notices")
-	check(colleague.awareness in [colleague.Awareness.NOTICING, colleague.Awareness.ENGAGED], "noticing alerts colleagues within ten meters")
+	check(colleague.awareness == colleague.Awareness.SEARCHING or colleague.awareness in [colleague.Awareness.NOTICING, colleague.Awareness.ENGAGED], "noticing sends colleagues within ten meters to look")
 	check(incident.presentation.seen.has("spotted"), "the first sighting files a spotted alert")
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 8)
 	var listener: CharacterBody3D = spawn("record", Vector3(5, .05, 6), false)
+	# Short-sighted for this check: it cannot see the engineer 5 m away, only hear them.
+	listener.sight_range = 3.0
 	await frames(70)
-	listener.visual.rotation.y = PI * .5
+	check(listener.awareness == listener.Awareness.UNAWARE, "an arrival that cannot see the engineer stays busy")
 	player.request_attack()
 	await frames(20)
-	check(listener.awareness != listener.Awareness.UNAWARE, "attacking within earshot is heard even behind its back")
+	check(listener.awareness == listener.Awareness.UNAWARE, "noise behind its back does not start a chase")
 	var bored: CharacterBody3D = spawn("record", Vector3(12, .05, -12), false)
-	bored.patience = 1.5
-	await frames(180)
-	check(bored.awareness != bored.Awareness.UNAWARE, "an ignored arrival is assigned to the engineer after its patience runs out")
+	await frames(60 * 20)
+	check(bored.awareness == bored.Awareness.UNAWARE, "an unseen arrival keeps waiting where it broke out, however long it takes")
+	var poked: CharacterBody3D = spawn("record", Vector3(-9, .05, -10), false)
+	await frames(70)
+	poked.receive_damage(5, player.position)
+	check(poked.awareness == poked.Awareness.ENGAGED, "hitting an enemy makes it chase")
 	# Engaged pursuers lose a hidden engineer and search the last known spot.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var seeker: CharacterBody3D = spawn("record", Vector3(-1, .05, -6))

@@ -1,5 +1,25 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.6 — Roam the floor (10 October 2026)
+
+Creator feedback: monsters always spawned in your face, and they should only chase you
+if they spot you or you hit them.
+
+- **Outbreaks around the office.** Each wave now breaks out at a named spot: the desks,
+  the pantry, Operations, the copy room, the conference deck, the lounge or the meeting
+  wing. It is always at least 14 m from you and never the same spot twice in a row. A
+  light column and a "▼ INCIDENT · 25 m" marker (visible through walls) show the way,
+  and the HUD reads "Incident reported at the pantry • 25 m". Bug swarms come with them.
+- **Sight or hit only.** Monsters chase only when they see you (their view cone, with
+  line of sight) or when you hit them. Noise, sprinting and waiting no longer pull them
+  in. One that spots you sends nearby colleagues to look where you were; they join only
+  if they see you too. Sneaking up still lands a double-damage Surprise Review.
+- **Onboarding Docs** fits on one page again (keys in two columns) and explains the
+  marker, the sight rule and bugs.
+
+Validation: 654 assertions across 15 headless suites (roaming sites, beacon, sight-only
+awareness, investigation, hit-to-chase).
+
 ## 0.2.5 — One monster pack (10 October 2026)
 
 Creator ask: retry Quaternius' "Ultimate Monsters". Its official Drive link was still

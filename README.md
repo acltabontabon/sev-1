@@ -3,7 +3,7 @@
 **Works on My Machine.** A cinematic third-person corporate-nightmare action game.
 The system is down. Management is watching. You're the only engineer online.
 
-**Playtest Build 0.2 / version 0.2.5** (Milestone 12, "Operation Corporate Hell") is a
+**Playtest Build 0.2 / version 0.2.6** (Milestone 12, "Operation Corporate Hell") is a
 local macOS tester build that answers the first external feedback on 0.1. It is not
 creator-accepted or notarized. No known P0 gameplay failure was reproduced; first-use
 hitches and human acceptance of fun, comedy, voice and music remain open. See the
@@ -11,8 +11,8 @@ hitches and human acceptance of fun, comedy, voice and music remain open. See th
 
 ## Play
 
-Unzip `SEV-1-Friday-Deployment-0.2.5-macOS.zip` and open **SEV-1 Friday Deployment.app**.
-No Godot installation is needed. Local outputs are under `builds/releases/0.2.5/`.
+Unzip `SEV-1-Friday-Deployment-0.2.6-macOS.zip` and open **SEV-1 Friday Deployment.app**.
+No Godot installation is needed. Local outputs are under `builds/releases/0.2.6/`.
 The build is ad-hoc signed; recipient Macs may require explicit approval. Keep the
 included license notices with the app. Apple Silicon/macOS is the initial test platform;
 Intel, Windows and the declared macOS 14 minimum are not runtime-validated.
@@ -91,7 +91,7 @@ engine caches, logs, and local template downloads are ignored. See
 ## Validation
 
 Resource import, every script parse and the voice manifest pass, along with 15 headless
-suites (650 assertions): movement/combat/navigation, incident progression, upgrades,
+suites (654 assertions): movement/combat/navigation, incident progression, upgrades,
 debt, Burnout, corporate paths, narrative, release lifecycle, voice, the expanded office,
 the enemy roster and awareness, and the interface. The new release checks perform ten start/pause/decision/report/reset/
 menu cycles with stable actor cleanup. Existing full simulations use real melee and
