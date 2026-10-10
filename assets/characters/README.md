@@ -78,29 +78,58 @@ there is no finger rig. Death sets a settled pose immediately because incident r
 pause immediately; there is no animated fall. No heavy-attack input was introduced;
 the existing third combo step is the finisher. Creative acceptance needs a human run.
 
-## Milestone 12 rig evaluation (10 October 2026)
+## Rigged engineer (Quaternius, CC0)
 
-The creator approved trying a CC0 rigged character in Phase F. Evaluated, not imported:
+After the creator rejected the native engineer as still too plain for an action game,
+the playable engineer became a rigged, animated character on 10 October 2026. The
+earlier evaluation (Kenney: idle/run/jump only; Quaternius' newer library behind an
+itch.io purchase flow) is superseded by these two direct, account-free CC0 downloads:
 
-- Kenney Animated Characters (Protagonists), CC0, direct download: one `characterMedium`
-  rig with only `idle`, `run` and `jump` clips. No attacks, dodge, hit, death or
-  seated/typing motion, so combat, the menu desk and the opening would all still need
-  the native procedural poses on a body that no longer matches them.
-- Quaternius Universal Animation Library and modular characters, CC0: distributed only
-  through an itch.io purchase flow, which was not automated.
-- Mixamo: excluded; it requires an account.
+| File in `quaternius/` | Source | License |
+| --- | --- | --- |
+| `casual_male.fbx` (used), `casual2_male.fbx`, `casual3_male.fbx`, `worker_male.fbx`, `suit_male.fbx` (candidates) | Quaternius, "Ultimate Animated Character Pack", [OpenGameArt](https://opengameart.org/content/animated-characters-pack) | CC0 1.0 |
+| `knight_animations.fbx` (the pack's `KnightCharacter.fbx`, renamed) | Quaternius, "Lowpoly Animated Knight", [OpenGameArt](https://opengameart.org/content/lowpoly-animated-knight) | CC0 1.0 |
 
-Decision: keep the native engineer. Milestone 12 instead added authored full-body
-holds to `character_presentation.gd` (seated typing, relaxed, frozen alert, slump, sip,
-glance, armed) that the menu and the opening stage. A coherent office-worker rig with
-combat and seated clips remains the recommended future upgrade behind the existing
-wrapper contract.
+Files are unmodified FBX stored with Git LFS; attribution is voluntary
+([THIRD_PARTY_NOTICES.txt](../../THIRD_PARTY_NOTICES.txt)). The four unused body
+candidates stay for future cast members and cost nothing at runtime.
+
+**Motion.** The office pack has idle, walk, sit, stand, hit, victory and defeat but no
+run, roll or weapon motion. The knight shares the same bone names with a taller body,
+so `tools/build_engineer_rig.gd` bakes `game/player/engineer_animations.res`: each
+knight rotation key is re-expressed relative to the office body's rest pose, position
+keys are scaled to the shorter body, scale keys are dropped and run/roll/attack clips
+are kept in place (the controller moves the body). Rerun it after reimporting either FBX.
+
+**Look.** `rigged_engineer.gd` recolors the stock body at load (warm skin, charcoal
+top, dark denim, black hair, dark eyes) and adds his kit on bone attachments:
+headphones with glowing cups, the "ON CALL (FOREVER)" sticky note on his back and an ID
+badge. The keyboard weapon is `keyboard_weapon.tscn`, emitted by
+`tools/build_characters.py` from the same geometry as before.
+
+**Contract.** `Player/Visual/Character` keeps `reset_pose()`, `defeat()`,
+`story_pose`, `sit`, `crouch` and `weapon`. Clips are chosen and scrubbed from
+controller state (speed, airborne, dodge elapsed, hurt time, death); nothing uses root
+motion. Between swings the keyboard rides in the right fist. During a swing it follows
+an authored arc phased on the melee wind-up/active/recovery windows, and two-bone IK
+(`TwoBoneIK3D`) pulls the arm onto its grip, so the visible strike matches the damage
+window and hit-stop freezes both. The finisher is a full spin. Seated menu/opening
+poses hold the end of `SitDown` with IK hands on the desk keyboard.
+
+**Fallback.** `engineer_visual.tscn` and `character_presentation.gd` remain intact;
+swapping the `Character` instance in `player.tscn` and `menu_backdrop.tscn` restores
+the native look.
+
+**Limits.** Retargeted knight motion on a chibi body is approximate (no finger rig,
+some arm interpenetration). There is no foot IK on slopes. The keyboard is oversized
+on purpose. Creative acceptance needs a human run.
 
 ## Milestone 12 identity pass
 
-Still original native geometry from `tools/build_characters.py`, no imports:
+Original native geometry from `tools/build_characters.py`, no imports. The engineer
+entry now describes the fallback scene; the playable engineer is the rig above.
 
-- **Engineer:** charcoal open hoodie over the shirt and loose tie, hood bunched behind
+- **Engineer (fallback):** charcoal open hoodie over the shirt and loose tie, hood bunched behind
   the neck, over-ear headphones around the neck with glowing cups, bed-hair tufts, a
   coffee stain, sneakers with orange soles, and a sticky note on his back reading
   "ON CALL (FOREVER)" that the gameplay camera sees all run. The keyboard weapon gains a

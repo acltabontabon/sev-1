@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://game/release/menu_backdrop.gd" id="1"]
 [ext_resource type="PackedScene" path="res://game/rooms/office/office_after_hours.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://game/player/engineer_visual.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://game/player/rigged_engineer.tscn" id="3"]
 [ext_resource type="AudioStream" path="res://assets/audio/office_air.wav" id="4"]
 [ext_resource type="Texture2D" path="res://assets/environment/hdri/hansaplatz_2k.hdr" id="9"]
 

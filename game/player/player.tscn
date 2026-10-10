@@ -11,7 +11,7 @@
 [ext_resource type="Resource" path="res://game/player/finisher.tres" id="9"]
 [ext_resource type="Script" path="res://game/combat/attack_profile.gd" id="10"]
 
-[ext_resource type="PackedScene" path="res://game/player/engineer_visual.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://game/player/rigged_engineer.tscn" id="11"]
 
 [ext_resource type="AudioStream" path="res://assets/audio/dodge.wav" id="12"]
 [ext_resource type="AudioStream" path="res://assets/audio/step.wav" id="13"]

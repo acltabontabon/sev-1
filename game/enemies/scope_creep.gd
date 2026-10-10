@@ -20,6 +20,9 @@ var sting: AudioStreamPlayer3D
 
 func _ready() -> void:
 	title = "SCOPE CREEP"
+	magic_color = Color(.72, 1, .3)
+	magic_accent = Color(1, .9, .3)
+	magic_words = ["+1 REQ", "JUST ONE MORE", "NICE TO HAVE", "ALSO MOBILE"]
 	motto = "One tiny additional requirement."
 	max_health = 90
 	speed_scale = 1.35
@@ -80,6 +83,8 @@ func grow() -> void:
 	health_changed.emit(health)
 	_apply_growth()
 	pop.text = "+1 REQUIREMENT"
+	ElementFx.shards(self, global_position + Vector3.UP * .6, magic_accent, 14 + growth * 6, 5.0, 1.1, Vector3.UP, .14)
+	ElementFx.shockwave(self, global_position, magic_color, 2.0 + growth, .5)
 	pop_left = 1.6
 	if DisplayServer.get_name() != "headless":
 		sting.pitch_scale = 1.0 + growth * .18

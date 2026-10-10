@@ -1,5 +1,39 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.1 — "This is an action game" (10 October 2026)
+
+Answers the creator's review of 0.2.0: the engineer still looked like the old boring
+box model and fights lacked spectacle. Combat timing, damage and balance are unchanged;
+everything below is presentation.
+
+- **A real, animated protagonist.** The engineer is now a rigged CC0 character
+  (Quaternius) with run, roll, hit, death, sit and stand motion; the run/roll/death come
+  from a CC0 knight pack retargeted onto the office body. He swings the oversized
+  keyboard along big authored arcs (the arms follow it by IK), the third hit is a full
+  spinning finisher, the dodge is a roll, and he dies on the carpet with the keyboard
+  beside him. He keeps the headphones and the "ON CALL (FOREVER)" sticky note.
+- **Elemental combo.** Hit 1 throws a wind crescent ("FORCE PUSH"), hit 2 forks violet
+  lightning ("HOT RELOAD"), the finisher erupts in a ring of fire ("HOTFIX"). Hits get
+  their own element bursts, and the keyboard leaves a colored swing trail.
+- **Enemy magic.** Every enemy draws a spell circle under itself when it winds up (a
+  readable warning) and throws shards and a glyph when it strikes: Corrupted Records cast
+  red "NULL / 404" glitches, the Blocker an amber "AWAITING DEPENDENCY" circle and
+  shield shockwave, the Meeting Invite violet calendar runes ("SYNC", "1:1") over your
+  head, Scope Creep a sticky-note storm when it grows, and The Variance argues in red and
+  green lightning whenever its shield opens or closes. Defeats burst apart.
+- **Battle mode.** When an enemy engages, the screen hits: sting, flash, chromatic split
+  and speed lines, then a held combat grade (vignette, hotter glow and color) while the
+  fight lasts. The engineer's eyes glow and the keyboard edges cycle RGB.
+
+Limits: retargeted knight motion on a chibi body is approximate (no fingers, some arm
+clipping); effects are procedural particles and shaders, not hand-made VFX; whether the
+new look and effects feel better is for the creator to judge in play. Performance on the
+same M2 Pro: menu about 120 FPS, the full opening 119 FPS mean (max frame 24 ms), a
+three-enemy battle-mode fight with continuous combos 119 FPS mean (p95 9.3 ms, max 16.7 ms)
+at 1280×720 preview resolution. Validation: 636 assertions across 15 headless suites.
+
+## 0.2.0
+
 Version **0.2.0**, 10 October 2026 (Milestone 12, "Operation Corporate Hell"). Local
 macOS tester build; not creator-accepted, not notarized. This build answers the first
 external feedback on 0.1: plain presentation, a boring menu, no cinematic moments,

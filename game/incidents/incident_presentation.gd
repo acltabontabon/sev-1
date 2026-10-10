@@ -3,7 +3,7 @@ extends CanvasLayer
 const DESK_SCREEN: Script = preload("res://game/ui/desk_screen.gd")
 const FEED: Script = preload("res://game/ui/notification_feed.gd")
 const ALERT_SENDERS: Array[String] = ["MONITORING / SEV-1", "PRODUCTION SYSTEM", "STATUS PAGE", "THE VARIANCE"]
-const CHARACTER = preload("res://game/player/character_presentation.gd")
+const CHARACTER = preload("res://game/player/rigged_engineer.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)

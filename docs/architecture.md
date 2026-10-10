@@ -525,6 +525,33 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   hearing of attacks, dodges and sprinting, touch, ally alerts and a patience limit.
   Engaged foes flank, orbit when waiting for a turn, back off after swinging and search
   the last known position. Damage while unaware is doubled.
+- **Rigged engineer (0.2.1).** `game/player/rigged_engineer.tscn` replaces the native
+  visual under `Player/Visual/Character` and on the menu desk, behind the same contract
+  (`reset_pose()`, `defeat()`, `story_pose`, `sit`, `crouch`, `weapon`). It instances the
+  Quaternius CC0 body and plays `engineer_animations.res` (baked by
+  `tools/build_engineer_rig.gd`, which retargets the CC0 knight's run/roll/death onto it)
+  through a manually advanced AnimationPlayer at physics priority 10, after the
+  controller. Clips are picked or scrubbed from controller state. Swings drive the
+  keyboard along authored arcs phased on `Melee` windows and `TwoBoneIK3D` modifiers
+  (manual skeleton update) put the hands on its grip; between swings the keyboard
+  follows the right fist. `weapon_trail.gd` draws the swing ribbon. The native scene
+  stays as a fallback; provenance in `assets/characters/README.md`.
+- **Elements and spells.** `game/combat/element_fx.gd` (`ElementFx`) spawns transient,
+  top-level effects under their emitter (sigils from `magic_circle.gdshader`,
+  shockwaves, motes, shards, glyph words, light flashes, wind crescents, lightning
+  bolts, flame rings) and frees them itself; emitters clear them on reset with
+  `ElementFx.clear_from()`. The engineer's three combo steps release wind, lightning and
+  fire on their active window and on hits. `incident.gd` gives every enemy a spell
+  identity (`magic_color`, `magic_accent`, `magic_words`, `magic_radius`): a sigil on
+  telegraph, shards and a glyph on the strike, a burst on defeat; archetypes override
+  it and add their own (Blocker cast and shield, Meeting Invite booking, Scope Creep
+  growth, Variance phase lightning). Effects never deal damage or change timing.
+- **Battle mode.** `game/incidents/battle_mode.gd`, owned by the incident, watches for an
+  ENGAGED enemy. Onset: sting, flash, chromatic split and speed lines from
+  `battle_overlay.gdshader` (a CanvasLayer at layer -1, under the HUD). Held: vignette
+  and a hotter environment grade (glow, saturation, contrast; `main.tscn` enables
+  adjustments), and `Character.battle` lights the engineer's eyes and RGB keyboard
+  edges. `reset()` restores the grade on every incident reset.
 - **Tests.** New suites: `environment_tests.gd`, `encounter_tests.gd`,
-  `interface_tests.gd`. `tests/m12_preview.gd` captures the menu, opening, areas,
+  `interface_tests.gd`. `tests/m12_preview.gd` captures the menu, opening, areas, battle mode,
   roster, UI, finale and cast for visual review.

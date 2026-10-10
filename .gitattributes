@@ -28,3 +28,4 @@ assets/audio/sfx/**/*.ogg filter=lfs diff=lfs merge=lfs -text
 assets/audio/sfx/**/*.wav filter=lfs diff=lfs merge=lfs -text
 assets/audio/music/**/*.ogg filter=lfs diff=lfs merge=lfs -text
 assets/audio/music/**/*.wav filter=lfs diff=lfs merge=lfs -text
+assets/characters/**/*.fbx filter=lfs diff=lfs merge=lfs -text

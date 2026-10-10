@@ -50,6 +50,9 @@ func _run() -> void:
 	await frames(720)
 	check(enemy.position.y > 1.4 and enemy.position.distance_to(player.position) < 2.2, "enemy reaches conference floor through ramp and doorway")
 
+	# Baseline after one reset: transient combat effects from the chase are cleared by it.
+	scene.reset_encounter()
+	await frames(2)
 	var count: int = scene.find_children("*", "", true, false).size()
 	for index in range(10):
 		scene.reset_encounter()

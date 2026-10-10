@@ -3,7 +3,7 @@ extends Node3D
 ## The front end owns its lifetime and frees it before an incident starts.
 
 const DESK_SCREEN: Script = preload("res://game/ui/desk_screen.gd")
-const PRESENTATION = preload("res://game/player/character_presentation.gd")
+const PRESENTATION = preload("res://game/player/rigged_engineer.gd")
 const CAMERA_FROM: Vector3 = Vector3(.15, 1.78, 13.5)
 const CAMERA_TO: Vector3 = Vector3(-.15, 1.7, 13.05)
 const LOOK: Vector3 = Vector3(-4.1, 1.12, 9.4)

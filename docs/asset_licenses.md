@@ -50,5 +50,9 @@ without an account on 10 October 2026 and reviewed in the running game.
 
 Kenney's furniture chair and round table were evaluated and rejected as toy-like. Mixamo and Freesound remain excluded because they require accounts.
 
-A CC0 rigged character was evaluated and not imported; see
-[character evaluation](../assets/characters/README.md#milestone-12-rig-evaluation-10-october-2026).
+| Rigged engineer body and office clips | Quaternius "Ultimate Animated Character Pack" (`Casual_Male`), OpenGameArt; CC0 1.0 | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
+| Action clips (run, roll, death, jump, sword idles) | Quaternius "Lowpoly Animated Knight", OpenGameArt; CC0 1.0, retargeted at build time | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
+
+The rigged engineer replaced the native procedural engineer after creator feedback;
+the native scene and generator remain as a fallback. Elemental effects, enemy spells
+and the battle-mode grade are original procedural work (shaders and particles in code).

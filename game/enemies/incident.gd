@@ -56,6 +56,13 @@ var orbit_sign: float = 1.0
 var backoff_left: float = 0.0
 var was_attacking: bool = false
 var activity: String = ""
+## Spell identity, overridden by archetypes in _ready. Presentation only: a sigil under
+## the caster on every telegraph, a release on the strike, a burst on defeat.
+var magic_color: Color = Color(1, .22, .3)
+var magic_accent: Color = Color(.3, 1, .55)
+var magic_words: Array = ["NULL", "404", "NaN", "0x0", "ROLLBACK?", "DUPLICATE"]
+var magic_radius: float = 1.1
+var last_state: State = State.IDLE
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
 @onready var melee: Node3D = $Visual/Melee
@@ -96,6 +103,8 @@ func reset_enemy() -> void:
 	$Visual/RightArm.rotation = Vector3.ZERO
 	$DefeatSound.stop()
 	$ImpactSparks.clear()
+	ElementFx.clear_from(self)
+	last_state = State.IDLE
 	melee.cancel()
 	visual.reset_pose()
 	tell.hide()
@@ -146,6 +155,7 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 		collision_layer = 0
 		visual.defeat()
 		label.text = "INCIDENT RESOLVED"
+		_dissolve_magic()
 		died.emit()
 	return true
 
@@ -375,6 +385,23 @@ func show_impact(color: Color) -> void:
 	$ImpactSparks.burst(global_position + Vector3.UP * 1.2 - knockback.normalized() * .25, color, knockback)
 
 
+func _cast_magic() -> void:
+	ElementFx.sigil(self, global_position, magic_color, magic_radius, melee.windup + melee.active_time + .15, 2.2)
+	ElementFx.motes(self, global_position + Vector3.UP * .2, magic_color, 10, 1.6, melee.windup + .1, 2.5, .12)
+
+
+func _release_magic() -> void:
+	var forward: Vector3 = -visual.global_basis.z
+	ElementFx.shards(self, global_position + Vector3.UP * 1.1 + forward * .4, magic_accent, 10, 4.5, .6, forward + Vector3.UP * .4)
+	ElementFx.glyphs(self, global_position + Vector3.UP * 2.0, magic_color, [magic_words.pick_random()], .6, .3)
+
+
+func _dissolve_magic() -> void:
+	ElementFx.motes(self, global_position + Vector3.UP * .9, magic_color, 30, 4.0, .9, 1.5, .16)
+	ElementFx.shards(self, global_position + Vector3.UP * .9, magic_accent, 16, 4.0, 1.1)
+	ElementFx.shockwave(self, global_position, magic_color, 2.6, .5)
+
+
 ## Gentle push away from nearby allies so a wave never fuses into one silhouette.
 func _separation() -> Vector3:
 	var push: Vector3 = Vector3.ZERO
@@ -420,6 +447,12 @@ func _physics_process(delta: float) -> void:
 		return
 	stagger_left = maxf(0.0, stagger_left - delta)
 	_update_state()
+	if state != last_state:
+		if state == State.TELEGRAPH:
+			_cast_magic()
+		elif state == State.ATTACK:
+			_release_magic()
+		last_state = state
 	knockback = knockback.move_toward(Vector3.ZERO, delta * 18.0)
 	var direction: Vector3 = Vector3.ZERO
 	var pace: float = 1.0

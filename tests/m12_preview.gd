@@ -95,6 +95,10 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "battle":
+		await battle()
+		quit()
+		return
 	if only == "areas":
 		await tour()
 		quit()
@@ -208,6 +212,50 @@ func roster() -> void:
 		await process_frame
 		sample()
 	report("combat_five_enemies")
+	app.main_menu()
+	await frames(5)
+
+
+## Battle mode: onset grade, the elemental combo on a live wave, enemy spells, a perf sample.
+func battle() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(3.5)
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.feed.modulate.a = 0.0
+	var foe: CharacterBody3D = incident.alive[0]
+	player.global_position = foe.global_position + Vector3(0, 0, 2.0)
+	player.visual.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	for actor: CharacterBody3D in incident.alive:
+		actor.engage(player.global_position, false)
+	await live(.12)
+	await shot("battle_onset")
+	await live(1.4)
+	await shot("battle_engaged")
+	for step in range(3):
+		var offset: Vector3 = foe.global_position - player.global_position
+		player.visual.rotation.y = atan2(-offset.x, -offset.z)
+		player.request_attack()
+		while player.melee.attacking and player.melee.elapsed < player.melee.windup + player.melee.active_time * .6:
+			app.session.get_node("Player/CameraRig").controls_active = true
+			await process_frame
+		await shot("battle_element_%d" % step)
+		while player.melee.attacking:
+			await process_frame
+	await live(.8)
+	await shot("battle_spells")
+	last = 0
+	for index in range(300):
+		app.session.get_node("Player/CameraRig").controls_active = true
+		if index % 40 == 0 and not player.melee.attacking:
+			player.request_attack()
+		await process_frame
+		sample()
+	report("battle_mode_combat")
 	app.main_menu()
 	await frames(5)
 

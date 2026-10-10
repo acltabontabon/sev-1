@@ -13,6 +13,9 @@ var details: Node3D
 
 func _ready() -> void:
 	title = "THE MEETING INVITE"
+	magic_color = Color(.74, .5, 1)
+	magic_accent = Color(.55, .78, 1)
+	magic_words = ["9:00", "SYNC", "1:1", "ALL HANDS", "RSVP"]
 	motto = "Your attendance is mandatory."
 	max_health = 100
 	speed_scale = .9
@@ -75,6 +78,8 @@ func _physics_process(delta: float) -> void:
 		zone_cooldown -= delta
 		if zone_cooldown <= 0 and distance < 16:
 			zone_cooldown = zone_interval
+			ElementFx.sigil(self, global_position, magic_color, 1.0, 1.0, 3.0)
+			ElementFx.glyphs(self, target.global_position + Vector3.UP * 1.9, magic_color, magic_words.slice(0, 3), 1.1, .9)
 			zone_requested.emit(Vector3(target.global_position.x, global_position.y, target.global_position.z))
 	velocity.x = direction.x * move_speed + knockback.x
 	velocity.z = direction.z * move_speed + knockback.z

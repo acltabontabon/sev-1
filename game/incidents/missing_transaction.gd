@@ -37,6 +37,7 @@ var coffee_cups: int = 0
 var interactions: Dictionary = {}
 var voice: Node
 var presentation: CanvasLayer
+var battle_mode: CanvasLayer
 var enemies_defeated: int = 0
 var boss_encountered: bool = false
 var run: Node
@@ -112,6 +113,9 @@ func _ready() -> void:
 	add_child(voice)
 	presentation = preload("res://game/incidents/incident_presentation.gd").new()
 	add_child(presentation)
+	battle_mode = preload("res://game/incidents/battle_mode.gd").new()
+	battle_mode.name = "BattleMode"
+	add_child(battle_mode)
 	# Pantry objects: honest reactions, one of them useful.
 	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"]]:
 		var point: Node3D = INTERACTION.new()
@@ -167,6 +171,7 @@ func reset_incident() -> void:
 	room.get_node("ETA").text = "Happy Friday, team!\nEnjoy your well-deserved weekend!"
 	room.get_node("Clock").text = "FRIDAY / 16:59"
 	presentation.reset_story()
+	battle_mode.reset()
 
 
 func _reset_doors() -> void:

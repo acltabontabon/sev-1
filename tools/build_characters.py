@@ -138,6 +138,16 @@ header = '[gd_scene format=3]\n\n[ext_resource type="Script" path="res://game/pl
 text = header+'\n'.join(resources)+'\n[node name="Character" type="Node3D"]\nscript = ExtResource("1")\n\n'+'\n'.join(nodes)
 (ROOT/'game/player/engineer_visual.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
 
+# The rigged engineer carries the same keyboard: emit the WeaponPivot subtree on its own.
+weapon_nodes = [n.replace('parent="WeaponPivot/', 'parent="').replace('parent="WeaponPivot"', 'parent="."') for n in nodes if 'parent="WeaponPivot' in n]
+used = set(re.findall(r'SubResource\("(\w+)"\)', ''.join(weapon_nodes)))
+for block in resources:
+    if re.search(r'id="(\w+)"', block).group(1) in used:
+        used |= set(re.findall(r'SubResource\("(\w+)"\)', block))
+weapon_resources = [b for b in resources if re.search(r'id="(\w+)"', b).group(1) in used]
+text = '[gd_scene format=3]\n\n' + '\n'.join(weapon_resources) + '\n[node name="WeaponPivot" type="Node3D"]\n\n' + '\n'.join(weapon_nodes)
+(ROOT/'game/player/keyboard_weapon.tscn').write_text(re.sub(r'(?<![\w\d])(-?)\.(\d)', r'\g<1>0.\2', text))
+
 # Corrupted record: separated ledger slabs, offset head, asymmetric reaching arms.
 resources.clear()
 nodes.clear()

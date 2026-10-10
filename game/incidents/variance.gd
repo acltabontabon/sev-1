@@ -12,6 +12,10 @@ var seal: MeshInstance3D
 func _ready() -> void:
 	super._ready()
 	title = "THE VARIANCE"
+	magic_color = Color(1, .22, .28)
+	magic_accent = Color(.3, 1, .5)
+	magic_words = ["SUCCESS", "FAILED", "NOT FOUND"]
+	magic_radius = 2.4
 	motto = "Difference detected. Explanation unavailable."
 	marker = Label3D.new()
 	marker.position.y = 3.1
@@ -105,7 +109,10 @@ func _physics_process(delta: float) -> void:
 	crown.rotation.y += delta * (1.6 if exposed else .5)
 	crown.position.y = 2.9 + sin(phase_time * 2.0) * .08
 	phase_time = fmod(phase_time + delta, 8.0)
+	var was_exposed: bool = exposed
 	exposed = phase_time >= 4.5
+	if exposed != was_exposed:
+		_phase_magic()
 	if exposed:
 		melee.cancel()
 		var saved_target: CharacterBody3D = target
@@ -117,3 +124,16 @@ func _physics_process(delta: float) -> void:
 		super._physics_process(delta)
 		marker.text = "◆  VERIFIED ORIGINAL\nSHIELDED — EVADE"
 	label.text = "THE VARIANCE  /  %d" % health
+
+
+## The three verdicts argue in lightning whenever the shield opens or closes.
+func _phase_magic() -> void:
+	var crown_at: Vector3 = crown.global_position
+	for index in range(3):
+		var angle: float = TAU * index / 3.0 + phase_time
+		var ground: Vector3 = global_position + Vector3(cos(angle), 0, sin(angle)) * 2.6
+		ElementFx.bolt(self, crown_at, ground + Vector3.UP * .05, magic_accent if exposed else magic_color, .3, .12)
+	ElementFx.flash(self, crown_at, magic_accent if exposed else magic_color, 5.0, 9.0, .35)
+	ElementFx.sigil(self, global_position, magic_accent if exposed else magic_color, 3.0, 1.2, -1.0 if exposed else 1.0)
+	ElementFx.glyphs(self, crown_at + Vector3.UP * .4, magic_accent if exposed else magic_color, ["OPEN" if exposed else "SHIELDED"], .9, 0.0)
+

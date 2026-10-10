@@ -2052,3 +2052,8 @@ SEV-1 Milestone 12 interface and effect sounds
 -----------------------------------------------
 Selected sounds from Kenney Interface Sounds, Impact Sounds, UI Audio and Sci-Fi Sounds (www.kenney.nl), released under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
 Attribution is not required; credit is given voluntarily. The selected files and their source names are listed in assets/audio/sfx/README.md.
+
+SEV-1 rigged engineer
+---------------------
+Character model and animations from Quaternius (quaternius.com): "Ultimate Animated Character Pack" and "Lowpoly Animated Knight", both distributed on OpenGameArt.org under Creative Commons Zero (CC0 1.0): http://creativecommons.org/publicdomain/zero/1.0/
+Attribution is not required; credit is given voluntarily. Files, modifications and the retargeting step are listed in assets/characters/README.md.

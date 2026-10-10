@@ -10,7 +10,7 @@ func _run() -> void:
 	player.hitstop_enabled = false
 	await setup_pair()
 	var view: Node3D = player.presentation
-	check(view.get_node("WeaponPivot/EscalationBlade") != null, "native keyboard fallback loads without imported model assets")
+	check(view.get_node("WeaponPivot/EscalationBlade") != null and view.animator.has_animation("rig/roll") and view.animator.has_animation("rig/death"), "rigged engineer loads the keyboard and the retargeted action clips")
 	var tip: Vector3 = view.weapon.transform * Vector3(0, 0, -1.47)
 	check(tip.y > .05, "resting keyboard stays above floor")
 	var rest: Transform3D = view.weapon.transform
@@ -19,8 +19,9 @@ func _run() -> void:
 	check(not view.weapon.transform.is_equal_approx(rest) and enemy.health == enemy.max_health, "anticipation moves weapon before any damage")
 	await frames(7)
 	check(enemy.health == enemy.max_health - 25, "visible strike uses existing damage event exactly once")
+	check(_effects(view) > 0, "the strike releases its element as presentation")
 	await frames(30)
-	check(not player.melee.attacking and view.weapon.position.distance_to(Vector3(.38, .91, -.02)) < .05, "recovery returns weapon to carry pose")
+	check(not player.melee.attacking and view.weapon.position.distance_to(view.carry_transform().origin) < .05, "recovery returns the keyboard to the fist")
 	await setup_pair()
 	player.request_attack()
 	await frames(3)
@@ -31,6 +32,7 @@ func _run() -> void:
 	player.request_dodge()
 	await frames(6)
 	check(view.crouch > .1 and player.visual.scale == Vector3.ONE, "dodge crouches without scaling damage origin")
+	check(view.animator.current_animation == "rig/roll", "dodge plays the roll clip")
 	check(player.dodge_aura.visible == player.dodge_is_invulnerable(), "dodge aura follows actual invulnerability")
 	await frames(40)
 	check(view.crouch < .01 and not player.dodge_aura.visible, "dodge recovery restores stance and clears aura")
@@ -57,9 +59,18 @@ func _run() -> void:
 	player.receive_damage(player.health, enemy.position)
 	check(view.crouch > .4 and not player.melee.attacking, "player settles into defeat pose before terminal pause")
 	scene.reset_encounter()
-	check(view.crouch == 0 and view.get_node("Head").rotation.x < .1, "retry clears death pose")
+	check(view.crouch == 0 and view.animator.current_animation != "rig/death", "retry clears death pose")
+	check(_effects(view) == 0, "retry clears element effects")
 	print("RESULT: ", failures, " failure(s)")
 	scene.queue_free()
 	paused = false
 	await frames(2)
 	quit(0 if failures == 0 else 1)
+
+
+func _effects(view: Node) -> int:
+	var count: int = 0
+	for child in view.get_children():
+		if child is ElementFx:
+			count += 1
+	return count
