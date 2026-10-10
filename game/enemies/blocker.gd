@@ -26,6 +26,7 @@ func _ready() -> void:
 	magic_words = ["BLOCKED", "WAITING ON", "DEPENDENCY", "PENDING APPROVAL"]
 	magic_radius = 1.4
 	rig_kind = "blocker"
+	attack_style = "quake"
 	motto = "Awaiting dependency."
 	max_health = 260
 	speed_scale = .7

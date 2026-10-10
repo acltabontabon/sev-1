@@ -17,6 +17,7 @@ func _ready() -> void:
 	magic_accent = Color(.55, .78, 1)
 	magic_words = ["9:00", "SYNC", "1:1", "ALL HANDS", "RSVP"]
 	rig_kind = "invite"
+	attack_style = "quake"
 	motto = "Your attendance is mandatory."
 	max_health = 100
 	speed_scale = .9
@@ -84,6 +85,8 @@ func _physics_process(delta: float) -> void:
 			zone_cooldown = zone_interval
 			ElementFx.sigil(self, global_position, magic_color, 1.0, 1.0, 3.0)
 			rig.cast(1.0)
+			# The meeting drops from above onto the booked spot as the zone opens.
+			ElementFx.pillar(self, Vector3(target.global_position.x, global_position.y, target.global_position.z), magic_color, 1.4, 1.1)
 			ElementFx.glyphs(self, target.global_position + Vector3.UP * 1.9, magic_color, magic_words.slice(0, 3), 1.1, .9)
 			zone_requested.emit(Vector3(target.global_position.x, global_position.y, target.global_position.z))
 	velocity.x = direction.x * move_speed + knockback.x

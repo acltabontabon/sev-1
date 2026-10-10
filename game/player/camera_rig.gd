@@ -13,6 +13,8 @@ signal capture_changed(active: bool)
 
 var controls_active: bool = false
 var impulse: float = 0.0
+## Ground tremor from heavy enemy attacks: random jitter on top of the impulse kick.
+var tremor: float = 0.0
 @onready var spring_arm: SpringArm3D = $SpringArm3D
 
 
@@ -23,6 +25,7 @@ func _ready() -> void:
 
 func reset_view() -> void:
 	impulse = 0.0
+	tremor = 0.0
 	$SpringArm3D/Camera3D.rotation = Vector3.ZERO
 	rotation = Vector3.ZERO
 	spring_arm.rotation.x = deg_to_rad(-18.0)
@@ -33,12 +36,19 @@ func add_impulse(strength: float) -> void:
 	impulse = minf(1, impulse + strength)
 
 
+func add_tremor(strength: float) -> void:
+	tremor = minf(1, tremor + strength)
+
+
 func _physics_process(delta: float) -> void:
 	if get_tree().paused:
 		return
 	impulse = move_toward(impulse, 0, delta * impulse_decay)
+	tremor = move_toward(tremor, 0, delta * 2.2)
 	# Rotation only: never move the lens through the spring arm's collision plane.
-	$SpringArm3D/Camera3D.rotation = Vector3(deg_to_rad(impulse_degrees) * impulse, 0, deg_to_rad(impulse_degrees) * impulse * 0.35)
+	# Tremor scales with impulse_degrees, so the Camera shake setting governs both.
+	var rumble: Vector3 = Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-.5, .5)) * deg_to_rad(impulse_degrees * 2.2) * tremor * tremor
+	$SpringArm3D/Camera3D.rotation = Vector3(deg_to_rad(impulse_degrees) * impulse, 0, deg_to_rad(impulse_degrees) * impulse * 0.35) + rumble
 
 
 func orbit(motion: Vector2) -> void:

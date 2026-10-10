@@ -555,6 +555,13 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `corruption.gdshader`. Scope Creep scales the rig with its growth; The Variance's
   false positives are `projection()` copies of its rig. Provenance in
   `assets/enemies/README.md`.
+- **Enemy strikes.** `incident.gd` picks the strike effect from `attack_style` (slash,
+  quake, splat, cataclysm; archetypes set it) when the melee window opens: crescent and
+  floor fissure, ground slam (`ElementFx.quake`: shockwaves, cracks, debris, dust,
+  flash), goo splat, or the boss's twin quakes and fissures. The Meeting Invite drops
+  `ElementFx.pillar` onto each booked zone. `ElementFx.tremor` adds rotation-only jitter
+  through `camera_rig.add_tremor()`, scaled by the Camera shake preference via
+  `impulse_degrees`; `reset_view()` clears it.
 - **Battle mode.** `game/incidents/battle_mode.gd`, owned by the incident, watches for an
   ENGAGED enemy. Onset: sting, flash, chromatic split and speed lines from
   `battle_overlay.gdshader` (a CanvasLayer at layer -1, under the HUD). Held: vignette

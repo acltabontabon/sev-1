@@ -1,5 +1,27 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.3 — Enemy attacks hit the ground (10 October 2026)
+
+Creator ask: flashier enemy attacks, "like earthquake or something". Damage, reach,
+timing and AI are unchanged; every effect fires on the existing strike frame.
+
+- **Corrupted Record:** a red crescent slash with a crack racing across the floor toward
+  you, kicking up debris.
+- **The Blocker:** a ground-pound quake: twin shockwaves, glowing cracks splitting
+  outward, flying floor chunks, rolling dust and a screen tremor. The floor already
+  rumbles while it winds up.
+- **Scope Creep:** a goo splat that sprays sticky notes.
+- **The Meeting Invite:** booking a meeting now drops a violet beam over your spot that
+  slams down with a small quake as the zone opens.
+- **The Variance:** a cataclysm: red and green quakes, three fissures erupting rocks
+  across the vault, lightning from its crown and the strongest tremor.
+- **Screen tremor** is rotation-only and scales with the existing Camera shake setting
+  (0 turns it off).
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 119.3 FPS mean (p95
+9.7 ms, max 16.7 ms). Validation: 641 assertions across 15 headless suites. Whether the
+tremor is too much in a long fight needs a human run.
+
 ## 0.2.2 — Enemies that are not boxes (10 October 2026)
 
 Creator feedback on 0.2.1: the enemies still looked like boxes. Combat rules, AI,

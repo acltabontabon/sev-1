@@ -65,6 +65,22 @@ func _run() -> void:
 		var body: CharacterBody3D = spawn(kind, Vector3(worn.size() * 2.5 - 4, .05, -6))
 		worn.append([body.rig.kind if body.rig != null else "", body.get_node("Visual/Body").visible])
 	check(worn == [["record", false], ["blocker", false], ["invite", false], ["scope", false]], "each archetype wears its own rigged body")
+	# A Blocker's slam lands as a quake: camera tremor near the impact, effects on the floor.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 2)
+	player.camera_rig.reset_view()
+	var slammer: CharacterBody3D = spawn("blocker", Vector3(0, .05, 0))
+	slammer.melee.start()
+	var guard: int = 0
+	while slammer.melee.attacking and not slammer.melee.is_active() and guard < 120:
+		guard += 1
+		await frames(1)
+	await frames(2)
+	var quaking: int = slammer.get_children().filter(func(child: Node) -> bool: return child is ElementFx).size()
+	check(player.camera_rig.tremor > 0 and quaking >= 4, "a blocker slam shakes the camera and cracks the floor")
+	slammer.reset_enemy()
+	player.camera_rig.reset_view()
+	check(player.camera_rig.tremor == 0 and slammer.get_children().filter(func(child: Node) -> bool: return child is ElementFx).is_empty(), "reset clears the quake and the tremor")
 	# Blocker: cast, refuse damage, interrupt, release on death.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 9)

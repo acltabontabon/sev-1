@@ -24,6 +24,7 @@ func _ready() -> void:
 	magic_accent = Color(1, .9, .3)
 	magic_words = ["+1 REQ", "JUST ONE MORE", "NICE TO HAVE", "ALSO MOBILE"]
 	rig_kind = "scope"
+	attack_style = "splat"
 	motto = "One tiny additional requirement."
 	max_health = 90
 	speed_scale = 1.35

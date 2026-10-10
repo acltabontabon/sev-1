@@ -10,6 +10,7 @@ static var glow_material: StandardMaterial3D
 static var ribbon_material: StandardMaterial3D
 static var paper_material: StandardMaterial3D
 static var soft_dot: GradientTexture2D
+static var dust_material: StandardMaterial3D
 
 var life: float = 1.0
 var age: float = 0.0
@@ -251,6 +252,185 @@ static func flame_ring(emitter: Node, at: Vector3, radius: float, duration: floa
 	motes(emitter, at + Vector3.UP * .4, Color(1, .6, .2), 26, 6.0, duration * 1.4, 3.0, .07)
 	shockwave(emitter, at, Color(1, .5, .15), radius * 2.0, duration * .7)
 	flash(emitter, at + Vector3.UP, Color(1, .55, .2), 5.0, radius * 3.0, duration * .6)
+	return effect
+
+
+## Screen tremor for the engineer's camera, fading with distance from the source.
+static func tremor(emitter: Node, at: Vector3, strength: float, radius: float) -> void:
+	var player: Node3D = emitter.get_tree().get_first_node_in_group("players") as Node3D
+	if player == null or not player.has_node("CameraRig"):
+		return
+	var falloff: float = 1.0 - clampf(player.global_position.distance_to(at) / radius, 0.0, 1.0)
+	if falloff > 0.0:
+		player.get_node("CameraRig").add_tremor(strength * falloff)
+
+
+## Glowing fractures that split across the floor from a point and fade.
+static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, count: int = 7, duration: float = 1.4) -> ElementFx:
+	var effect: ElementFx = spawn(emitter, at + Vector3.UP * .03, duration)
+	var strand: MeshInstance3D = MeshInstance3D.new()
+	strand.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mesh: ImmediateMesh = ImmediateMesh.new()
+	strand.mesh = mesh
+	effect.add_child(strand)
+	var paths: Array[PackedVector3Array] = []
+	for index in range(count):
+		var angle: float = TAU * index / count + randf_range(-.3, .3)
+		var reach: float = radius * randf_range(.6, 1.0)
+		var points: PackedVector3Array = PackedVector3Array([Vector3.ZERO])
+		for step in range(1, 7):
+			var bend: float = angle + randf_range(-.35, .35)
+			points.append(Vector3(cos(bend), 0, sin(bend)) * reach * step / 6.0)
+		paths.append(points)
+	effect.on_tick = func(t: float) -> void:
+		mesh.clear_surfaces()
+		var grow: float = minf(1.0, t * 7.0)
+		var alpha: float = 1.0 - smoothstep(.35, 1.0, t)
+		for points in paths:
+			mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, _ribbon())
+			var shown: int = maxi(2, int(ceil(points.size() * grow)))
+			for index in range(shown):
+				var point: Vector3 = points[index]
+				var across: Vector3 = point.normalized().cross(Vector3.UP) if point.length() > .01 else Vector3.RIGHT
+				var width: float = .09 * (1.0 - float(index) / points.size()) + .015
+				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
+				mesh.surface_add_vertex(point + across * width)
+				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha).lerp(Color(1, 1, 1, alpha), .35))
+				mesh.surface_add_vertex(point - across * width)
+			mesh.surface_end()
+	effect.on_tick.call(0.0)
+	return effect
+
+
+## Floor chunks thrown up by an impact.
+static func debris(emitter: Node, at: Vector3, amount: int, speed: float, duration: float = 1.1, color: Color = Color(.32, .31, .3)) -> ElementFx:
+	return shards(emitter, at + Vector3.UP * .1, color, amount, speed, duration, Vector3.UP, .17)
+
+
+## Rolling dust that spreads along the floor (alpha-blended, not glowing).
+static func dust(emitter: Node, at: Vector3, radius: float, duration: float = 1.2, color: Color = Color(.55, .52, .48)) -> ElementFx:
+	var effect: ElementFx = spawn(emitter, at + Vector3.UP * .25, duration)
+	if dust_material == null:
+		_dot_mesh(.1)
+		dust_material = StandardMaterial3D.new()
+		dust_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		dust_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		dust_material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		dust_material.vertex_color_use_as_albedo = true
+		dust_material.albedo_texture = soft_dot
+		dust_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	var quad: QuadMesh = QuadMesh.new()
+	quad.size = Vector2.ONE * .9
+	quad.material = dust_material
+	var puffs: CPUParticles3D = _particles(26, duration * .9, quad)
+	puffs.direction = Vector3.UP
+	puffs.spread = 85.0
+	puffs.flatness = .85
+	puffs.initial_velocity_min = radius * 1.2
+	puffs.initial_velocity_max = radius * 2.2
+	puffs.damping_min = radius * 1.5
+	puffs.damping_max = radius * 2.5
+	puffs.scale_amount_curve = _swell_curve()
+	var ramp: Gradient = Gradient.new()
+	ramp.set_color(0, Color(color.r, color.g, color.b, .55))
+	ramp.set_color(1, Color(color.r, color.g, color.b, 0))
+	puffs.color_ramp = ramp
+	effect.add_child(puffs)
+	puffs.emitting = true
+	return effect
+
+
+## The full ground slam: twin shockwaves, cracks, debris, dust, a flash and tremor.
+static func quake(emitter: Node, at: Vector3, color: Color, radius: float, strength: float = .8) -> ElementFx:
+	var effect: ElementFx = shockwave(emitter, at, color, radius * 2.0, .5)
+	var echoed: Array[bool] = [false]
+	var first: Callable = effect.on_tick
+	effect.on_tick = func(t: float) -> void:
+		first.call(t)
+		if t > .3 and not echoed[0]:
+			echoed[0] = true
+			shockwave(emitter, at, Color(1, 1, 1, .7), radius * 1.4, .4)
+	cracks(emitter, at, color, radius)
+	debris(emitter, at, int(10 + radius * 4), 3.5 + radius)
+	dust(emitter, at, radius)
+	flash(emitter, at + Vector3.UP * .6, color, 4.0, radius * 3.0, .3)
+	tremor(emitter, at, strength, radius * 4.0)
+	return effect
+
+
+## A crack that races along the floor from one point to another, rocks erupting behind it.
+static func fissure(emitter: Node, from: Vector3, to: Vector3, color: Color, duration: float = .9) -> ElementFx:
+	var effect: ElementFx = spawn(emitter, Vector3.ZERO, duration)
+	effect.global_position = Vector3.ZERO
+	var strand: MeshInstance3D = MeshInstance3D.new()
+	strand.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mesh: ImmediateMesh = ImmediateMesh.new()
+	strand.mesh = mesh
+	effect.add_child(strand)
+	var start: Vector3 = Vector3(from.x, from.y + .03, from.z)
+	var axis: Vector3 = Vector3(to.x - from.x, 0, to.z - from.z)
+	var across: Vector3 = axis.normalized().cross(Vector3.UP)
+	var points: PackedVector3Array = PackedVector3Array()
+	for step in range(13):
+		points.append(start + axis * step / 12.0 + across * (randf_range(-.25, .25) if step > 0 else 0.0))
+	var erupted: Array[int] = [0]
+	effect.on_tick = func(t: float) -> void:
+		var front: int = mini(points.size(), int(ceil(points.size() * minf(1.0, t * 3.0))))
+		while erupted[0] < front:
+			if erupted[0] % 3 == 1:
+				debris(emitter, points[erupted[0]], 4, 4.5, .8)
+				motes(emitter, points[erupted[0]], color, 5, 3.0, .45, 2.0, .2)
+			erupted[0] += 1
+		mesh.clear_surfaces()
+		if front < 2:
+			return
+		var alpha: float = 1.0 - smoothstep(.5, 1.0, t)
+		mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, _ribbon())
+		for index in range(front):
+			var width: float = .12 * sin(PI * (index + .5) / points.size()) + .02
+			mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
+			mesh.surface_add_vertex(points[index] + across * width)
+			mesh.surface_set_color(Color(1, 1, 1, alpha * .7))
+			mesh.surface_add_vertex(points[index] - across * width)
+		mesh.surface_end()
+	return effect
+
+
+## A beam that hangs over a spot, then slams down after `delay` with a small quake.
+static func pillar(emitter: Node, at: Vector3, color: Color, radius: float, delay: float) -> ElementFx:
+	var effect: ElementFx = spawn(emitter, at, delay + .45)
+	var beam: MeshInstance3D = MeshInstance3D.new()
+	var tube: CylinderMesh = CylinderMesh.new()
+	tube.top_radius = radius
+	tube.bottom_radius = radius
+	tube.height = 9.0
+	tube.cap_top = false
+	tube.cap_bottom = false
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.albedo_color = Color(color.r, color.g, color.b, 0)
+	tube.material = material
+	beam.mesh = tube
+	beam.position.y = 4.5
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	effect.add_child(beam)
+	var landed: Array[bool] = [false]
+	var total: float = delay + .45
+	effect.on_tick = func(t: float) -> void:
+		var time: float = t * total
+		if time < delay:
+			beam.scale = Vector3(.15 + .1 * sin(time * 30.0), 1, .15 + .1 * sin(time * 30.0))
+			material.albedo_color.a = .25 * time / delay
+		else:
+			if not landed[0]:
+				landed[0] = true
+				quake(emitter, at, color, radius, .45)
+			var after: float = (time - delay) / .45
+			beam.scale = Vector3(lerpf(1.0, .1, after), 1, lerpf(1.0, .1, after))
+			material.albedo_color.a = .7 * (1.0 - after)
 	return effect
 
 

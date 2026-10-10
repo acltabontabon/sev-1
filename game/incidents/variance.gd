@@ -11,6 +11,7 @@ var seal: MeshInstance3D
 
 func _ready() -> void:
 	rig_kind = "variance"
+	attack_style = "cataclysm"
 	super._ready()
 	title = "THE VARIANCE"
 	magic_color = Color(1, .22, .28)

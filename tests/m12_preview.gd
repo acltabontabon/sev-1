@@ -99,6 +99,10 @@ func _run() -> void:
 		await battle()
 		quit()
 		return
+	if only == "attacks":
+		await attacks()
+		quit()
+		return
 	if only == "areas":
 		await tour()
 		quit()
@@ -256,6 +260,55 @@ func battle() -> void:
 		await process_frame
 		sample()
 	report("battle_mode_combat")
+	app.main_menu()
+	await frames(5)
+
+
+## Each enemy's strike landing (slash crack, ground quake, splat, meeting drop, cataclysm).
+func attacks() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.5)
+	incident.presentation.feed.modulate.a = 0.0
+	app.session.get_node("HUD").hide()
+	var camera: Camera3D = Camera3D.new()
+	app.session.add_child(camera)
+	camera.fov = 55
+	for kind: String in ["record", "blocker", "scope", "invite", "variance"]:
+		incident._cleanup()
+		incident._enter(incident.Stage.INVESTIGATION)
+		player.max_health = 100000
+		player.health = 100000
+		player.global_position = Vector3(0, .05, 4)
+		player.visual.rotation.y = 0.0
+		var actor: CharacterBody3D
+		if kind == "variance":
+			actor = load("res://game/enemies/incident.tscn").instantiate()
+			actor.set_script(load("res://game/incidents/variance.gd"))
+			incident.add_child(actor)
+			incident.actors.append(actor)
+		else:
+			actor = incident._spawn_entry([kind, "A1"], incident.alive)
+		actor.global_position = Vector3(0, .05, 4 - (3.4 if kind == "variance" else 2.6))
+		actor.home = actor.global_position
+		actor.engage()
+		camera.position = Vector3(5.5, 2.6, 4.2)
+		camera.look_at(Vector3(0, .9, 2.4))
+		camera.make_current()
+		await live(.3)
+		if kind == "invite":
+			actor.zone_cooldown = 0.0
+			await live(1.2)
+		else:
+			actor.melee.start()
+			while actor.melee.attacking and actor.melee.elapsed < actor.melee.windup + .08:
+				await process_frame
+		await shot("attack_%s" % kind)
+		await live(.25)
+		await shot("attack_%s_after" % kind)
+	incident._cleanup()
 	app.main_menu()
 	await frames(5)
 
