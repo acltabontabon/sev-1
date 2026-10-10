@@ -1,5 +1,23 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.15 — Reply All, Blame Shift, Circle Back (10 October 2026)
+
+Creator feedback on 0.2.14: put a whoosh under each call; "Hot Swap" is cringe; a
+funnier alternative, maybe a better move set.
+
+- **The moves are corporate jargon now, each with a twist that fits the joke:**
+  - **REPLY ALL** (C): the crescent that hits everyone in line; each victim gets a
+    "RE: RE: RE:".
+  - **BLAME SHIFT** (X, or attack out of a dodge): the dash slash; everyone it passes
+    is BLAMED and takes 30% more from every hit for 4 s. Dash in, then punish.
+  - **CIRCLE BACK** (Z, "Let's circle… BACK!!"): the whirlwind; its last pulse sends
+    survivors to the PARKING LOT, stunned for 1.2 s.
+  - **FORCE ROLLBACK** (V) stays: "git reset… HARD!".
+- **Whooshes.** Original synthesized whooshes (filtered noise sweeps from
+  `tools/build_whoosh.py`) play under each call: a slice, a dash pass, a wobbling spin,
+  and a rising swell into the ultimate, with a heavy impact under its slam.
+- New calls voiced with the hype chain; old ones removed.
+
 ## 0.2.14 — Louder calls (10 October 2026)
 
 Creator feedback on 0.2.13: make the shouts louder and more hype.

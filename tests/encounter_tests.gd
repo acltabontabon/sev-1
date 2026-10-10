@@ -507,9 +507,9 @@ func _run() -> void:
 	var second_cut: CharacterBody3D = spawn("record", Vector3(.6, .05, -4.0), false)
 	for foe: CharacterBody3D in [first_cut, second_cut]:
 		foe.set_physics_process(false)
-	check(player.specials.hotfix_wave(), "C throws a Hotfix Wave")
-	check(player.specials.last_call == "hotfix_wave" and player.specials.voice.stream != null and scene.get_node("HUD").cut_in.visible, "the engineer shouts the move's name, anime style, with a cut-in")
-	check(not player.specials.hotfix_wave(), "the wave has a cooldown")
+	check(player.specials.reply_all(), "C fires Reply All")
+	check(player.specials.last_call == "reply_all" and player.specials.voice.stream != null and player.specials.whoosh.stream != null and scene.get_node("HUD").cut_in.visible, "the engineer shouts the move's name over a whoosh, anime style, with a cut-in")
+	check(not player.specials.reply_all(), "the wave has a cooldown")
 	await frames(50)
 	check(first_cut.health < first_cut.max_health and second_cut.health < second_cut.max_health, "the wave pierces a line of enemies 5 and 10 m away")
 	check(player.specials.blades.is_empty() and player.specials.focus > 0, "the blade expires at its range, and its hits build FOCUS")
@@ -524,7 +524,7 @@ func _run() -> void:
 	await frames(60)
 	check(player.specials.last_call == "reset_hard", "the ultimate is called twice: on the leap and on the slam")
 	check(behind.health < behind.max_health and beyond.health == beyond.max_health and player.specials.focus < 10, "Force Rollback hits everything around the engineer, nothing beyond its radius, and spends FOCUS")
-	# Hot Swap: dash through a line, everything passed is cut a beat later.
+	# Blame Shift: dash through a line, cutting and blaming everything passed.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 6)
 	player.camera_rig.rotation.y = 0.0
@@ -533,22 +533,27 @@ func _run() -> void:
 	for foe: CharacterBody3D in passed:
 		foe.set_physics_process(false)
 	var start_z: float = player.global_position.z
-	check(player.specials.dash_slash(), "X dashes")
-	check(player.specials.last_call == "hot_swap", "Hot Swap is called out")
-	check(not player.specials.dash_slash(), "the dash has a cooldown")
+	check(player.specials.blame_shift(), "X dashes")
+	check(player.specials.last_call == "blame_shift", "Blame Shift is called out")
+	check(not player.specials.blame_shift(), "the dash has a cooldown")
 	await frames(4)
 	check(passed[0].health < passed[0].max_health and passed[1].health == passed[1].max_health, "the dash cuts the first enemy as it passes, before reaching the second")
 	await frames(12)
 	check(start_z - player.global_position.z > 5.0 and passed.all(func(foe: CharacterBody3D) -> bool: return foe.health < foe.max_health), "the engineer goes straight through, cutting everything on the way")
 	await frames(30)
 	check(player.dash_velocity == Vector3.ZERO and player.specials.dash_marked.is_empty(), "the dash ends cleanly on arrival")
+	var blamed: CharacterBody3D = passed[0]
+	check(blamed.blamed_left > 0, "everyone the dash passes is BLAMED")
+	var before_blame: int = blamed.health
+	blamed.receive_damage(10, player.position)
+	check(before_blame - blamed.health == 13, "a blamed incident takes 30% more from every hit")
 	player.specials.dash_cooldown = 0.0
 	await frames(40)
 	player.request_dodge()
 	await frames(2)
-	check(player.specials.dash_slash() and not player.dodging, "attacking out of a dodge turns it into the dash slash")
+	check(player.specials.blame_shift() and not player.dodging, "attacking out of a dodge turns it into the dash slash")
 	await frames(60)
-	# Merge Conflict: a whirlwind that hits everything around, several times.
+	# Circle Back: a whirlwind that hits everything around, several times.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 5)
 	await frames(4)
@@ -557,11 +562,12 @@ func _run() -> void:
 		foe.max_health = 1000
 		foe.health = 1000
 		foe.set_physics_process(false)
-	check(player.specials.merge_conflict(), "Z starts the whirlwind")
-	check(player.specials.last_call == "merge_conflict", "Merge Conflict is called out")
-	check(not player.specials.merge_conflict(), "the whirlwind has a cooldown")
+	check(player.specials.circle_back(), "Z starts the whirlwind")
+	check(player.specials.last_call == "circle_back", "Circle Back is called out")
+	check(not player.specials.circle_back(), "the whirlwind has a cooldown")
 	await frames(roundi(player.specials.SPIN_TIME * 60) + 10)
 	check(ring.all(func(foe: CharacterBody3D) -> bool: return foe.max_health - foe.health >= player.specials.SPIN_DAMAGE * 3), "the whirlwind hits everything around the engineer again and again")
+	check(ring.all(func(foe: CharacterBody3D) -> bool: return foe.stagger_left > 1.0), "the last pulse sends survivors to the parking lot")
 	scene.reset_encounter()
 	await frames(2)
 	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty() and player.specials.dash_cooldown == 0 and player.specials.spin_left == 0, "restart clears FOCUS, cooldowns and blades")

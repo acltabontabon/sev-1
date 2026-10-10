@@ -3,14 +3,16 @@ extends Node
 ## swings for the body (rigged_engineer.gd animates combo steps), and fire on the swing's
 ## active frame so the visible strike and the effect agree.
 ##
-## HOTFIX WAVE (C / middle mouse): an overhead cut throws a crescent blade 13 m forward,
-## piercing everything in its path until a wall breaks it. 3.5 s cooldown.
+## REPLY ALL (C / middle mouse): an overhead cut throws a crescent blade 13 m forward
+## that hits everyone in its path ("RE: RE: RE:") until a wall breaks it. 3.5 s cooldown.
 ## FORCE ROLLBACK (V): the ultimate. Landed hits fill FOCUS; at 100 the engineer leaps,
 ## time slows, and the slam rolls back everything within 7.5 m (shields included).
-## HOT SWAP (X, or attack out of a dodge): a 7 m dash straight through enemies, cutting
-## each one the instant it is passed; the path flashes white on arrival. 2.5 s cooldown.
-## MERGE CONFLICT (Z): a steerable fire whirlwind for 1.4 s that hits everything within
-## 3 m four times and drags it inward. 6 s cooldown.
+## BLAME SHIFT (X, or attack out of a dodge): a 7 m dash straight through enemies, cutting
+## each one the instant it is passed and leaving it BLAMED: +30% damage taken for 4 s.
+## The path flashes white on arrival. 2.5 s cooldown.
+## CIRCLE BACK (Z): a steerable fire whirlwind for 1.4 s that hits everything within 3 m
+## four times and drags it inward; the last pulse sends survivors to the PARKING LOT
+## (stunned 1.2 s). 6 s cooldown.
 
 signal focus_changed(value: float)
 ## A move was called out loud (anime style): its name, and whether it is the ultimate.
@@ -54,8 +56,18 @@ var dash_marked: Array[Node3D] = []
 var dash_landed: bool = false
 ## The light wall the dash leaves along its path; it flashes white when the cuts land.
 var trail: MeshInstance3D
-## The engineer shouts every move's name; the last call is kept for checks.
+## The engineer shouts every move's name over a whoosh; the last call is kept for checks.
+const WHOOSH: Dictionary = {
+	"reply_all": preload("res://assets/audio/sfx/whoosh_slice.ogg"),
+	"blame_shift": preload("res://assets/audio/sfx/whoosh_dash.ogg"),
+	"circle_back": preload("res://assets/audio/sfx/whoosh_spin.ogg"),
+	"rollback": preload("res://assets/audio/sfx/whoosh_rise.ogg"),
+	"reset_hard": preload("res://assets/audio/sfx/heavy_impact.ogg"),
+}
+const BLAME_SECONDS: float = 4.0
+const PARKING_SECONDS: float = 1.2
 var voice: AudioStreamPlayer
+var whoosh: AudioStreamPlayer
 var last_call: String = ""
 var trail_left: float = 0.0
 var trail_flash: float = 0.0
@@ -89,6 +101,10 @@ func _ready() -> void:
 	# Calls sit on top of the fight, not inside the dialogue mix.
 	voice.volume_db = 4.0
 	add_child(voice)
+	whoosh = AudioStreamPlayer.new()
+	whoosh.bus = &"Effects"
+	whoosh.volume_db = -2.0
+	add_child(whoosh)
 
 
 func reset() -> void:
@@ -119,6 +135,10 @@ func _shout(key: String, title: String, ultimate: bool = false) -> void:
 		voice.pitch_scale = randf_range(.97, 1.05)
 		if DisplayServer.get_name() != "headless":
 			voice.play()
+	whoosh.stream = WHOOSH.get(key)
+	whoosh.pitch_scale = randf_range(.94, 1.06)
+	if whoosh.stream != null and DisplayServer.get_name() != "headless":
+		whoosh.play()
 	called.emit(title, ultimate)
 
 
@@ -143,7 +163,7 @@ func _can_act() -> bool:
 		and dash_left <= 0 and spin_left <= 0
 
 
-func hotfix_wave() -> bool:
+func reply_all() -> bool:
 	if wave_cooldown > 0 or not _can_act():
 		return false
 	player.melee.cancel()
@@ -152,7 +172,7 @@ func hotfix_wave() -> bool:
 		return false
 	queued = "wave"
 	wave_cooldown = WAVE_COOLDOWN
-	_shout("hotfix_wave", "HOTFIX WAVE")
+	_shout("reply_all", "REPLY ALL")
 	return true
 
 
@@ -175,8 +195,8 @@ func rollback() -> bool:
 	return true
 
 
-## Hot Swap: allowed out of a dodge (that is the point), never mid-special.
-func dash_slash() -> bool:
+## Blame Shift: allowed out of a dodge (that is the point), never mid-special.
+func blame_shift() -> bool:
 	if dash_cooldown > 0 or player.narrative_hold or player.health <= 0 or player.hurt_left > 0 or not player.is_on_floor() \
 			or not queued.is_empty() or dash_left > 0 or spin_left > 0:
 		return false
@@ -205,12 +225,12 @@ func dash_slash() -> bool:
 	dash_cooldown = DASH_COOLDOWN
 	ElementFx.gust(player, eye, Basis.looking_at(direction), DASH_COLOR, 2.5, .22)
 	ElementFx.motes(player, player.global_position + Vector3.UP * .4, DASH_COLOR, 18, 3.0, .5, 0.0, .12, -direction, 50.0)
-	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.3, DASH_COLOR, ["HOT SWAP"], .6, 0.0)
-	_shout("hot_swap", "HOT SWAP")
+	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.3, DASH_COLOR, ["BLAME SHIFT"], .6, 0.0)
+	_shout("blame_shift", "BLAME SHIFT")
 	return true
 
 
-func merge_conflict() -> bool:
+func circle_back() -> bool:
 	if spin_cooldown > 0 or not _can_act():
 		return false
 	player.melee.cancel()
@@ -219,8 +239,8 @@ func merge_conflict() -> bool:
 	spin_left = SPIN_TIME
 	spin_tick = .12
 	spin_cooldown = SPIN_COOLDOWN
-	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.4, SPIN_COLOR, ["MERGE CONFLICT"], .8, 0.0)
-	_shout("merge_conflict", "MERGE CONFLICT")
+	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.4, SPIN_COLOR, ["LET'S CIRCLE BACK"], .8, 0.0)
+	_shout("circle_back", "CIRCLE BACK")
 	return true
 
 
@@ -303,6 +323,10 @@ func _cut(target: Node3D) -> bool:
 		target.apply_hitstop(.08)
 	if target.has_method("show_impact"):
 		target.show_impact(DASH_COLOR)
+	# Shifted onto them: blamed incidents take more from everything for a while.
+	if "blamed_left" in target and target.get("health") != 0:
+		target.blamed_left = BLAME_SECONDS
+		ElementFx.glyphs(player, at + Vector3.UP * 1.3, Color(1, .4, .3), ["BLAMED"], .9, 0.0)
 	player.hit_confirmed.emit()
 	player.camera_rig.add_impulse(.4)
 	return true
@@ -317,6 +341,7 @@ func _tick_spin(delta: float) -> void:
 	if spin_tick > 0:
 		return
 	spin_tick = SPIN_TIME / SPIN_TICKS
+	var last: bool = spin_left < spin_tick * .5
 	var at: Vector3 = player.global_position
 	ElementFx.shockwave(player, at + Vector3.UP * .1, SPIN_COLOR, SPIN_RADIUS, .3)
 	ElementFx.flame_ring(player, at, SPIN_RADIUS * .8, .35)
@@ -334,6 +359,10 @@ func _tick_spin(delta: float) -> void:
 			# Into the whirlwind, not away from it.
 			if "knockback" in target:
 				target.knockback = -Vector3(offset.x, 0, offset.z).normalized() * 4.0
+			# The final pulse parks whatever is left: "let's take that offline".
+			if last and target.get("health") != 0 and "stagger_left" in target:
+				target.stagger_left = PARKING_SECONDS
+				ElementFx.glyphs(player, target.global_position + Vector3.UP * 2.2, Color(.95, .8, .4), ["PARKING LOT"], .9, 0.0)
 	if landed:
 		player.hit_confirmed.emit()
 		player.camera_rig.add_impulse(.35)
@@ -389,7 +418,7 @@ func _launch_wave() -> void:
 	var ground: Vector3 = Vector3(origin.x, player.global_position.y, origin.z)
 	ElementFx.fissure(player, ground, ground + direction * WAVE_RANGE * .8, WAVE_COLOR, .7)
 	ElementFx.gust(player, origin, Basis.looking_at(direction), WAVE_COLOR, 3.0, .3)
-	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.3, WAVE_COLOR, ["HOTFIX WAVE"], .7, 0.0)
+	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.3, WAVE_COLOR, ["REPLY ALL"], .7, 0.0)
 	player.camera_rig.add_impulse(.6)
 
 
@@ -428,6 +457,7 @@ func _advance(blade: Dictionary, delta: float) -> void:
 			if target.has_method("show_impact"):
 				target.show_impact(WAVE_COLOR)
 			ElementFx.shards(player, center, WAVE_COLOR, 10, 6.0, .5, blade.direction)
+			ElementFx.glyphs(player, center + Vector3.UP * 1.2, WAVE_COLOR, ["RE: RE: RE:"], .6, 0.0)
 			player.camera_rig.add_impulse(.5)
 			player.hit_confirmed.emit()
 	if not wall.is_empty() or blade.travelled >= WAVE_RANGE - .01:

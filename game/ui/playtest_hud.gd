@@ -452,7 +452,7 @@ func _refresh_incident(incident: Node) -> void:
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
-	$Controls.text = "E  USE    LMB / F  COMBO    Q / RMB  DODGE    C  WAVE    X  DASH    Z  SPIN    V  ROLLBACK    R  RESTART    ESC  PAUSE"
+	$Controls.text = "E  USE    LMB / F  COMBO    Q / RMB  DODGE    C  REPLY ALL    X  BLAME SHIFT    Z  CIRCLE BACK    V  ROLLBACK    R  RESTART    ESC  PAUSE"
 	$Controls.offset_top = -30
 	if incident.message != last_message:
 		last_message = incident.message

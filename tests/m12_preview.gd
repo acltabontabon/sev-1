@@ -294,7 +294,7 @@ func battle() -> void:
 	await frames(5)
 
 
-## The special moves: Hotfix Wave mid-flight, then Force Rollback's leap and slam.
+## The special moves: Reply All mid-flight, then Force Rollback's leap and slam.
 func specials() -> void:
 	app.start_incident()
 	var incident: Node = app.session.get_node("Incident")
@@ -317,7 +317,7 @@ func specials() -> void:
 	for foe: CharacterBody3D in foes:
 		foe.set_physics_process(false)
 	player.visual.rotation.y = 0.0
-	player.specials.hotfix_wave()
+	player.specials.reply_all()
 	await live(.08)
 	await shot("special_wave_cutin")
 	while player.specials.blades.is_empty():
@@ -346,7 +346,7 @@ func specials() -> void:
 	await shot("special_rollback_slam")
 	await live(.5)
 	await shot("special_rollback_after")
-	# Hot Swap through a fresh line, then Merge Conflict among a ring.
+	# Blame Shift through a fresh line, then Circle Back among a ring.
 	player.global_position = Vector3(0, .05, 7)
 	player.camera_rig.rotation.y = 0.0
 	player.camera_rig.reset_view()
@@ -356,7 +356,7 @@ func specials() -> void:
 		foe.reveal()
 		foe.set_physics_process(false)
 	await live(.8)
-	player.specials.dash_slash()
+	player.specials.blame_shift()
 	await live(.1)
 	await shot("special_dash_through")
 	while player.specials.dash_left > 0:
@@ -372,7 +372,7 @@ func specials() -> void:
 		foe.position = Vector3(3, .05, 4) + Vector3(cos(index * 1.6), 0, sin(index * 1.6)) * 2.2
 		foe.reveal()
 	await live(.3)
-	player.specials.merge_conflict()
+	player.specials.circle_back()
 	await live(.5)
 	await shot("special_spin")
 	app.main_menu()

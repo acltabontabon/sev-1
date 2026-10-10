@@ -84,6 +84,8 @@ var rig_kind: String = "record"
 ## until it breaks out. Set by `disguise()` before the enemy enters the tree.
 var host: Node3D
 var disguise_left: float = 0.0
+## Blame Shift: while blamed, every hit lands 30% harder.
+var blamed_left: float = 0.0
 var rig: MonsterRig
 @onready var navigation: NavigationAgent3D = $NavigationAgent3D
 @onready var visual: Node3D = $Visual
@@ -229,6 +231,8 @@ func receive_damage(amount: int, source: Vector3) -> bool:
 		engage(source, true)
 		if get_parent().has_method("on_surprise"):
 			get_parent().on_surprise(self)
+	if blamed_left > 0:
+		amount = roundi(amount * 1.3)
 	health = maxi(health - amount, 0)
 	health_changed.emit(health)
 	flash_left = hit_flash_duration
@@ -596,6 +600,7 @@ func _physics_process(delta: float) -> void:
 	if health <= 0:
 		return
 	stagger_left = maxf(0.0, stagger_left - delta)
+	blamed_left = maxf(0.0, blamed_left - delta)
 	_update_state()
 	if state != last_state:
 		if state == State.TELEGRAPH:

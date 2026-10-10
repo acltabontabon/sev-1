@@ -45,6 +45,7 @@ without an account on 10 October 2026 and reviewed in the running game.
 | --- | --- | --- |
 | Barlow Condensed, Inter, JetBrains Mono typefaces | Official Google Fonts repository; SIL Open Font License 1.1, license text bundled | [assets/fonts](../assets/fonts/README.md), [THIRD_PARTY_NOTICES.txt](../THIRD_PARTY_NOTICES.txt) |
 | 16 interface/effect sounds | Kenney Interface Sounds, Impact Sounds, UI Audio, Sci-Fi Sounds; CC0 1.0 | [assets/audio/sfx](../assets/audio/sfx/README.md) |
+| 4 whoosh effects (0.2.15) | Original, synthesized by `tools/build_whoosh.py`; no third-party material | [assets/audio/sfx](../assets/audio/sfx/README.md) |
 | 7 PBR material sets (1K) | ambientCG and Poly Haven; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md) |
 | Night-city sky (2K HDRI) | Poly Haven "Hansaplatz", Greg Zaal; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md#night-sky-hdri) |
 | 8 pantry props | Kenney Furniture Kit; CC0 1.0, tinted at load | [assets/environment/kenney_furniture](../assets/environment/kenney_furniture/README.md) |

@@ -601,14 +601,16 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   swing (`_swung_at`, which also lands the blow and skips the cutscene), the end of a talk
   with an armed host, or `ARMED_PATIENCE` running out. The triggering host becomes the
   wave's first member so the cutscene watches it. `next_step()` returns tag `???`.
-- **Special moves.** `game/player/special_moves.gd` (child of the player): `hotfix_wave()`
+- **Special moves.** `game/player/special_moves.gd` (child of the player): `reply_all()`
   and `rollback()` start combo steps 0 and 2 for the body and fire on the swing's active
   frame; the wave is a top-level crescent swept against the `enemies` group each tick
   (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
-  `dash_slash()` drives `player.dash_velocity` (the player skips normal movement and
+  `blame_shift()` drives `player.dash_velocity` (the player skips normal movement and
   drops enemy collision while it is set) and cuts each enemy near the swept segment the
-  moment it is passed; `merge_conflict()` repeats combo step 1 and pulses
-  radial damage with an inward knockback. Each move `_shout()`s its callout
+  moment it is passed; `circle_back()` repeats combo step 1 and pulses
+  radial damage with an inward knockback (the last pulse staggers: the parking lot);
+  `blame_shift()` sets `incident.blamed_left`, which multiplies incoming damage by 1.3.
+  A synthesized whoosh (`assets/audio/sfx/whoosh_*.ogg`) plays under each call. Each move `_shout()`s its callout
   (`assets/audio/voices/talk/call_*.ogg`, the `shout` profile in `talk.json` `callouts`) and
   emits `called`, which the HUD turns into a cut-in strip on unscaled time.
 - **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one

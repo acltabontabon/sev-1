@@ -23,4 +23,10 @@ Stored with Git LFS. Listening and mix acceptance is pending creator review.
 | `force_field.ogg` | Sci-Fi Sounds / `forceField_000.ogg` | Reserved: shield effects |
 | `door_close.ogg`, `door_open.ogg` | Sci-Fi Sounds / `doorClose_000.ogg`, `doorOpen_000.ogg` | Reserved: meeting room doors |
 
+## Original (SEV-1)
+
+| File | Source | Use |
+| --- | --- | --- |
+| `whoosh_slice.ogg`, `whoosh_dash.ogg`, `whoosh_spin.ogg`, `whoosh_rise.ogg` | Synthesized for SEV-1 by `tools/build_whoosh.py` (filtered noise sweeps, fixed seeds); original work, no third-party material | Under the move calls: Reply All, Blame Shift, Circle Back, Force Rollback |
+
 "Reserved" files are imported for later Milestone 12 phases and are not yet triggered.

@@ -49,9 +49,9 @@ var dodge_elapsed: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 
 var narrative_hold: bool = false
-## Hotfix Wave and Force Rollback (special_moves.gd).
+## Reply All, Blame Shift, Circle Back and Force Rollback (special_moves.gd).
 var specials: Node
-## Set by the Hot Swap dash slash: the body travels at this velocity, through enemies.
+## Set by the Blame Shift dash slash: the body travels at this velocity, through enemies.
 var dash_velocity: Vector3 = Vector3.ZERO
 var spawn_position: Vector3
 @onready var presentation: Node3D = $Visual/Character
@@ -74,24 +74,24 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if camera_rig.controls_active and event.is_action_pressed("attack") and not event.is_echo():
-		# Attacking out of a dodge turns it into the Hot Swap dash slash.
-		if not (dodging and specials.dash_slash()):
+		# Attacking out of a dodge turns it into the Blame Shift dash slash.
+		if not (dodging and specials.blame_shift()):
 			request_attack()
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("dodge") and not event.is_echo():
 		request_dodge()
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("special") and not event.is_echo():
-		specials.hotfix_wave()
+		specials.reply_all()
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("ultimate") and not event.is_echo():
 		specials.rollback()
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("dash_slash") and not event.is_echo():
-		specials.dash_slash()
+		specials.blame_shift()
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("whirlwind") and not event.is_echo():
-		specials.merge_conflict()
+		specials.circle_back()
 		get_viewport().set_input_as_handled()
 
 

@@ -1010,17 +1010,17 @@
  "host_hover": "…Can I help you? You've been standing there for a while. Breathing. Loudly.",
  "host_hr": "Did you just— Okay. I'm telling HR. I'm telling HR right now.",
  "callouts": {
-  "hotfix_wave": {
-   "text": "Hotfix… WAVE!!",
-   "say": "Hotfix! ... Wave!!!"
+  "reply_all": {
+   "text": "Reply… ALL!!",
+   "say": "Reply! ... All!!!"
   },
-  "hot_swap": {
-   "text": "Hot… SWAP!!",
-   "say": "Hot! ... Swap!!!"
+  "blame_shift": {
+   "text": "Blame… SHIFT!!",
+   "say": "Blame! ... Shift!!!"
   },
-  "merge_conflict": {
-   "text": "Merge… CONFLICT!!",
-   "say": "Merge! ... Conflict!!!"
+  "circle_back": {
+   "text": "Let's circle… BACK!!",
+   "say": "Let's circle! ... Back!!!"
   },
   "rollback": {
    "text": "FORCE… ROLLBACK!!!",
