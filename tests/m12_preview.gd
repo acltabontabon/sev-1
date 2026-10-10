@@ -95,6 +95,10 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "lineup":
+		await lineup()
+		quit()
+		return
 	if only == "finishers":
 		await finishers()
 		quit()
@@ -294,6 +298,58 @@ func battle() -> void:
 		await process_frame
 		sample()
 	report("battle_mode_combat")
+	app.main_menu()
+	await frames(5)
+
+
+## The monster lineup under plain light, close up: one of each kind, then hurt.
+func lineup() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.4)
+	player.global_position = Vector3(-6, .05, 12)
+	var monsters: Array[CharacterBody3D] = []
+	var kinds: Array = ["record", "blocker", "invite", "scope", "bug"]
+	for index in range(kinds.size()):
+		var foe: CharacterBody3D = incident._spawn_entry([kinds[index], "A1"], incident.alive)
+		foe.position = Vector3(-2.0 + index * 2.4, .05, 3.0)
+		foe.reveal()
+		foe.set_physics_process(false)
+		foe.visual.rotation.y = 0.0
+		monsters.append(foe)
+	var boss: CharacterBody3D = incident.RECORD.instantiate()
+	boss.set_script(incident.VARIANCE)
+	boss.position = Vector3(10.5, .05, 2.0)
+	incident.add_child(boss)
+	incident.actors.append(boss)
+	boss.set_physics_process(false)
+	boss.visual.rotation.y = 0.0
+	var light: OmniLight3D = OmniLight3D.new()
+	light.light_color = Color(1, .97, .92)
+	light.light_energy = 3.0
+	light.omni_range = 14.0
+	light.position = Vector3(4, 4, 7)
+	incident.add_child(light)
+	var cam: Camera3D = incident.presentation.camera
+	app.session.get_node("HUD").visible = false
+	for view: Array in [["lineup_wide", Vector3(4.5, 1.6, 9.5), Vector3(4.5, 1.0, 3.0), 55.0], ["lineup_close", Vector3(-.8, 1.3, 5.6), Vector3(.2, 1.0, 3.0), 45.0], ["lineup_boss", Vector3(10.5, 2.4, 7.5), Vector3(10.5, 1.8, 2.0), 45.0]]:
+		cam.global_position = view[1]
+		cam.look_at(view[2])
+		cam.fov = view[3]
+		for frame in range(20):
+			cam.make_current()
+			await process_frame
+		await shot(view[0])
+	for foe: CharacterBody3D in monsters:
+		foe.health = roundi(foe.max_health * .3)
+	cam.global_position = Vector3(4.5, 1.6, 9.5)
+	cam.look_at(Vector3(4.5, 1.0, 3.0))
+	for frame in range(20):
+		cam.make_current()
+		await process_frame
+	await shot("lineup_hurt")
 	app.main_menu()
 	await frames(5)
 

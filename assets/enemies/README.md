@@ -29,9 +29,11 @@ earlier files left the tree.
 
 **How they are used.** `game/enemies/monster_rig.gd` (`MonsterRig`) instances the model
 under each enemy's `Visual` at a fixed scale (this pack shares one authoring scale, and
-skinned bounds understate the flyers), keeps the model's own materials and adds
-`corruption.gdshader` as an additive overlay pass: a faint rim in the archetype's colour,
-a bright charge while the attack winds up, a hit flash and a glow as the corpse sinks.
+skinned bounds understate the flyers), replaces the pack's flat colours with a dark
+flesh skin (`monster_flesh.gdshader`, palette in `MonsterRig.PALETTE`; blood spreads as
+they are hurt) and adds `corruption.gdshader` as an additive overlay pass: a charge in the
+archetype's colour while the attack winds up, a hit flash and an ember as the corpse
+dissolves. The models themselves are unchanged CC0 files.
 Clips play from the enemy's state: locomotion from pursuit speed, the attack scrubbed so
 its impact frame lands at the end of the melee wind-up, hit on stagger, a cast clip for
 spells, then death and a sink through the floor. Nothing uses root motion; the rig never

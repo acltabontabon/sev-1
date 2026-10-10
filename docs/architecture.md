@@ -621,6 +621,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   bones at zero scale on each half (`collapsed`); `_tumble()` reparents the model into one;
   `_gibs()` spawns short-lived chunk bodies. All are children of the actor (freed with it)
   on collision layer 8 against the world only.
+- **Monster skin.** `MonsterRig._skin()` swaps each pack material for one shared
+  `ShaderMaterial` on `game/enemies/monster_flesh.gdshader`, coloured from `PALETTE` (per
+  material name; a kind's `palette` can override). Its `gore` instance uniform is pinned to
+  `instance_index(4)` because the overlay pass already uses slots 0-3 on the same mesh;
+  `_shade()` drives it from health.
 - **Blood.** `game/combat/blood.gd` (`Blood`): `burst()` and `spurt()` are CPU droplet
   particles (alpha, billboarded, gravity), `splat()` drops a Decal with a generated splat
   texture onto the floor below a point (capped, fading). `MonsterRig._slice()` calls all

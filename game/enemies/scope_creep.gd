@@ -2,6 +2,9 @@ extends "res://game/enemies/incident.gd"
 ## Escalating threat. Every few seconds it goes unhit, it grows: bigger reach, more
 ## damage, more health, and at the last stage a full spin. Any hit resets the clock.
 
+## Shared by every Scope Creep: requirements that have been stuck on for far too long.
+const STALE_PAPER: StandardMaterial3D = preload("res://game/enemies/stale_paper.tres")
+
 signal grew(stage: int)
 const VISUAL: PackedScene = preload("res://game/enemies/scope_creep_visual.tscn")
 const SCALES: Array[float] = [.75, 1.05, 1.35, 1.7]
@@ -20,8 +23,8 @@ var sting: AudioStreamPlayer3D
 
 func _ready() -> void:
 	title = "SCOPE CREEP"
-	magic_color = Color(.72, 1, .3)
-	magic_accent = Color(1, .9, .3)
+	magic_color = Color(.55, .72, .22)
+	magic_accent = Color(.8, .66, .26)
 	magic_words = ["+1 REQ", "JUST ONE MORE", "NICE TO HAVE", "ALSO MOBILE"]
 	rig_kind = "scope"
 	attack_style = "splat"
@@ -48,6 +51,10 @@ func _ready() -> void:
 		var normal: Vector3 = (out / radius).normalized()
 		var side: Vector3 = normal.cross(Vector3.UP if absf(normal.y) < .95 else Vector3.RIGHT).normalized()
 		note.basis = Basis(side, normal, side.cross(normal)).rotated(normal, index * .7) * Basis.from_scale(Vector3(.55, 1, .55))
+		# Old, damp, stained paper rather than fresh neon notes.
+		for paper in [note] + note.find_children("*", "MeshInstance3D", true, false):
+			if paper is MeshInstance3D:
+				(paper as MeshInstance3D).material_override = STALE_PAPER
 	pop = Label3D.new()
 	pop.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	pop.font_size = 64

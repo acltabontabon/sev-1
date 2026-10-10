@@ -1,5 +1,23 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.18 — Monsters, not toys (10 October 2026)
+
+Creator direction: make the enemies more monster, not neon; the game is a satirical,
+funny, gory dark RPG (recorded in [vision](vision.md#tone-established-direction-10-october-2026)).
+
+- **Flesh, not candy.** Every monster's flat pack colours are replaced by a new skin
+  (`monster_flesh.gdshader`): a dark per-material palette (rotting orc flesh, matted grey
+  fur, charred demon skin, black chitin, bile-green slime, yellowed teeth, dimly glowing
+  eyes) with mottling, bruises, darkened silhouettes and a wet sheen. The neon rim at rest
+  is gone; the archetype colour now only shows as the attack wind-up tell and hit flash.
+- **They bleed as they are hurt.** Blood soaks across the body as health drops; the dead
+  are drenched. Death chunks are meat, blood and bone instead of neon cubes.
+- Scope Creep's sticky notes are stale, damp paper, and its spell colours are a sickly
+  bile rather than lime.
+
+Performance (M2 Pro, 1280×720 preview): 119.8 FPS mean in a five-enemy fight (p95 9.6 ms,
+max 12.8 ms). Validation: 742 assertions across 15 headless suites.
+
 ## 0.2.17 — Blood (10 October 2026)
 
 Creator request: blood splatter when enemies get sliced.

@@ -4,6 +4,16 @@ SEV-1 is a single-player, third-person 3D hack-and-slash action roguelite about 
 
 *The system is down. Management is watching. You're the only engineer online.*
 
+## Tone (established direction, 10 October 2026)
+
+The creator set the tone: **a satirical, funny, gory dark RPG.** Satire aims at systems
+and incentives; the humour is loud and unhinged (voiced NPC talk, corporate jargon as
+move names, death notices on corpses); the violence is gory and physical (enemies sliced
+in half, blood, meat chunks, kill cams); the look is dark: monsters are grimy, bruised
+flesh rather than bright or neon toys, and they bleed visibly as they are hurt. The RPG
+side so far is talking to the night shift with dialogue choices; deeper RPG systems are
+not yet decided and are not implied by this line.
+
 ## Player promise
 
 Win stylish, readable fights against the physical consequences of a dysfunctional organization. Learn enemies, commit to attacks, escape danger, and make uncomfortable decisions about short-term relief and later consequences. The action must be enjoyable without its jokes; the jokes must work without programming knowledge.

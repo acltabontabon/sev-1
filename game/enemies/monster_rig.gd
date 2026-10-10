@@ -5,6 +5,34 @@ extends Node3D
 ## moves the body, starts attacks or applies damage. Provenance: assets/enemies/README.md.
 
 const OVERLAY: Shader = preload("res://game/enemies/corruption.gdshader")
+const FLESH: Shader = preload("res://game/enemies/monster_flesh.gdshader")
+## The pack's cheerful flat colours, regraded dark: [colour, roughness, metallic, wet,
+## glow]. Unlisted materials are darkened. Eyes glow dimly; nothing is neon.
+const PALETTE: Dictionary = {
+	"Orc_Main": [Color(.3, .34, .24), .8, 0.0, .3, 0.0],
+	"Orc_Secondary": [Color(.16, .2, .13), .85, 0.0, .2, 0.0],
+	"Orc_Mouth": [Color(.32, .05, .07), .35, 0.0, .8, 0.0],
+	"MushroomKing_Main": [Color(.55, .48, .38), .7, 0.0, .1, 0.0],
+	"Belt.001": [Color(.17, .13, .09), .9, 0.0, 0.0, 0.0],
+	"Wood": [Color(.22, .15, .09), .9, 0.0, 0.0, 0.0],
+	"Metal": [Color(.3, .26, .22), .65, .6, 0.0, 0.0],
+	"Yeti_Main": [Color(.38, .36, .32), .95, 0.0, .1, 0.0],
+	"Yeti_Secondary": [Color(.19, .14, .17), .6, 0.0, .5, 0.0],
+	"Yeti_Teeth": [Color(.58, .47, .3), .5, 0.0, .3, 0.0],
+	"Teeth": [Color(.58, .47, .3), .5, 0.0, .3, 0.0],
+	"Tongue": [Color(.3, .05, .09), .3, 0.0, .9, 0.0],
+	"Dragon_Main": [Color(.28, .09, .06), .7, 0.0, .3, 0.0],
+	"Dragon_Secondary": [Color(.13, .05, .07), .6, 0.0, .4, 0.0],
+	"Dragon_Horn": [Color(.45, .4, .32), .6, 0.0, .1, 0.0],
+	"Green_Main": [Color(.22, .25, .1), .25, 0.0, .9, 0.0],
+	"Demon_Main": [Color(.26, .035, .035), .65, 0.0, .3, 0.0],
+	"Black": [Color(.05, .04, .04), .5, 0.0, .3, 0.0],
+	"Armabee_Main": [Color(.06, .05, .045), .3, .2, .6, 0.0],
+	"Armabee_Secondary": [Color(.34, .22, .05), .45, 0.0, .3, 0.0],
+	"Wings": [Color(.26, .24, .21), .4, 0.0, .3, 0.0],
+	"Eye_White": [Color(.55, .45, .2), .2, 0.0, .8, 1.4],
+	"Eye_Black": [Color(.02, 0, 0), .1, 0.0, 1.0, 0.0],
+}
 ## Per kind: model, standing height in metres (for labels and bars), model `scale` (the
 ## Ultimate Monsters share one authoring scale; skinned bounds understate flyers), optional
 ## hover `lift`, and clip roles.
@@ -24,6 +52,7 @@ const KINDS: Dictionary = {
 		"idle": "Flying_Idle", "walk": "Fast_Flying", "run": "Fast_Flying", "attack": "Headbutt", "impact": .45,
 		"hit": "HitReact", "death": "Death", "cast": "Punch"},
 	"scope": {"model": "res://assets/enemies/ultimate_monsters/spiky_blob.gltf", "height": 1.1, "scale": .33,
+		"palette": {"Eye_White": [Color(.42, .37, .28), .55, 0.0, .3, 0.0]},
 		"idle": "Idle", "walk": "Walk", "run": "Walk", "attack": "Bite_Front", "impact": .45,
 		"hit": "HitRecieve", "death": "Death", "cast": ""},
 	"variance": {"model": "res://assets/enemies/ultimate_monsters/demon.gltf", "height": 3.2, "scale": 1.0, "slice": HUMANOID_CUT,
@@ -86,17 +115,43 @@ func _ready() -> void:
 	if overlay == null:
 		overlay = ShaderMaterial.new()
 		overlay.shader = OVERLAY
-	# Keep each model's own art; the overlay pass only adds the fight-readable glow.
+	# Dark, grimy flesh in place of the pack's flat colours; the overlay pass only adds the
+	# fight-readable charge glow and hit flash.
 	for mesh in model.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
 		meshes.append(instance)
 		for surface in instance.mesh.get_surface_count():
-			var source: Material = instance.get_active_material(surface)
-			var skin: Material = source.duplicate() if source != null else StandardMaterial3D.new()
+			var skin: Material = _skin(instance.get_active_material(surface))
 			skin.next_pass = overlay
 			instance.set_surface_override_material(surface, skin)
 	base_scale = _scale()
 	reset()
+
+
+static var skins: Dictionary = {}
+
+
+## One shared monster material per source material: the flesh shader in its dark palette.
+func _skin(source: Material) -> Material:
+	var key: String = source.resource_name if source != null else ""
+	# A kind can repaint a shared material name (the blob's spikes reuse "Eye_White").
+	var overrides: Dictionary = spec.get("palette", {})
+	var cache: String = (kind + ":" + key) if overrides.has(key) else key
+	if skins.has(cache):
+		return skins[cache]
+	var skin: ShaderMaterial = ShaderMaterial.new()
+	skin.shader = FLESH
+	var base: Color = (source as StandardMaterial3D).albedo_color.darkened(.45) if source is StandardMaterial3D else Color(.2, .2, .2)
+	var look: Array = overrides.get(key, PALETTE.get(key, [base, .75, 0.0, .2, 0.0]))
+	skin.set_shader_parameter("base_color", look[0])
+	skin.set_shader_parameter("roughness_base", look[1])
+	skin.set_shader_parameter("metallic_base", look[2])
+	skin.set_shader_parameter("wet", look[3])
+	skin.set_shader_parameter("emission_color", Color(.9, .55, .15))
+	skin.set_shader_parameter("emission_strength", look[4])
+	skin.set_shader_parameter("detail_scale", 4.0)
+	skins[cache] = skin
+	return skin
 
 
 func reset() -> void:
@@ -324,7 +379,20 @@ func _hold_collapsed() -> void:
 				skeleton.set_bone_pose_scale(index, Vector3.ONE * .001)
 
 
-## Data chunks spray from the hit and bounce off the floor.
+static var meats: Array[StandardMaterial3D] = []
+
+
+static func _meat(index: int) -> StandardMaterial3D:
+	if meats.is_empty():
+		for tone: Array in [[Color(.3, .02, .03), .25], [Color(.42, .1, .08), .45], [Color(.22, .01, .02), .2], [Color(.55, .48, .38), .6]]:
+			var meat: StandardMaterial3D = StandardMaterial3D.new()
+			meat.albedo_color = tone[0]
+			meat.roughness = tone[1]
+			meats.append(meat)
+	return meats[index % meats.size()]
+
+
+## Chunks spray from the kill and bounce off the floor.
 func _gibs(away: Vector3) -> void:
 	if gib_mesh == null:
 		gib_mesh = BoxMesh.new()
@@ -347,13 +415,8 @@ func _gibs(away: Vector3) -> void:
 		var chunk: MeshInstance3D = MeshInstance3D.new()
 		chunk.mesh = gib_mesh
 		chunk.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var paint: StandardMaterial3D = StandardMaterial3D.new()
-		var tone: Color = actor.magic_color if index % 3 else actor.magic_accent
-		paint.albedo_color = tone.darkened(.35)
-		paint.emission_enabled = true
-		paint.emission = tone
-		paint.emission_energy_multiplier = 1.6
-		chunk.material_override = paint
+		# Meat, blood and the odd bit of bone.
+		chunk.material_override = _meat(index % 4)
 		chunk.scale = Vector3.ONE * randf_range(.7, 1.6)
 		gib.add_child(chunk)
 		actor.add_child(gib)
@@ -366,7 +429,11 @@ func _gibs(away: Vector3) -> void:
 
 func _shade(flash: float, charge: float, dissolve: float) -> void:
 	var color: Color = actor.magic_color if actor != null else Color(1, .25, .3)
+	# Blood spreads over the body as it is hurt; the dead are soaked.
+	var hurt: float = 1.0 - clampf(float(actor.health) / maxf(1.0, actor.max_health), 0.0, 1.0) if actor != null else 0.0
+	var gore: float = 1.0 if dying > 0.0 else hurt * .85
 	for mesh in meshes:
+		mesh.set_instance_shader_parameter("gore", gore)
 		mesh.set_instance_shader_parameter("glow", color)
 		mesh.set_instance_shader_parameter("flash", flash)
 		mesh.set_instance_shader_parameter("charge", charge)
