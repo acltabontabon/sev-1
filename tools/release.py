@@ -12,7 +12,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.25"
+VERSION = "0.2.26"
 OUT = ROOT / "builds/releases" / VERSION
 LOGS = ROOT / "logs"
 APP = OUT / "SEV-1 Friday Deployment.app"

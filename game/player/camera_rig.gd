@@ -1,5 +1,8 @@
 extends Node3D
-## Orbit independently of the character's facing; the spring arm handles walls.
+## Orbit independently of the character's facing; the spring arm handles walls. It
+## sweeps a sphere (not a ray) so the lens never grazes into a wall or ceiling, also
+## stops at the office's camera-only blockers (layer 9), pulls in at once and eases
+## back out, and fades the engineer when it has to sit right behind his head.
 
 signal capture_changed(active: bool)
 
@@ -27,11 +30,20 @@ var input_idle: float = 0.0
 var assisting: bool = false
 ## The player's chosen distance; battle pulls back a little on top of it.
 var base_length: float = 5.0
+## Within this distance of the pivot the engineer fades so the view is not his head.
+@export var fade_distance: float = 2.4
+var fade_meshes: Array[GeometryInstance3D] = []
+var faded: float = 0.0
 @onready var spring_arm: SpringArm3D = $SpringArm3D
 
 
 func _ready() -> void:
 	spring_arm.add_excluded_object((get_parent() as CollisionObject3D).get_rid())
+	# The body and blade only (built before the rig); transient effects keep their own look.
+	var visual: Node = get_parent().get_node_or_null("Visual")
+	if visual != null:
+		for node in visual.find_children("*", "GeometryInstance3D", true, false):
+			fade_meshes.append(node)
 	reset_view()
 
 
@@ -47,6 +59,7 @@ func reset_view() -> void:
 	rotation = Vector3.ZERO
 	spring_arm.rotation.x = deg_to_rad(-18.0)
 	spring_arm.spring_length = 5.0
+	_fade(0.0)
 
 
 func add_impulse(strength: float) -> void:
@@ -63,12 +76,27 @@ func _physics_process(delta: float) -> void:
 	impulse = move_toward(impulse, 0, delta * impulse_decay)
 	tremor = move_toward(tremor, 0, delta * 2.2)
 	input_idle += delta
-	spring_arm.spring_length = lerpf(spring_arm.spring_length, base_length + .9 * battle, 1.0 - exp(-3.0 * delta))
+	# A wall pulls the lens in at once; once it clears, the lens eases back out
+	# instead of popping (the length grows back from where the wall left it).
+	var reach: float = spring_arm.get_hit_length()
+	if reach < spring_arm.spring_length - .05:
+		spring_arm.spring_length = maxf(reach, min_distance * .5)
+	spring_arm.spring_length = lerpf(spring_arm.spring_length, base_length + .9 * battle, 1.0 - exp(-2.5 * delta))
+	_fade(clampf((fade_distance - reach) / (fade_distance - 1.0), 0.0, 1.0))
 	_frame_fight(delta)
 	# Rotation only: never move the lens through the spring arm's collision plane.
 	# Tremor scales with impulse_degrees, so the Camera shake setting governs both.
 	var rumble: Vector3 = Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-.5, .5)) * deg_to_rad(impulse_degrees * 2.2) * tremor * tremor
 	$SpringArm3D/Camera3D.rotation = Vector3(deg_to_rad(impulse_degrees) * impulse, 0, deg_to_rad(impulse_degrees) * impulse * 0.35) + rumble
+
+
+func _fade(amount: float) -> void:
+	if is_equal_approx(amount, faded):
+		return
+	faded = amount
+	for mesh in fade_meshes:
+		if is_instance_valid(mesh):
+			mesh.transparency = .85 * amount
 
 
 func _frame_fight(delta: float) -> void:

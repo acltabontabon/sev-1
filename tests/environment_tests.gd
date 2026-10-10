@@ -9,6 +9,65 @@ func path_reaches(from: Vector3, to: Vector3) -> bool:
 	return not points.is_empty() and points[points.size() - 1].distance_to(to) < 1.0
 
 
+## Share of real camera placements across the floor whose view passes through, or whose
+## lens sits inside, visible office geometry. Every visible mesh gets a trimesh shadow
+## on a private layer, so this measures what is drawn, not what the camera collides with.
+func camera_clipping(room: Node3D) -> float:
+	const SEEN: int = 1 << 19
+	var shadows: Array[Node] = []
+	for node in room.find_children("*", "MeshInstance3D", true, false):
+		var mesh_node: MeshInstance3D = node
+		if mesh_node.mesh == null or not mesh_node.is_visible_in_tree():
+			continue
+		var shape: ConcavePolygonShape3D = mesh_node.mesh.create_trimesh_shape()
+		if shape == null:
+			continue
+		shape.backface_collision = true
+		var body: StaticBody3D = StaticBody3D.new()
+		body.collision_layer = SEEN
+		body.collision_mask = 0
+		var holder: CollisionShape3D = CollisionShape3D.new()
+		holder.shape = shape
+		body.add_child(holder)
+		root.add_child(body)
+		body.global_transform = mesh_node.global_transform
+		shadows.append(body)
+	await frames(2)
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	var map: RID = player.get_world_3d().navigation_map
+	var lens: SphereShape3D = SphereShape3D.new()
+	lens.radius = .1
+	var camera: Camera3D = player.get_node("CameraRig/SpringArm3D/Camera3D")
+	var total: int = 0
+	var bad: int = 0
+	for x in range(-12, 27, 5):
+		for z in range(-40, 16, 5):
+			var spot: Vector3 = NavigationServer3D.map_get_closest_point(map, Vector3(x, 0, z))
+			if Vector2(spot.x - x, spot.z - z).length() > 1.5:
+				continue
+			player.global_position = spot + Vector3.UP * .05
+			player.velocity = Vector3.ZERO
+			for yaw_step in range(6):
+				for pitch: float in [-18.0, -45.0]:
+					player.camera_rig.rotation.y = TAU * yaw_step / 6.0
+					player.camera_rig.spring_arm.rotation.x = deg_to_rad(pitch)
+					player.camera_rig.spring_arm.spring_length = 5.0
+					await frames(1)
+					var pivot: Vector3 = player.camera_rig.spring_arm.global_position
+					var sight: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(pivot, camera.global_position, SEEN))
+					var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+					query.shape = lens
+					query.transform = Transform3D(Basis(), camera.global_position)
+					query.collision_mask = SEEN
+					total += 1
+					if not sight.is_empty() or not space.intersect_shape(query, 1).is_empty():
+						bad += 1
+	for body in shadows:
+		body.queue_free()
+	player.camera_rig.reset_view()
+	return float(bad) / maxf(1.0, total)
+
+
 func _run() -> void:
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -78,6 +137,12 @@ func _run() -> void:
 	scene.reset_encounter()
 	await frames(3)
 	check(incident.coffee_cups == 0 and incident.run.motivation == 0 and player.move_multiplier == 1.0 and room.get_node("VaultGate").collision_layer == 1, "restart restores coffee, gate and movement")
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	# The camera stays out of walls, ceilings, headers and beams all over the floor (a
+	# thin ray let its lens graze through half the time). Small props stay see-through.
+	var clipping: float = await camera_clipping(room)
+	check(clipping < .04, "the camera keeps out of the office's walls, ceilings and beams (%.1f%% of views clip)" % (clipping * 100.0))
 	scene.queue_free()
 	paused = false
 	await frames(3)

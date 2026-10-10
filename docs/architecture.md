@@ -32,7 +32,7 @@ Main base                  game/main.tscn + main.gd
 | --- | --- |
 | [Main](../game/main.gd) | Connects capture, death, and reset signals. Delegates episode death/reset when Incident exists, otherwise restores both lab actors. Guards terminal and choice-modal capture. R works while paused. |
 | [Player](../game/player/player.gd) | Camera-relative acceleration, braking, sprint, gravity, jump, visual facing, presentation handoff, health/invulnerability, attack request, damage/death, and reset. |
-| [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. Spring arm retracts against world geometry and excludes the player. |
+| [Camera](../game/player/camera_rig.gd) | Independent yaw, bounded pitch, wheel distance, capture/release, focus-loss release. The spring arm sweeps a 0.3 m sphere (not a ray) against World and Camera geometry and excludes the player; it pulls in at once and eases back out, and the engineer fades when the lens is within 2.4 m of the pivot. |
 | [Melee](../game/combat/melee_attack.gd) | Wind-up/active/recovery timing, one hit per target per swing, cone/range/elevation checks, obstruction ray, strike arc, and optional warning/swing audio. |
 | [Enemy](../game/enemies/incident.gd) | Pursuit within detection distance, direction committed at attack start, telegraph/recovery, health, flash, short stagger, knockback, defeat, and reset. Native NavigationAgent3D follows the office mesh while approaching; attack timing/facing remains unchanged. |
 | [HUD](../game/ui/playtest_hud.gd) | Capture prompt, fighter health, attack state, hit marker, damage flash, and defeat/retry text. Reads the known actors in the lab, or the local Incident controller for objectives, narrative, investigation, boss health, and reports. |
@@ -79,6 +79,7 @@ R restores existing actors' positions, health, attack timers, collision state, a
 | World | 1 | Static environment; melee obstruction and camera checks |
 | Player | 2 | Player body; its mask is 5, world plus enemy |
 | Enemy | 4 | Enemy body; its mask is 3, world plus player |
+| Camera | 256 | Camera-only boxes the office root (`office_after_hours.gd`) adds at load to visible meshes of 1.4 m or more without World collision (door headers, beams, ducts, whiteboards); only the spring arm (mask 257) sees them |
 
 Text `.tscn` scenes hold primitive meshes, materials, colliders, and lights. Limb/weapon motion is scripted; there is no imported rig or animation library. The arc is a small generated `ImmediateMesh`. Eight synthesized WAV effects live in [assets/audio](../assets/audio/README.md), with committed import sidecars and documented provenance. Headless tests skip sound playback because the dummy audio path did not drain reliably on test exit. Sound quality still requires graphical listening and human feedback.
 

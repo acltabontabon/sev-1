@@ -1,5 +1,25 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.26 — The camera stays out of the walls (10 October 2026)
+
+Creator report: moving around, the camera passes through walls and the view is lost.
+
+- **Measured, then fixed.** Across 24,000 sampled camera placements on the floor, about
+  half put the lens inside or behind something drawn. The spring arm checked a thin ray,
+  so at glancing angles the lens still sliced into walls and the ceiling; and door
+  headers (Pantry, Quick Sync, the wing), ceiling beams, ducts, cable trays and
+  whiteboards had no collision at all.
+- **The camera sweeps a sphere.** It keeps clear of walls and ceilings from any angle,
+  and also stops at the office's large architecture, which now gets camera-only
+  collision (bodies, enemies, navigation and sight lines ignore it). Small props such as
+  plants, lamps and monitors stay see-through so the view doesn't jerk around them.
+- **No popping.** A wall pulls the camera in at once; once it clears, the camera eases
+  back out instead of snapping.
+- **See past him in tight spots.** When a wall forces the camera right behind the
+  engineer, he fades so the room ahead stays visible.
+- A regression check samples real camera placements across the office: 0% now clip,
+  22% with the old camera.
+
 ## 0.2.25 — Smoother animation, progression and pacing (10 October 2026)
 
 Creator request: make sure animation, progression and pacing are smooth. An audit of

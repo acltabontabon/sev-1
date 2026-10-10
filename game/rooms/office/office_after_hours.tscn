@@ -1,5 +1,6 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://game/rooms/office/office_after_hours.gd" id="office_script"]
 [ext_resource type="Material" path="res://game/rooms/office/carpet.tres" id="1"]
 [ext_resource type="Material" path="res://game/rooms/office/plaster.tres" id="2"]
 [ext_resource type="Material" path="res://game/rooms/office/metal.tres" id="3"]
@@ -723,6 +724,7 @@ size = Vector3(1.70000, 2.20000, 0.04000)
 material = ExtResource("59")
 
 [node name="OfficeAfterHours" type="Node3D"]
+script = ExtResource("office_script")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 position = Vector3(0.00000, -0.25000, 0.00000)
