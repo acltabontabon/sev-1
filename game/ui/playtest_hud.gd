@@ -11,6 +11,9 @@ var guide: HBoxContainer
 var guide_arrow: Label
 var guide_text: Label
 var minimap: Control
+var focus_bar: ProgressBar
+var focus_value: Label
+var focus_full: bool = false
 var health_bar: ProgressBar
 var health_value: Label
 var burnout_bar: ProgressBar
@@ -137,6 +140,8 @@ func _build_incident_hud() -> void:
 	burnout_value = _row(column, "BURNOUT", burnout_bar)
 	debt_bar = _bar(Color(1, .55, .25), 100)
 	debt_value = _row(column, "DEBT", debt_bar)
+	focus_bar = _bar(Color(.62, .5, 1), 100)
+	focus_value = _row(column, "FOCUS", focus_bar)
 	_build_banner()
 	for node_name: String in ["Debt", "Burnout"]:
 		var label: Label = $Margin/VBox.get_node(node_name)
@@ -394,7 +399,7 @@ func _refresh_incident(incident: Node) -> void:
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
 		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
-	$Controls.text = "E  USE    WASD  MOVE    LMB / F  COMBO    Q / RMB  DODGE    R  RESTART    ESC  PAUSE"
+	$Controls.text = "E  USE    LMB / F  COMBO    Q / RMB  DODGE    C  HOTFIX WAVE    V  ROLLBACK    R  RESTART    ESC  PAUSE"
 	$Controls.offset_top = -30
 	if incident.message != last_message:
 		last_message = incident.message
@@ -409,6 +414,14 @@ func _refresh_incident(incident: Node) -> void:
 	debt_bar.max_value = incident.run.debt_limit
 	debt_bar.value = incident.run.debt
 	debt_value.text = "%d  %s" % [incident.run.debt, incident.run.severity()]
+	var specials: Node = player.specials
+	focus_bar.value = specials.focus
+	var wave: String = "C WAVE %.1fs" % specials.wave_cooldown if specials.wave_cooldown > 0 else "C WAVE READY"
+	focus_value.text = ("V ROLLBACK READY" if specials.ultimate_ready() else "%d%%" % roundi(specials.focus)) + "  ·  " + wave
+	focus_value.add_theme_color_override("font_color", Color(.8, .7, 1) if specials.ultimate_ready() else Color(.75, .8, .85))
+	if specials.ultimate_ready() and not focus_full:
+		_pulse(focus_bar)
+	focus_full = specials.ultimate_ready()
 	if incident.run.debt != last_debt:
 		last_debt = incident.run.debt
 		_pulse(debt_bar)

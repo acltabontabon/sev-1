@@ -95,6 +95,10 @@ func _run() -> void:
 		await roster()
 		quit()
 		return
+	if only == "specials":
+		await specials()
+		quit()
+		return
 	if only == "talk":
 		await talk()
 		quit()
@@ -242,6 +246,9 @@ func battle() -> void:
 	var player: CharacterBody3D = app.session.get_node("Player")
 	incident.presentation.skip()
 	await live(2.5)
+	# Waves wait to be set off now; the probe lets the first one snap on its own.
+	if incident.armed:
+		incident._break_out(incident.hosts[0], "timeout")
 	while incident.presentation.beat_shot == "outbreak":
 		await live(.1)
 	await live(.6)
@@ -283,6 +290,58 @@ func battle() -> void:
 		await process_frame
 		sample()
 	report("battle_mode_combat")
+	app.main_menu()
+	await frames(5)
+
+
+## The special moves: Hotfix Wave mid-flight, then Force Rollback's leap and slam.
+func specials() -> void:
+	app.start_incident()
+	var incident: Node = app.session.get_node("Incident")
+	var player: CharacterBody3D = app.session.get_node("Player")
+	incident.presentation.skip()
+	await live(.5)
+	player.max_health = 10000
+	player.health = 10000
+	incident.presentation.feed.modulate.a = 0.0
+	player.global_position = Vector3(0, .05, 6)
+	player.camera_rig.rotation.y = 0.0
+	player.camera_rig.reset_view()
+	var foes: Array[CharacterBody3D] = []
+	for at: Vector3 in [Vector3(-.6, .05, 1.5), Vector3(.7, .05, -2.0), Vector3(0, .05, -5.0)]:
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = at
+		foe.reveal()
+		foes.append(foe)
+	await live(1.2)
+	for foe: CharacterBody3D in foes:
+		foe.set_physics_process(false)
+	player.visual.rotation.y = 0.0
+	player.specials.hotfix_wave()
+	while player.specials.blades.is_empty():
+		await live(.01)
+	await live(.12)
+	await shot("special_wave_launch")
+	await live(.2)
+	await shot("special_wave_cut")
+	await live(1.0)
+	for at: Vector3 in [Vector3(2.5, .05, 4.0), Vector3(-2.8, .05, 7.0), Vector3(1.5, .05, 9.0)]:
+		var foe: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
+		foe.position = at
+		foe.reveal()
+		foe.set_physics_process(false)
+	player.specials.add_focus(100)
+	await live(.6)
+	await shot("special_focus_ready")
+	player.specials.rollback()
+	await live(.25)
+	await shot("special_rollback_leap")
+	while player.specials.queued != "":
+		await live(.01)
+	await live(.08)
+	await shot("special_rollback_slam")
+	await live(.5)
+	await shot("special_rollback_after")
 	app.main_menu()
 	await frames(5)
 
@@ -346,9 +405,8 @@ func outbreak() -> void:
 	player.global_position = incident._on_floor(host.global_position + Vector3(1.6, 0, 1.6))
 	player.camera_rig.rotation.y = atan2(1.6, 1.6)
 	player.camera_rig.reset_view()
-	await live(1.0)
-	await shot("outbreak_planted")
-	player.global_position = Vector3(-1.8, .05, 10.8)
+	await live(2.6)
+	await shot("outbreak_hover")
 	while story.beat_shot != "outbreak":
 		await live(.05)
 	for mark: Array in [[.7, "outbreak_ticket"], [1.9, "outbreak_turning"], [2.5, "outbreak_burst"], [3.3, "outbreak_monster"]]:

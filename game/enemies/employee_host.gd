@@ -89,6 +89,22 @@ func _ready() -> void:
 	gesture_left = randf_range(4.0, 9.0)
 
 
+## A remark over their head, in their own voice: `node` is "hover" or "hr".
+func say(node: String) -> void:
+	var talk: Dictionary = DIALOGUES.data()
+	line.text = talk.get("host_" + node, "…")
+	line_left = 3.2
+	var path: String = DIALOGUES.audio("host_%s_%s" % [str(identity.name).to_lower(), node])
+	if DisplayServer.get_name() != "headless" and ResourceLoader.exists(path):
+		var voice: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+		voice.stream = load(path)
+		voice.bus = &"Voice"
+		voice.position.y = 1.4
+		add_child(voice)
+		voice.play()
+		voice.finished.connect(voice.queue_free)
+
+
 ## Where the turn is, in seconds before the burst: calm, a ping (phone up), then the
 ## convulsion as the corruption takes hold.
 func turn(remaining: float) -> void:

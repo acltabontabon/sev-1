@@ -595,6 +595,16 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   swarm to `end_outbreak()`, and the presentation's `outbreak()` cutscene picks a clear,
   uncrowded angle, shows a lower third, and hands back after 4.1 s (TAB jumps to the
   burst). Headless runs skip disguises unless `outbreak_in_headless` is set.
+- **Set-off triggers.** When a wave is due (`spawn_delay` spent) in a rendered game,
+  `missing_transaction._watch_hosts()` arms its planted `hosts` instead of spawning:
+  `_break_out(host, reason)` fires on hovering (`HOVER_RANGE` for `HOVER_LIMIT`), a live
+  swing (`_swung_at`, which also lands the blow and skips the cutscene), the end of a talk
+  with an armed host, or `ARMED_PATIENCE` running out. The triggering host becomes the
+  wave's first member so the cutscene watches it. `next_step()` returns tag `???`.
+- **Special moves.** `game/player/special_moves.gd` (child of the player): `hotfix_wave()`
+  and `rollback()` start combo steps 0 and 2 for the body and fire on the swing's active
+  frame; the wave is a top-level crescent swept against the `enemies` group each tick
+  (segment distance, wall raycast); FOCUS fills from `player.hit_confirmed`.
 - **Minimap.** `game/ui/minimap.gd` (HUD child) flattens the baked navigation mesh into one
   2D mesh once and draws it player-centred, rotated with the camera, with threats,
   patrol sight fans, people and the NEXT step pinned to the rim.

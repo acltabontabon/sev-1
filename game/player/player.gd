@@ -49,6 +49,8 @@ var dodge_elapsed: float = 0.0
 var dodge_direction: Vector3 = Vector3.ZERO
 
 var narrative_hold: bool = false
+## Hotfix Wave and Force Rollback (special_moves.gd).
+var specials: Node
 var spawn_position: Vector3
 @onready var presentation: Node3D = $Visual/Character
 @onready var visual: Node3D = $Visual
@@ -62,6 +64,9 @@ func _ready() -> void:
 	spawn_position = global_position
 	melee.hit_landed.connect(_on_hit_landed)
 	melee.finished.connect(_on_attack_finished)
+	specials = preload("res://game/player/special_moves.gd").new()
+	specials.name = "Specials"
+	add_child(specials)
 	presentation.reset_pose()
 
 
@@ -71,6 +76,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif camera_rig.controls_active and event.is_action_pressed("dodge") and not event.is_echo():
 		request_dodge()
+		get_viewport().set_input_as_handled()
+	elif camera_rig.controls_active and event.is_action_pressed("special") and not event.is_echo():
+		specials.hotfix_wave()
+		get_viewport().set_input_as_handled()
+	elif camera_rig.controls_active and event.is_action_pressed("ultimate") and not event.is_echo():
+		specials.rollback()
 		get_viewport().set_input_as_handled()
 
 
@@ -195,6 +206,8 @@ func reset_player() -> void:
 	dodge_aura.hide()
 	visual.scale = Vector3.ONE
 	presentation.reset_pose()
+	if specials != null:
+		specials.reset()
 	$HitSound.stop()
 	$HurtSound.stop()
 	$DodgeSound.stop()

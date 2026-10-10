@@ -234,7 +234,7 @@ def talk_lines(talk):
     """Every voiced talk line, derived from the manifest so text and audio never drift."""
     lines = []
     replies = {}
-    host_replies = [['Are you okay?'], ['…I\'ll just go.'], ['(Back away slowly.)']]
+    host_replies = [['Are you okay?'], ['Have you tried turning yourself off and on again?'], ['…I\'ll just go.'], ['(Back away slowly.)']]
     for tree in list(talk['trees'].values()) + [{'nodes': {'host': {'replies': host_replies}}}]:
         for entry in tree['nodes'].values():
             for reply in entry['replies']:
@@ -249,6 +249,8 @@ def talk_lines(talk):
         for person in people:
             key = person['name'].lower()
             for node, text, profile in [('a', person['line'], key), ('wrong', talk['host_replies'].get(kind, 'Fine.'), key + '_turning'),
+                                        ('snap', talk['host_snap'].get(kind, 'Off. And on. Sure.'), key + '_turning'),
+                                        ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
                 lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
     for line in lines:

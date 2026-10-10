@@ -1,5 +1,35 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.11 — Set them off yourself, and two special moves (10 October 2026)
+
+Creator feedback on 0.2.10: the outbreak camera was too close; monsters should be
+introduced by something the engineer does (going close, irritating them), not the
+moment the game starts; and the engineer needs fancy moves and strong specials.
+
+- **You set them off.** A due wave now waits inside its employees, who act strange
+  (NEXT points at the nearest with a ??? marker; the HUD says how many and when they
+  snap). Talk to one and the conversation ends with them turning (there is now a
+  deliberately provoking reply); hover within 2.8 m for 5 s and you get a voiced
+  "…can I help you? … breathing. Loudly." before they snap; hit one and the whole wave
+  turns on the spot with no cutscene, your blow landing as the surprise double. Ignore
+  them for 45 s and they snap anyway. Swinging at an employee who isn't due gets you a
+  voiced "I'm telling HR." The cutscene's lower third says what set them off.
+- **Wider outbreak camera.** The cutscene frames from about 5 m, slightly high, pulled
+  in only by walls; it usually shows the room, the employee and the engineer.
+- **HOTFIX WAVE (C / middle mouse).** The overhead cut throws an upright crescent blade
+  13 m ahead that pierces every enemy in its path (45 damage each, surprise doubles
+  apply), breaks on walls, scars the floor and trails sparks. 3.5 s cooldown.
+- **FORCE ROLLBACK (V).** The ultimate: combo and wave hits fill the FOCUS bar (new, in
+  the vitals card, with the wave cooldown). At 100 the engineer leaps in slow motion
+  and slams: 110 damage to everything within 7.5 m, shields dropped, rings, cracks,
+  "git reset --hard" and a camera punch.
+- **Voices.** 25 more lines (the provoking reply, each employee's snap, hover and HR
+  remarks): 152 talk lines in all, unheard candidates.
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 120.0 FPS mean (p95
+12.5 ms, max 15.6 ms). Validation: 705 assertions across 15 headless suites plus the
+talk-voice manifest check.
+
 ## 0.2.10 — The night shift talks properly (10 October 2026)
 
 Creator feedback on 0.2.9: a sleepy "mmm" was read out as "em em em"; NPCs kept walking

@@ -373,9 +373,18 @@ func _run() -> void:
 	check(planted.size() == 2 and planted.all(func(at: Vector3) -> bool: return Vector2(at.x - player.position.x, at.z - player.position.z).length() >= incident.ROAM_DISTANCE - .5), "the first wave waits inside two employees planted away from the engineer")
 	incident.spawn_delay = 0
 	await frames(3)
+	var odd: Node3D = incident._strangest()
+	check(incident.armed and incident.alive.is_empty() and incident.next_step().get("tag", "") == "???", "a due wave waits inside its employees, and NEXT points at the one acting strange")
+	await frames(120)
+	check(incident.alive.is_empty(), "nobody turns while the engineer keeps their distance")
+	var odd_at: Vector3 = odd.global_position
+	player.position = incident._on_floor(odd_at + Vector3(1.4, 0, 0))
+	await frames(roundi(incident.HOVER_LIMIT * .5 * 60))
+	check(incident.alive.is_empty() and odd.line.visible, "hovering earns a polite question first")
+	await frames(roundi(incident.HOVER_LIMIT * .5 * 60) + 6)
 	var patient: CharacterBody3D = incident.alive[0]
-	check(patient.disguised() and not patient.visual.visible and incident.presentation.beat_shot == "outbreak" and player.narrative_hold, "a due wave opens on an employee, still human, with the camera on them")
-	check(Vector2(patient.global_position.x - planted[0].x, patient.global_position.z - planted[0].z).length() < 1.0, "the incident breaks out where its employee stood")
+	check(patient.disguised() and not patient.visual.visible and incident.presentation.beat_shot == "outbreak" and player.narrative_hold, "hovering too long sets them off: the camera watches the employee turn")
+	check(Vector2(patient.global_position.x - odd_at.x, patient.global_position.z - odd_at.z).length() < 1.0, "the cutscene follows the employee the engineer set off")
 	check(not incident.request_attack(patient) and incident.bugs.is_empty(), "nobody swings and no bugs arrive before the burst")
 	await frames(roundi(incident.OUTBREAK_BURST * 60) + 12)
 	check(incident.alive.size() == 2 and incident.alive.all(func(actor: CharacterBody3D) -> bool: return not actor.disguised() and actor.visual.visible) and incident.bugs.size() == 3, "the burst turns every employee in the wave and releases the swarm")
@@ -387,9 +396,50 @@ func _run() -> void:
 	incident.presentation.skip()
 	incident.spawn_delay = 0
 	await frames(3)
+	incident._break_out(incident.hosts[0], "timeout")
+	await frames(2)
 	incident.presentation.skip()
 	await frames(2)
 	check(not incident.alive[0].disguised() and incident.outbreak_left == 0 and incident.bugs.size() == 3, "TAB skips the cutscene straight to the burst")
+	# Hitting first: no cutscene, the wave turns on the spot and the first blow lands double.
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	incident.spawn_delay = 0
+	await frames(3)
+	var target_host: Node3D = incident.hosts[1]
+	player.position = incident._on_floor(target_host.global_position + Vector3(0, 0, 1.4))
+	player.visual.rotation.y = 0.0
+	player.request_attack()
+	for frame in range(40):
+		await frames(1)
+		if not incident.alive.is_empty():
+			break
+	var struck: CharacterBody3D = incident.alive[0] if not incident.alive.is_empty() else null
+	check(struck != null and not struck.disguised() and struck.health < struck.max_health and incident.presentation.beat_shot != "outbreak", "hitting a strange coworker turns the wave on the spot and lands the first blow")
+	# Ignored too long, they snap anyway.
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	incident.spawn_delay = 0
+	await frames(3)
+	incident.armed_left = .05
+	await frames(8)
+	check(not incident.alive.is_empty() and not incident.armed, "ignored long enough, the wave breaks out on its own")
+	# Talking to them only ends one way.
+	scene.reset_encounter()
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	incident.spawn_delay = 0
+	await frames(3)
+	var chatty: Node3D = incident.hosts[0]
+	player.position = incident._on_floor(chatty.global_position + Vector3(1.0, 0, 0))
+	await frames(2)
+	incident.talk(incident.talk_target())
+	await frames(2)
+	incident.dialogue.close()
+	await frames(2)
+	check(not incident.alive.is_empty() and incident.alive[0].host == chatty, "a conversation with someone the wave is waiting inside ends with them turning")
 	incident.outbreak_left = 2.0
 	var lurker: CharacterBody3D = incident._spawn_entry(["record", "A1"], incident.alive)
 	check(lurker.disguised(), "a member spawned mid-outbreak still wears an employee")
@@ -448,6 +498,34 @@ func _run() -> void:
 				if dialogues.voiced_reply(reply[0]) and not ResourceLoader.exists(dialogues.audio(dialogues.reply_id(reply[0]))):
 					silent.append(reply[0])
 	check(silent.is_empty(), "every spoken reply has the engineer's recorded line %s" % [silent])
+	# Special moves: a long piercing slash and a radial ultimate.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(0, .05, 6)
+	player.camera_rig.rotation.y = 0.0
+	await frames(4)
+	var first_cut: CharacterBody3D = spawn("record", Vector3(0, .05, 1.0), false)
+	var second_cut: CharacterBody3D = spawn("record", Vector3(.6, .05, -4.0), false)
+	for foe: CharacterBody3D in [first_cut, second_cut]:
+		foe.set_physics_process(false)
+	check(player.specials.hotfix_wave(), "C throws a Hotfix Wave")
+	check(not player.specials.hotfix_wave(), "the wave has a cooldown")
+	await frames(50)
+	check(first_cut.health < first_cut.max_health and second_cut.health < second_cut.max_health, "the wave pierces a line of enemies 5 and 10 m away")
+	check(player.specials.blades.is_empty() and player.specials.focus > 0, "the blade expires at its range, and its hits build FOCUS")
+	check(not player.specials.rollback(), "the ultimate waits for a full FOCUS bar")
+	player.specials.add_focus(100)
+	var behind: CharacterBody3D = spawn("record", Vector3(0, .05, 9.5), false)
+	var beyond: CharacterBody3D = spawn("record", Vector3(3, .05, -8.0), false)
+	for foe: CharacterBody3D in [behind, beyond]:
+		foe.set_physics_process(false)
+	await frames(30)
+	check(player.specials.rollback(), "V unleashes Force Rollback when FOCUS is full")
+	await frames(60)
+	check(behind.health < behind.max_health and beyond.health == beyond.max_health and player.specials.focus < 10, "Force Rollback hits everything around the engineer, nothing beyond its radius, and spends FOCUS")
+	scene.reset_encounter()
+	await frames(2)
+	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty(), "restart clears FOCUS, cooldowns and blades")
+	await fresh_stage(incident.Stage.INVESTIGATION)
 	# Minimap, seating and the corridor invites.
 	var minimap: Control = scene.get_node("HUD/Minimap")
 	check(minimap.floor_mesh != null and minimap.visible, "the minimap draws the walkable floor during play")

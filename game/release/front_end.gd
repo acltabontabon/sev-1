@@ -3,18 +3,20 @@ extends Node
 const INCIDENT: PackedScene = preload("res://game/incidents/missing_transaction.tscn")
 const PREFERENCES: Script = preload("res://game/release/preferences.gd")
 const BACKDROP: PackedScene = preload("res://game/release/menu_backdrop.tscn")
-const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
+const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Hotfix Wave: long slash through a line\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
 const KEYS: Array = [
 	[["W", "A", "S", "D"], "Move, relative to the camera"], [["MOUSE"], "Look  ·  wheel zooms"],
 	[["SHIFT"], "Sprint"], [["SPACE"], "Jump"],
 	[["LMB", "F"], "Attack  ·  press late in recovery to chain three hits"],
 	[["Q", "RMB"], "Dodge  ·  no direction dodges backward"],
+	[["C", "MMB"], "Hotfix Wave  ·  a long slash that cuts through a line of enemies"],
+	[["V"], "Force Rollback  ·  ultimate; landing hits fills FOCUS"],
 	[["E"], "Use: the console, the coffee machine, everything else"],
 	[["1", "2", "3"], "Choose evidence, change requests and replies"],
 	[["TAB"], "Skip the opening (after first viewing) or the boss arrival"],
 	[["R"], "Restart the incident"], [["ESC"], "Pause  ·  back"]]
 const FIELD_NOTES: Array[String] = [
-	"Incidents break out around the floor. Follow the ▼ INCIDENT marker to find them.",
+	"Monsters start as coworkers. Follow ▼ to the one acting strange: talk, hover or hit first.",
 	"Monsters only chase what they see, or whoever hits them. Sneak up for double damage.",
 	"Orange arc: an attack is coming. Dodge aside, then counter during recovery.",
 	"Bugs die in one hit. The Blocker shields friends: hit it mid-cast or take it down first.",

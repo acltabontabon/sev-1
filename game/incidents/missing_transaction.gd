@@ -53,6 +53,16 @@ var pending_hosts: Array = []
 var crew_index: Dictionary = {}
 var outbreak_left: float = 0.0
 var swarm_waiting: Array = []
+## A due wave waits inside its employees until the engineer sets one off: talking to
+## them, hovering too close for too long, or hitting them. If ignored, they snap anyway.
+const ARMED_PATIENCE: float = 45.0
+const HOVER_RANGE: float = 2.8
+const HOVER_LIMIT: float = 5.0
+var armed: bool = false
+var armed_left: float = 0.0
+var hover: Dictionary = {}
+var trigger_reason: String = ""
+var hr_cooldown: float = 0.0
 ## Talking to the night shift: RPG-style dialogue while nothing is hunting the engineer.
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const TALK_RANGE: float = 2.4
@@ -283,6 +293,9 @@ func _cleanup() -> void:
 	crew_index.clear()
 	swarm_waiting.clear()
 	outbreak_left = 0.0
+	armed = false
+	hover.clear()
+	trigger_reason = ""
 	wave_area = ""
 	if beacon != null:
 		beacon.hide()
@@ -314,7 +327,7 @@ func _enter(next: Stage) -> void:
 			remaining = stage_total()
 			objective = "1 / 3 — The Discrepancy: eliminate corrupted records."
 			_plant(0)
-			message = "Incidents break out around the floor: follow the ▼ marker.\nHit them before they spot you for double damage. Orange arc: dodge, then counter."
+			message = "The night shift is not okay. Find the coworker acting strange (▼).\nHit them before they spot you for double damage. Orange arc: dodge, then counter."
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Follow the cyan OPERATIONS marker to the far wall. Press E nearby."
@@ -384,13 +397,17 @@ func _process(delta: float) -> void:
 		elif alive.is_empty() and wave_index < waves().size():
 			spawn_delay -= delta
 			if spawn_delay <= 0:
-				_spawn()
+				if outbreaks() and not hosts.is_empty():
+					_watch_hosts(delta)
+				else:
+					_spawn()
 	elif stage == Stage.BOSS and not is_instance_valid(boss):
 		spawn_delay -= delta
 		if spawn_delay <= 0:
 			_spawn()
 	_update_beacon()
 	_assign_slots(delta)
+	_complain_to_hr(delta)
 	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
 		_start_quick_sync()
 	var attending: bool = false
@@ -502,8 +519,9 @@ func _spawn() -> void:
 			_plant(wave_index)
 	var first: CharacterBody3D = _spawn_entry(pending.pop_front(), alive, pending_hosts.pop_front() if not pending_hosts.is_empty() else null)
 	pop_left = .4
-	if opening and outbreaks():
-		presentation.outbreak(first, wave_area)
+	if opening and outbreaks() and trigger_reason != "hit":
+		presentation.outbreak(first, wave_area, trigger_reason)
+		trigger_reason = ""
 
 
 func _release_swarm(index: int, site: String) -> void:
@@ -597,6 +615,77 @@ func _make_host(kind: String, at: Vector3) -> Node3D:
 	return host
 
 
+## The wave is due: its employees act strange and wait for the engineer to set one off.
+func _watch_hosts(delta: float) -> void:
+	if not armed:
+		armed = true
+		armed_left = ARMED_PATIENCE
+		hover.clear()
+		message = "Something is off with the night shift. Find the coworker acting strange (▼).\nTalk to them, hover too long, or hit first: hitting first lands double."
+	armed_left -= delta
+	var closest: Node3D = null
+	for host: Node3D in hosts:
+		if not is_instance_valid(host):
+			continue
+		if closest == null or _flat(host.global_position) < _flat(closest.global_position):
+			closest = host
+		# Hovering: a polite question, then a much less polite answer.
+		var near: bool = _flat(host.global_position) < HOVER_RANGE
+		hover[host] = (hover.get(host, 0.0) + delta) if near else maxf(0.0, hover.get(host, 0.0) - delta)
+		host.dread = .35 * clampf(hover[host] / HOVER_LIMIT, 0, 1)
+		if near and hover[host] > HOVER_LIMIT * .25 and not host.get_meta("asked", false):
+			host.set_meta("asked", true)
+			host.say("hover")
+		if hover[host] >= HOVER_LIMIT:
+			_break_out(host, "hover")
+			return
+		if _swung_at(host):
+			_break_out(host, "hit")
+			return
+	if armed_left <= 0 and closest != null:
+		_break_out(closest, "timeout")
+
+
+## True while the engineer's live swing would land on this spot.
+func _swung_at(host: Node3D) -> bool:
+	if not player.melee.is_active():
+		return false
+	var offset: Vector3 = host.global_position - player.global_position
+	offset.y = 0
+	var facing: Vector3 = -player.visual.global_basis.z
+	return offset.length() < player.melee.reach + .3 and Vector2(facing.x, facing.z).normalized().dot(Vector2(offset.x, offset.z).normalized()) > .2
+
+
+## Set off: this employee is the one the cutscene watches; the rest of the wave turns too.
+func _break_out(host: Node3D, reason: String) -> void:
+	if not hosts.has(host):
+		return
+	armed = false
+	trigger_reason = reason
+	hosts.erase(host)
+	hosts.push_front(host)
+	log_event("%s set off the wave (%s)" % [str(host.identity.get("name", "Someone")).capitalize(), reason])
+	_spawn()
+	if reason == "hit" and not alive.is_empty():
+		# No cutscene for a swing: the whole wave turns on the spot, and the blow lands as
+		# the surprise review.
+		end_outbreak()
+		alive[0].receive_damage(player.melee.effective_damage(), player.global_position)
+
+
+## Swinging at an employee who is not part of the due wave: paperwork, not violence.
+func _complain_to_hr(delta: float) -> void:
+	hr_cooldown = maxf(0.0, hr_cooldown - delta)
+	if hr_cooldown > 0 or not player.melee.is_active():
+		return
+	for host: Node3D in hosts + sync_hosts:
+		if is_instance_valid(host) and (not armed or sync_hosts.has(host)) and _swung_at(host):
+			hr_cooldown = 1.5
+			ElementFx.glyphs(self, host.global_position + Vector3.UP * 2.0, Color(1, .8, .4), ["HR HAS BEEN NOTIFIED"], 1.2, 0.0)
+			host.say("hr")
+			return
+
+
 ## The turn completes: every employee still wearing an incident breaks out, and the
 ## wave's bugs pour out of the first one.
 func end_outbreak() -> void:
@@ -671,6 +760,8 @@ func next_step() -> Dictionary:
 				return {"text": "Hunt the threats. Hit them before they see you.", "point": near.global_position, "tag": "THREAT"}
 			if not alive.is_empty() or not pending.is_empty():
 				return {"text": "Fight! Dodge the orange arcs, strike after.", "point": none, "tag": ""}
+			if armed and _strangest() != null:
+				return {"text": "A coworker is acting strange. Talk to them, or hit first.", "point": _strangest().global_position, "tag": "???"}
 			return {"text": "Catch your breath. The next wave is coming.", "point": none, "tag": ""}
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
@@ -1019,7 +1110,18 @@ func near_console() -> bool:
 	return player.position.distance_to(CONSOLE_POSITION) < 4.0
 
 
+## The nearest employee the due wave is waiting inside.
+func _strangest() -> Node3D:
+	var best: Node3D = null
+	for host: Node3D in hosts:
+		if is_instance_valid(host) and (best == null or _flat(host.global_position) < _flat(best.global_position)):
+			best = host
+	return best
+
+
 func encounter_status() -> String:
+	if armed and _strangest() != null:
+		return "Something is off with %d coworker%s • nearest %d m • they snap in %ds" % [hosts.size(), "" if hosts.size() == 1 else "s", roundi(_flat(_strangest().global_position)), maxi(0, ceili(armed_left))]
 	if quick_sync == "active":
 		return "Quick Sync in progress • %d attendee%s remaining" % [sync_alive.size(), "" if sync_alive.size() == 1 else "s"]
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and nearest_threat() != null:
@@ -1159,11 +1261,15 @@ func _end_talk() -> void:
 			talking.talking = false
 	player.get_node("Visual/Character").process_mode = Node.PROCESS_MODE_INHERIT
 	player.get_node("Visual/Character").weapon.visible = true
+	var spoken_to: Node3D = talking
 	talk_with = {}
 	talking = null
 	presentation.release_camera()
 	if not terminal():
 		player.camera_rig.set_capture(true)
+	# A conversation with someone the wave is waiting inside only ends one way.
+	if armed and hosts.has(spoken_to):
+		_break_out(spoken_to, "talk")
 
 
 func use(key: String) -> void:

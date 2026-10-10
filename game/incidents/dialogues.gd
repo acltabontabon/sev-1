@@ -43,7 +43,9 @@ static func host_tree(identity: Dictionary, kind: String) -> Dictionary:
 		"voice": "host_%s_" % str(identity.get("name", "")).to_lower(), "nodes": {
 		"a": {"text": identity.get("line", "…"), "replies": [
 			["Are you okay?", "wrong", {}],
+			["Have you tried turning yourself off and on again?", "snap", {}],
 			["…I'll just go.", "soon", {}]]},
+		"snap": {"text": data().host_snap.get(kind, "Off. And on. Sure."), "replies": []},
 		"wrong": {"text": data().host_replies.get(kind, "Fine."), "replies": [["(Back away slowly.)", "soon", {}]]},
 		"soon": {"text": data().host_soon, "replies": []},
 	}}

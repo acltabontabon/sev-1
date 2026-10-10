@@ -540,7 +540,10 @@ func vault_entered() -> void:
 
 ## A wave is due: cut to one employee as the ticket lands, watch them turn, hand back.
 ## Every other employee in the wave turns at the same moment, wherever they are.
-func outbreak(actor: CharacterBody3D, area: String) -> void:
+const TRIGGERS: Dictionary = {"talk": "CONVERSATION ESCALATED", "hover": "YOU HOVERED. THEY NOTICED.", "timeout": "THEY GOT TIRED OF WAITING"}
+
+
+func outbreak(actor: CharacterBody3D, area: String, reason: String = "") -> void:
 	if not is_instance_valid(actor) or (not beat_shot.is_empty() and beat_shot != "outbreak"):
 		return
 	beat_shot = "outbreak"
@@ -557,22 +560,29 @@ func outbreak(actor: CharacterBody3D, area: String) -> void:
 	for step in range(12):
 		var angle: float = ceili(step / 2.0) * PI / 6.0 * (1.0 if step % 2 == 0 else -1.0)
 		var direction: Vector3 = toward.rotated(Vector3.UP, angle)
-		var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(eye, eye + direction * 3.8 + Vector3.UP * .5, 1)
+		var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(eye, eye + direction * 5.8 + Vector3.UP * 1.1, 1)
 		query.exclude = [actor.get_rid()]
-		if space.intersect_ray(query).is_empty() and not _crowds_shot(eye, eye + direction * 3.4, actor):
+		if space.intersect_ray(query).is_empty() and not _crowds_shot(eye, eye + direction * 5.4, actor):
 			chosen = direction
 			break
 	# The employee turns to the camera as the ticket lands; the monster keeps that facing.
 	if actor.disguised():
 		actor.host.rotation.y = atan2(chosen.x, chosen.z)
 		actor.visual.rotation.y = actor.host.rotation.y + PI
-	outbreak_from = eye + chosen * 3.3 + Vector3.UP * .5
-	outbreak_to = eye + chosen * 2.3 + Vector3.UP * .2
+	# A wide, slightly high frame: the employee, their surroundings, often the engineer.
+	var reach: float = 5.4
+	var probe: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(eye, eye + chosen * 5.8 + Vector3.UP * 1.1, 1)
+	probe.exclude = [actor.get_rid()]
+	var blocked: Dictionary = space.intersect_ray(probe)
+	if not blocked.is_empty():
+		reach = maxf(2.4, eye.distance_to(blocked.position) - .4)
+	outbreak_from = eye + chosen * reach + Vector3.UP * (reach * .2)
+	outbreak_to = eye + chosen * (reach - 1.0) + Vector3.UP * (reach * .13)
 	camera.global_position = outbreak_from
 	camera.look_at(eye)
 	var who: Dictionary = actor.host.identity if actor.disguised() and "identity" in actor.host else {}
 	var minutes: int = maxi(0, int((incident.elapsed - 13.4) / 20.0))
-	lower_kicker.text = "%d:%02d PM  ·  %s" % [5 + minutes / 60, minutes % 60, area.to_upper() if not area.is_empty() else "THE FLOOR"]
+	lower_kicker.text = "%d:%02d PM  ·  %s%s" % [5 + minutes / 60, minutes % 60, area.to_upper() if not area.is_empty() else "THE FLOOR", ("  ·  " + TRIGGERS[reason]) if TRIGGERS.has(reason) else ""]
 	lower_kicker.add_theme_color_override("font_color", Color(.6, .85, .9))
 	lower_name.text = "%s  ·  %s" % [who.get("name", "OVERTIME"), who.get("team", "Payments Platform")]
 	lower_name.add_theme_color_override("font_color", Color(.94, .96, 1))
@@ -745,7 +755,7 @@ func _outbreak_shot(delta: float, rig: Camera3D) -> void:
 		spot = outbreak_to.lerp(back, smoothstep(burst, burst + .7, beat_time))
 	camera.global_position = spot
 	camera.look_at(eye)
-	camera.fov = 46.0
+	camera.fov = 50.0
 	if beat_time > burst - .9 and beat_time < burst:
 		camera.rotation += Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), 0) * .004
 	shake = maxf(0, shake - delta * 2.0)

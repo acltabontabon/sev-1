@@ -987,6 +987,15 @@
   "Q3": "Q three",
   "9:15": "nine fifteen",
   "2019": "twenty nineteen",
-  "YOU": "you"
- }
+  "YOU": "you",
+  "SO": "so"
+ },
+ "host_snap": {
+  "record": "Off. And on. Again. Sure. Let's see what boots up. Spoiler: it's not me anymore.",
+  "blocker": "Turning myself off requires a change request. Turning myself on requires two. Denied. Both. Forever.",
+  "invite": "Off and on? Like a meeting that could have been an email? Oh, I'm going to be SO much worse than an email.",
+  "scope": "Ooh, a reboot! Can the new me also have wings? And a dashboard? And teeth? Small ask."
+ },
+ "host_hover": "…Can I help you? You've been standing there for a while. Breathing. Loudly.",
+ "host_hr": "Did you just— Okay. I'm telling HR. I'm telling HR right now."
 }
