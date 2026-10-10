@@ -88,9 +88,14 @@ def process(master, output, profile):
         ratio = 2 ** (profile['pitch'] / 12)
         filters += [f'asetrate={round(24000 * ratio)}', 'aresample=24000', f'atempo={1 / ratio:.4f}']
     if profile['processing'] == 'monster':
-        # Overworked monsters: grit, a doubled throat and a short ugly room.
-        filters += ['highpass=f=90', 'equalizer=f=900:t=q:w=1:g=4', 'acompressor=threshold=-22dB:ratio=6:attack=3:release=80:makeup=6',
-                    'chorus=0.6:0.85:28|41:0.4|0.32:0.35|0.5:1.1|0.7', 'aecho=0.8:0.4:35|60:0.35|0.2', 'asoftclip=type=atan']
+        # A monster losing it: a crazed warble, a growling sub-voice a fifth below mixed
+        # under the line, overdriven and bit-crushed grit, and a short ugly room.
+        filters += ['highpass=f=80', 'vibrato=f=7:d=0.3',
+                    'asplit=2[dry][low];[low]asetrate=16800,aresample=24000,atempo=1.4286,volume=0.75[growl];'
+                    '[dry][growl]amix=inputs=2:weights=1 0.8:normalize=0',
+                    'equalizer=f=700:t=q:w=1:g=5', 'acompressor=threshold=-24dB:ratio=8:attack=2:release=70:makeup=8',
+                    'volume=4dB', 'asoftclip=type=tanh', 'acrusher=bits=10:mix=0.22:mode=log',
+                    'aecho=0.85:0.45:40|85:0.35|0.2']
     if profile['processing'] == 'hype':
         # Anime move call: presence, hard compression, a doubled voice, arena echo, soft
         # saturation; mastered louder than dialogue so it cuts through a fight.

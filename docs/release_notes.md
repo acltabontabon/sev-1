@@ -1,5 +1,16 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.20 — Monsters losing it (10 October 2026)
+
+Creator feedback on 0.2.19: the monsters should sound like monsters losing their minds.
+
+- Every bark was re-voiced deeper (records −7, the Blocker −9 semitones) through a nastier
+  chain: a crazed warble, a growling sub-voice a fifth below mixed under every line,
+  overdrive, bit-crushed grit and a short ugly room, mastered at −15 LUFS so they cut
+  through a fight. Manic laughter joins several lines ("OVERTIME! OVERTIME! HA HA HA HA!",
+  "CHANGE REQUEST… DENIED! HA HA HA!", "Small ask… small ask… heh heh heh… SMALL ASK!")
+  plus three new ones (45 barks in all). Still unheard candidates.
+
 ## 0.2.19 — The monsters talk (10 October 2026)
 
 Creator request: the monsters should say funny things, like they lost their minds from
