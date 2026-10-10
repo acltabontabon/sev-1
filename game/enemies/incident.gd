@@ -407,12 +407,11 @@ func show_impact(color: Color) -> void:
 
 
 func _cast_magic() -> void:
-	ElementFx.sigil(self, global_position, magic_color, magic_radius, melee.windup + melee.active_time + .15, 2.2)
-	ElementFx.motes(self, global_position + Vector3.UP * .2, magic_color, 10, 1.6, melee.windup + .1, 2.5, .12)
-	if attack_style == "quake" or attack_style == "cataclysm":
-		# The floor starts to rumble under a heavy wind-up.
-		ElementFx.dust(self, global_position, .6, melee.windup)
-		ElementFx.tremor(self, global_position, .25, 10.0)
+	# The circle is the readable warning; minions rely on their arc alone.
+	if attack_style != "nip":
+		ElementFx.sigil(self, global_position, magic_color, magic_radius, melee.windup + melee.active_time + .15, 2.2)
+	if attack_style == "cataclysm":
+		ElementFx.tremor(self, global_position, .25, 12.0)
 
 
 func _release_magic() -> void:
@@ -423,6 +422,7 @@ func _release_magic() -> void:
 	match attack_style:
 		"quake":
 			ElementFx.quake(self, front, magic_color, 2.4, .85)
+			ElementFx.freeze(self, .07)
 		"cataclysm":
 			ElementFx.quake(self, front, magic_color, 3.4, 1.0)
 			ElementFx.quake(self, ground, magic_accent, 2.0, .3)
@@ -430,23 +430,20 @@ func _release_magic() -> void:
 			for side in [-1.0, 1.0]:
 				ElementFx.fissure(self, front, ground + forward.rotated(Vector3.UP, side * .6) * 7.0, magic_color, .8)
 			ElementFx.bolt(self, global_position + Vector3.UP * 3.4, front, magic_accent, .3, .1)
+			ElementFx.freeze(self, .11)
 		"splat":
-			ElementFx.motes(self, front + Vector3.UP * .3, magic_color, 26, 5.0, .55, -9.0, .2)
-			ElementFx.shards(self, front + Vector3.UP * .4, magic_accent, 12, 5.0, .9, Vector3.UP, .14)
+			ElementFx.motes(self, front + Vector3.UP * .3, magic_color, 22, 5.0, .55, -9.0, .2)
 			ElementFx.shockwave(self, front, magic_color, 2.6, .4)
-			ElementFx.tremor(self, front, .3, 6.0)
+		"nip":
+			pass
 		_:
-			ElementFx.gust(self, ground + Vector3.UP * 1.1 + forward * .3, visual.global_basis, magic_color, 2.4, .3)
 			ElementFx.fissure(self, ground + forward * .5, ground + forward * (melee.reach + 1.2), magic_color, .6)
-			ElementFx.shards(self, ground + Vector3.UP * 1.1 + forward * .4, magic_accent, 10, 4.5, .6, forward + Vector3.UP * .4)
-			ElementFx.tremor(self, front, .3, 7.0)
-	ElementFx.glyphs(self, global_position + Vector3.UP * 2.0, magic_color, [magic_words.pick_random()], .6, .3)
 
 
 func _dissolve_magic() -> void:
-	ElementFx.motes(self, global_position + Vector3.UP * .9, magic_color, 30, 4.0, .9, 1.5, .16)
-	ElementFx.shards(self, global_position + Vector3.UP * .9, magic_accent, 16, 4.0, 1.1)
-	ElementFx.shockwave(self, global_position, magic_color, 2.6, .5)
+	ElementFx.motes(self, global_position + Vector3.UP * .6, magic_color, 14 if attack_style == "nip" else 24, 4.0, .7, 1.5, .14)
+	if attack_style != "nip":
+		ElementFx.shockwave(self, global_position, magic_color, 2.4, .45)
 
 
 ## Gentle push away from nearby allies so a wave never fuses into one silhouette.

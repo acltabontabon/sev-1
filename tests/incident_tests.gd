@@ -58,7 +58,8 @@ func _run() -> void:
 	check(incident.stage == incident.Stage.ENCOUNTER_ONE and is_instance_valid(incident.active_enemy), "first combat starts within thirty-nine active seconds")
 	check(not player.narrative_hold and player.camera_rig.get_node("SpringArm3D/Camera3D").current and scene.get_node("HUD").visible, "unskipped opening hands camera, input and HUD to the player")
 	check(not incident.presentation.emerging.visible and incident.room.get_node("CeilingPool0").light_energy > 1.0, "opening leaves no staged monster and restores combat lighting")
-	check(get_nodes_in_group("enemies").size() == 2 and incident.alive.size() == 2, "lab opponent is disabled and the first wave arrives as a pair")
+	check(get_nodes_in_group("enemies").size() == 2 + incident.bugs.size() and incident.alive.size() == 2, "lab opponent is disabled and the first wave arrives as a pair")
+	check(incident.bugs.size() == 3, "a swarm of three one-hit bugs rushes in beside the first wave")
 	var first: CharacterBody3D = incident.active_enemy
 	var first_speed: float = first.move_speed
 	check(first.position.distance_to(player.position) > 3, "arrival is outside immediate striking distance")
@@ -147,7 +148,7 @@ func _run() -> void:
 		await frames(2)
 		player.camera_rig.set_capture(true)
 		await frames(580)
-		check(get_nodes_in_group("enemies").filter(func(node: Node) -> bool: return node.health > 0).size() == 2, "restart creates exactly the first wave")
+		check(get_nodes_in_group("enemies").filter(func(node: Node) -> bool: return node.health > 0 and not incident.bugs.has(node)).size() == 2, "restart creates exactly the first wave")
 		scene.reset_encounter()
 		player.camera_rig.set_capture(false)
 		await frames(2)

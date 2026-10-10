@@ -2,8 +2,8 @@ extends MeshInstance3D
 ## Ribbon left by the keyboard's edge while a swing is live. Presentation only: it samples
 ## two points on the weapon each physics tick and fades the oldest samples out.
 
-@export var samples: int = 12
-@export var base_offset: Vector3 = Vector3(0, 0, -.45)
+@export var samples: int = 14
+@export var base_offset: Vector3 = Vector3(0, 0, -.38)
 @export var tip_offset: Vector3 = Vector3(0, 0, -1.47)
 var color: Color = Color(.3, .95, 1)
 var emitting: bool = false
@@ -50,6 +50,6 @@ func sample() -> void:
 		var fade: float = 1.0 - float(index) / float(points.size() - 1)
 		immediate.surface_set_color(Color(color.r, color.g, color.b, 0.0))
 		immediate.surface_add_vertex(points[index][0])
-		immediate.surface_set_color(Color(color.r, color.g, color.b, .85 * fade * fade))
+		immediate.surface_set_color(Color(color.r, color.g, color.b, fade).lerp(Color(1, 1, 1, fade), .25 * fade))
 		immediate.surface_add_vertex(points[index][1])
 	immediate.surface_end()

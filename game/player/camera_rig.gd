@@ -10,11 +10,23 @@ signal capture_changed(active: bool)
 @export var max_distance: float = 7.0
 @export_range(0, 2) var impulse_degrees: float = 0.8
 @export_range(1, 30) var impulse_decay: float = 12.0
+## Combat framing: after the mouse rests this long mid-fight, the view eases toward the
+## fight. Any mouse motion hands control straight back.
+@export_range(0.2, 3.0) var assist_delay: float = 1.0
+@export_range(0.2, 6.0) var assist_rate: float = 2.2
+@export_range(10, 90) var assist_dead_zone_degrees: float = 35.0
 
 var controls_active: bool = false
 var impulse: float = 0.0
 ## Ground tremor from heavy enemy attacks: random jitter on top of the impulse kick.
 var tremor: float = 0.0
+## Where the fight is (set by battle mode; INF when nothing is engaged) and how intense.
+var focus: Vector3 = Vector3.INF
+var battle: float = 0.0
+var input_idle: float = 0.0
+var assisting: bool = false
+## The player's chosen distance; battle pulls back a little on top of it.
+var base_length: float = 5.0
 @onready var spring_arm: SpringArm3D = $SpringArm3D
 
 
@@ -26,6 +38,11 @@ func _ready() -> void:
 func reset_view() -> void:
 	impulse = 0.0
 	tremor = 0.0
+	focus = Vector3.INF
+	battle = 0.0
+	input_idle = 0.0
+	assisting = false
+	base_length = 5.0
 	$SpringArm3D/Camera3D.rotation = Vector3.ZERO
 	rotation = Vector3.ZERO
 	spring_arm.rotation.x = deg_to_rad(-18.0)
@@ -45,13 +62,36 @@ func _physics_process(delta: float) -> void:
 		return
 	impulse = move_toward(impulse, 0, delta * impulse_decay)
 	tremor = move_toward(tremor, 0, delta * 2.2)
+	input_idle += delta
+	spring_arm.spring_length = lerpf(spring_arm.spring_length, base_length + .9 * battle, 1.0 - exp(-3.0 * delta))
+	_frame_fight(delta)
 	# Rotation only: never move the lens through the spring arm's collision plane.
 	# Tremor scales with impulse_degrees, so the Camera shake setting governs both.
 	var rumble: Vector3 = Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-.5, .5)) * deg_to_rad(impulse_degrees * 2.2) * tremor * tremor
 	$SpringArm3D/Camera3D.rotation = Vector3(deg_to_rad(impulse_degrees) * impulse, 0, deg_to_rad(impulse_degrees) * impulse * 0.35) + rumble
 
 
+func _frame_fight(delta: float) -> void:
+	if not controls_active or not focus.is_finite() or input_idle < assist_delay:
+		assisting = false
+		return
+	var to: Vector3 = focus - global_position
+	if Vector2(to.x, to.z).length() < 1.5:
+		return
+	var yaw: float = atan2(-to.x, -to.z)
+	var offset: float = absf(angle_difference(rotation.y, yaw))
+	if not assisting and offset > deg_to_rad(assist_dead_zone_degrees):
+		assisting = true
+	if assisting:
+		rotation.y = lerp_angle(rotation.y, yaw, 1.0 - exp(-assist_rate * delta))
+		spring_arm.rotation.x = lerp_angle(spring_arm.rotation.x, deg_to_rad(-20.0), 1.0 - exp(-1.5 * delta))
+		if offset < deg_to_rad(8.0):
+			assisting = false
+
+
 func orbit(motion: Vector2) -> void:
+	input_idle = 0.0
+	assisting = false
 	rotation.y = wrapf(rotation.y - motion.x * mouse_sensitivity, -PI, PI)
 	spring_arm.rotation.x = clampf(
 		spring_arm.rotation.x - motion.y * mouse_sensitivity,
@@ -75,9 +115,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_capture(true)
 			get_viewport().set_input_as_handled()
 		elif controls_active and event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			spring_arm.spring_length = maxf(min_distance, spring_arm.spring_length - 0.4)
+			base_length = maxf(min_distance, base_length - 0.4)
 		elif controls_active and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			spring_arm.spring_length = minf(max_distance, spring_arm.spring_length + 0.4)
+			base_length = minf(max_distance, base_length + 0.4)
 	elif event is InputEventMouseMotion and controls_active:
 		orbit(event.screen_relative)
 

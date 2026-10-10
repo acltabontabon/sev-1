@@ -137,5 +137,4 @@ func _phase_magic() -> void:
 		ElementFx.bolt(self, crown_at, ground + Vector3.UP * .05, magic_accent if exposed else magic_color, .3, .12)
 	ElementFx.flash(self, crown_at, magic_accent if exposed else magic_color, 5.0, 9.0, .35)
 	ElementFx.sigil(self, global_position, magic_accent if exposed else magic_color, 3.0, 1.2, -1.0 if exposed else 1.0)
-	ElementFx.glyphs(self, crown_at + Vector3.UP * .4, magic_accent if exposed else magic_color, ["OPEN" if exposed else "SHIELDED"], .9, 0.0)
 

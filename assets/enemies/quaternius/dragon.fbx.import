@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://o56prk6i7b4j"
-path="res://.godot/imported/mike.fbx-07441cc2005c2b9801c7033cfe51ae5e.scn"
+uid="uid://ggqt2lyxgr1h"
+path="res://.godot/imported/dragon.fbx-ac965d821371552b4e864a1b384d88ba.scn"
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/mike.fbx"
-dest_files=["res://.godot/imported/mike.fbx-07441cc2005c2b9801c7033cfe51ae5e.scn"]
+source_file="res://assets/enemies/quaternius/dragon.fbx"
+dest_files=["res://.godot/imported/dragon.fbx-ac965d821371552b4e864a1b384d88ba.scn"]
 
 [params]
 

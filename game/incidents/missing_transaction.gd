@@ -12,6 +12,13 @@ const ARCHETYPES: Dictionary = {
 	"blocker": preload("res://game/enemies/blocker.gd"),
 	"invite": preload("res://game/enemies/meeting_invite.gd"),
 	"scope": preload("res://game/enemies/scope_creep.gd"),
+	"bug": preload("res://game/enemies/bug.gd"),
+}
+## Minion swarms per wave (index matches WAVES): one-hit bugs that rush in beside the wave.
+## They never count toward a wave; survivors are closed as WONTFIX when the stage clears.
+const SWARMS: Dictionary = {
+	Stage.ENCOUNTER_ONE: [3, 4],
+	Stage.ENCOUNTER_TWO: [4, 5],
 }
 const ZONE: Script = preload("res://game/enemies/meeting_zone.gd")
 ## Authored encounters: each wave is [kind, spawn marker]; waves arrive after a breather.
@@ -38,6 +45,7 @@ var interactions: Dictionary = {}
 var voice: Node
 var presentation: CanvasLayer
 var battle_mode: CanvasLayer
+var coworkers: Node3D
 var enemies_defeated: int = 0
 var boss_encountered: bool = false
 var run: Node
@@ -77,6 +85,8 @@ var pop_left: float = 0.0
 var wave_index: int = 0
 var zones: Array[Node3D] = []
 var corpses: Dictionary = {}
+var bugs: Array[CharacterBody3D] = []
+var bugs_fixed: int = 0
 var seen_kinds: Dictionary = {}
 ## Postmortem timeline: [elapsed seconds, event], recorded as the run happens.
 var timeline: Array = []
@@ -116,6 +126,10 @@ func _ready() -> void:
 	battle_mode = preload("res://game/incidents/battle_mode.gd").new()
 	battle_mode.name = "BattleMode"
 	add_child(battle_mode)
+	coworkers = preload("res://game/incidents/coworkers.gd").new()
+	coworkers.name = "Coworkers"
+	coworkers.incident = self
+	add_child(coworkers)
 	# Pantry objects: honest reactions, one of them useful.
 	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"]]:
 		var point: Node3D = INTERACTION.new()
@@ -153,6 +167,7 @@ func reset_incident() -> void:
 	_reset_doors()
 	$AlertSound.stop()
 	enemies_defeated = 0
+	bugs_fixed = 0
 	boss_encountered = false
 	elapsed = 0
 	stage_time = 0
@@ -172,6 +187,7 @@ func reset_incident() -> void:
 	room.get_node("Clock").text = "FRIDAY / 16:59"
 	presentation.reset_story()
 	battle_mode.reset()
+	coworkers.reset()
 
 
 func _reset_doors() -> void:
@@ -195,6 +211,7 @@ func _cleanup() -> void:
 	pending.clear()
 	zones.clear()
 	corpses.clear()
+	bugs.clear()
 	for actor in actors:
 		if is_instance_valid(actor):
 			actor.process_mode = Node.PROCESS_MODE_DISABLED
@@ -379,9 +396,49 @@ func _spawn() -> void:
 		if wave_index >= waves().size():
 			return
 		pending = waves()[wave_index].duplicate(true)
+		_release_swarm(wave_index, pending[0][1])
 		wave_index += 1
 	_spawn_entry(pending.pop_front(), alive)
 	pop_left = .4
+
+
+func _release_swarm(index: int, site: String) -> void:
+	var sizes: Array = SWARMS.get(stage, [])
+	if index >= sizes.size():
+		return
+	var origin: Vector3 = spawn_site(site)
+	for count in range(sizes[index]):
+		var bug: CharacterBody3D = RECORD.instantiate()
+		bug.set_script(ARCHETYPES["bug"])
+		bug.starts_aware = true
+		bug.process_mode = Node.PROCESS_MODE_PAUSABLE
+		bug.position = origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4
+		bug.detection_distance = 50
+		add_child(bug)
+		bug.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * bug.speed_scale * run.pressure()
+		actors.append(bug)
+		bugs.append(bug)
+		bug.died.connect(_on_bug_died.bind(bug), CONNECT_ONE_SHOT)
+	if not seen_kinds.has("bug"):
+		seen_kinds["bug"] = true
+		presentation.introduce("bug", bugs.back())
+
+
+func _on_bug_died(bug: CharacterBody3D) -> void:
+	bugs.erase(bug)
+	bugs_fixed += 1
+	corpses[bug] = 1.4
+
+
+## The stage is clear: whatever bugs are left get triaged the usual way.
+func _close_bugs() -> void:
+	var open: Array[CharacterBody3D] = bugs.duplicate()
+	for bug: CharacterBody3D in open:
+		if is_instance_valid(bug) and bug.health > 0:
+			ElementFx.glyphs(bug, bug.global_position + Vector3.UP * 1.1, Color(.7, .75, .8), ["WONTFIX"], .9, 0.0)
+			bug.receive_damage(bug.health, bug.global_position)
+	if not open.is_empty():
+		log_event("%d bug%s closed as WONTFIX" % [open.size(), "" if open.size() == 1 else "s"])
 
 
 func spawn_site(name: String) -> Vector3:
@@ -447,6 +504,9 @@ func on_surprise(_actor: Node) -> void:
 ## At most a few enemies wind up at once, so a crowd reads as a sequence of tells.
 func request_attack(actor: Node) -> bool:
 	var busy: int = 0
+	# Bugs nip freely and never queue the real threats behind them.
+	if bugs.has(actor):
+		return true
 	for other: CharacterBody3D in alive + sync_alive:
 		if other != actor and is_instance_valid(other) and other.health > 0 and other.melee.attacking and other.melee.elapsed < other.melee.windup + other.melee.active_time:
 			busy += 1
@@ -520,6 +580,7 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal():
 		return
 	if actor == boss:
+		ElementFx.freeze(self, .3, .05)
 		enemies_defeated += 1
 		_enter(Stage.RESOLVED)
 		return
@@ -545,6 +606,7 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 	remaining -= 1
 	if alive.is_empty() and pending.is_empty():
 		if wave_index >= waves().size():
+			_close_bugs()
 			if stage == Stage.ENCOUNTER_TWO:
 				_complete_containment()
 			_offer_upgrade(Stage.INVESTIGATION if stage == Stage.ENCOUNTER_ONE else Stage.BOSS)

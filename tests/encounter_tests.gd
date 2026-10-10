@@ -81,6 +81,52 @@ func _run() -> void:
 	slammer.reset_enemy()
 	player.camera_rig.reset_view()
 	check(player.camera_rig.tremor == 0 and slammer.get_children().filter(func(child: Node) -> bool: return child is ElementFx).is_empty(), "reset clears the quake and the tremor")
+	# Minions: one hit fixes a bug; whatever survives the stage is closed as WONTFIX.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	var swatted: CharacterBody3D = spawn("bug", Vector3(-2, .05, -3))
+	swatted.receive_damage(1, player.position)
+	check(swatted.health == 0, "any accepted hit fixes a bug")
+	var stragglers: Array[CharacterBody3D] = []
+	for index in range(3):
+		var straggler: CharacterBody3D = spawn("bug", Vector3(index * 1.5 - 2, .05, -6))
+		incident.bugs.append(straggler)
+		straggler.died.connect(incident._on_bug_died.bind(straggler), CONNECT_ONE_SHOT)
+		stragglers.append(straggler)
+	incident._close_bugs()
+	check(incident.bugs.is_empty() and stragglers.all(func(bug: CharacterBody3D) -> bool: return bug.health == 0), "clearing a stage closes every surviving bug as WONTFIX")
+	# The overtime crew cowers during a fight and the manager takes the credit after.
+	var crew: Node3D = incident.coworkers
+	incident.battle_mode.engaged = true
+	crew._process(.016)
+	var manager: AnimationPlayer = crew.people[2].animator
+	check(crew.people.size() == 4 and manager.current_animation.ends_with("Defeat"), "coworkers cower while an enemy is engaged")
+	incident.battle_mode.engaged = false
+	crew._process(.016)
+	check(manager.current_animation.ends_with("Victory") and (crew.people[2].line as Label3D).text == "Great teamwork, everyone!", "after the fight the manager takes the credit")
+	crew.reset()
+	check(not manager.current_animation.ends_with("Victory") and crew.find_children("*", "CollisionObject3D", true, false).is_empty(), "crew resets and never blocks the fight")
+	# Combat framing: a resting mouse lets the view ease toward the fight; input takes it back.
+	var rig: Node3D = player.camera_rig
+	rig.reset_view()
+	rig.controls_active = true
+	rig.focus = player.global_position + Vector3(6, 0, 0)
+	rig.input_idle = 5.0
+	var before_yaw: float = rig.rotation.y
+	for step in range(30):
+		rig._frame_fight(1.0 / 60.0)
+	check(absf(angle_difference(before_yaw, rig.rotation.y)) > .3, "a resting mouse lets the camera turn toward the fight")
+	rig.orbit(Vector2(4, 0))
+	var held_yaw: float = rig.rotation.y
+	rig._frame_fight(1.0 / 60.0)
+	check(rig.rotation.y == held_yaw, "mouse input hands the camera straight back")
+	rig.reset_view()
+	# Freeze-frame: always restores real-time speed.
+	ElementFx.freeze_in_headless = true
+	ElementFx.freeze(incident, .05)
+	var frozen_scale: float = Engine.time_scale
+	await create_timer(.2, true, false, true).timeout
+	check(frozen_scale < .1 and Engine.time_scale == 1.0, "a freeze-frame stops the fight briefly and restores speed")
+	ElementFx.freeze_in_headless = false
 	# Blocker: cast, refuse damage, interrupt, release on death.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	player.position = Vector3(0, .05, 9)

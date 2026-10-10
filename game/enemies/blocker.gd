@@ -161,7 +161,6 @@ func _physics_process(delta: float) -> void:
 		beam.show()
 		ElementFx.sigil(self, global_position, magic_color, shield_radius * .5, cast_time + .2, 1.2)
 		rig.cast(cast_time)
-		ElementFx.glyphs(self, global_position + Vector3.UP * 2.3, magic_color, ["AWAITING DEPENDENCY"], cast_time, 0.0)
 		if DisplayServer.get_name() != "headless":
 			hum.play()
 	# Shield bash: the shield itself is the weapon.

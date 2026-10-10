@@ -2,22 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgxqgfgjkth04"
-path.s3tc="res://.godot/imported/stan_texture.png-82a40c0102885af74fe945e043233fe7.s3tc.ctex"
-path.etc2="res://.godot/imported/stan_texture.png-82a40c0102885af74fe945e043233fe7.etc2.ctex"
+uid="uid://bt8xeeearmdav"
+path="res://.godot/imported/bug_bug-n.png-7c8191ef56b4b394c9e6a86ef3d7fcd1.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
+}
+generator_parameters={
+"md5": "3b46380d7a73d4ed4116437dc1a1a501"
 }
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/stan_texture.png"
-dest_files=["res://.godot/imported/stan_texture.png-82a40c0102885af74fe945e043233fe7.s3tc.ctex", "res://.godot/imported/stan_texture.png-82a40c0102885af74fe945e043233fe7.etc2.ctex"]
+source_file="res://assets/enemies/bug/bug_bug-n.png"
+dest_files=["res://.godot/imported/bug_bug-n.png-7c8191ef56b4b394c9e6a86ef3d7fcd1.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -39,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

@@ -11,6 +11,11 @@ static var ribbon_material: StandardMaterial3D
 static var paper_material: StandardMaterial3D
 static var soft_dot: GradientTexture2D
 static var dust_material: StandardMaterial3D
+## The latest freeze-frame; only its own timer restores speed, so nested freezes extend.
+static var freeze_token: int = 0
+static var freeze_until: int = 0
+## Headless suites step frames, so freezes are off there unless a test opts in.
+static var freeze_in_headless: bool = false
 
 var life: float = 1.0
 var age: float = 0.0
@@ -253,6 +258,28 @@ static func flame_ring(emitter: Node, at: Vector3, radius: float, duration: floa
 	shockwave(emitter, at, Color(1, .5, .15), radius * 2.0, duration * .7)
 	flash(emitter, at + Vector3.UP, Color(1, .55, .2), 5.0, radius * 3.0, duration * .6)
 	return effect
+
+
+## Freeze-frame: the whole fight stops for a beat on a big impact. Real-time, nests,
+## and always restores normal speed.
+static func freeze(emitter: Node, seconds: float, scale: float = .03) -> void:
+	if DisplayServer.get_name() == "headless" and not freeze_in_headless:
+		return
+	var until: int = Time.get_ticks_msec() + int(seconds * 1000.0)
+	if until <= freeze_until and Engine.time_scale < 1.0:
+		return
+	freeze_until = until
+	freeze_token += 1
+	var token: int = freeze_token
+	Engine.time_scale = scale
+	emitter.get_tree().create_timer(seconds, true, false, true).timeout.connect(func() -> void:
+		if token == freeze_token:
+			Engine.time_scale = 1.0)
+
+
+static func release_freeze() -> void:
+	freeze_until = 0
+	Engine.time_scale = 1.0
 
 
 ## Screen tremor for the engineer's camera, fading with distance from the source.

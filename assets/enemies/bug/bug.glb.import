@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b3byagayxcuo"
-path="res://.godot/imported/leela.fbx-80b3d8160bdd92f9c6c587b526cc80b9.scn"
+uid="uid://bia58t88vf14g"
+path="res://.godot/imported/bug.glb-b583b9b541e49ba6296664d793c8ae1d.scn"
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/leela.fbx"
-dest_files=["res://.godot/imported/leela.fbx-80b3d8160bdd92f9c6c587b526cc80b9.scn"]
+source_file="res://assets/enemies/bug/bug.glb"
+dest_files=["res://.godot/imported/bug.glb-b583b9b541e49ba6296664d793c8ae1d.scn"]
 
 [params]
 
@@ -32,7 +32,7 @@ meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
 animation/fps=30
-animation/trimming=true
+animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
@@ -40,7 +40,6 @@ materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
 _subresources={}
-fbx/importer=0
-fbx/allow_geometry_helper_nodes=false
-fbx/embedded_image_handling=1
-fbx/naming_version=2
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1

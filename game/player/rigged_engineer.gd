@@ -39,6 +39,9 @@ var hands: Array[Vector3] = DESK_HANDS.duplicate()
 var head_turn: Vector2 = Vector2.ZERO
 var lean: float = 0.0
 var spin: float = 0.0
+## Visual-only body offsets for the moves: forward lunge and leap height.
+var lunge: float = 0.0
+var lift: float = 0.0
 var held: float = 1.0
 var right_reach: float = 0.0
 var left_reach: float = 0.0
@@ -94,6 +97,8 @@ func reset_pose() -> void:
 	sit = 0.0
 	lean = 0.0
 	spin = 0.0
+	lunge = 0.0
+	lift = 0.0
 	head_turn = Vector2.ZERO
 	held = 1.0
 	right_reach = 0.0
@@ -185,6 +190,8 @@ func _gameplay(speed: float, delta: float) -> void:
 		_scrub("hit", (1.0 - actor.hurt_left / maxf(actor.hurt_duration, .01)) * .35, .04, delta)
 	elif not actor.is_on_floor():
 		_scrub("jump", .45, .12, delta)
+	elif melee.attacking and actor.combo_index == 2 and melee.elapsed < melee.windup:
+		_scrub("jump", .25 + .3 * melee.elapsed / melee.windup, .05, delta)
 	elif speed > 2.6:
 		_loop("run", clampf(speed / run_reference_speed, .7, 1.7), .14, delta)
 	elif speed > .35:
@@ -192,6 +199,8 @@ func _gameplay(speed: float, delta: float) -> void:
 	else:
 		_loop("idle", 1.0, .2, delta)
 	spin = 0.0
+	lunge = 0.0
+	lift = 0.0
 	if not hit_hooked:
 		melee.hit_landed.connect(_on_hit_landed)
 		hit_hooked = true
@@ -207,61 +216,83 @@ func _gameplay(speed: float, delta: float) -> void:
 	held = move_toward(held, hold_goal, delta * (30.0 if hold_goal == 0.0 else 7.0))
 	right_reach = 1.0 - held
 	rotation.y = spin
+	position = Vector3(0, lift, -lunge)
 	_turn("Head", Vector3.RIGHT, head_turn.x)
 	_turn("Head", Vector3.UP, head_turn.y)
 
 
-## Authored arc for the current combo step, phased exactly on the melee windows.
+## Authored moves for the three combo steps, phased exactly on the melee windows:
+## a lunging diagonal slash, a spinning backhand, and a leap into an overhead slam.
+## Wind-ups snap into a held anticipation pose; strikes start at full speed.
 func _swing(melee: Node3D, _delta: float) -> void:
 	var index: int = maxi(actor.combo_index, 0)
-	var direction: float = actor.combo[index].swing_direction
-	var windup: float = melee.elapsed / melee.windup
+	var windup: float = clampf(melee.elapsed / melee.windup, 0, 1)
 	var strike: float = (melee.elapsed - melee.windup) / melee.active_time
-	var settle: float = (melee.elapsed - melee.windup - melee.active_time) / melee.recovery
+	var settle: float = clampf((melee.elapsed - melee.windup - melee.active_time) / melee.recovery, 0, 1)
+	var striking_now: bool = melee.elapsed >= melee.windup and strike < 1.0
 	var carry: Transform3D = carry_transform()
 	var target: Transform3D
 	var twist: float = 0.0
 	var dip: float = 0.0
+	var anticipation: float = ease(minf(1.0, windup / .7), .35)
+	var release: float = 1.0 - ease(settle, 2.0)
 	trail.color = ELEMENTS[index].color
-	if index == 2:
-		# Finisher: crouch, load the keyboard low behind the hip, then a full spin.
-		var loaded: Transform3D = Transform3D(Basis.from_euler(Vector3(.1, -1.75, .25)), Vector3(.3, .78, .25))
-		var extended: Transform3D = Transform3D(Basis.from_euler(Vector3(.05, -1.57, .1)), Vector3(.35, .95, -.1))
-		if windup < 1.0:
-			var weight: float = smoothstep(0, 1, windup)
-			target = carry.interpolate_with(loaded, weight)
-			dip = .1 * weight
-			twist = .6 * weight
-		elif strike < 1.0:
-			target = loaded.interpolate_with(extended, smoothstep(0, 1, strike * 2.0))
-			spin = -TAU * ease(strike, .6) * .85
-			dip = .1
-		else:
-			var weight: float = smoothstep(0, 1, clampf(settle, 0, 1))
-			spin = -TAU * lerpf(.85, 1.0, minf(1.0, settle * 2.5))
-			target = extended.interpolate_with(carry, weight)
-			dip = .1 * (1.0 - weight)
-		left_reach = 0.0
-	else:
-		var side: float = direction
-		var back: Transform3D = Transform3D(Basis.from_euler(Vector3(.35, -1.25 * side, .25 * side)), Vector3(.28 * side, 1.12, .08))
-		var front: Transform3D = Transform3D(Basis.from_euler(Vector3(-.12, 1.2 * side, -.15 * side)), Vector3(-.12 * side, .92, -.42))
-		if windup < 1.0:
-			var weight: float = smoothstep(0, 1, windup)
-			target = carry.interpolate_with(back, weight)
-			twist = -.45 * side * weight
-		elif strike < 1.0:
-			# Explicit phase coordination: no smoothing, the active window is short.
-			var weight: float = ease(strike, .7)
-			var middle: Transform3D = Transform3D(Basis.from_euler(Vector3(.05, 0, 0)), Vector3(.1 * side, 1.0, -.62))
-			target = back.interpolate_with(middle, weight * 2.0) if weight < .5 else middle.interpolate_with(front, weight * 2.0 - 1.0)
-			twist = lerpf(-.45, .55, weight) * side
-		else:
-			var weight: float = smoothstep(0, 1, clampf(settle, 0, 1))
-			target = front.interpolate_with(carry, weight)
-			twist = .55 * side * (1.0 - weight)
-		left_reach = 0.0
-	trail.emitting = windup >= .6 and (strike < 1.0 or settle < .25)
+	match index:
+		0:
+			# High over the right shoulder, cut down across the body, step into it.
+			var back: Transform3D = Transform3D(Basis.from_euler(Vector3(1.25, -.7, .45)), Vector3(.34, 1.3, .12))
+			var middle: Transform3D = Transform3D(Basis.from_euler(Vector3(-.15, .2, -.2)), Vector3(.02, 1.0, -.7))
+			var front: Transform3D = Transform3D(Basis.from_euler(Vector3(-.95, 1.05, -.4)), Vector3(-.3, .62, -.4))
+			if not striking_now and strike < 1.0:
+				target = carry.interpolate_with(back, anticipation)
+				twist = -.6 * anticipation
+				dip = .06 * anticipation
+			elif striking_now:
+				var cut: float = ease(strike, .3)
+				target = back.interpolate_with(middle, cut * 2.0) if cut < .5 else middle.interpolate_with(front, cut * 2.0 - 1.0)
+				twist = lerpf(-.6, .75, cut)
+				lunge = .5 * cut
+				dip = .1
+			else:
+				target = front.interpolate_with(carry, 1.0 - release)
+				twist = .75 * release
+				lunge = .5 * release
+				dip = .1 * release
+		1:
+			# Wind the keyboard across the body, then turn a full circle with it extended.
+			var loaded: Transform3D = Transform3D(Basis.from_euler(Vector3(.15, 1.5, -.3)), Vector3(-.35, .98, .15))
+			var extended: Transform3D = Transform3D(Basis.from_euler(Vector3(.05, 1.57, -.1)), Vector3(-.42, 1.0, -.15))
+			if not striking_now and strike < 1.0:
+				target = carry.interpolate_with(loaded, anticipation)
+				twist = .7 * anticipation
+				dip = .12 * anticipation
+			elif striking_now:
+				target = loaded.interpolate_with(extended, minf(1.0, strike * 3.0))
+				spin = TAU * ease(strike, .45)
+				lift = .25 * sin(strike * PI)
+				dip = .05
+			else:
+				target = extended.interpolate_with(carry, 1.0 - release)
+				spin = TAU
+				dip = .12 * release
+		_:
+			# Leap: rise with the keyboard overhead in both hands, slam down on the strike.
+			var overhead: Transform3D = Transform3D(Basis.from_euler(Vector3(1.95, 0, 0)), Vector3(.05, 1.6, .2))
+			var slammed: Transform3D = Transform3D(Basis.from_euler(Vector3(-1.15, 0, 0)), Vector3(.05, .5, -.7))
+			left_reach = 1.0
+			if not striking_now and strike < 1.0:
+				target = carry.interpolate_with(overhead, anticipation)
+				# Up fast, hang, then drop so the feet land as the strike opens.
+				lift = .7 * (ease(minf(1.0, windup / .55), .3) if windup < .7 else 1.0 - ease((windup - .7) / .3, 2.4))
+			elif striking_now:
+				target = overhead.interpolate_with(slammed, minf(1.0, ease(strike * 2.5, .4)))
+				dip = .22
+			else:
+				target = slammed.interpolate_with(carry, 1.0 - release)
+				dip = .22 * release
+				left_reach = release
+	# The ribbon marks the cut itself, not the wind-up.
+	trail.emitting = melee.elapsed >= melee.windup * .9 and (strike < 1.0 or settle < .2)
 	weapon.transform = target
 	_turn("Abdomen", Vector3.UP, twist * .45)
 	_turn("Torso", Vector3.UP, twist * .55)
@@ -287,7 +318,10 @@ func _cast_element(index: int) -> void:
 			ElementFx.flash(self, tip, color, 4.0, 6.0, .2)
 			ElementFx.motes(self, tip, color, 16, 5.0, .35, -4.0, .08)
 		2:
+			# Landing of the leap: fire ring, cracked floor, a jolt.
 			ElementFx.flame_ring(self, global_position, 2.6, .75)
+			ElementFx.cracks(self, global_position + forward * .6, color, 2.2, 6, 1.0)
+			ElementFx.tremor(self, global_position, .45, 6.0)
 
 
 func _on_hit_landed(target: Node3D) -> void:
@@ -305,6 +339,8 @@ func _on_hit_landed(target: Node3D) -> void:
 		2:
 			ElementFx.motes(self, at, color, 24, 5.0, .7, 2.5, .2)
 			ElementFx.flash(self, at, color, 3.0, 4.0, .3)
+			if not called_out:
+				ElementFx.freeze(self, .08)
 	if not called_out:
 		called_out = true
 		ElementFx.glyphs(self, global_position + Vector3.UP * 2.15, color, [ELEMENTS[index].call], .7, 0.0)

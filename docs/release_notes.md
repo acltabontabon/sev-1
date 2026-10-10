@@ -1,5 +1,40 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.4 — Monsters, minions, moves and the night shift (10 October 2026)
+
+Creator feedback on 0.2.3: freeze-frames on big impacts; monster effects that add
+nothing; monsters that do not look like monsters; one-hit minions; a crisper, fancier
+combo; a more coherent camera; and coworkers to bring the office to life.
+
+- **Real monsters.** Corrupted Records are skeletons ("zombie transactions") that claw
+  up out of the floor; the Blocker is a hulking alien brute with its BLOCKED sign; the
+  Meeting Invite is a purple bat; Scope Creep stays a note-covered slime; The Variance
+  is a red dragon wearing its crown of status screens. Each keeps its original colours
+  with only a faint rim, a bright wind-up glow and a hit flash; corpses sink away.
+- **BUG minions.** Swarms of small, fast alien bugs rush in with every wave (3–5). Any
+  hit fixes one. They never hold up a wave; when the stage clears, the survivors are
+  closed as WONTFIX (and the postmortem timeline says how many).
+- **Less noise.** Enemy strikes no longer throw floating words, shards and motes; the
+  telegraph circle and the impact itself remain.
+- **Freeze-frames.** The Blocker's quake, The Variance's cataclysm, your finisher
+  connecting and the boss's defeat stop the fight for a beat.
+- **A new combo.** Hit 1 snaps the keyboard overhead and cuts down diagonally as you
+  lunge forward; hit 2 is a full spinning backhand; hit 3 leaps into the air and slams
+  down two-handed into the fire ring, cracking the floor. Same damage windows; the
+  swing ribbon only draws the cut itself.
+- **Camera.** It pulls back a little during fights and, if you leave the mouse alone for
+  a second, eases toward the fight; moving the mouse hands control straight back.
+- **The night shift.** Four coworkers on overtime: one asleep on his keyboard ("zZz…
+  LGTM… zZz"), one insisting he is on a different incident, a manager pacing on a call
+  ("Yes, someone's on it. No, I don't know who."), and Facilities finally closing the
+  vending-machine ticket from 2019. They cower during fights, and when one ends the
+  manager announces "Great teamwork, everyone!"
+
+Performance (M2 Pro, 1280×720 preview): a five-enemy fight held 120.1 FPS mean (p95
+9.4 ms, max 13.8 ms); a battle-mode fight with continuous combos 119.8 FPS (max 16.8
+ms). Validation: 650 assertions across 15 headless suites. Feel, camera assist and
+the coworker jokes need a human run.
+
 ## 0.2.3 — Enemy attacks hit the ground (10 October 2026)
 
 Creator ask: flashier enemy attacks, "like earthquake or something". Damage, reach,

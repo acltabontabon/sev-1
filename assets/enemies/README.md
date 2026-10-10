@@ -1,33 +1,36 @@
-# Enemy bodies (Quaternius, CC0)
+# Enemy bodies (CC0)
 
-Retrieved 10 October 2026 from OpenGameArt without an account, after the creator said
-the enemies "still look like boxes". All are CC0 1.0 (public domain dedication;
-`License.txt` in each archive); attribution is voluntary
-([THIRD_PARTY_NOTICES.txt](../../THIRD_PARTY_NOTICES.txt)). FBX and textures are
-unmodified apart from lowercase file names, stored with Git LFS.
+Retrieved 10 October 2026 from OpenGameArt without an account. All are CC0 1.0
+(public domain dedication); attribution is voluntary
+([THIRD_PARTY_NOTICES.txt](../../THIRD_PARTY_NOTICES.txt)). Files are unmodified apart
+from lowercase names; textures embedded in the GLB files are extracted by Godot's
+importer next to them. Everything is stored with Git LFS.
 
-| File in `quaternius/` | Source | Worn by |
+| File | Source | Worn by |
 | --- | --- | --- |
-| `stan.fbx`, `stan_texture.png` | "Animated Mech Pack" (March 2021), [OpenGameArt](https://opengameart.org/node/126992) | Corrupted Record |
-| `leela.fbx`, `leela_texture.png` | same pack | The Blocker (carries the BLOCKED sign) |
-| `george.fbx`, `george_texture.png` | same pack | The Meeting Invite (the invite card hovers above it) |
-| `mike.fbx`, `mike_texture.png` | same pack | The Variance (3.1 m, crown of status screens) |
-| `slime.fbx` | "LowPoly Animated Monsters", [OpenGameArt](https://opengameart.org/content/lowpoly-animated-monsters) | Scope Creep (sticky notes plastered on it; grows) |
+| `quaternius/skeleton.fbx` | Quaternius, "LowPoly Animated Monsters", [OpenGameArt](https://opengameart.org/content/lowpoly-animated-monsters) | Corrupted Record (a zombie transaction that claws out of the floor) |
+| `quaternius/brute.glb` (`Enemy Large`) | Quaternius, "Ultimate Space Kit", [OpenGameArt](https://opengameart.org/node/155017) | The Blocker (carries the BLOCKED sign) |
+| `quaternius/bat.fbx` | "LowPoly Animated Monsters" | The Meeting Invite (invite card overhead) |
+| `quaternius/slime.fbx` | "LowPoly Animated Monsters" | Scope Creep (sticky notes plastered on it; grows) |
+| `quaternius/dragon.fbx` | "LowPoly Animated Monsters" | The Variance (3.4 m, crown of status screens) |
+| `bug/bug.glb` | CDmir, "Alien Bug Animated", [OpenGameArt](https://opengameart.org/content/alien-bug-animated) | BUG minions (one-hit swarms) |
 
-Also evaluated in the office and not imported: the pack's skeleton, bat and dragon,
-the "Textured Cute Monster Pack" (too toy-like next to the mechs) and the 2018
-"Animated LowPoly Robot".
+History: 0.2.2 used four mechs from Quaternius' "Animated Mech Pack". The creator
+said some enemies did not read as monsters, so 0.2.4 replaced them with the bodies
+above; the mech files left the tree. Also evaluated and not used: the "Textured Cute
+Monster Pack" (toy-like), the 2018 "Animated LowPoly Robot", and Quaternius' "Ultimate
+Monsters" (its Google Drive download was over quota on the day).
 
-**How they are used.** `game/enemies/monster_rig.gd` (`MonsterRig`) instances the
-model under each enemy's `Visual`, scales it to a set height and plays its own clips
-from the enemy's state: idle/walk/run from pursuit speed, the attack clip scrubbed so
-its impact frame lands at the end of the melee wind-up, hit on stagger, a raised-arm
-clip for casts, and death (then a dissolve) on defeat. Nothing uses root motion and the
-rig never moves the body or deals damage. `corruption.gdshader` keeps the original
-texture and adds a rim, crawling glitch bands in the archetype's spell colour, a hit
-flash and a bright charge during the telegraph. Setting `rig_kind = ""` on an enemy
-restores the native box geometry, which is kept as a fallback.
+**How they are used.** `game/enemies/monster_rig.gd` (`MonsterRig`) instances the model
+under each enemy's `Visual`, scales it to a set height (flying kinds hover), keeps the
+model's own materials and adds `corruption.gdshader` as an additive overlay pass: a
+faint rim in the archetype's colour, a bright charge while the attack winds up, a hit
+flash and a glow as the corpse sinks. Clips are played from the enemy's state: the
+skeleton's spawn while manifesting, locomotion from pursuit speed, the attack scrubbed
+so its impact frame lands at the end of the melee wind-up, hit on stagger, a cast
+clip for spells, then death (or, for a bug, a squash) and a sink through the floor.
+Nothing uses root motion and the rig never moves the body or deals damage. Setting
+`rig_kind = ""` on an enemy restores the native box geometry, kept as a fallback.
 
-**Limits.** The mech clips (sword slash, punch, kick) are generic; they read as
-attacks but were not authored for these jokes. Arc reach and damage are unchanged, so
-the visible limb does not exactly trace the telegraph arc. The Slime has no hit clip.
+**Limits.** Attack clips are stock bites, punches and swipes, so limbs do not trace
+the telegraph arc exactly. The slime, skeleton and bug have no hit-reaction clip.

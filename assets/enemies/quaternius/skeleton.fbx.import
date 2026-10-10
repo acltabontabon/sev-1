@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://umidxarvoehy"
-path="res://.godot/imported/stan.fbx-d603f40b7d6b542c80588c7bc89a8a41.scn"
+uid="uid://b5uw0hpl4gj6u"
+path="res://.godot/imported/skeleton.fbx-8417f3b49bc16aa81bd1634eddeaf6eb.scn"
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/stan.fbx"
-dest_files=["res://.godot/imported/stan.fbx-d603f40b7d6b542c80588c7bc89a8a41.scn"]
+source_file="res://assets/enemies/quaternius/skeleton.fbx"
+dest_files=["res://.godot/imported/skeleton.fbx-8417f3b49bc16aa81bd1634eddeaf6eb.scn"]
 
 [params]
 

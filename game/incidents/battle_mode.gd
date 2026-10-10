@@ -49,7 +49,25 @@ func reset() -> void:
 	onset = 0.0
 	engaged = false
 	sting.stop()
+	ElementFx.release_freeze()
 	_apply()
+
+
+## Centre of the engaged enemies near the engineer, weighted to the closest; INF if none.
+func fight_focus() -> Vector3:
+	var total: Vector3 = Vector3.ZERO
+	var weight: float = 0.0
+	for node: Node in get_tree().get_nodes_in_group("enemies"):
+		var enemy: CharacterBody3D = node as CharacterBody3D
+		if enemy == null or not enemy.is_inside_tree() or enemy.health <= 0 or enemy.awareness != enemy.Awareness.ENGAGED or not enemy.visible:
+			continue
+		var distance: float = enemy.global_position.distance_to(player.global_position)
+		if distance > 12.0:
+			continue
+		var share: float = 1.0 / maxf(distance, 1.0)
+		total += enemy.global_position * share
+		weight += share
+	return total / weight if weight > 0.0 else Vector3.INF
 
 
 func fighting() -> bool:
@@ -85,3 +103,6 @@ func _apply() -> void:
 		environment.adjustment_contrast = base_contrast * (1.0 + .08 * level)
 	if player != null and "battle" in player.presentation:
 		player.presentation.battle = level
+	if player != null:
+		player.camera_rig.battle = level
+		player.camera_rig.focus = fight_focus() if engaged else Vector3.INF

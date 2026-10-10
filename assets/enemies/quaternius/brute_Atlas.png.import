@@ -2,18 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4w2jnd0xtvrr"
-path.s3tc="res://.godot/imported/mike_texture.png-d9bce835d23337c9fb33024643836b72.s3tc.ctex"
-path.etc2="res://.godot/imported/mike_texture.png-d9bce835d23337c9fb33024643836b72.etc2.ctex"
+uid="uid://dk4ynbi8gvpx5"
+path.s3tc="res://.godot/imported/brute_Atlas.png-715e5197b2f020379ca239cdf40b393a.s3tc.ctex"
+path.etc2="res://.godot/imported/brute_Atlas.png-715e5197b2f020379ca239cdf40b393a.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "b6b1d5843eb67973aacf764f46d2f25b"
+}
 
 [deps]
 
-source_file="res://assets/enemies/quaternius/mike_texture.png"
-dest_files=["res://.godot/imported/mike_texture.png-d9bce835d23337c9fb33024643836b72.s3tc.ctex", "res://.godot/imported/mike_texture.png-d9bce835d23337c9fb33024643836b72.etc2.ctex"]
+source_file="res://assets/enemies/quaternius/brute_Atlas.png"
+dest_files=["res://.godot/imported/brute_Atlas.png-715e5197b2f020379ca239cdf40b393a.s3tc.ctex", "res://.godot/imported/brute_Atlas.png-715e5197b2f020379ca239cdf40b393a.etc2.ctex"]
 
 [params]
 
