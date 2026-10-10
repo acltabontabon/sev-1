@@ -87,7 +87,15 @@ def process(master, output, profile):
         # Shift pitch by semitones and keep the timing: a blended voice becomes a person.
         ratio = 2 ** (profile['pitch'] / 12)
         filters += [f'asetrate={round(24000 * ratio)}', 'aresample=24000', f'atempo={1 / ratio:.4f}']
-    filters += ['loudnorm=I=-20:TP=-2:LRA=11']
+    if profile['processing'] == 'hype':
+        # Anime move call: presence, hard compression, a doubled voice, arena echo, soft
+        # saturation; mastered louder than dialogue so it cuts through a fight.
+        filters += ['highpass=f=140', 'equalizer=f=2800:t=q:w=1.2:g=6', 'aexciter=amount=2:drive=6',
+                    'acompressor=threshold=-24dB:ratio=9:attack=2:release=90:makeup=9',
+                    'chorus=0.7:0.9:22|36:0.35|0.3:0.3|0.45:1.8|1.2', 'aecho=0.85:0.55:70|150:0.3|0.16',
+                    'asoftclip=type=tanh']
+    loudness = profile.get('loudness', -20)
+    filters += ['loudnorm=I=-20:TP=-2:LRA=11' if loudness == -20 else f'loudnorm=I={loudness}:TP=-1:LRA=7']
     output.parent.mkdir(parents=True, exist_ok=True)
     run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', master, '-af', ','.join(filters),
          '-ac', '1', '-ar', '24000', '-c:a', 'pcm_s16le', output.with_suffix('.mix.wav')])

@@ -49,7 +49,9 @@ every line derived from the manifest (127 at 0.2.10, including the engineer's sp
 replies in the `you` profile, which matches the protagonist voice; parenthetical actions
 are silent; replies are keyed by `reply_id()`, the same slug rule in GDScript and Python).
 Move callouts (`callouts`, `call_<move>.ogg`) use the `shout` profile: the protagonist
-voice, slightly faster, with the Variance echo. Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
+voice at 1.18× and +1.5 semitones through the `hype` processing (EQ presence, exciter,
+9:1 compression, chorus doubling, arena echo, tanh soft clip) mastered at −13 LUFS target
+(measured −14), and played +4 dB in game. Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
 numbers for speech only into `assets/audio/voices/talk/` with
 `talk/provenance.json`; `talk-validate` (run by `tools/validate.py`) fails on a missing,
 stale or untracked clip. Status: candidates; human listening acceptance pending.

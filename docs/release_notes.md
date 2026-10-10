@@ -1,5 +1,15 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.14 — Louder calls (10 October 2026)
+
+Creator feedback on 0.2.13: make the shouts louder and more hype.
+
+- The five move calls were re-voiced faster and a little higher, with exclamation-heavy
+  reads, then run through a new "hype" chain: presence boost, exciter, hard compression,
+  a doubled-voice chorus, an arena echo and soft saturation, mastered at −14 LUFS (talk
+  stays at −20). In game they play +4 dB with slight pitch variety per call, so they sit
+  on top of the fight. Still unheard candidates; tell us if they need more.
+
 ## 0.2.13 — Called out loud (10 October 2026)
 
 Creator feedback on 0.2.12: the dash's damage should land as you pass through; and the

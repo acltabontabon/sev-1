@@ -86,6 +86,8 @@ func _ready() -> void:
 	add_child(trail)
 	voice = AudioStreamPlayer.new()
 	voice.bus = &"Voice"
+	# Calls sit on top of the fight, not inside the dialogue mix.
+	voice.volume_db = 4.0
 	add_child(voice)
 
 
@@ -113,6 +115,8 @@ func _shout(key: String, title: String, ultimate: bool = false) -> void:
 	var path: String = "res://assets/audio/voices/talk/call_%s.ogg" % key
 	if ResourceLoader.exists(path):
 		voice.stream = load(path)
+		# A little variety so the tenth call is not a recording of the first.
+		voice.pitch_scale = randf_range(.97, 1.05)
 		if DisplayServer.get_name() != "headless":
 			voice.play()
 	called.emit(title, ultimate)

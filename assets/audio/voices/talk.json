@@ -292,10 +292,11 @@
     "am_michael": 1.0
    },
    "language": "a",
-   "speed": 1.08,
-   "pitch": 0,
-   "processing": "double",
-   "direction": "The engineer calling a move, anime style: committed, a held beat, then the name. A touch of echo."
+   "speed": 1.18,
+   "pitch": 1.5,
+   "loudness": -13,
+   "processing": "hype",
+   "direction": "The engineer calling a move, anime style: a held beat, then the name at full commitment. Compressed, doubled, arena echo; mastered loud."
   }
  },
  "crew": {
@@ -1010,24 +1011,24 @@
  "host_hr": "Did you just— Okay. I'm telling HR. I'm telling HR right now.",
  "callouts": {
   "hotfix_wave": {
-   "text": "Hotfix… WAVE!",
-   "say": "Hotfix... Wave!"
+   "text": "Hotfix… WAVE!!",
+   "say": "Hotfix! ... Wave!!!"
   },
   "hot_swap": {
-   "text": "Hot… SWAP!",
-   "say": "Hot... Swap!"
+   "text": "Hot… SWAP!!",
+   "say": "Hot! ... Swap!!!"
   },
   "merge_conflict": {
-   "text": "Merge… CONFLICT!",
-   "say": "Merge... Conflict!"
+   "text": "Merge… CONFLICT!!",
+   "say": "Merge! ... Conflict!!!"
   },
   "rollback": {
-   "text": "FORCE… ROLLBACK!",
-   "say": "Force... Rollback!"
+   "text": "FORCE… ROLLBACK!!!",
+   "say": "Force! ... Rollback!!!"
   },
   "reset_hard": {
-   "text": "git reset… HARD!",
-   "say": "Git reset... Hard!"
+   "text": "git reset… HARD!!!",
+   "say": "Git reset! ... Hard!!!"
   }
  }
 }
