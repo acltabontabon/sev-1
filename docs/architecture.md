@@ -494,7 +494,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   engineer's monitor (chat, log-off dialog, SEV-1 takeover). It updates live while on
   camera and freezes afterwards.
 - **Opening and beats.** `incident_presentation.gd` stages the opening from `SHOTS` and
-  `BEATS` tables (36 s; 3 s on retry), the evidence push-in, the vault arrival (no
+  `BEATS` tables (47.5 s; 3 s on retry: a narrated cold open, the `CREW` freeze-frame
+  montage with a screen-reading desaturation shader and slammed name cards, the red
+  monitor wave, the notification `STORM`, a dolly zoom, and a title slam; shots may carry
+  an end field of view or `"dolly"` and a dutch roll), the evidence push-in, the vault arrival (no
   control loss), first-sighting slow motion and the terminal ending shot. A
   `sequence` queue plays lines that belong together through the bounded voice queue;
   stage changes clear it. A small music director cross-fades `assets/audio/music` beds on

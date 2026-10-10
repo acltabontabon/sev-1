@@ -559,7 +559,7 @@ func _build_evidence() -> void:
 
 
 func _refresh_incident(incident: Node) -> void:
-	var open_seconds: int = maxi(0, int(incident.elapsed - 13.4))
+	var open_seconds: int = maxi(0, int(incident.elapsed - 29.1))
 	$Margin/VBox/Title.text = "INC-001  ·  %s  ·  %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
 	status.text = incident.objective
 	var progress: String = incident.encounter_status()

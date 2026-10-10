@@ -3,7 +3,7 @@
 **Works on My Machine.** A cinematic third-person corporate-nightmare action game.
 The system is down. Management is watching. You're the only engineer online.
 
-**Playtest Build 0.2 / version 0.2.34** (Milestone 12, "Operation Corporate Hell") is a
+**Playtest Build 0.2 / version 0.2.35** (Milestone 12, "Operation Corporate Hell") is a
 local macOS tester build that answers the first external feedback on 0.1. It is not
 creator-accepted or notarized. No known P0 gameplay failure was reproduced; first-use
 hitches and human acceptance of fun, comedy, voice and music remain open. See the
@@ -11,8 +11,8 @@ hitches and human acceptance of fun, comedy, voice and music remain open. See th
 
 ## Play
 
-Unzip `SEV-1-Friday-Deployment-0.2.34-macOS.zip` and open **SEV-1 Friday Deployment.app**.
-No Godot installation is needed. Local outputs are under `builds/releases/0.2.34/`.
+Unzip `SEV-1-Friday-Deployment-0.2.35-macOS.zip` and open **SEV-1 Friday Deployment.app**.
+No Godot installation is needed. Local outputs are under `builds/releases/0.2.35/`.
 The build is ad-hoc signed; recipient Macs may require explicit approval. Keep the
 included license notices with the app. Apple Silicon/macOS is the initial test platform;
 Intel, Windows and the declared macOS 14 minimum are not runtime-validated.
@@ -52,8 +52,11 @@ and Attempt to Log Off. The window close action also exits cleanly.
 
 **Incident 001 — The Missing Transaction**, in an expanded Office After Hours:
 
-1. A 36-second Friday, 4:59 PM opening (skippable after the first viewing; retries take
-   three seconds). Enemies arrive unaware and busy; they notice you by sight, by the
+1. A 47-second narrated cold open: a nature-documentary narrator over the dark office,
+   the night shift introduced one freeze-frame at a time, Friday at 4:59 PM, a Log Off
+   click, every screen going red, a notification storm, and something climbing out of
+   the production dashboard (skippable after the first viewing; retries take three
+   seconds). Enemies arrive unaware and busy; they notice you by sight, by the
    noise of fighting, or when a colleague flags you. Hitting one unaware is a Surprise
    Review for double damage.
 2. Two waves of Corrupted Records and Scope Creep, then a change request (upgrade).

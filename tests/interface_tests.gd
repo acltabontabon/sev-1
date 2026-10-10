@@ -16,7 +16,7 @@ func _run() -> void:
 	player.max_health = 10000
 	player.health = 10000
 	await frames(60)
-	check(story.seen.has("opening") and feed.cards.is_empty(), "the cinematic opening speaks in subtitles, never chat cards")
+	check(story.seen.has("doc_office") and feed.cards.is_empty(), "the cinematic opening speaks in subtitles, never chat cards")
 	story.skip_unlocked = true
 	story.skip()
 	await frames(4)

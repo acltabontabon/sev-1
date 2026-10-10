@@ -9,32 +9,63 @@ const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
 ## Where the seated engineer's face is (rigged_engineer.SEATED_OFFSET lifts him onto the cushion).
 const FACE: Vector3 = Vector3(-2.5, 1.63, 9.92)
-const OPENING_LENGTH: float = 36.0
-## Opening shots: start, camera from, camera to, look from, look to, field of view.
+const OPENING_LENGTH: float = 47.5
+## Opening shots: start, camera from, camera to, look from, look to, field of view, and
+## optionally an end field of view (or "dolly": the lens widens as the camera closes so
+## the face holds its size while the room warps), then a dutch roll in degrees.
 ## Each shot eases from its first pose to its second until the next shot cuts in.
 const SHOTS: Array = [
-	[0.0, Vector3(3.6, 2.7, 14.8), Vector3(2.6, 2.4, 14.0), Vector3(-2.3, 1.0, 9.8), Vector3(-2.4, 1.1, 9.7), 46.0],
-	[4.4, Vector3(-1.62, 1.95, 10.7), Vector3(-1.78, 1.87, 10.38), MONITOR + Vector3(.12, 0, 0), MONITOR + Vector3(.08, 0, 0), 36.0],
-	[8.4, Vector3(-1.98, 1.95, 8.25), Vector3(-2.16, 1.9, 8.45), FACE, FACE + Vector3(0, .02, 0), 42.0],
-	[11.6, Vector3(-2.26, 1.55, 9.98), Vector3(-2.36, 1.49, 9.74), MONITOR, MONITOR, 33.0],
-	[13.4, Vector3(-2.5, 1.27, 9.95), Vector3(-2.5, 1.27, 9.82), MONITOR, MONITOR, 42.0],
-	[16.9, Vector3(-2.08, 1.85, 8.5), Vector3(-2.2, 1.79, 8.68), FACE, FACE, 38.0],
-	[18.6, Vector3(-2.12, 1.38, 9.7), Vector3(-2.16, 1.36, 9.58), Vector3(-2.3, 1.13, 9.19), Vector3(-2.3, 1.12, 9.19), 34.0],
-	[21.4, Vector3(-2.1, 1.85, 8.45), Vector3(-2.22, 1.79, 8.68), FACE, FACE + Vector3(0, -.03, 0), 40.0],
-	[26.2, Vector3(-1.1, 1.85, 11.7), Vector3(-1.35, 1.95, 11.0), Vector3(-3.0, 2.0, -14.5), Vector3(-3.2, 2.1, -14.5), 46.0],
-	[28.0, Vector3(-1.55, .95, -8.0), Vector3(-1.95, 1.05, -8.9), Vector3(-4.1, 1.75, -14.6), Vector3(-4.1, 1.45, -13.8), 44.0],
-	[30.4, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
-	[32.4, Vector3(-2.25, 1.55, 12.4), Vector3(-2.1, 2.25, 13.5), Vector3(-2.6, 1.5, 6.0), Vector3(-2.6, 1.3, 4.0), 55.0],
+	# Establishing: high over the dark office, 4:59 on a Friday.
+	[0.0, Vector3(4.0, 5.2, -12.0), Vector3(2.0, 4.6, -5.0), Vector3(-1.0, .5, 8.0), Vector3(-2.0, .8, 9.0), 64.0, 60.0],
+	[4.3, Vector3(-9.5, 3.4, -9.0), Vector3(-9.0, 2.6, -1.5), Vector3(-6.0, .8, 2.0), Vector3(-5.0, .9, 6.0), 56.0, 52.0],
+	# (8.6–16.6 s: the night shift, one freeze-frame each; see CREW.)
+	# Down to the one desk still lit.
+	[16.6, Vector3(1.6, 4.2, 3.0), Vector3(-.7, 2.25, 13.1), Vector3(-2.5, .9, 6.0), Vector3(-2.5, 1.25, 9.6), 58.0, 46.0],
+	[22.6, Vector3(-1.62, 1.95, 10.7), Vector3(-1.78, 1.87, 10.38), MONITOR + Vector3(.12, 0, 0), MONITOR + Vector3(.08, 0, 0), 36.0],
+	[25.5, Vector3(-1.98, 1.95, 8.25), Vector3(-2.16, 1.9, 8.45), FACE, FACE + Vector3(0, .02, 0), 42.0],
+	[28.5, Vector3(-2.26, 1.55, 9.98), Vector3(-2.36, 1.49, 9.74), MONITOR, MONITOR, 33.0],
+	# The click. Everything goes red.
+	[29.1, Vector3(-2.5, 1.27, 9.95), Vector3(-2.5, 1.27, 9.84), MONITOR, MONITOR, 42.0, 42.0, -6.0],
+	[29.8, Vector3(-4.2, 1.15, 12.9), Vector3(-4.6, 1.0, 12.3), Vector3(-7.4, 1.3, -6.0), Vector3(-7.6, 1.2, -6.0), 50.0, 50.0, 12.0],
+	# Every ping at once: the lens widens as it closes on him.
+	[30.8, Vector3(-1.8743, 1.9429, 7.8342), Vector3(-2.2867, 1.7367, 9.2089), FACE, FACE, 26.0, "dolly"],
+	[35.6, Vector3(-1.82, 1.28, 9.5), Vector3(-1.92, 1.32, 9.62), FACE + Vector3(0, .02, 0), FACE, 38.0, 32.0, -7.0],
+	# Black. Then the lights go, and something climbs out of the dashboard.
+	[37.6, Vector3(-1.1, 1.85, 11.7), Vector3(-1.35, 1.95, 11.0), Vector3(-3.0, 2.0, -14.5), Vector3(-3.2, 2.1, -14.5), 46.0],
+	[40.0, Vector3(-1.55, .95, -8.0), Vector3(-1.95, 1.05, -8.9), Vector3(-4.1, 1.75, -14.6), Vector3(-4.1, 1.45, -13.8), 44.0, 40.0, -8.0],
+	[43.0, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
+	[44.6, Vector3(-2.25, 1.55, 12.4), Vector3(-2.1, 2.25, 13.5), Vector3(-2.6, 1.5, 6.0), Vector3(-2.6, 1.3, 4.0), 55.0],
 ]
 ## Timed beats, fired once each as the opening clock crosses them.
 const BEATS: Array = [
-	[.5, "say", "opening"], [4.6, "post", "friday"], [4.9, "say", "friday"],
-	[8.4, "pose", CHARACTER.Pose.RELAX], [8.6, "say", "relief"], [11.4, "pose", CHARACTER.Pose.TYPING],
-	[13.0, "click", ""], [13.4, "alarm", ""], [13.6, "say", "alert"],
-	[16.9, "pose", CHARACTER.Pose.ALERT], [17.0, "acknowledged", ""], [18.7, "post", "eta"], [18.9, "say", "eta"], [20.3, "typing", ""],
-	[21.5, "post", "leadership"], [21.5, "say", "leadership"], [24.2, "pose", CHARACTER.Pose.SLUMP],
-	[24.7, "say", "start"], [26.2, "pose", CHARACTER.Pose.ALERT], [26.3, "flicker", ""],
-	[28.0, "emerge", ""], [28.6, "boom", ""], [30.5, "pose", CHARACTER.Pose.ARMED],
+	[.5, "say", "doc_office"], [8.8, "say", "doc_shift"], [14.1, "say", "doc_chose"], [17.6, "say", "doc_engineer"],
+	[22.5, "post", "friday"], [22.6, "say", "friday"],
+	[25.5, "pose", CHARACTER.Pose.RELAX], [25.9, "say", "relief"], [28.5, "pose", CHARACTER.Pose.TYPING],
+	[28.9, "click", ""], [29.1, "alarm", ""], [29.8, "red_wave", ""],
+	[30.8, "pose", CHARACTER.Pose.ALERT], [30.8, "acknowledged", ""], [31.0, "storm", ""], [31.1, "say", "eta"], [31.2, "say", "leadership"],
+	[35.8, "say", "start"], [37.2, "blackout", ""],
+	[37.7, "flicker", ""], [37.9, "say", "doc_premise"], [40.0, "emerge", ""], [40.6, "boom", ""], [43.1, "pose", CHARACTER.Pose.ARMED], [45.0, "title", ""],
+]
+## The night shift, introduced like a heist crew: the camera whips to each, the world
+## freezes and drains of colour, and a card slams in.
+## [cast name, who, their misery, colour, framing: distance, height above the head, sideways].
+const CREW: Array = [
+	["Recruiter", "DREW", "TALENT  ·  CULTURE FIT ENFORCEMENT", Color(1, .45, .5), Vector3(1.9, .15, .9)],
+	["Manager", "MORGAN", "ON A CALL ABOUT THE CALL", Color(1, .62, .78), Vector3(1.9, .15, .9)],
+	["Sleeper", "GARY", "ON CALL. TECHNICALLY.", Color(.7, .6, 1), Vector3(2.0, 1.1, 1.4)],
+	["Intern", "JO", "INTERN  ·  DAY ONE  ·  ON CALL", Color(1, .7, .3), Vector3(1.9, .15, .9)],
+]
+const CREW_START: float = 8.6
+const CREW_EACH: float = 2.0
+## The notification storm: more than anyone could read, and that is the point.
+const STORM: Array = [
+	["Management", "any update?", Color(1, .62, .78)], ["Leadership", "Is this related to the outage?", Color(1, .75, .4)],
+	["VP Engineering", "Let's not panic. ETA?", Color(.6, .8, 1)], ["People Ops", "Reminder: Wellness Week starts Monday!", Color(.78, .62, 1)],
+	["Management", "+1 on the ETA", Color(1, .62, .78)], ["Product", "is checkout affected? asking for a friend", Color(.5, 1, .7)],
+	["Leadership", "Can we just roll forward?", Color(1, .75, .4)], ["Legal", "Please do not put anything in writing.", Color(.85, .85, .85)],
+	["Management", "quick sync?", Color(1, .62, .78)], ["Sales", "customer says it's down. is it down?", Color(1, .5, .45)],
+	["Leadership", "Who approved a Friday deploy?", Color(1, .75, .4)], ["Management", "per my last message", Color(1, .62, .78)],
+	["VP Engineering", "Board meeting in 10. I need a number.", Color(.6, .8, 1)], ["Management", "ETA??", Color(1, .62, .78)],
 ]
 const POSTS: Dictionary = {
 	"friday": ["People Ops", "Happy Friday, team! Enjoy your well-deserved weekend!", Color(.78, .62, 1), "16:59"],
@@ -80,6 +111,37 @@ var shake: float = 0.0
 var pools: Array[Light3D] = []
 var pool_energy: Array[float] = []
 var dark: Material = preload("res://game/rooms/office/black.tres")
+## Opening state: the red wave down the desks, the strobe, the ping storm.
+var wave_start: float = -1.0
+var wave_order: Array[MeshInstance3D] = []
+var calm_material: StandardMaterial3D
+## Whole screen panels for the red wave (the code lines alone barely read at a distance).
+var displays: Array[MeshInstance3D] = []
+var alarm_display: StandardMaterial3D
+var pool_colors: Array[Color] = []
+var storm_next: float = -1.0
+var storm_index: int = 0
+var title_at: float = -1.0
+## The crew montage: the card, the drained-colour freeze, and where each shot whips from.
+var crew_card: Control
+var crew_name: Label
+var crew_misery: Label
+var crew_bar: ColorRect
+var crew_freeze: ColorRect
+var crew_from: Transform3D
+var crew_shown: int = -1
+const FREEZE_SHADER: String = """shader_type canvas_item;
+uniform sampler2D screen: hint_screen_texture, filter_linear;
+uniform float amount = 0.0;
+uniform vec4 tint: source_color = vec4(1.0);
+void fragment() {
+	vec3 colour = texture(screen, SCREEN_UV).rgb;
+	float grey = dot(colour, vec3(0.299, 0.587, 0.114));
+	vec3 drained = mix(colour, vec3(grey) * tint.rgb * 1.15, amount);
+	vec2 centre = SCREEN_UV - 0.5;
+	float vignette = 1.0 - amount * 0.55 * smoothstep(0.25, 0.75, length(centre));
+	COLOR = vec4(drained * vignette, 1.0);
+}"""
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var feed: Control
 var pinger: AudioStreamPlayer
@@ -204,7 +266,7 @@ func _ready() -> void:
 	card.offset_bottom = 170
 	card.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for entry: Array in [["INCIDENT 001  ·  THE MISSING TRANSACTION", "Eyebrow", 0], ["SEV-1", "DisplayTitle", 190], ["Works on My Machine", "Subhead", 30]]:
+	for entry: Array in [["SEV-1", "DisplayTitle", 190], ["Works on My Machine", "Subhead", 30]]:
 		var label: Label = Label.new()
 		label.text = entry[0]
 		label.theme_type_variation = entry[1]
@@ -214,6 +276,45 @@ func _ready() -> void:
 		card.add_child(label)
 	card.hide()
 	add_child(card)
+	crew_freeze = ColorRect.new()
+	crew_freeze.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	crew_freeze.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var freeze_shader: Shader = Shader.new()
+	freeze_shader.code = FREEZE_SHADER
+	crew_freeze.material = ShaderMaterial.new()
+	crew_freeze.material.shader = freeze_shader
+	crew_freeze.hide()
+	add_child(crew_freeze)
+	move_child(crew_freeze, 0)
+	crew_card = Control.new()
+	crew_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	crew_card.offset_left = 90
+	crew_card.offset_top = -330
+	crew_card.offset_right = 900
+	crew_card.offset_bottom = -110
+	crew_card.rotation = deg_to_rad(-4.0)
+	crew_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	crew_bar = ColorRect.new()
+	crew_bar.position = Vector2(0, 18)
+	crew_bar.size = Vector2(14, 168)
+	crew_card.add_child(crew_bar)
+	crew_name = Label.new()
+	crew_name.position = Vector2(36, 0)
+	crew_name.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_bold.ttf"))
+	crew_name.add_theme_font_size_override("font_size", 132)
+	crew_name.add_theme_constant_override("outline_size", 10)
+	crew_name.add_theme_color_override("font_outline_color", Color(0, 0, 0, .7))
+	crew_card.add_child(crew_name)
+	crew_misery = Label.new()
+	crew_misery.position = Vector2(40, 150)
+	crew_misery.add_theme_font_override("font", preload("res://assets/fonts/barlow_condensed_semibold.ttf"))
+	crew_misery.add_theme_font_size_override("font_size", 40)
+	crew_misery.add_theme_constant_override("outline_size", 6)
+	crew_misery.add_theme_color_override("font_outline_color", Color(0, 0, 0, .8))
+	crew_misery.add_theme_color_override("font_color", Color(.95, .93, .9))
+	crew_card.add_child(crew_misery)
+	crew_card.hide()
+	add_child(crew_card)
 	lower_third = VBoxContainer.new()
 	lower_third.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	lower_third.offset_left = 72
@@ -270,6 +371,8 @@ func _ready() -> void:
 			for mesh in workstation.find_children("*", "MeshInstance3D", true, false):
 				if str(mesh.name).begins_with("Code"):
 					monitors.append(mesh)
+				elif mesh.name == &"Display" and workstation.name != &"YourWorkstation":
+					displays.append(mesh)
 	for mesh in monitors:
 		mesh.material_override = screen_material
 	desk = DESK_SCREEN.new()
@@ -279,6 +382,13 @@ func _ready() -> void:
 	for index in range(6):
 		pools.append(incident.room.get_node("CeilingPool%d" % index))
 		pool_energy.append(pools[index].light_energy)
+		pool_colors.append(pools[index].light_color)
+	calm_material = StandardMaterial3D.new()
+	calm_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	calm_material.albedo_color = Color(.12, .42, .38)
+	alarm_display = StandardMaterial3D.new()
+	alarm_display.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	alarm_display.albedo_color = Color(.85, .06, .03)
 	for index in range(4):
 		corridor_lights.append(incident.room.get_node("CorridorLight%d" % index))
 		vault_lights.append(incident.room.get_node("VaultLight%d" % index))
@@ -377,6 +487,7 @@ func reset_story() -> void:
 func _restore_lights() -> void:
 	for index in range(pools.size()):
 		pools[index].light_energy = pool_energy[index]
+		pools[index].light_color = pool_colors[index]
 		incident.room.get_node("Diffuser%d" % index).material_override = null
 
 
@@ -414,7 +525,7 @@ func _on_line_started(id: String) -> void:
 	var entry: Dictionary = voice.lines[id]
 	if in_cinematic() or entry.character == "NARRATOR":
 		return
-	var minutes: int = maxi(0, int((incident.elapsed - 13.4) / 20.0))
+	var minutes: int = maxi(0, int((incident.elapsed - 29.1) / 20.0))
 	feed.post(entry.character, entry.subtitle, voice.line_left, "%d:%02d PM" % [5 + minutes / 60, minutes % 60])
 	if DisplayServer.get_name() != "headless" and entry.character != "ENGINEER":
 		var alert: bool = entry.character in ALERT_SENDERS
@@ -712,7 +823,7 @@ func outbreak(actor: CharacterBody3D, area: String, reason: String = "") -> void
 	camera.global_position = outbreak_from
 	camera.look_at(eye)
 	var who: Dictionary = actor.host.identity if actor.disguised() and "identity" in actor.host else {}
-	var minutes: int = maxi(0, int((incident.elapsed - 13.4) / 20.0))
+	var minutes: int = maxi(0, int((incident.elapsed - 29.1) / 20.0))
 	lower_kicker.text = "%d:%02d PM  ·  %s%s" % [5 + minutes / 60, minutes % 60, area.to_upper() if not area.is_empty() else "THE FLOOR", ("  ·  " + TRIGGERS[reason]) if TRIGGERS.has(reason) else ""]
 	lower_kicker.add_theme_color_override("font_color", Color(.6, .85, .9))
 	lower_name.text = "%s  ·  %s" % [who.get("name", "OVERTIME"), who.get("team", "Payments Platform")]
@@ -1091,7 +1202,7 @@ func _music(delta: float) -> void:
 	if incident.terminal():
 		desired = ""
 	elif incident.stage == incident.Stage.ALERT:
-		desired = "tension" if short_opening or incident.stage_time > 32.0 else ""
+		desired = "tension" if short_opening or incident.stage_time > 37.6 else ""
 	elif incident.stage == incident.Stage.BOSS and incident.boss_triggered:
 		desired = "boss"
 		level = -9.0
@@ -1154,6 +1265,19 @@ func _environment(delta: float) -> void:
 
 func _end_opening() -> void:
 	# However the opening ends, play starts in a clean, lit, readable office.
+	for mesh in monitors:
+		mesh.material_override = screen_material
+	for mesh in displays:
+		mesh.material_override = null
+	wave_start = -1.0
+	storm_next = -1.0
+	title_at = -1.0
+	crew_shown = -1
+	crew_card.hide()
+	crew_freeze.hide()
+	if incident.coworkers != null:
+		incident.coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
+	card.scale = Vector2.ONE
 	emerging.hide()
 	for fragment in fragments:
 		fragment.hide()
@@ -1195,6 +1319,25 @@ func _fire(entry: Array) -> void:
 			shake = .6
 		"acknowledged":
 			desk.alarm_compact()
+		"red_wave":
+			# Every other screen was calm a moment ago; now they turn, nearest first.
+			wave_start = incident.stage_time
+			wave_order = monitors.duplicate()
+			wave_order.append_array(displays)
+			wave_order.sort_custom(func(a: MeshInstance3D, b: MeshInstance3D) -> bool: return a.global_position.distance_to(SEAT) < b.global_position.distance_to(SEAT))
+			for mesh in wave_order:
+				mesh.material_override = calm_material if mesh in monitors else null
+		"storm":
+			storm_next = incident.stage_time
+			storm_index = 0
+		"blackout":
+			storm_next = -1.0
+			incident.get_node("AlertSound").stop()
+		"title":
+			title_at = incident.stage_time
+			shake = 1.0
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -3)
+			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -5)
 		"typing":
 			desk.set_typing("Leadership is typing…")
 		"flicker":
@@ -1221,9 +1364,18 @@ func _opening(time: float, delta: float) -> void:
 	var shot: Array = SHOTS[index]
 	var end: float = SHOTS[index + 1][0] if index + 1 < SHOTS.size() else OPENING_LENGTH
 	var weight: float = smoothstep(0, 1, clampf((time - shot[0]) / (end - shot[0]), 0, 1))
-	camera.fov = shot[5]
 	camera.position = shot[1].lerp(shot[2], weight)
 	camera.look_at(shot[3].lerp(shot[4], weight))
+	camera.fov = shot[5]
+	if shot.size() > 6 and shot[6] is String:
+		# Dolly zoom: hold the subject's size while the distance shrinks.
+		var held: float = shot[1].distance_to(shot[3]) * tan(deg_to_rad(shot[5]) * .5)
+		camera.fov = rad_to_deg(2.0 * atan(held / maxf(camera.position.distance_to(shot[3].lerp(shot[4], weight)), .05)))
+	elif shot.size() > 6:
+		camera.fov = lerpf(shot[5], shot[6], weight)
+	if shot.size() > 7:
+		camera.rotate_object_local(Vector3.BACK, deg_to_rad(shot[7]))
+	_crew_montage(time)
 	shake = maxf(0, shake - delta * 1.6)
 	if shake > 0:
 		camera.rotation += Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), 0) * .012 * shake
@@ -1233,32 +1385,53 @@ func _opening(time: float, delta: float) -> void:
 		camera.global_transform = camera.global_transform.interpolate_with(target.global_transform, handover)
 		camera.fov = lerpf(camera.fov, target.fov, handover)
 	camera.make_current()
-	# Frame: fade from black, letterbox in, out again for the handover.
-	fade.visible = time < 1.4
-	fade.color.a = 1.0 - smoothstep(.2, 1.4, time)
+	# Frame: fade from black, a hard beat of black after "Tangina naman.", letterbox.
+	fade.visible = time < 1.4 or (time >= 37.2 and time < 37.75)
+	fade.color.a = 1.0 - smoothstep(.2, 1.4, time) if time < 1.4 else 1.0 - smoothstep(37.6, 37.75, time)
 	var bars: float = 66.0 * smoothstep(0, 1.0, time) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .2, time))
 	for side in [0, 1]:
 		letterbox[side].show()
 		letterbox[side].offset_top = 0.0 if side == 0 else -bars
 		letterbox[side].offset_bottom = bars if side == 0 else 0.0
 	# Diegetic clock: 4:59 PM runs out exactly when the pager fires.
-	var seconds: int = 41 + int(minf(time, 13.39) * 18.0 / 13.4)
-	var clock: String = "16:59:%02d" % seconds if time < 13.4 else "17:00:%02d" % int(time - 13.4)
-	timecode.visible = time > 1.0 and time < 32.4
-	timecode.text = "FRIDAY  ·  " + clock + "  ·  PAYMENTS PLATFORM"
+	var seconds: int = 41 + int(minf(time, 29.09) * 18.0 / 29.1)
+	var clock: String = "16:59:%02d" % seconds if time < 29.1 else "17:00:%02d" % int(time - 29.1)
+	timecode.visible = false
 	desk.set_clock("FRI " + clock.left(5))
-	desk.show_logoff(time >= 11.6 and time < 13.4, smoothstep(11.8, 12.9, time), time >= 13.0)
+	desk.show_logoff(time >= 24.0 and time < 29.1, smoothstep(24.2, 28.2, time), time >= 28.9)
+	# The alarm strobes the floor red until the storm takes over.
+	for pool in range(pools.size()):
+		if time >= 29.1 and time < 30.75:
+			pools[pool].light_color = Color(1, .12, .08)
+			pools[pool].light_energy = pool_energy[pool] * (1.6 if fmod(time * 6.0 + pool * .3, 1.0) < .5 else .15)
+		elif time >= 30.75 and time < 30.9:
+			pools[pool].light_color = pool_colors[pool]
+			pools[pool].light_energy = pool_energy[pool]
+	if wave_start >= 0.0:
+		for rank in range(wave_order.size()):
+			if time >= wave_start + rank * .012:
+				wave_order[rank].material_override = alarm_display if wave_order[rank] in displays else screen_material
+	if storm_next >= 0.0 and time >= storm_next and time < 35.4:
+		var spam: Array = STORM[storm_index % STORM.size()]
+		desk.post(spam[0], spam[1], spam[2], "17:00")
+		pinger.stream = preload("res://assets/audio/sfx/chat_ping.ogg")
+		pinger.pitch_scale = rng.randf_range(.85, 1.35)
+		if DisplayServer.get_name() != "headless":
+			pinger.play()
+		storm_index += 1
+		# Faster and faster: the pings start polite and end as one sound.
+		storm_next = time + lerpf(.32, .08, smoothstep(31.0, 34.6, time))
 	# Lights die from the desk toward Operations: a bounded flicker, then dim pools.
 	for order in range(6):
 		var light: int = [1, 0, 3, 2, 4, 5][order]
-		var start: float = 26.3 + order * .22
+		var start: float = 37.7 + order * .3
 		if time >= start and time < OPENING_LENGTH - 1.0:
 			var lit: bool = time < start + .5 and fmod(time - start, .14) < .06
 			pools[light].light_energy = pool_energy[light] * (1.0 if lit else .12)
 			incident.room.get_node("Diffuser%d" % light).material_override = null if lit else dark
 	if time >= OPENING_LENGTH - 1.0:
 		_restore_lights()
-	if time >= 26.8 and time < 28.8:
+	if time >= 38.2 and time < 40.2:
 		var states: Array[String] = ["SUCCESS", "FAILED", "NOT FOUND"]
 		var flip: int = int(time * 9.0) % 3
 		incident.room.get_node("Critical").text = states[flip]
@@ -1267,25 +1440,89 @@ func _opening(time: float, delta: float) -> void:
 		incident.room.get_node("ETA").text = "PAYMENTS: %s" % states[(flip + 2) % 3]
 		if fmod(time, .25) < delta:
 			sting(preload("res://assets/audio/sfx/glitch_b.ogg"), -14)
-	elif time >= 28.8 and incident.room.get_node("Critical").text != "THREE SYSTEMS\nDISAGREE":
+	elif time >= 40.2 and incident.room.get_node("Critical").text != "THREE SYSTEMS\nDISAGREE":
 		incident._dashboard("THREE SYSTEMS\nDISAGREE", "CRITICAL INCIDENT / SEV-1")
 	# Something steps out of the production dashboard: visual only, never an actor.
 	if emerging.visible:
-		var rise: float = smoothstep(28.0, 30.2, time)
+		var rise: float = smoothstep(40.0, 42.2, time)
 		emerging.position = Vector3(-4.1 + rng.randf_range(-.06, .06) * (1.0 - rise), lerpf(.6, .05, rise), lerpf(-15.9, -13.5, rise))
 		emerging.rotation.y = PI
 		emerging.scale = Vector3.ONE * lerpf(.75, 1.3, rise)
 		for part in range(fragments.size()):
 			var angle: float = part * TAU / 8 + time * 2.0
-			var radius: float = lerpf(.2, 2.6, smoothstep(28.0, 29.6, time))
+			var radius: float = lerpf(.2, 2.6, smoothstep(40.0, 41.6, time))
 			fragments[part].position = Vector3(-4.1, 2.6, -15.2) + Vector3(cos(angle) * radius, sin(angle * 1.5) * radius * .5, absf(sin(angle)) * radius * .6)
 			fragments[part].rotation = Vector3(time * 3.0, angle, 0)
-			fragments[part].visible = time < 30.4
-		if time >= 32.4:
+			fragments[part].visible = time < 42.4
+		if time >= 43.6:
 			emerging.hide()
-	# Title card fades in over the rising shot.
-	card.visible = time >= 32.6 and time < OPENING_LENGTH - .4
-	card.modulate.a = smoothstep(32.6, 33.2, time) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .4, time))
+	# Title slams in over the rising shot: oversized, then settles.
+	card.visible = title_at >= 0.0 and time < OPENING_LENGTH - .4
+	if card.visible:
+		var since: float = time - title_at
+		card.pivot_offset = card.size * .5
+		card.scale = Vector2.ONE * lerpf(1.6, 1.0, ease(minf(1.0, since / .18), .4))
+		card.modulate.a = minf(1.0, since / .08) * (1.0 - smoothstep(OPENING_LENGTH - 1.2, OPENING_LENGTH - .4, time))
+
+
+## Meet the night shift: whip to each coworker, freeze the world, slam their card.
+func _crew_montage(time: float) -> void:
+	var index: int = int(floor((time - CREW_START) / CREW_EACH))
+	var active: bool = time >= CREW_START and index < CREW.size() and incident.coworkers != null
+	crew_card.visible = false
+	crew_freeze.visible = false
+	if not active:
+		if crew_shown >= 0 and incident.coworkers != null:
+			incident.coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
+		crew_shown = -1
+		return
+	var entry: Array = CREW[index]
+	var body: Node3D = null
+	for someone: Dictionary in incident.coworkers.people:
+		if someone.entry.name == entry[0]:
+			body = someone.body
+	if body == null:
+		return
+	var since: float = time - CREW_START - index * CREW_EACH
+	if index != crew_shown:
+		# Each whip starts from wherever the camera was a moment ago.
+		crew_shown = index
+		crew_from = camera.global_transform
+		incident.coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
+		sting(preload("res://assets/audio/sfx/whoosh_slice.ogg"), -8)
+	var head: Vector3 = body.global_position + Vector3.UP * (1.05 if entry[0] == "Sleeper" else 1.5)
+	var front: Vector3 = body.global_basis.z
+	front.y = 0
+	front = front.normalized() if front.length() > .1 else Vector3.BACK
+	var side: Vector3 = front.cross(Vector3.UP).normalized()
+	var framing: Vector3 = entry[4]
+	var spot: Vector3 = head + front * framing.x + side * framing.z + Vector3.UP * framing.y
+	# Never through a wall: pull the lens in front of whatever is between.
+	var hit: Dictionary = incident.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(head, spot, 1))
+	if not hit.is_empty():
+		spot = head + (hit.position - head) * .85
+	var hold: Transform3D = Transform3D(Basis.looking_at(head - Vector3.UP * .1 - spot), spot)
+	var whip: float = smoothstep(0.0, .3, since)
+	camera.global_transform = crew_from.interpolate_with(hold, whip)
+	camera.fov = lerpf(46.0, 38.0, smoothstep(.3, CREW_EACH, since))
+	if since >= .3:
+		# Freeze: the night shift stops; the colour drains; the card slams in.
+		if since - get_process_delta_time() < .3:
+			incident.coworkers.process_mode = Node.PROCESS_MODE_DISABLED
+			shake = .5
+			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -10)
+		var drain: float = smoothstep(.3, .45, since) * (1.0 - smoothstep(CREW_EACH - .15, CREW_EACH, since))
+		crew_freeze.visible = true
+		(crew_freeze.material as ShaderMaterial).set_shader_parameter("amount", drain * .85)
+		(crew_freeze.material as ShaderMaterial).set_shader_parameter("tint", entry[3].lerp(Color.WHITE, .55))
+		crew_card.visible = true
+		crew_name.text = entry[1]
+		crew_misery.text = entry[2]
+		crew_bar.color = entry[3]
+		crew_name.add_theme_color_override("font_color", entry[3].lerp(Color.WHITE, .2))
+		var slide: float = ease(minf(1.0, (since - .3) / .16), .35)
+		crew_card.position.x = lerpf(-700.0, 90.0, slide)
+		crew_card.modulate.a = drain
 
 
 func _process(delta: float) -> void:
@@ -1346,5 +1583,8 @@ func _process(delta: float) -> void:
 		say("first_dodge")
 	if incident.stage == incident.Stage.BOSS and incident.boss_time > 22: say("rca")
 	caption.text = voice.subtitle
+	if incident.stage == incident.Stage.ALERT and "\n" in caption.text:
+		# Film subtitles: the line only; the shot already shows who is speaking.
+		caption.text = caption.text.get_slice("\n", 1)
 	# Film subtitles belong to the cinematic; in play, speech arrives as chat cards.
 	panel.visible = not voice.subtitle.is_empty() and in_cinematic()

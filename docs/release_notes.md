@@ -1,5 +1,28 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.35 — A cold open like a film (11 October 2026)
+
+Creator requests: tell the setup with cinema instead of text, unhinged; introduce the
+night shift and their misery; open like a movie with a documentary-style narrator.
+
+- **Narrated cold open (47 s, skippable after the first viewing).** A wry
+  nature-documentary narrator (the existing narrator voice, slower and drier; not an
+  impression of any real person) over drone shots of the dark office: "This is the
+  open-plan office. At four fifty-nine on a Friday, it is the most dangerous place on
+  Earth."
+- **Meet the night shift.** The camera whips to DREW (culture fit enforcement), MORGAN
+  (on a call about the call), GARY (on call, technically) and JO (intern, day one, on
+  call); each time the world freezes, drains of colour and a name card slams in.
+- **Then it goes wrong.** He clicks Log Off; smash cut to SEV-1; every monitor in the
+  office turns red in a wave under a red strobe; a dolly zoom closes on his face while
+  the chat floods faster than anyone could read; "Tangina naman."; a beat of black; the
+  lights die row by row while the narrator sets the premise and something climbs out of
+  the dashboard; he stands with the Monolith; the title slams on "quietly".
+- **Less text.** No running timecode, no speaker labels on subtitles (one clean line),
+  and the title card is just SEV-1 and its tagline.
+- The establishing shots render the whole office first, which also removed the
+  ~140 ms freeze when play began (it now compiles under the fade-in).
+
 ## 0.2.34 — Wall jokes you can read; the logo stands alone (11 October 2026)
 
 Creator requests: make the wall text readable so the unhinged lines land; remove

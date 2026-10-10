@@ -42,7 +42,7 @@ the run while adjusting preferences. Use Quit or the window close action to exit
 
 ## Report a bug
 
-Include version **0.2.34**, Mac model/chip, macOS version, resolution, graphics setting,
+Include version **0.2.35**, Mac model/chip, macOS version, resolution, graphics setting,
 the incident stage, choices made, what you expected, what happened, and repeat steps.
 A screenshot or short clip is useful. Note whether retry fixed it. Local logs and
 `settings.cfg` live in `~/Library/Application Support/SEV-1/`. Share logs only after
@@ -62,7 +62,7 @@ Answer briefly; use 1 (poor) to 5 (strong) where helpful.
 8. What confused or frustrated you? Any bug or uncomfortable effect?
 9. Would you play another run? Why?
 10. What was the most memorable moment? How long did your run take?
-11. Did the title screen and the opening make you want to start? Was 36 seconds right?
+11. Did the title screen and the opening make you want to start? Was the 47-second narrated opening right, or too long?
 12. Could you tell the four enemy types apart, and what each wanted you to do?
 13. Did the chat cards, change-request tickets and Leadership DM read easily in a fight?
 14. Did you visit the pantry or the Quick Sync room? Why or why not?

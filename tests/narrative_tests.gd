@@ -10,7 +10,7 @@ func _run() -> void:
 	check("HEALTHY" in incident.room.get_node("Critical").text and story.monitors.size() > 0, "opening begins with healthy monitoring surfaces")
 	player.camera_rig.set_capture(true)
 	await frames(90)
-	check(player.narrative_hold and story.camera.current and story.seen.has("opening"), "workstation shot starts with one Friday message")
+	check(player.narrative_hold and story.camera.current and story.seen.has("doc_office"), "the cold open starts with the narrator over the office")
 	check(not player.request_attack() and not player.request_dodge(), "staged pose cannot attack or dodge")
 	player.camera_rig.set_capture(false)
 	var before: float = incident.stage_time
@@ -20,7 +20,9 @@ func _run() -> void:
 	check(player.get_node("Visual/Character").sit > .9 and player.position.distance_to(story.SEAT) < .1, "opening seats the engineer at the desk")
 	await key(KEY_TAB)
 	check(incident.stage == incident.Stage.ALERT and player.narrative_hold, "first viewing ignores Tab until the opening was seen once")
-	await frames(240)
+	# Past the narrated cold open and the night-shift montage, to the desk.
+	while incident.stage_time < 23.2:
+		await frames(10)
 	check(story.desk.chat.get_child_count() == 1 and story.seen.has("friday"), "Friday message lands on the desk monitor with its voiced line")
 	story.skip_unlocked = true
 	await key(KEY_TAB)

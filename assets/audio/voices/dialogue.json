@@ -44,6 +44,13 @@
       "speed": 1.0,
       "direction": "Precise, polite compliance. Emotionally indifferent.",
       "processing": "clean"
+    },
+    "documentary": {
+      "voice": "bm_george",
+      "language": "b",
+      "speed": 0.88,
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "processing": "clean"
     }
   },
   "lines": [
@@ -797,6 +804,81 @@
       "fallback_duration": 1.6,
       "optional": true,
       "status": "generated"
+    },
+    {
+      "id": "doc_office",
+      "character": "NARRATOR",
+      "text": "This is the open-plan office. At four fifty-nine on a Friday, it is the most dangerous place on Earth.",
+      "subtitle": "This is the open-plan office. At four fifty-nine on a Friday, it is the most dangerous place on Earth.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_office.ogg",
+      "trigger": "Establishing shot over the dark office",
+      "priority": 3,
+      "fallback_duration": 9.0,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 9.0
+    },
+    {
+      "id": "doc_shift",
+      "character": "NARRATOR",
+      "text": "Here, the night shift survives on caffeine, denial, and calendar invites.",
+      "subtitle": "Here, the night shift survives on caffeine, denial, and calendar invites.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_shift.ogg",
+      "trigger": "Crew montage begins",
+      "priority": 3,
+      "fallback_duration": 6.0,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 6.0
+    },
+    {
+      "id": "doc_chose",
+      "character": "NARRATOR",
+      "text": "None of them chose this. All of them are on call.",
+      "subtitle": "None of them chose this. All of them are on call.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_chose.ogg",
+      "trigger": "Over the crew cards",
+      "priority": 3,
+      "fallback_duration": 4.5,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 4.5
+    },
+    {
+      "id": "doc_engineer",
+      "character": "NARRATOR",
+      "text": "And this is the last engineer still logged in. He was almost free.",
+      "subtitle": "And this is the last engineer still logged in. He was almost free.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_engineer.ogg",
+      "trigger": "Drone lands on the engineer's desk",
+      "priority": 3,
+      "fallback_duration": 5.5,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 5.5
+    },
+    {
+      "id": "doc_premise",
+      "character": "NARRATOR",
+      "text": "Somewhere in production, a transaction has gone missing. And in this office, nothing stays missing quietly.",
+      "subtitle": "Somewhere in production, a transaction has gone missing. And in this office, nothing stays missing quietly.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_premise.ogg",
+      "trigger": "Something climbs out of the dashboard",
+      "priority": 3,
+      "fallback_duration": 7.5,
+      "optional": false,
+      "status": "generated",
+      "beat_budget": 7.5
     }
   ]
 }

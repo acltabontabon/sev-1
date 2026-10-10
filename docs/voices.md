@@ -37,6 +37,7 @@ attention, as noted in the upstream voice catalog.
 | production | `af_kore` | US English | 1.0 | Measured authority. Flat certainty, clear consonants. Processing: intercom. |
 | variance | `am_fenrir` | US English | 0.94 | Fragmented but intelligible. Pause between clauses; no monster growling. Processing: double. |
 | narrator | `bm_george` | UK English | 1.0 | Restrained dramatic seriousness. No wink, parody, or trailer shouting. Processing: clean. |
+| documentary | `bm_george` | UK English | 0.88 | The cold open's wry nature-documentary narrator (0.2.35): slow, warm, grave, sincere about the absurd. Never a parody or an impression of any real narrator. Processing: clean. Lines `doc_office`, `doc_shift`, `doc_chose`, `doc_engineer`, `doc_premise`. |
 | postmortem | `bf_emma` | UK English | 1.0 | Precise, polite compliance. Emotionally indifferent. Processing: clean. |
 
 **The night shift (0.2.9).** Conversations with coworkers and planted employees live in
