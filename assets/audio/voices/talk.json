@@ -286,6 +286,16 @@
    "pitch": 0,
    "processing": "clean",
    "direction": "The engineer: conversational, exhausted, competent. Dry; never announce the punchline."
+  },
+  "shout": {
+   "blend": {
+    "am_michael": 1.0
+   },
+   "language": "a",
+   "speed": 1.08,
+   "pitch": 0,
+   "processing": "double",
+   "direction": "The engineer calling a move, anime style: committed, a held beat, then the name. A touch of echo."
   }
  },
  "crew": {
@@ -997,5 +1007,27 @@
   "scope": "Ooh, a reboot! Can the new me also have wings? And a dashboard? And teeth? Small ask."
  },
  "host_hover": "…Can I help you? You've been standing there for a while. Breathing. Loudly.",
- "host_hr": "Did you just— Okay. I'm telling HR. I'm telling HR right now."
+ "host_hr": "Did you just— Okay. I'm telling HR. I'm telling HR right now.",
+ "callouts": {
+  "hotfix_wave": {
+   "text": "Hotfix… WAVE!",
+   "say": "Hotfix... Wave!"
+  },
+  "hot_swap": {
+   "text": "Hot… SWAP!",
+   "say": "Hot... Swap!"
+  },
+  "merge_conflict": {
+   "text": "Merge… CONFLICT!",
+   "say": "Merge... Conflict!"
+  },
+  "rollback": {
+   "text": "FORCE… ROLLBACK!",
+   "say": "Force... Rollback!"
+  },
+  "reset_hard": {
+   "text": "git reset… HARD!",
+   "say": "Git reset... Hard!"
+  }
+ }
 }

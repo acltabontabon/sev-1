@@ -1,14 +1,31 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.13 — Called out loud (10 October 2026)
+
+Creator feedback on 0.2.12: the dash's damage should land as you pass through; and the
+engineer should shout each move's name when using it, like in Japanese anime.
+
+- **Hot Swap cuts on contact.** Each enemy is cut (crossed white slashes, shards, a
+  flash) the instant the dash passes it; arrival keeps the white flash of the path, the
+  spin flourish and a freeze-frame if anything fell.
+- **Move callouts.** The engineer shouts every special in his own voice with a touch of
+  echo: "Hotfix… WAVE!", "Hot… SWAP!", "Merge… CONFLICT!", and the ultimate twice:
+  "FORCE… ROLLBACK!" on the leap and "git reset… HARD!" on the slam. Each call slides
+  a cut-in across the screen: a slanted purple strip for the ultimate, a quick slash of
+  text for the rest (real-time, so it plays through the slow motion).
+- 5 new lines; 157 talk/callout lines in all, unheard candidates.
+
+Validation: 718 assertions across 15 headless suites (new: cut-on-contact timing and
+every move's callout).
+
 ## 0.2.12 — A dash slash and a whirlwind (10 October 2026)
 
 Creator feedback on 0.2.11: more special moves, like a dash slash.
 
 - **HOT SWAP (X, or attack during a dodge).** A 7 m dash straight through enemies
-  (invulnerable, through bodies, stopped short of walls). Everything passed is marked;
-  a beat after the engineer lands and flourishes, all of it is cut at once (55 damage
-  each, crossed white slashes, a freeze-frame). A gold wall of light traces the path and
-  flashes white on the cut. 2.5 s cooldown. Dodge-into-attack makes it a combo tool.
+  (invulnerable, through bodies, stopped short of walls). In 0.2.12 everything passed
+  was cut together a beat after arrival (55 damage each); 0.2.13 cuts on contact. A
+  gold wall of light traces the path and flashes white on arrival. 2.5 s cooldown. Dodge-into-attack makes it a combo tool.
 - **MERGE CONFLICT (Z).** A steerable fire whirlwind for 1.4 s: the spinning backhand on
   repeat, four pulses that hit everything within 3 m and drag it inward. 6 s cooldown.
 - The FOCUS line in the vitals card now shows all three cooldowns (C · X · Z); the

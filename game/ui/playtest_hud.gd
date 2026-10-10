@@ -14,6 +14,9 @@ var minimap: Control
 var focus_bar: ProgressBar
 var focus_value: Label
 var focus_full: bool = false
+## Anime cut-in: a slanted strip with the move's name, sliding through.
+var cut_in: PanelContainer
+var cut_in_text: Label
 var health_bar: ProgressBar
 var health_value: Label
 var burnout_bar: ProgressBar
@@ -151,6 +154,8 @@ func _build_incident_hud() -> void:
 		label.add_theme_color_override("font_color", Color(.62, .68, .72))
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.custom_minimum_size.x = 240
+	_build_cut_in()
+	player.specials.called.connect(_on_move_called)
 	minimap = preload("res://game/ui/minimap.gd").new()
 	minimap.name = "Minimap"
 	minimap.incident = get_parent().get_node("Incident")
@@ -291,6 +296,54 @@ func _process(delta: float) -> void:
 		$Margin/VBox/AttackState.text = "%d / 3  %s  /  %s%s" % [player.combo_index + 1, player.combo[player.combo_index].title, phase, queue_text]
 	else:
 		$Margin/VBox/AttackState.text = "READY  /  LMB OR F   •   Q OR RMB TO DODGE"
+
+
+func _build_cut_in() -> void:
+	cut_in = PanelContainer.new()
+	cut_in.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var strip: StyleBoxFlat = StyleBoxFlat.new()
+	strip.bg_color = Color(.02, .02, .04, .82)
+	strip.border_color = Color(.62, .5, 1)
+	strip.border_width_top = 3
+	strip.border_width_bottom = 3
+	strip.content_margin_left = 60
+	strip.content_margin_right = 60
+	strip.content_margin_top = 6
+	strip.content_margin_bottom = 6
+	cut_in.add_theme_stylebox_override("panel", strip)
+	cut_in_text = Label.new()
+	cut_in_text.theme_type_variation = "DisplayTitle"
+	cut_in_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cut_in_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cut_in.add_child(cut_in_text)
+	cut_in.hide()
+	add_child(cut_in)
+
+
+## The move's name crosses the screen as it is shouted: a wide slanted strip for the
+## ultimate, a quick slash of text for the others. Runs on real time (slow motion too).
+func _on_move_called(title: String, ultimate: bool) -> void:
+	var view: Vector2 = get_viewport().get_visible_rect().size
+	cut_in_text.text = title
+	cut_in_text.add_theme_font_size_override("font_size", 72 if ultimate else 40)
+	cut_in_text.add_theme_color_override("font_color", Color(.85, .8, 1) if ultimate else Color(1, .97, .9))
+	(cut_in.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Color(.02, .02, .04, .82 if ultimate else 0.0)
+	(cut_in.get_theme_stylebox("panel") as StyleBoxFlat).border_color = Color(.62, .5, 1, 1.0 if ultimate else 0.0)
+	cut_in.size = Vector2(view.x * 1.3, 0)
+	cut_in.reset_size()
+	cut_in.size.x = view.x * 1.3
+	cut_in.pivot_offset = cut_in.size * .5
+	cut_in.rotation = deg_to_rad(-6.0)
+	var y: float = view.y * (.42 if ultimate else .3)
+	cut_in.position = Vector2(-view.x * 1.4, y)
+	cut_in.modulate.a = 1.0
+	cut_in.show()
+	var slide: Tween = cut_in.create_tween()
+	slide.set_ignore_time_scale(true)
+	slide.tween_property(cut_in, "position:x", -view.x * .15, .12).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	slide.tween_property(cut_in, "position:x", -view.x * .1, .55 if ultimate else .35)
+	slide.tween_property(cut_in, "position:x", view.x * 1.2, .12).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_IN)
+	slide.tween_callback(cut_in.hide)
 
 
 ## A full-width incident banner for the moments the whole office should hear.

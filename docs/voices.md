@@ -48,7 +48,8 @@ with the Variance echo. `.tools/voice-env/bin/python tools/voices.py talk` gener
 every line derived from the manifest (127 at 0.2.10, including the engineer's spoken
 replies in the `you` profile, which matches the protagonist voice; parenthetical actions
 are silent; replies are keyed by `reply_id()`, the same slug rule in GDScript and Python).
-Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
+Move callouts (`callouts`, `call_<move>.ogg`) use the `shout` profile: the protagonist
+voice, slightly faster, with the Variance echo. Subtitles keep the written form; the manifest's `spoken` table rewrites acronyms and
 numbers for speech only into `assets/audio/voices/talk/` with
 `talk/provenance.json`; `talk-validate` (run by `tools/validate.py`) fails on a missing,
 stale or untracked clip. Status: candidates; human listening acceptance pending.

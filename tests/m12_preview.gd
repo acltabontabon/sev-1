@@ -318,6 +318,8 @@ func specials() -> void:
 		foe.set_physics_process(false)
 	player.visual.rotation.y = 0.0
 	player.specials.hotfix_wave()
+	await live(.08)
+	await shot("special_wave_cutin")
 	while player.specials.blades.is_empty():
 		await live(.01)
 	await live(.12)
@@ -334,7 +336,9 @@ func specials() -> void:
 	await live(.6)
 	await shot("special_focus_ready")
 	player.specials.rollback()
-	await live(.25)
+	await live(.15)
+	await shot("special_rollback_cutin")
+	await live(.1)
 	await shot("special_rollback_leap")
 	while player.specials.queued != "":
 		await live(.01)
@@ -355,13 +359,11 @@ func specials() -> void:
 	player.specials.dash_slash()
 	await live(.1)
 	await shot("special_dash_through")
-	while player.specials.cut_left <= 0 and player.specials.dash_left > 0:
+	while player.specials.dash_left > 0:
 		await live(.01)
-	await live(.12)
+	await live(.02)
 	await shot("special_dash_arrive")
-	while player.specials.cut_left > 0:
-		await live(.01)
-	await live(.05)
+	await live(.15)
 	await shot("special_dash_cut")
 	await live(1.0)
 	player.global_position = Vector3(3, .05, 4)

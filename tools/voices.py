@@ -253,9 +253,14 @@ def talk_lines(talk):
                                         ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
                 lines.append({'id': f'host_{key}_{node}', 'text': text, 'voice_profile': profile})
+    # Move callouts, shouted anime style by the engineer.
+    for key, call in talk.get('callouts', {}).items():
+        lines.append({'id': f'call_{key}', 'text': call['text'], 'voice_profile': 'shout', 'pronunciation_text': call['say']})
     for line in lines:
         if line['id'] in talk.get('pronunciation', {}):
             line['pronunciation_text'] = talk['pronunciation'][line['id']]
+        elif 'pronunciation_text' in line:
+            pass
         elif spoken(talk, line['text']) != line['text']:
             line['pronunciation_text'] = spoken(talk, line['text'])
         line['audio'] = TALK_DIR / f"{line['id']}.ogg"

@@ -7,12 +7,14 @@ extends Node
 ## piercing everything in its path until a wall breaks it. 3.5 s cooldown.
 ## FORCE ROLLBACK (V): the ultimate. Landed hits fill FOCUS; at 100 the engineer leaps,
 ## time slows, and the slam rolls back everything within 7.5 m (shields included).
-## HOT SWAP (X, or attack out of a dodge): a 7 m dash straight through enemies; a beat
-## after the engineer lands, everything passed is cut at once. 2.5 s cooldown.
+## HOT SWAP (X, or attack out of a dodge): a 7 m dash straight through enemies, cutting
+## each one the instant it is passed; the path flashes white on arrival. 2.5 s cooldown.
 ## MERGE CONFLICT (Z): a steerable fire whirlwind for 1.4 s that hits everything within
 ## 3 m four times and drags it inward. 6 s cooldown.
 
 signal focus_changed(value: float)
+## A move was called out loud (anime style): its name, and whether it is the ultimate.
+signal called(title: String, ultimate: bool)
 
 const WAVE_COOLDOWN: float = 3.5
 const WAVE_RANGE: float = 13.0
@@ -31,8 +33,6 @@ const DASH_COOLDOWN: float = 2.5
 const DASH_DAMAGE: int = 55
 const DASH_HALF_WIDTH: float = 1.5
 const DASH_COLOR: Color = Color(1, .85, .35)
-## The beat between arriving and the cuts landing.
-const DASH_SHEATHE: float = .28
 const SPIN_TIME: float = 1.4
 const SPIN_TICKS: int = 4
 const SPIN_RADIUS: float = 3.0
@@ -51,9 +51,12 @@ var dash_left: float = 0.0
 var dash_from: Vector3
 var dash_direction: Vector3
 var dash_marked: Array[Node3D] = []
-var cut_left: float = 0.0
+var dash_landed: bool = false
 ## The light wall the dash leaves along its path; it flashes white when the cuts land.
 var trail: MeshInstance3D
+## The engineer shouts every move's name; the last call is kept for checks.
+var voice: AudioStreamPlayer
+var last_call: String = ""
 var trail_left: float = 0.0
 var trail_flash: float = 0.0
 var spin_cooldown: float = 0.0
@@ -81,6 +84,9 @@ func _ready() -> void:
 	trail.material_override = material
 	trail.hide()
 	add_child(trail)
+	voice = AudioStreamPlayer.new()
+	voice.bus = &"Voice"
+	add_child(voice)
 
 
 func reset() -> void:
@@ -89,7 +95,6 @@ func reset() -> void:
 	dash_cooldown = 0.0
 	spin_cooldown = 0.0
 	spin_left = 0.0
-	cut_left = 0.0
 	dash_marked.clear()
 	_end_dash()
 	trail_left = 0.0
@@ -100,6 +105,17 @@ func reset() -> void:
 			blade.node.queue_free()
 	blades.clear()
 	add_focus(-focus)
+
+
+## Call the move: the shouted line, and the cut-in banner via `called`.
+func _shout(key: String, title: String, ultimate: bool = false) -> void:
+	last_call = key
+	var path: String = "res://assets/audio/voices/talk/call_%s.ogg" % key
+	if ResourceLoader.exists(path):
+		voice.stream = load(path)
+		if DisplayServer.get_name() != "headless":
+			voice.play()
+	called.emit(title, ultimate)
 
 
 func add_focus(amount: float) -> void:
@@ -132,6 +148,7 @@ func hotfix_wave() -> bool:
 		return false
 	queued = "wave"
 	wave_cooldown = WAVE_COOLDOWN
+	_shout("hotfix_wave", "HOTFIX WAVE")
 	return true
 
 
@@ -147,6 +164,7 @@ func rollback() -> bool:
 	player.invulnerable_left = maxf(player.invulnerable_left, 1.4)
 	var at: Vector3 = player.global_position
 	ElementFx.glyphs(player, at + Vector3.UP * 2.6, ROLLBACK_COLOR, ["FORCE ROLLBACK"], .9, 0.0)
+	_shout("rollback", "FORCE ROLLBACK", true)
 	ElementFx.motes(player, at + Vector3.UP * .4, ROLLBACK_COLOR, 30, 3.0, .8, 4.0, .16)
 	# The leap hangs in slow motion; the slam snaps time back.
 	ElementFx.freeze(player, .4, .3)
@@ -156,7 +174,7 @@ func rollback() -> bool:
 ## Hot Swap: allowed out of a dodge (that is the point), never mid-special.
 func dash_slash() -> bool:
 	if dash_cooldown > 0 or player.narrative_hold or player.health <= 0 or player.hurt_left > 0 or not player.is_on_floor() \
-			or not queued.is_empty() or dash_left > 0 or spin_left > 0 or cut_left > 0:
+			or not queued.is_empty() or dash_left > 0 or spin_left > 0:
 		return false
 	player.dodging = false
 	player.melee.cancel()
@@ -169,12 +187,13 @@ func dash_slash() -> bool:
 	var wall: Dictionary = player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(eye, eye + direction * DASH_DISTANCE, 1))
 	if not wall.is_empty():
 		distance = maxf(.8, eye.distance_to(wall.position) - .6)
-	# No swing on the way through: the cut lands on arrival.
+	# No swing on the way through: the cuts come from the dash itself.
 	player.visual.rotation.y = atan2(-direction.x, -direction.z)
 	dash_from = player.global_position
 	dash_direction = direction
 	dash_left = DASH_TIME * distance / DASH_DISTANCE
 	dash_marked.clear()
+	dash_landed = false
 	player.dash_velocity = direction * DASH_DISTANCE / DASH_TIME
 	# Straight through bodies: enemies sit on collision layer 3 (value 4).
 	player.set_collision_mask_value(3, false)
@@ -183,6 +202,7 @@ func dash_slash() -> bool:
 	ElementFx.gust(player, eye, Basis.looking_at(direction), DASH_COLOR, 2.5, .22)
 	ElementFx.motes(player, player.global_position + Vector3.UP * .4, DASH_COLOR, 18, 3.0, .5, 0.0, .12, -direction, 50.0)
 	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.3, DASH_COLOR, ["HOT SWAP"], .6, 0.0)
+	_shout("hot_swap", "HOT SWAP")
 	return true
 
 
@@ -196,6 +216,7 @@ func merge_conflict() -> bool:
 	spin_tick = .12
 	spin_cooldown = SPIN_COOLDOWN
 	ElementFx.glyphs(player, player.global_position + Vector3.UP * 2.4, SPIN_COLOR, ["MERGE CONFLICT"], .8, 0.0)
+	_shout("merge_conflict", "MERGE CONFLICT")
 	return true
 
 
@@ -207,7 +228,7 @@ var trail_span: float = 0.0
 
 
 ## A vertical sheet of light from where the dash began to where the engineer is: gold,
-## brightest at the head; white for a moment when the cuts land, then it fades.
+## brightest at the head; white for a moment on arrival, then it fades.
 func _draw_trail(from: Vector3, to: Vector3) -> void:
 	trail_span = Vector2(to.x - from.x, to.z - from.z).length()
 	trail.global_transform = Transform3D.IDENTITY
@@ -234,7 +255,7 @@ func _end_dash() -> void:
 
 func _tick_dash(delta: float) -> void:
 	dash_left -= delta
-	# Everything the engineer passes is marked now and cut on arrival.
+	# Everything the engineer passes is cut as they go by.
 	var here: Vector3 = player.global_position
 	for candidate in player.get_tree().get_nodes_in_group("enemies"):
 		var target: Node3D = candidate as Node3D
@@ -246,42 +267,41 @@ func _tick_dash(delta: float) -> void:
 		var closest: Vector3 = Geometry3D.get_closest_point_to_segment(Vector3(at.x, here.y, at.z), dash_from, here)
 		if Vector2(closest.x - at.x, closest.z - at.z).length() <= DASH_HALF_WIDTH:
 			dash_marked.append(target)
-			ElementFx.flash(player, at + Vector3.UP, DASH_COLOR, 1.5, 2.5, .12)
+			dash_landed = _cut(target) or dash_landed
 	ElementFx.motes(player, here + Vector3.UP * .8, DASH_COLOR, 4, 1.5, .35, 0.0, .1, -dash_direction, 40.0)
-	trail_left = DASH_SHEATHE + .45
+	trail_left = .7
 	trail_flash = 0.0
 	_draw_trail(dash_from, here)
 	if dash_left <= 0:
+		# Arrival: the path flashes, a spin to finish, and a freeze-frame if anything fell.
 		_end_dash()
 		ElementFx.bolt(player, dash_from + Vector3.UP, here + Vector3.UP, Color(1, .95, .7), .45, .09)
 		ElementFx.bolt(player, dash_from + Vector3.UP * .7, here + Vector3.UP * .7, DASH_COLOR, .55, .05)
-		cut_left = DASH_SHEATHE
+		trail_flash = 1.0
+		dash_marked.clear()
 		player._start_step(1)
+		if dash_landed:
+			ElementFx.freeze(player, .08)
+			player.camera_rig.add_impulse(1.0)
 
 
-## The beat after arrival: every marked enemy is cut at once, crosswise.
-func _resolve_cuts() -> void:
-	var landed: bool = false
-	for target in dash_marked:
-		if not is_instance_valid(target) or target.get("health") == 0:
-			continue
-		var at: Vector3 = target.global_position + Vector3.UP
-		var across: Vector3 = dash_direction.cross(Vector3.UP).normalized()
-		for tilt in [1.0, -1.0]:
-			ElementFx.bolt(player, at - across * 1.3 + Vector3.UP * .8 * tilt, at + across * 1.3 - Vector3.UP * .8 * tilt, Color(1, .97, .8), .4, .13)
-		ElementFx.shards(player, at, DASH_COLOR, 12, 6.0, .5, dash_direction)
-		if target.receive_damage(roundi(DASH_DAMAGE * player.melee.damage_multiplier), at - dash_direction * 2.0):
-			landed = true
-			if target.has_method("apply_hitstop"):
-				target.apply_hitstop(.08)
-			if target.has_method("show_impact"):
-				target.show_impact(DASH_COLOR)
-			player.hit_confirmed.emit()
-	dash_marked.clear()
-	trail_flash = 1.0
-	if landed:
-		ElementFx.freeze(player, .09)
-		player.camera_rig.add_impulse(1.0)
+## One enemy cut by the dash, crosswise, as the engineer goes past.
+func _cut(target: Node3D) -> bool:
+	var at: Vector3 = target.global_position + Vector3.UP
+	var across: Vector3 = dash_direction.cross(Vector3.UP).normalized()
+	for tilt in [1.0, -1.0]:
+		ElementFx.bolt(player, at - across * 1.3 + Vector3.UP * .8 * tilt, at + across * 1.3 - Vector3.UP * .8 * tilt, Color(1, .97, .8), .35, .13)
+	ElementFx.shards(player, at, DASH_COLOR, 12, 6.0, .5, dash_direction)
+	ElementFx.flash(player, at, DASH_COLOR, 2.0, 3.0, .15)
+	if not target.receive_damage(roundi(DASH_DAMAGE * player.melee.damage_multiplier), at - dash_direction * 2.0):
+		return false
+	if target.has_method("apply_hitstop"):
+		target.apply_hitstop(.08)
+	if target.has_method("show_impact"):
+		target.show_impact(DASH_COLOR)
+	player.hit_confirmed.emit()
+	player.camera_rig.add_impulse(.4)
+	return true
 
 
 func _tick_spin(delta: float) -> void:
@@ -321,10 +341,6 @@ func _physics_process(delta: float) -> void:
 	spin_cooldown = maxf(0.0, spin_cooldown - delta)
 	if dash_left > 0:
 		_tick_dash(delta)
-	if cut_left > 0:
-		cut_left -= delta
-		if cut_left <= 0:
-			_resolve_cuts()
 	if spin_left > 0:
 		_tick_spin(delta)
 	if trail_left > 0 and dash_left <= 0:
@@ -427,6 +443,7 @@ func _slam() -> void:
 	ElementFx.flash(player, at + Vector3.UP * 1.2, ROLLBACK_COLOR, 6.0, 10.0, .45)
 	ElementFx.motes(player, at + Vector3.UP * .5, ROLLBACK_COLOR, 60, 9.0, 1.0, 3.0, .2)
 	ElementFx.glyphs(player, at + Vector3.UP * 3.0, Color(1, 1, 1), ["git reset --hard"], 1.4, 0.0)
+	_shout("reset_hard", "GIT RESET --HARD", true)
 	ElementFx.tremor(player, at, 1.4, 16.0)
 	ElementFx.freeze(player, .14, .04)
 	player.camera_rig.add_impulse(2.2)
