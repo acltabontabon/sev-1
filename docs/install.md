@@ -39,10 +39,11 @@ these CI packages. No system-wide security settings need to change.
 
 ## Play and feedback
 
-Choose **Acknowledge Incident**. WASD moves, mouse aims the camera, left-click/F
-attacks, right-click/Q dodges, E interacts, and Escape pauses. The title's
-**Onboarding Docs** lists all special moves. Stage One completion saves; Stage Two
-is coming later. See the included `TESTING.md` for playtest feedback.
+Choose **Play**, then **The Reconciliation Abyss** (Circle I). WASD moves, mouse aims
+the camera, left-click/F attacks, right-click/Q dodges, E interacts, and Escape pauses.
+The title's **Controls** page lists all special moves. Circle I completion saves;
+Circles II–VI are listed but not built yet. The game opens in a 1600×900 window
+(scaled down to fit smaller displays); **Settings** → **Fullscreen** fills the screen. See the included `TESTING.md` for playtest feedback.
 
 Automated headless checks cover logic and package launch. They do not establish
 GPU compatibility, audio quality, frame rate or fun on your computer.
