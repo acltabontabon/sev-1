@@ -72,7 +72,7 @@ Without `--only`, it also captures opening shots. `tests/rig_preview.gd` writes
 Historical check counts, measured frame times, hardware/settings, and acceptance
 limits are recorded in [release notes](release_notes.md) and
 [stabilization evidence](stabilization.md). First-use hitches remain a playtest concern.
-Gameplay defaults to 60 FPS; Corporate Policy offers 120 FPS. Menus and paused/report
+Gameplay defaults to 60 FPS; Settings offers 120 FPS. Menus and paused/report
 screens run at up to 30 FPS; an unfocused game runs at up to 15 FPS and automatically
 pauses ordinary gameplay. See the
 [frame-budget investigation](stabilization.md#fanload-investigation-and-frame-budgets--11-october-2026).

@@ -1,6 +1,7 @@
 extends "res://tests/release_tests.gd"
 ## Outcome checks: fresh process data, UI unlock, replay/failure, and write failures.
 const TEST_PROGRESS: String = "user://chapter_progress_test.json"
+const TESTER: String = "Cleared Circle I in an older build?"
 
 
 func _run() -> void:
@@ -39,24 +40,25 @@ func _run() -> void:
 	root.add_child(app)
 	current_scene = app
 	await frames(3)
-	check(menu_button("I already finished Stage One") != null, "fresh title offers the earlier tester unlock")
-	await click_control(menu_button("I already finished Stage One"))
-	check(app.page == "tester_unlock" and menu_button("Unlock Stage One Completion") != null, "tester unlock explains the action before saving")
+	await click_control(menu_button("Play"))
+	check(menu_button(TESTER) != null, "fresh campaign offers the earlier tester unlock")
+	await click_control(menu_button(TESTER))
+	check(app.page == "tester_unlock" and menu_button("Mark Circle I Cleared") != null, "tester unlock explains the action before saving")
 	await key(KEY_ESCAPE)
-	check(app.page == "main" and not app.progress.stage_one_completed, "backing out leaves completion locked")
+	check(app.page == "campaign" and not app.progress.stage_one_completed, "backing out leaves completion locked")
 	var real_path: String = app.progress.path
 	app.progress.path = "user://nonexistent_chapter_test_directory/save.json"
-	await click_control(menu_button("I already finished Stage One"))
-	await click_control(menu_button("Unlock Stage One Completion"))
+	await click_control(menu_button(TESTER))
+	await click_control(menu_button("Mark Circle I Cleared"))
 	check(not app.progress.stage_one_completed and menu_button("Retry Save") != null and not app.progress_notice.is_empty(), "failed tester save offers retry without claiming saved completion")
 	app.progress.path = real_path
 	await click_control(menu_button("Retry Save"))
-	check(app.page == "main" and app.progress.stage_one_completed and menu_button("Replay Stage One") != null and menu_button("Acknowledge Incident") == null, "earlier testers save completion and receive replay")
+	check(app.page == "campaign" and app.progress.stage_one_completed and menu_button(TESTER) == null and menu_button(app.CIRCLES[0]) != null, "earlier testers save completion and keep replay")
 	var labels: String = ""
 	for label: Node in app.box.find_children("*", "Label", true, false):
 		labels += label.text + "\n"
-	check("Progress saved. Stage Two coming soon." in labels, "title states saved progress and honestly marks Stage Two unavailable")
-	await click_control(menu_button("Replay Stage One"))
+	check("INCIDENT 001  ·  CLEARED" in labels and "Circles II–VI are not built yet." in labels, "campaign marks Circle I cleared and honestly marks later circles unavailable")
+	await click_control(menu_button(app.CIRCLES[0]))
 	scene = app.session
 	incident = scene.get_node("Incident")
 	await frames(3)
@@ -77,7 +79,8 @@ func _run() -> void:
 	root.add_child(app)
 	current_scene = app
 	await frames(3)
-	check(app.progress.stage_one_completed and menu_button("Replay Stage One") != null, "a new application instance loads completion into the title")
+	await click_control(menu_button("Play"))
+	check(app.progress.stage_one_completed and menu_button(TESTER) == null and "CLEARED" in str(app.box.find_children("*", "Label", true, false).map(func(label: Label) -> String: return label.text)), "a new application instance loads completion into the campaign")
 	app.queue_free()
 	paused = false
 	await frames(3)

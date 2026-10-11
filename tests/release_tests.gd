@@ -11,6 +11,13 @@ func menu_button(title: String) -> Button:
 	return null
 
 
+## Title → Play → Circle I: the only playable circle starts the incident.
+func start_from_title() -> void:
+	await click_control(menu_button("Play"))
+	check(app.page == "campaign", "Play opens the campaign")
+	await click_control(menu_button(app.CIRCLES[0]))
+
+
 func _run() -> void:
 	DirAccess.remove_absolute(TEST_SETTINGS)
 	DirAccess.remove_absolute(TEST_SETTINGS + ".chapters.json")
@@ -20,10 +27,10 @@ func _run() -> void:
 	current_scene = app
 	await frames(3)
 	check(app.page == "main" and app.session == null, "launch shows title without running an incident")
-	await click_control(menu_button("Onboarding Docs"))
-	check(app.page == "controls" and "Space      Sprint / jump" in app.CONTROLS, "pointer opens accurate controls")
+	await click_control(menu_button("Controls"))
+	check(app.page == "controls" and app.KEYS.has([["SHIFT"], "Sprint"]) and app.KEYS.has([["SPACE"], "Jump"]), "pointer opens accurate controls")
 	await key(KEY_ESCAPE)
-	await click_control(menu_button("Corporate Policy"))
+	await click_control(menu_button("Settings"))
 	check(app.page == "settings", "settings reachable from title")
 	app.change_setting("master", .35)
 	app.change_setting("effects", 0.0)
@@ -37,12 +44,29 @@ func _run() -> void:
 	check(saved.values == app.preferences.values and not saved.values.has("debt"), "fresh preference object loads saved device settings only")
 	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Effects")), "effects can be muted independently")
 	await key(KEY_ESCAPE)
-	await click_control(menu_button("Attempt to Log Off"))
-	check(app.page == "logoff" and menu_button("Log Off Anyway") != null and menu_button("Stay") != null, "quit asks for one confirmation")
+	await click_control(menu_button("Quit"))
+	check(app.page == "logoff" and menu_button("Log Off") != null and menu_button("Stay") != null and menu_button("Stay").has_focus(), "quit asks for one confirmation with Stay focused")
 	await key(KEY_ESCAPE)
 	check(app.page == "main" and app.backdrop != null and app.backdrop.is_inside_tree(), "Escape cancels log off back to the live title backdrop")
+	await click_control(menu_button("Play"))
+	var playable: int = 0
+	for circle: String in app.CIRCLES:
+		if menu_button(circle) != null:
+			playable += 1
+	check(app.CIRCLES.size() == 6 and playable == 1 and menu_button(app.CIRCLES[0]).has_focus(), "campaign lists six circles with only Circle I playable and focused")
+	await key(KEY_ESCAPE)
+	check(app.page == "main" and app.session == null, "Escape leaves the campaign without starting a run")
+	for page_name: String in ["main", "campaign", "tester_unlock", "settings", "controls", "credits", "logoff"]:
+		app.show_page(page_name)
+		await frames(3)
+		var bounds: Rect2 = app.get_viewport().get_visible_rect()
+		for control: Node in app.box.find_children("*", "Control", true, false):
+			if control is Button and control.is_visible_in_tree():
+				check(bounds.encloses(control.get_global_rect()), "%s: %s fits the 1280×720 view" % [page_name, control.text])
+	app.show_page("main")
+	await frames(3)
 	for cycle in range(10):
-		await click_control(menu_button("Replay Stage One" if app.progress.stage_one_completed else "Acknowledge Incident"))
+		await start_from_title()
 		scene = app.session
 		player = scene.get_node("Player")
 		incident = scene.get_node("Incident")
@@ -54,7 +78,7 @@ func _run() -> void:
 		var before: float = incident.elapsed
 		await frames(12)
 		check(paused and app.page == "pause" and incident.elapsed == before, "cycle %d: pause freezes active incident time" % cycle)
-		await click_control(menu_button("Corporate Policy"))
+		await click_control(menu_button("Settings"))
 		await key(KEY_R)
 		check(app.page == "settings" and incident.elapsed == before, "settings consumes restart without disturbing run")
 		await key(KEY_ESCAPE)
@@ -74,7 +98,7 @@ func _run() -> void:
 		check(app.page == "pause" and incident.upgrade_pending, "Escape suspends upgrade without losing decision")
 		await key(KEY_1)
 		check(incident.run.choices.is_empty(), "hidden decision cannot consume input through pause")
-		await click_control(menu_button("Resume Suffering"))
+		await click_control(menu_button("Resume"))
 		await key(KEY_1)
 		check(incident.stage == incident.Stage.INVESTIGATION and not paused, "resume returns to upgrade and applies selection once")
 		# Approach from the clear south side; planted employees can occupy
@@ -91,10 +115,10 @@ func _run() -> void:
 		check(incident.corporate_choice == 1 and not paused, "corporate decision survives pause and settings")
 		incident.fail()
 		await frames(3)
-		check(app.page == "report" and paused and menu_button("Restart Incident") != null, "defeat reaches actionable report")
+		check(app.page == "report" and paused and menu_button("Retry") != null, "defeat reaches actionable report")
 		if cycle == 0:
 			check(not app.progress.stage_one_completed, "losing Stage One does not record completion")
-		await click_control(menu_button("Restart Incident"))
+		await click_control(menu_button("Retry"))
 		await frames(3)
 		check(incident.stage == incident.Stage.ALERT and incident.run.debt == 0 and incident.run.burnout == 0 and incident.run.choices.is_empty() and not paused and scene.find_children("*", "", true, false).size() == count, "cycle %d: restart clears actors, decisions, modifiers and pause with stable nodes" % cycle)
 		for next in [incident.Stage.ENCOUNTER_ONE, incident.Stage.INVESTIGATION, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
@@ -104,8 +128,8 @@ func _run() -> void:
 		incident.active_enemy.receive_damage(10000, player.position)
 		await frames(3)
 		check(app.page == "report" and incident.stage == incident.Stage.RESOLVED, "victory reaches report in release application")
-		check(app.progress.stage_one_completed and menu_button("Replay Stage One") != null, "victory saves completion and offers replay")
-		await click_control(menu_button("Back to Desk"))
+		check(app.progress.stage_one_completed and menu_button("Replay") != null, "victory saves completion and offers replay")
+		await click_control(menu_button("Main Menu"))
 		await frames(4)
 		check(app.session == null and get_nodes_in_group("enemies").is_empty() and get_nodes_in_group("players").is_empty(), "cycle %d: main menu unloads all actors and audio owners" % cycle)
 	# Real finale completion returns directly to a usable menu after its closing card.

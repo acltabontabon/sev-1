@@ -60,7 +60,7 @@ sh tools/godot.sh --path . --fixed-fps 60 --script tests/skill_impact_tests.gd -
 Their ignored `builds/rig_states.png` and `builds/skill_*.png` show rendered poses.
 They are staged verification, not a normal run or a performance measurement.
 
-Launch the source game with `sh tools/godot.sh --path .`, choose Acknowledge Incident,
+Launch the source game with `sh tools/godot.sh --path .`, choose Play → The Reconciliation Abyss,
 and try left-click/F for the combo, C for Reply All, X for Blame Shift, Z for Circle
 Back, G for the counter, and V for Force Rollback once FOCUS fills. Dodge with right
 mouse/Q, and use R for a quick retry. Check whether the sword feels heavier, the spin

@@ -62,10 +62,10 @@ original music, bloody finishers, and a blameless postmortem with your name on i
 
 ## Your first shift
 
-Launch the game and choose **Acknowledge Incident**.
+Launch the game and choose **Play** → **The Reconciliation Abyss**.
 **WASD** moves, **mouse** controls the camera, **left-click** attacks,
 **right-click** dodges, **E** interacts, and **Escape** pauses.
-**Onboarding Docs** lists every special move; **Corporate Policy** holds settings.
+**Controls** lists every special move; **Settings** holds audio, display and comfort options.
 
 This playtest includes **Incident 001: The Missing Transaction**—one playable
 stage through its boss and aftermath. Stage One completion saves; replay preserves

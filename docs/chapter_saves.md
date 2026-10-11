@@ -2,18 +2,22 @@
 
 Implemented on 11 October 2026 at the creator's request. Stage One means the whole
 Incident 001 episode, not its internal encounter states. Stage Two is not playable.
+The title presents Stage One as Circle I, The Reconciliation Abyss, of the six
+[design circles](game_design.md#six-circles-of-corporate-hell); chapter IDs are unchanged.
 
 ## Player behavior
 
 - Resolving Incident 001 automatically saves Stage One completion before its finale
-  returns to the title. The victory report and completed title say “Progress saved.
-  Stage Two coming soon.”
-- Replay Stage One starts the same incident; replay, death, R restart, and returning
-  to the title never erase completion. No second chapter launch button is offered yet.
-- Earlier testers select “I already finished Stage One” on the fresh title, then
-  “Unlock Stage One Completion.” Back/Escape cancels without saving. This trusts
+  returns to the title. The victory report says “Circle I cleared. Progress saved.”
+  and Play → Campaign tags Circle I “Incident 001 · Cleared”.
+- The campaign lists all six circles. Only Circle I is a button; Circles II–VI are
+  dimmed, unfocusable and captioned as not built yet, never as locked rewards.
+- Choosing Circle I again replays the same incident; replay, death, R restart, and
+  returning to the title never erase completion.
+- Earlier testers choose “Cleared Circle I in an older build?” on the campaign, then
+  “Mark Circle I Cleared.” Back/Escape cancels without saving. This trusts
   the tester's claim; older builds did not record completion.
-- Save failures show a warning and a Retry Save action at the title; they never claim
+- Save failures show a warning and a Retry Save action on the title and campaign; they never claim
   progress was saved. Unsupported or damaged files are preserved rather than replaced.
 
 ## Storage and future integration
@@ -30,8 +34,8 @@ failure. Tests/previews using alternate preference paths use separate chapter fi
 
 Future Stage Two work must keep these chapter IDs and the existing Godot user data
 directory stable. Do not version the save path with the application release. Add a
-Continue action that reads `next_chapter` only when its playable scene exists; keep
-Replay Stage One. Extend/migrate the schema explicitly if new chapters or carried
+Continue action that reads `next_chapter` only when its playable scene exists, and
+turn that circle's campaign row into a button; keep Circle I replayable. Extend/migrate the schema explicitly if new chapters or carried
 choices require it. This increment does not establish carry-over upgrade rules.
 
 ## Validation and human checkpoint
@@ -53,7 +57,7 @@ the saved-progress title, and replay preserving completion on disk. Packaged hea
 combat and graphical menu checks passed; see [release evidence](release.md#0246--stage-one-saves-and-replay-11-october-2026).
 
 Human checkpoint: finish Stage One (or use the earlier tester unlock), quit and reopen,
-check the saved message and Replay Stage One, then replay/restart and reopen again.
+check Circle I's CLEARED tag and replay it, then replay/restart and reopen again.
 Confirm the menu stays readable at your normal resolution and the ending still plays.
 Headless checks do not establish visual quality or human acceptance.
 

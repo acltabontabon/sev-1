@@ -12,12 +12,12 @@ Apple Silicon is the tested platform; Intel is included in the universal bundle 
 unverified. The app declares macOS 14+, but only macOS 27.0.1 on M2 Pro has been
 measured. Keyboard and mouse are required. No controller mapping is implemented.
 
-Choose **Onboarding Docs** (controls) or **Corporate Policy** (settings), then **Acknowledge Incident**. Aim for one ordinary
+Choose **Controls** or **Settings**, then **Play** → **The Reconciliation Abyss**. Aim for one ordinary
 run; the 5–10-minute target has not yet been measured with human testers. Tab skips
-the opening and boss arrival. Stage One completion saves separately from device preferences. After completion,
-**Replay Stage One** starts again without erasing it. Earlier testers can choose
-**I already finished Stage One** → **Unlock Stage One Completion** on the title.
-Check the saved-progress message after quitting and reopening; Stage Two is coming soon.
+the opening and boss arrival. Circle I (Stage One) completion saves separately from device preferences. After
+completion, the campaign marks it CLEARED and choosing it again replays without erasing it. Earlier testers can
+choose **Play** → **Cleared Circle I in an older build?** → **Mark Circle I Cleared**.
+Check the CLEARED tag after quitting and reopening; Circles II–VI are listed but not built yet.
 
 ## Play the incident
 
@@ -35,8 +35,8 @@ Check the saved-progress message after quitting and reopening; Stage Two is comi
    first; step out of Meeting Invite circles before they start; don't ignore Scope Creep.
 5. Walk through the lifted gate and the server corridor into the vault. Fight The
    Variance: evade during SHIELDED, attack during OPEN, trust the solid diamond.
-6. Read the postmortem. **Restart Incident** or R retries with neutral health and
-   modifiers. **Back to Desk** returns to the title.
+6. Read the postmortem. **Retry** (or **Replay** after a win) or R starts again with
+   neutral health and modifiers. **Main Menu** returns to the title.
 
 Escape pauses, including during decision screens. Resume returns to the pending
 choice. Pause offers settings, controls, restart, menu and quit. Losing app focus
