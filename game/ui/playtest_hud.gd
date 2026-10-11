@@ -519,14 +519,16 @@ func _warm_glyphs() -> void:
 func _refresh_incident(incident: Node) -> void:
 	var open_seconds: int = maxi(0, int(incident.elapsed - 29.1))
 	$Margin/VBox/Title.text = "INC-001  ·  %s  ·  %02d:%02d" % [STATUS[incident.stage], open_seconds / 60, open_seconds % 60]
-	status.text = incident.objective
+	var objective_text: String = incident.objective
 	var progress: String = incident.encounter_status()
 	if not progress.is_empty():
-		status.text += "\n" + progress
-	$Margin/VBox/Health.text = "YOU  %d / %d" % [player.health, player.max_health]
+		objective_text += "\n" + progress
+	status.text = objective_text
+	var health_text: String = "YOU  %d / %d" % [player.health, player.max_health]
 	if is_instance_valid(incident.active_enemy):
 		var foe: CharacterBody3D = incident.active_enemy
-		$Margin/VBox/Health.text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
+		health_text += "     |     %s  %d / %d" % ["THE VARIANCE" if incident.stage == incident.Stage.BOSS else "RECORD", foe.health, foe.max_health]
+	$Margin/VBox/Health.text = health_text
 	$Controls.text = "E USE   LMB COMBO   Q DODGE   ESC PAUSE"
 	$Controls.offset_top = -28
 	if incident.message != last_message:
@@ -551,7 +553,9 @@ func _refresh_incident(incident: Node) -> void:
 	var specials: Node = player.specials
 	focus_bar.value = specials.focus
 	focus_value.text = "V READY" if specials.ultimate_ready() else "%d%%" % roundi(specials.focus)
-	focus_value.add_theme_color_override("font_color", Color(.8, .7, 1) if specials.ultimate_ready() else Color(.75, .8, .85))
+	var focus_color: Color = Color(.8, .7, 1) if specials.ultimate_ready() else Color(.75, .8, .85)
+	if focus_value.get_theme_color("font_color") != focus_color:
+		focus_value.add_theme_color_override("font_color", focus_color)
 	if specials.ultimate_ready() and not focus_full:
 		_pulse(focus_bar)
 	focus_full = specials.ultimate_ready()
@@ -580,7 +584,10 @@ func _refresh_incident(incident: Node) -> void:
 				flash_banner("CONTAINMENT AUTHORIZED   ·   OWNER: YOU", Color(.62, .25, .05), 2.6)
 			incident.Stage.BOSS:
 				flash_banner("ESCALATED TO: YOU   ·   PRODUCTION CORE OPEN   ·   GO NORTH", Color(.4, .1, .55), 3.2)
-	(burnout_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = [Color(.55, .85, 1), Color(1, .72, .3), Color(1, .38, .25)][incident.run.burnout_band()]
+	var burnout_fill: StyleBoxFlat = burnout_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	var burnout_color: Color = [Color(.55, .85, 1), Color(1, .72, .3), Color(1, .38, .25)][incident.run.burnout_band()]
+	if burnout_fill.bg_color != burnout_color:
+		burnout_fill.bg_color = burnout_color
 	buff.text = incident.buff_text()
 	buff.visible = not buff.text.is_empty()
 	var boss: CharacterBody3D = incident.boss
@@ -593,17 +600,18 @@ func _refresh_incident(incident: Node) -> void:
 	var burnout_label: Label = find_child("Burnout", true, false)
 	debt_label.text = "Debt effect: enemies pursue +%d%% faster" % roundi((incident.run.pressure() - 1) * 100)
 	var run: Node = incident.run
-	burnout_label.text = "Burnout: your damage +%d%% · risk +%d%%   %s" % [roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
+	var burnout_text: String = "Burnout: your damage +%d%% · risk +%d%%   %s" % [roundi(run.burnout_offense() * 100), roundi(run.burnout_risk() * 100), run.modifier_summary()]
 	burnout_label.modulate = [Color(.75, .85, .9), Color(1, .85, .55), Color(1, .65, .5)][run.burnout_band()]
 	if not incident.buff_text().is_empty():
-		burnout_label.text += "  ·  " + incident.buff_text()
+		burnout_text += "  ·  " + incident.buff_text()
 	# Effect lines only appear once there is an effect to read.
 	debt_label.visible = incident.run.pressure() > 1.001
 	burnout_label.visible = run.burnout > 0 or not incident.buff_text().is_empty() or not run.modifier_summary().begins_with("Damage 100% • Taken 100% • Dodge recovery 100%")
 	if incident.challenge_result == "Active":
-		burnout_label.text += "  ·  Committed ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
+		burnout_text += "  ·  Committed ETA %d:%02d" % [int(ceil(incident.challenge_left)) / 60, int(ceil(incident.challenge_left)) % 60]
 	elif incident.corporate_choice == 0:
-		burnout_label.text += "  ·  " + incident.challenge_result
+		burnout_text += "  ·  " + incident.challenge_result
+	burnout_label.text = burnout_text
 	prompt.visible = (not camera_rig.controls_active or incident.terminal()) and not incident.modal_pending()
 	if external_menu:
 		prompt.visible = false
@@ -620,10 +628,14 @@ func _refresh_incident(incident: Node) -> void:
 	notice.modulate.a = smoothstep(0.0, .2, message_age) * (1.0 - smoothstep(NOTICE_SECONDS - .7, NOTICE_SECONDS, message_age))
 	boss_box.visible = boss_box.visible and $Margin.visible
 	_refresh_guide(incident)
-	$CapturePrompt/Panel/Padding/VBox/Text.add_theme_font_size_override("font_size", 17 if incident.terminal() else 20)
-	$CapturePrompt/Panel/Padding/VBox/Text.text = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E answer Management\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."
+	var prompt_label: Label = $CapturePrompt/Panel/Padding/VBox/Text
+	var prompt_size: int = 17 if incident.terminal() else 20
+	if prompt_label.get_theme_font_size("font_size") != prompt_size:
+		prompt_label.add_theme_font_size_override("font_size", prompt_size)
+	var prompt_text: String = incident.report if incident.terminal() else "FRIDAY, 4:59 PM\nOne payment. Three systems. Nobody agrees.\n\nClick to begin / resume\nWASD move • Mouse aim • LMB/F three-hit combo\nQ / right mouse dodge • E answer Management\n\nWatch orange warnings. Strike during recovery.\nR restarts the entire incident. TAB skips introductions."
 	if not incident.terminal() and incident.elapsed > 0:
-		$CapturePrompt/Panel/Padding/VBox/Text.text += "\n\n" + run.modifier_summary() + "\n" + run.burnout_notice
+		prompt_text += "\n\n" + run.modifier_summary() + "\n" + run.burnout_notice
+	prompt_label.text = prompt_text
 
 
 func _refresh_guide(incident: Node) -> void:

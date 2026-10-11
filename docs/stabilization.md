@@ -161,6 +161,44 @@ frame), and one or two 37–53 ms frames in fights without a text cause. Steady 
 well above 60 FPS here; a 120 Hz display with VSync will still drop frames around the
 p95. Windows and lower-end hardware remain unmeasured.
 
+### HUD efficiency audit — 11 October 2026
+
+The HUD no longer reapplies unchanged focus colors, Burnout bar styles or pause/report
+font sizes every frame. Objective, enemy health, Burnout and pause/report labels are
+assembled before assignment, avoiding a base-text replacement followed by appends on
+every refresh. Visual contents and gameplay timing are preserved.
+
+`tests/hud_efficiency_tests.gd` checks stable styling and immediate health, ultimate and
+ETA updates. In the same fixture, the previous refresh function emitted **360** theme/style
+invalidations over 120 unchanged refreshes; the revised function emitted **zero**.
+Run it with `sh tools/godot.sh --headless --fixed-fps 60 --path . --script tests/hud_efficiency_tests.gd`.
+The full `python3 tools/validate.py` suite also passed. A rendered 1080p capture confirmed
+that the HUD, vitals, special icons and floor map still display.
+
+Sequential rendered samples used Apple M2 Pro, macOS, Godot 4.7.2, Forward+/Metal,
+1920×1080, High (SSAO, glow, MSAA 2x), VSync off. The baseline injected the previous
+HUD refresh function into the current scene, preserving other working-tree changes.
+The revised run used the current HUD. Startup is excluded below:
+
+| Sample | Mean FPS | Median / p95 / p99 ms | Frames >16.7 ms | Frames >33.3 ms | Worst ms |
+| --- | --- | --- | --- | --- | --- |
+| Previous HUD | 120.21 | 8.24 / 11.29 / 12.83 | 22 | 5 | 170.96 |
+| Revised HUD | 119.64 | 8.24 / 11.28 / 14.63 | 20 | 4 | 46.21 |
+
+These samples establish no overall FPS improvement. The reduced worst hitch cannot be
+attributed to the HUD alone: first-use caches, randomized encounters and another running
+packaged game affect comparability. GPU timing returned zero, so it is unavailable rather
+than evidence of zero GPU cost. One earlier sample overlapped validation and is excluded.
+The probe uses scripted teleports, elevated player health and forced stage transitions;
+it does not establish ordinary run pacing or cover every wave/finale. First-use stalls and
+Windows performance remain open. The confirmed gain is removing recurring UI invalidation.
+Raw samples and the screenshot are ignored build artifacts, not shipped assets.
+
+Playtest the source with `play.command`: move and aim during a crowded outbreak, chain
+melee and specials, use Force Rollback, then visit the vault and retry. Report the exact
+moment of any pause, especially whether it happens only on first use or repeats, and
+confirm health/readiness/countdown text still changes promptly.
+
 ## Remaining limits and human gate
 
 The full ordinary run has no measured human duration. One enemy is damaging at a time;
