@@ -50,6 +50,27 @@ only Intel x86-64 in the executable and bundled dylibs before smoke testing.
 The original preset is restored after export.
 No paid identity or notarization is used by either path.
 
+## Verified playtest 0.2.49 — 11 October 2026
+
+Published [v0.2.49](https://github.com/acltabontabon/sev-1/releases/tag/v0.2.49)
+from `f178f1434349588b9bd7adeb5b778cd9b440d7fb` through
+[Actions run 38101532077](https://github.com/acltabontabon/sev-1/actions/runs/38101532077).
+Both native source validators passed. Windows export, packaged smoke, installer,
+silent install, installed-game smoke and uninstall passed. Mac universal export,
+Intel thinning/architecture check, packaged smoke, DMG creation and verification
+passed. Published installer SHA-256 digests match the downloaded manifests and
+both manifests identify that exact source commit.
+
+The public page was inspected in a logged-out browser: screenshots, direct Windows/
+Intel Mac download links, the prerelease badge and prominent work-in-progress
+playtest notice are present. The repository is public. Windows setup is 89.4 MiB;
+the Intel Mac DMG is 102.2 MiB. Both are unsigned and unnotarized.
+
+These are technical/package checks, not graphical/audio/performance measurements or
+human acceptance of combat and pacing. Newer ongoing art experiments on main are
+outside this immutable tag. The 0.2.47 cold-import and 0.2.48 Mac-template failures
+are preserved in the changelog; neither produced a published complete release.
+
 ## Historical local tester evidence
 
 
