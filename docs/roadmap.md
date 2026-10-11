@@ -74,8 +74,9 @@ with a restrained office/combat grade and speech-safe dialogue choices. Use the
 [direct playtest checkpoint](scene_flow.md#acceptance-checkpoint) to judge the
 rollback survey's timing and visibility, then a full run to judge the promises'
 memorial payoff. No new circle, boss, permanent progression or release build is
-implied. Opening staging remains at the committed baseline while a separate
-workflow's uncommitted opening work is preserved. Human acceptance remains open.
+implied. The isolated candidate initially preserved the opening; release 0.2.51
+also includes the subsequently committed seating and reveal corrections.
+Human acceptance remains open.
 
 The 11 October [scene-flow pass](scene_flow.md) connects outbreak guidance, the
 optional investigation detours and the corridor/vault route. Its checkpoint verifies

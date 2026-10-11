@@ -33,6 +33,8 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 - **Make an impact.** Fast combos, spectacular attacks, bloody finishers.
 - **Meet the night shift.** Voiced conversations, haunted break rooms, deeply unhelpful meetings.
 - **Get irresponsibly stronger.** Free power-ups, mounting burnout, and promises you'll regret.
+- **Your feedback is mandatory.** Force Rollback ends with a satisfaction survey. Keep hitting things to give it five stars.
+- **Make plans for after work.** Accept a coworker's invitation. The aftermath remembers what you promised.
 
 <table>
   <tr>
@@ -50,6 +52,10 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 ## Your shift starts here
 
 **Windows · Intel Mac · Keyboard & mouse**
+
+**Playtest 0.2.51** brings the rollback survey, Kevin's disastrous pantry birthday,
+an expanded destructible vault, narrated crew memories, and opening and dialogue
+refinements. [Read the changelog](CHANGELOG.md#0251--2026-10-12).
 
 Download, install, and choose **Play** → **The Reconciliation Abyss**. No developer tools needed.
 **Work in progress:** these releases are for playtesting and feedback while
@@ -71,23 +77,5 @@ unsigned-app prompts.
 [**Acknowledge Incident →**](https://github.com/acltabontabon/sev-1/releases)
 
 ---
-
-Source-checkout checkpoint: double-click [duel_preview.command](duel_preview.command)
-to watch the new Stage One boss choreography directly. Creator pacing and sound
-review remain pending; the shortcut is a quick source-checkout checkpoint.
-
-For the opening seating and camera checkpoint, double-click [opening_preview.command](opening_preview.command).
-Watch the desk reactions and the step away from the chair; control returns in the office.
-Relaunch the shortcut to replay the full opening.
-
-For the corporate firefighting entrance, double-click [boss_intro_preview.command](boss_intro_preview.command).
-Watch the hose response, Destructive Feedback and the lasting aftermath; TAB skips.
-
-For an immediate playable boss fight, double-click [boss_arena_preview.command](boss_arena_preview.command).
-Try the wider dodge lanes and smash the equipment cases and coolant canisters.
-Relaunch the shortcut for a fresh fight.
-
-For the revised ending, double-click [ending_preview.command](ending_preview.command).
-TAB skips; relaunch to retry. Judge the ghost eyelines, bleak departure, and dialogue timing.
 
 [Share playtest feedback](docs/testing.md) · [Credits](docs/asset_licenses.md) · [Development](docs/development.md)

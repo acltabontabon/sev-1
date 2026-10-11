@@ -72,6 +72,14 @@ func _run() -> void:
 	check(talk.nodes.a.replies[1][1] == "good_days" and talk.nodes.a.replies.size() == 4, "the personal branch is discoverable without deleting other choices")
 	incident.dialogue.open(talk, Callable())
 	incident.dialogue.advance()
+	# Headless dialogue normally skips playback. Use a silent PCM fixture for
+	# the real playing/stop gate without creating an unserviced Ogg decoder.
+	var voice_fixture: AudioStreamWAV = AudioStreamWAV.new()
+	voice_fixture.mix_rate = 44100
+	var silence: PackedByteArray = PackedByteArray()
+	silence.resize(44100)
+	voice_fixture.data = silence
+	incident.dialogue.speaker.stream = voice_fixture
 	incident.dialogue.speaker.play()
 	incident.dialogue.choose(0)
 	check(incident.dialogue.speaking == "them", "revealing text cannot accidentally cut off a playing punchline")

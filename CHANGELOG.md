@@ -3,6 +3,39 @@
 Changes describe the implemented playable prototype. Creative acceptance and
 ordinary hardware playtesting remain separate from automated checks.
 
+## [0.2.51] — 2026-10-12
+
+- Force Rollback now generates mandatory satisfaction paperwork. Subsequent hits
+  stamp approval stars; ignoring the form counts as consent. The survey never
+  captures combat input, hides during conversations/cinematics and clears on retry.
+- Personal crew conversations are easier to find. All displayed replies have
+  number shortcuts, speech finishes before choices appear, and E can explicitly
+  reveal text or skip speech. Wider personal shots avoid crowded wall close-ups.
+- Accept a coffee or lunch invitation and your actual chosen promise returns in
+  that coworker's memorial. The ending includes five narrated illustrated memories,
+  a clearer transition from battle into grief, and a continuous walk out through
+  the office doors into the rainy street. Monday's postmortem closes the episode.
+- The expanded production vault includes industrial equipment and breakable props
+  that both the engineer and the boss can destroy. The crew's firefighting entrance
+  uses fixed response stations, a connected hose and Destructive Feedback.
+- Kevin's optional pantry birthday now becomes a voiced party, a transformation
+  and an ambush. Clearing it restores health and reduces Burnout.
+- Operations is rebuilt as an incident command station. Temporary power-ups are
+  free, clearly described single-effect rewards; normal upgrade debt costs and
+  pursuit penalties are retired. Burnout and Management decisions remain.
+- The engineer has an on-call developer outfit; office NPCs have distinct authored
+  hairstyles. Office/combat color grading is more restrained, with color separation
+  confined to combat onset.
+- The live title desk includes a coffee-drinking routine. Menus now use Play,
+  Controls and Settings, show the six-circle campaign structure with later circles
+  locked, and keep focused labels readable. Only Circle I is playable.
+- Opening seating, hand placement, sword visibility and the cinematic reveal are
+  corrected, with a direct source preview and regression coverage.
+- Same delivery as the previous playtest: Windows x86-64 installer, Intel Mac
+  x86-64 DMG, SHA-256 checksums and exact-source manifests. Builds remain unsigned
+  and unnotarized. Human combat, comedy, pacing and audio acceptance remain open;
+  local graphical probes still observe occasional frame-time hitches.
+
 ## [0.2.50] — 2026-10-11
 
 - Corrupted Records now use the free KayKit Skeleton Minion instead of the realistic

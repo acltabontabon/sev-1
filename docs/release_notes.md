@@ -1,5 +1,19 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.51 — Paperwork, promises and the night shift (12 October 2026)
+
+This release combines the latest committed opening fixes with the isolated
+comedy/dialogue/visual pass and the source changes since 0.2.50. The complete
+player-facing change list is in [CHANGELOG.md](../CHANGELOG.md#0251--2026-10-12).
+Use the same Windows installer / Intel Mac DMG distribution and unsigned-app
+instructions as the previous playtest. No new circle is playable.
+
+Playtest priorities: use Force Rollback, keep fighting or ignore the satisfaction
+form, try a personal crew conversation, accept an invitation, and watch for the
+promise in the memorial. Review the corrected opening, optional birthday, expanded
+vault and new ending as one ordinary run. Automated checks do not establish comedy,
+emotional impact, listening quality or run duration. First-use hitches remain open.
+
 ## Source update — Title menu focus clipping (12 October 2026)
 
 The title and other menu entries now reserve space for the focus indent, so short

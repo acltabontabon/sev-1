@@ -44,8 +44,9 @@ Listen to a complete conversation, then compare E to reveal / E to skip voice.
 Check keyboard reply 4 as well as a mouse selection. On a full run, compare the
 memorial with and without an accepted invitation. These are creative candidates;
 automated state checks cannot establish comedy, emotional impact or ordinary
-completion time. The opening staging is deliberately preserved in this worktree
-because another workflow had uncommitted changes to it at task start.
+completion time. The initial isolated candidate preserved the opening while another
+workflow had uncommitted changes. Release 0.2.51 combines that candidate with the
+subsequently committed opening seating and reveal corrections.
 
 Run `sh tools/godot.sh --path . --script tests/scene_flow_preview.gd -- --play` for a
 quick investigation retry, or start from the title for the ordinary episode.

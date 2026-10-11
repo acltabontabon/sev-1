@@ -2,15 +2,15 @@
 
 ## Start
 
-Unzip the macOS package and open **SEV-1 Friday Deployment.app**. No editor or
-programming tools are needed. This is an ad-hoc signed local test build, not notarized;
-macOS may require the recipient's explicit approval in Privacy & Security. Only
-approve a build received from the creator. Do not disable Gatekeeper system-wide.
-If macOS refuses it, report the exact message to the creator.
+Install the Windows x86-64 setup package, or open the Intel Mac DMG and drag
+**SEV-1 Friday Deployment.app** to Applications. No editor or programming tools
+are needed. These GitHub playtest packages are unsigned and unnotarized; follow
+the included [installation instructions](install.md) for system prompts.
 
-Apple Silicon is the tested platform; Intel is included in the universal bundle but
-unverified. The app declares macOS 14+, but only macOS 27.0.1 on M2 Pro has been
-measured. Keyboard and mouse are required. No controller mapping is implemented.
+The release targets Windows 10+ with Vulkan-capable graphics and Intel Macs with
+macOS 14+ and Metal-capable graphics. Local graphical measurements use an Apple
+M2 Pro source build; they do not establish performance on these release targets.
+Keyboard and mouse are required. No controller mapping is implemented.
 
 Choose **Controls** or **Settings**, then **Play** → **The Reconciliation Abyss**. Aim for one ordinary
 run; the 5–10-minute target has not yet been measured with human testers. Tab skips
@@ -36,8 +36,16 @@ Check the CLEARED tag after quitting and reopening; Circles II–VI are listed b
    first; step out of Meeting Invite circles before they start; don't ignore Scope Creep.
 5. Walk through the lifted gate and the server corridor into the vault. Fight The
    Variance: evade during SHIELDED, attack during OPEN, trust the solid diamond.
-6. Read the postmortem. **Retry** (or **Replay** after a win) or R starts again with
-   neutral health and modifiers. **Main Menu** returns to the title.
+6. A victory leads through the duel, the crew's memorial, departure and Monday's
+   postmortem call, then returns to the title. TAB skips the finale. A defeat offers
+   the incident report and retry. R restarts with neutral health and modifiers;
+   replay from the campaign keeps saved completion.
+
+For 0.2.51, fill Focus and press V for Force Rollback. Continue landing hits to
+stamp the satisfaction survey, or ignore it and watch what the company records.
+During a breather, talk to a coworker and choose “Tell me something normal.”
+Accept an invitation, then look for your chosen promise in that coworker's memorial.
+Number keys select every displayed reply; E reveals text, then skips remaining speech.
 
 Escape pauses, including during decision screens. Resume returns to the pending
 choice. Pause offers settings, controls, restart, menu and quit. Losing app focus
@@ -46,10 +54,11 @@ the run while adjusting preferences. Use Quit or the window close action to exit
 
 ## Report a bug
 
-Include version **0.2.45**, Mac model/chip, macOS version, resolution, graphics setting,
+Include version **0.2.51**, computer model/CPU/GPU, operating system, resolution, graphics setting,
 the incident stage, choices made, what you expected, what happened, and repeat steps.
 A screenshot or short clip is useful. Note whether retry fixed it. Local logs and
-`settings.cfg` live in `~/Library/Application Support/SEV-1/`. Share logs only after
+`settings.cfg` live in `~/Library/Application Support/SEV-1/` on macOS or
+`%APPDATA%/SEV-1/` on Windows. Share logs only after
 checking them for information you do not want to disclose. There is no telemetry.
 
 ## Two-minute feedback
@@ -61,11 +70,11 @@ Answer briefly; use 1 (poor) to 5 (strong) where helpful.
 3. Were enemy warnings and hits fair and readable?
 4. Could you immediately explain what your chosen power-up does?
 5. Were the free power-ups immediately understandable? Did Burnout affect your management reply?
-6. Did the corporate humor work? Which line landed or missed?
+6. Did the corporate humor work? Which event or line landed or missed? Did the rollback survey get in the way?
 7. Did the office, characters and UI look coherent?
 8. What confused or frustrated you? Any bug or uncomfortable effect?
 9. Would you play another run? Why?
-10. What was the most memorable moment? How long did your run take?
+10. What was the most memorable moment? Did an accepted invitation change how the memorial felt? How long did your run take?
 11. Did the title screen and the opening make you want to start? Was the 50-second narrated opening right, or too long? Was the reveal scary and funny?
 12. Could you tell the four enemy types apart, and what each wanted you to do?
 13. Did the chat cards, change-request tickets and Leadership DM read easily in a fight?

@@ -54,9 +54,14 @@ room that should have been an email. Talk to the overtime crew. Trigger outbreak
 Watch ordinary employees become monsters, then follow the failing server corridor
 to **The Variance**.
 
-Risky upgrades bring Technical Debt. Burnout makes you dangerous and vulnerable.
+Pick a free temporary power-up. Burnout makes you dangerous and vulnerable.
 Your promise to Management has consequences. There are voiced conversations,
 original music, bloody finishers, and a blameless postmortem with your name on it.
+
+This playtest adds a mandatory satisfaction survey after Force Rollback—your next
+hits count as positive feedback. Survive Kevin's pantry birthday, smash equipment
+in the expanded vault, and spend a moment with the crew before the aftermath.
+The company remembers your productivity. The ending remembers your promises.
 
 **The system is down. Management is watching. You're the only engineer online.**
 
