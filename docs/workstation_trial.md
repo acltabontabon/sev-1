@@ -51,8 +51,10 @@ cycle to judge the placement and motion; human visual acceptance remains pending
 
 The title-only `title_engineer.gd` stages a five-second reach, pickup, tilted sip,
 set-down and return to typing using the actual mug and solved right-arm IK. The
-title positions the mug within seated reach and turns its handle away from the
-camera so the cup stays visible. The first idle reaction is coffee, followed by
+title keeps the mug on the clear right side of the tabletop, away from the keyboard
+and mouse mat. The engineer shifts his weight and leans forward/right to pick it up
+and return it to that same spot. Its handle turns away from the camera so the cup
+stays visible. The first idle reaction is coffee, followed by
 alternating coffee and slump/relax beats. Notices continue without interrupting a
 held cup. No runtime props are spawned and gameplay/story coffee poses are unchanged.
 The presentation regression measures solved hand contact, cup travel and tabletop

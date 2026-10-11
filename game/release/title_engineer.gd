@@ -41,6 +41,11 @@ func _staged(delta: float) -> void:
 		return
 	coffee_time = minf(COFFEE_DURATION, coffee_time + delta)
 	var carry: float = smoothstep(.85, 1.8, coffee_time) * (1.0 - smoothstep(3.2, 4.2, coffee_time))
+	var reaching: float = smoothstep(0, .7, coffee_time) * (1.0 - smoothstep(4.25, COFFEE_DURATION, coffee_time)) * (1.0 - carry)
+	# Reach from the torso while keeping the hips seated and the cup on the clear side.
+	position += Vector3(.1, 0, -.05) * reaching
+	_turn("Abdomen", Vector3.RIGHT, -.5 * reaching)
+	_turn("Abdomen", Vector3.FORWARD, .45 * reaching)
 	# Turn toward the title camera so the cup reads against his cheek.
 	_turn("Head", Vector3.UP, -.95 * carry)
 	var head: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(bones["Head"])

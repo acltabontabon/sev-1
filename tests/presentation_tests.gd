@@ -99,6 +99,7 @@ func _desk_contacts() -> void:
 	var cup_bounds: AABB = desk.global_transform.affine_inverse() * body.global_transform * body.get_aabb()
 	check(absf(cup_bounds.position.y - .8225) < .002 and mug.get_node("Handle").visible and mug.get_node("Coffee").visible,
 		"detailed coffee mug has a handle and coffee and rests on the tabletop")
+	check(cup_bounds.position.x > .7, "the resting mug stays on the clear right side, away from the keyboard and mouse mat")
 	for pose: int in [rig.Pose.GLANCE, rig.Pose.SLUMP, rig.Pose.TYPING, rig.Pose.SIP, rig.Pose.RELAX, rig.Pose.TYPING]:
 		rig.story_pose = pose
 		var clear: bool = true

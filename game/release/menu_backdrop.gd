@@ -44,8 +44,8 @@ func _ready() -> void:
 	character = $Engineer/Visual/Character
 	character.story_pose = PRESENTATION.Pose.TYPING
 	character.coffee_mug = room.get_node("YourWorkstation/Mug")
-	# Within a seated arm's reach, with the whole cup still supported by the desk.
-	character.coffee_mug.position = Vector3(.49, .8225, .37)
+	# The clear right side of the tabletop; the engineer leans over to reach it.
+	character.coffee_mug.position = Vector3(.82, .8225, .18)
 	character.coffee_mug.rotation.y = deg_to_rad(160.0)
 	screen = DESK_SCREEN.new()
 	screen.name = "DeskScreen"
