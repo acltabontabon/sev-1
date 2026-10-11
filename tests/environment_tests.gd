@@ -144,7 +144,7 @@ func _run() -> void:
 	incident.presentation.skip()
 	await frames(10)
 	var start: Vector3 = Vector3(0, .05, 8)
-	for entry: Array in [["meeting wing corridor", Vector3(16.3, .05, 0)], ["Quick Sync room", room.get_node("SpawnPoints/QuickSyncCenter").position + Vector3(0, 0, 4)], ["pantry", Vector3(22.6, .05, 6)], ["server corridor", Vector3(9, .05, -23)], ["server vault", room.get_node("SpawnPoints/VaultArrival").position]]:
+	for entry: Array in [["meeting wing corridor", Vector3(16.3, .05, 0)], ["Quick Sync room", room.get_node("SpawnPoints/QuickSyncCenter").position + Vector3(0, 0, 4)], ["Quick Sync annex", Vector3(29, .05, -8)], ["pantry", Vector3(22.6, .05, 6)], ["server corridor", Vector3(9, .05, -23)], ["server vault", room.get_node("SpawnPoints/VaultArrival").position]]:
 		check(path_reaches(start, entry[1]), "navigation reaches the %s from the desks" % entry[0])
 	for marker: Node3D in room.get_node("SpawnPoints").get_children():
 		if str(marker.name).begins_with("Spawn_"):

@@ -320,13 +320,65 @@ func _run() -> void:
 	await frames(3)
 	check(incident.quick_sync == "active" and incident.sync_alive.size() == 3 and incident.room.get_node("QuickSyncDoorA").collision_layer == 1, "entering Quick Sync shuts the doors and starts the meeting")
 	check(incident.room.get_node("QuickSyncLight").light_energy == 0 and incident.presentation.seen.has("quick_sync_start"), "lights go out on 'Can we take this offline?'")
+	# The projector waits through the reveal/grace, then gives a real escape window.
+	incident.outbreak_left = 1.0
+	incident.sync_action_left = .1
+	incident._tick_quick_sync(1.0)
+	check(not incident.zones.any(func(zone: Node3D) -> bool: return zone.has_meta("sync_action")), "action items cannot start during the employee transformation")
+	incident.outbreak_left = 0.0
+	for foe: CharacterBody3D in incident.sync_alive:
+		foe.reveal_grace_left = 0.0
+		foe.set_physics_process(false)
+	incident._tick_quick_sync(.2)
+	var action: Node3D = incident.zones.back()
+	check(action.has_meta("sync_action") and not action.contains(player), "a floor action item warns before it can hurt or slow the engineer")
+	player.position = action.position
+	player.invulnerable_left = 0.0
+	var before_action: int = player.health
+	await frames(125)
+	check(player.health < before_action and player.zone_multiplier == .5, "attending the action item drains health and slows the engineer")
+	player.position = Vector3(29, .05, -7)
+	await frames(2)
+	var escaped_health: int = player.health
+	await frames(62)
+	check(player.health == escaped_health and player.zone_multiplier == 1.0, "running into the annex escapes the action item without further damage")
+	player.health = 60
 	for foe: CharacterBody3D in incident.sync_alive.duplicate():
 		foe.receive_damage(100000, player.position)
 	await frames(2)
 	check(incident.quick_sync == "done" and player.health == 90 and incident.run.burnout == 20 and incident.room.get_node("QuickSyncDoorA").collision_layer == 0, "surviving the meeting restores health and Burnout and opens the doors")
+	check(not incident.zones.any(func(zone: Node3D) -> bool: return zone.has_meta("sync_action")) and "email" in incident.room.get_node("SyncDetail").text, "adjournment cancels floor action items and records the useless meeting minutes")
 	player.position = Vector3(22.75, .05, -4)
 	await frames(3)
 	check(incident.sync_alive.is_empty() and incident.stage == incident.Stage.INVESTIGATION, "Quick Sync never retriggers and does not advance the incident")
+	# The rendered stand-up is skippable without losing the transformation or reward.
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	incident.standup_in_headless = true
+	player.position = Vector3(22.75, .05, -8)
+	await frames(2)
+	check(incident.quick_sync == "standup" and player.narrative_hold and incident.sync_hosts.size() == 3 and incident.sync_alive.is_empty(), "the engineer arrives during a stand-up before anyone transforms")
+	incident.standup_scene._next()
+	incident.standup_scene._next()
+	check("One story point" in incident.standup_scene.caption.text, "the engineer proposes estimating the emergency before the attendees react")
+	await key(KEY_TAB)
+	check(incident.quick_sync == "active" and not player.narrative_hold and incident.sync_alive.size() == 3 and incident.sync_alive[0].rig.kind == "standup", "skipping the stand-up reveals the unique horned facilitator and restores playable control")
+	check(incident.sync_alive[0].bark("spot", 1.0, true) and incident.sync_alive[0].last_bark.begins_with("bark_invite_"), "the stand-up monster retains voiced Meeting Invite reactions")
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(22.75, .05, -8)
+	await frames(2)
+	scene.reset_encounter()
+	await frames(2)
+	check(not player.narrative_hold and incident.standup_scene == null and incident.quick_sync == "idle", "restarting during the stand-up clears its camera, actors and control hold")
+	await fresh_stage(incident.Stage.INVESTIGATION)
+	player.position = Vector3(22.75, .05, -8)
+	await frames(2)
+	while incident.standup_scene.step < 4:
+		incident.standup_scene._next()
+	incident.standup_scene.left = .001
+	await frames(2)
+	check(incident.quick_sync == "active" and incident.standup_scene == null and not player.narrative_hold, "the last voiced reaction naturally hands off to transformation without a skip")
+	incident.standup_in_headless = false
+	await fresh_stage(incident.Stage.INVESTIGATION)
 	# Dependency escalation adds a Blocker to the final containment wave.
 	incident.corporate_choice = 2
 	incident.stage = incident.Stage.ENCOUNTER_TWO

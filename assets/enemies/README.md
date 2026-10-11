@@ -20,6 +20,7 @@ from lowercase names, and are stored with Git LFS.
 | `dragon.gltf` | `Flying/glTF/Dragon_Evolved.gltf` | The Meeting Invite (invite card overhead) |
 | `spiky_blob.gltf` | `Blob/glTF/GreenSpikyBlob.gltf` | Scope Creep (sticky notes on it; grows) |
 | `demon.gltf` | `Big/glTF/Demon.gltf` | The Variance (halo and horns: two truths at once; trident) |
+| `squidle.gltf` | `Flying/glTF/Squidle.gltf` | Quick Sync stand-up facilitator (winged, bone-horned; dark palette) |
 | `armabee.gltf` | `Flying/glTF/Armabee_Evolved.gltf` | BUG minions (one-hit swarms; a literal bug) |
 
 History: 0.2.2 used Quaternius mechs; 0.2.4 used a mix of smaller CC0 packs (skeleton,
@@ -42,3 +43,7 @@ box geometry, kept as a fallback.
 
 **Limits.** Attack clips are the pack's generic weapon swings, punches, bites and
 headbutts, so limbs do not trace the telegraph arc exactly.
+
+The stand-up facilitator was retrieved from the same public pack mirror on 11 October
+2026. The embedded-buffer glTF is unchanged; its material palette and scale are applied
+in `MonsterRig` at runtime. The existing CC0 license and voluntary credit cover it.

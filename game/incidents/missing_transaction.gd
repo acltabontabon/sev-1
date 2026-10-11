@@ -160,6 +160,11 @@ var seen_kinds: Dictionary = {}
 ## Postmortem timeline: [elapsed seconds, event], recorded as the run happens.
 var timeline: Array = []
 var quick_sync: String = "idle"
+var standup_scene: Node3D
+var standup_in_headless: bool = false
+var sync_action_left: float = 6.0
+var sync_action_index: int = 0
+const SYNC_ACTIONS: Array[String] = ["YESTERDAY?", "TODAY?", "ANY BLOCKERS?"]
 var actors: Array[Node3D] = []
 var copies: Array[Node3D] = []
 var console_marker: Label3D
@@ -247,6 +252,10 @@ func reset_incident() -> void:
 	player.move_multiplier = 1.0
 	player.zone_multiplier = 1.0
 	quick_sync = "idle"
+	standup_scene = null
+	sync_action_left = 6.0
+	sync_action_index = 0
+	_sync_screen(false)
 	timeline.clear()
 	noticed_stage = -1
 	seen_kinds.clear()
@@ -294,6 +303,9 @@ func terminal() -> bool:
 
 
 func _cleanup() -> void:
+	if is_instance_valid(standup_scene):
+		standup_scene.cancel()
+		standup_scene = null
 	alive.clear()
 	sync_alive.clear()
 	boss = null
@@ -446,6 +458,7 @@ func _process(delta: float) -> void:
 	_complain_to_hr(delta)
 	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
 		_start_quick_sync()
+	_tick_quick_sync(delta)
 	var attending: bool = false
 	for zone: Node3D in zones:
 		attending = attending or zone.contains(player)
@@ -645,7 +658,7 @@ func _plant(index: int) -> void:
 	wave_site = site
 
 
-## The Quick Sync is already in session: three attendees standing round the table.
+## The Quick Sync is already in session: three attendees across the open floor.
 func _plant_sync() -> void:
 	if quick_sync != "idle" or not sync_hosts.is_empty():
 		return
@@ -1014,6 +1027,8 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D], host: Node3D = nu
 	if ARCHETYPES[kind] != null:
 		actor.set_script(ARCHETYPES[kind])
 	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
+	if kind == "invite" and is_same(group, sync_alive):
+		actor.standup_facilitator = true
 	actor.starts_aware = is_same(group, sync_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
 	if not is_instance_valid(host):
@@ -1118,6 +1133,8 @@ func _book_meeting(at: Vector3) -> void:
 	zone.player = player
 	zone.position = at
 	zone.process_mode = Node.PROCESS_MODE_PAUSABLE
+	if quick_sync == "active":
+		zone.set_meta("sync_action", true)
 	add_child(zone)
 	actors.append(zone)
 	zones.append(zone)
@@ -1143,30 +1160,101 @@ func _on_shield_cast(count: int) -> void:
 
 func in_quick_sync() -> bool:
 	var at: Vector3 = player.global_position
-	return at.x > 18.8 and at.z > -15.5 and at.z < -2.3
+	return at.x > 18.8 and at.x < 31.0 and at.z > -15.5 and at.z < -2.3
 
 
 func _start_quick_sync() -> void:
+	if DisplayServer.get_name() == "headless" and not standup_in_headless:
+		_begin_quick_sync()
+		return
+	quick_sync = "standup"
+	for entry: Array in [["QuickSyncDoorA", -8.75], ["QuickSyncDoorB", -7.25]]:
+		var door: StaticBody3D = room.get_node(entry[0])
+		door.position.z = entry[1]
+		door.collision_layer = 1
+	room.get_node("SyncTitle").text = "DAILY STAND-UP"
+	room.get_node("SyncDetail").text = "Yesterday. Today. Blockers.\nProduction can wait.\nYour weekend can also wait."
+	standup_scene = load("res://game/incidents/quick_sync_standup.gd").new()
+	standup_scene.incident = self
+	actors.append(standup_scene)
+	add_child(standup_scene)
+
+
+func _begin_quick_sync() -> void:
 	quick_sync = "active"
+	sync_action_left = 6.0
+	sync_action_index = 0
+	_sync_screen(true)
 	log_event("Pulled into a Quick Sync (15 min)")
 	for entry: Array in [["QuickSyncDoorA", -8.75], ["QuickSyncDoorB", -7.25]]:
 		var door: StaticBody3D = room.get_node(entry[0])
 		door.position.z = entry[1]
 		door.collision_layer = 1
 	presentation.quick_sync(true)
-	message = "QUICK SYNC (15 MIN) • Leadership has taken this offline. Survive the meeting."
+	message = "EMERGENCY ALIGNMENT • Dismiss all 3 attendees. Dodge the floor action items."
 	if outbreaks():
 		outbreak_left = OUTBREAK_BURST
 	for index in range(QUICK_SYNC.size()):
 		_spawn_entry(QUICK_SYNC[index], sync_alive, sync_hosts[index] if index < sync_hosts.size() else null)
 	sync_hosts.clear()
+	_sync_screen(true)
 	if outbreaks():
 		_make_reveal_space(sync_alive[0].global_position)
 		presentation.outbreak(sync_alive[0], "Meeting Room 3")
 
 
+## The projector assigns one small, avoidable action item at a time. Cinematic and
+## retreat time do not advance its clock. No separate timer survives a restart.
+func _tick_quick_sync(delta: float) -> void:
+	if quick_sync != "active" or modal_pending() or outbreak_left > 0 or presentation.beat_shot != "":
+		return
+	for foe: CharacterBody3D in sync_alive:
+		if is_instance_valid(foe) and foe.reveal_grace_left > 0:
+			return
+	sync_action_left -= delta
+	_sync_screen(true)
+	if sync_action_left > 0 or not in_quick_sync():
+		return
+	sync_action_left = 7.0
+	var title: String = SYNC_ACTIONS[sync_action_index % SYNC_ACTIONS.size()]
+	sync_action_index += 1
+	var zone: Node3D = ZONE.new()
+	zone.player = player
+	zone.radius = 2.0
+	zone.telegraph = 2.0
+	zone.duration = 3.0
+	zone.tick_damage = 4
+	zone.warning_text = "ACTION ITEM IN"
+	zone.active_text = title + "\nATTENDANCE COUNTS AS CONSENT"
+	zone.position = Vector3(clampf(player.position.x, 20.9, 28.8), .05, clampf(player.position.z, -12.2, -4.5))
+	zone.set_meta("sync_action", true)
+	add_child(zone)
+	actors.append(zone)
+	zones.append(zone)
+	zone.expired.connect(_on_zone_expired.bind(zone), CONNECT_ONE_SHOT)
+	presentation.meeting_booked()
+	message = "ACTION ITEM: %s • Step out of the circle." % title
+
+
+func _sync_screen(active: bool) -> void:
+	var title: Label3D = room.get_node("SyncTitle")
+	var detail: Label3D = room.get_node("SyncDetail")
+	title.text = "DAILY STAND-UP" if active else "QUICK SYNC  (15 MIN)"
+	if active:
+		detail.text = "%d attendees to dismiss\nNext action item: %ds\nLeaving early: career limiting" % [sync_alive.size(), ceili(maxf(0, sync_action_left))]
+	elif quick_sync == "done":
+		detail.text = "Minutes: nobody listened.\nAction items: go home.\nThis could have been an email."
+	else:
+		detail.text = "Production is down.\nFirst: align on alignment.\nThen: discuss going home."
+
+
 func _end_quick_sync() -> void:
 	quick_sync = "done"
+	for zone: Node3D in zones.duplicate():
+		if zone.has_meta("sync_action"):
+			_on_zone_expired(zone)
+	player.zone_multiplier = 1.0
+	_sync_screen(false)
 	log_event("Quick Sync survived; action items: none")
 	for entry: Array in [["QuickSyncDoorA", -10.25], ["QuickSyncDoorB", -5.75]]:
 		var door: StaticBody3D = room.get_node(entry[0])
@@ -1601,7 +1689,7 @@ func _debt_dashboard() -> void:
 
 
 func modal_pending() -> bool:
-	return upgrade_pending or decision_pending or talking != null
+	return upgrade_pending or decision_pending or talking != null or quick_sync == "standup"
 
 
 func _choose_modal(index: int) -> void:

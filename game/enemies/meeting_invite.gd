@@ -4,6 +4,7 @@ extends "res://game/enemies/incident.gd"
 
 signal zone_requested(position: Vector3)
 const VISUAL: PackedScene = preload("res://game/enemies/meeting_invite_visual.tscn")
+@export var standup_facilitator: bool = false
 @export var zone_interval: float = 6.0
 @export var preferred_distance: float = 7.0
 var zone_cooldown: float = 2.5
@@ -12,11 +13,12 @@ var details: Node3D
 
 
 func _ready() -> void:
-	title = "THE MEETING INVITE"
+	title = "THE DAILY STAND-UP" if standup_facilitator else "THE MEETING INVITE"
 	magic_color = Color(.74, .5, 1)
 	magic_accent = Color(.55, .78, 1)
 	magic_words = ["9:00", "SYNC", "1:1", "ALL HANDS", "RSVP"]
-	rig_kind = "invite"
+	rig_kind = "standup" if standup_facilitator else "invite"
+	bark_kind = "invite"
 	attack_style = "quake"
 	motto = "Your attendance is mandatory."
 	max_health = 100
@@ -26,9 +28,12 @@ func _ready() -> void:
 		get_node(part).hide()
 	details = VISUAL.instantiate()
 	visual.add_child(details)
-	# The invite itself hovers above the mech that keeps sending it.
+	# The agenda hovers above the monster that keeps sending it.
 	details.get_node("Card").position = Vector3(0, 3.25, 0)
 	details.get_node("Card").scale = Vector3.ONE * .75
+	if standup_facilitator:
+		details.get_node("Card/Title").text = "STAND-UP"
+		details.get_node("Card/Detail").text = "15 MIN. NO EXCEPTIONS."
 
 
 func reset_enemy() -> void:

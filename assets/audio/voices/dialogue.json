@@ -1210,6 +1210,76 @@
       "fallback_duration": 6.0,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "standup_facilitator",
+      "character": "FACILITATOR",
+      "text": "Daily stand-up. Yesterday? Today? Any blockers?",
+      "subtitle": "Daily stand-up. Yesterday? Today? Any blockers?",
+      "voice_profile": "management",
+      "direction": "Warm professionalism, artificial optimism, quiet pressure. Treat every request as reasonable.",
+      "audio": "res://assets/audio/voices/standup_facilitator.ogg",
+      "trigger": "Quick Sync stand-up scene before the transformation",
+      "priority": 3,
+      "fallback_duration": 5.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "standup_yesterday",
+      "character": "ATTENDEE",
+      "text": "Yesterday, I moved a ticket. Today, I move it back. No blockers.",
+      "subtitle": "Yesterday, I moved a ticket. Today, I move it back. No blockers.",
+      "voice_profile": "postmortem",
+      "direction": "Precise, polite compliance. Emotionally indifferent.",
+      "audio": "res://assets/audio/voices/standup_yesterday.ogg",
+      "trigger": "Quick Sync stand-up scene before the transformation",
+      "priority": 3,
+      "fallback_duration": 5.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "standup_point",
+      "character": "ENGINEER",
+      "text": "Production is on fire. One story point: put it out, then go home.",
+      "subtitle": "Production is on fire. One story point: put it out, then go home.",
+      "voice_profile": "protagonist",
+      "direction": "Conversational, exhausted, competent. Dry sarcasm; never announce the punchline.",
+      "audio": "res://assets/audio/voices/standup_point.ogg",
+      "trigger": "Quick Sync stand-up scene before the transformation",
+      "priority": 3,
+      "fallback_duration": 5.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "standup_react",
+      "character": "ATTENDEE",
+      "text": "One point? I spent three meetings estimating the fucking fire!",
+      "subtitle": "One point? I spent three meetings estimating the fucking fire!",
+      "voice_profile": "production",
+      "direction": "Measured authority. Flat certainty, clear consonants.",
+      "audio": "res://assets/audio/voices/standup_react.ogg",
+      "trigger": "Quick Sync stand-up scene before the transformation",
+      "priority": 3,
+      "fallback_duration": 5.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "standup_snap",
+      "character": "FACILITATOR",
+      "text": "Going home is not a deliverable. Re-estimate. Together. Forever.",
+      "subtitle": "Going home is not a deliverable. Re-estimate. Together. Forever.",
+      "voice_profile": "management",
+      "direction": "Warm professionalism, artificial optimism, quiet pressure. Treat every request as reasonable.",
+      "audio": "res://assets/audio/voices/standup_snap.ogg",
+      "trigger": "Quick Sync stand-up scene before the transformation",
+      "priority": 3,
+      "fallback_duration": 5.0,
+      "optional": false,
+      "status": "generated"
     }
   ]
 }

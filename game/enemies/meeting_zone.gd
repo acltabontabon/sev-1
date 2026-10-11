@@ -7,6 +7,8 @@ signal expired
 @export var telegraph: float = 1.1
 @export var duration: float = 4.0
 @export var tick_damage: int = 5
+@export var warning_text: String = "MEETING STARTS IN"
+@export var active_text: String = "MEETING IN PROGRESS\nATTENDANCE MANDATORY"
 var player: CharacterBody3D
 var age: float = 0.0
 var tick: float = 0.0
@@ -66,14 +68,14 @@ func contains(body: Node3D) -> bool:
 func _physics_process(delta: float) -> void:
 	age += delta
 	if age < telegraph:
-		label.text = "MEETING STARTS IN %d" % ceili(telegraph - age)
+		label.text = "%s %d" % [warning_text, ceili(telegraph - age)]
 		var pulse: float = .5 + .5 * sin(age * 20.0)
 		edge.scale = Vector3.ONE * lerpf(.3, 1.0, age / telegraph)
 		material.albedo_color.a = .08 + .1 * pulse
 		return
 	edge.scale = Vector3.ONE
 	material.albedo_color = Color(.3, .55, 1, .32)
-	label.text = "MEETING IN PROGRESS\nATTENDANCE MANDATORY"
+	label.text = active_text
 	if age >= telegraph + duration:
 		expired.emit()
 		set_physics_process(false)

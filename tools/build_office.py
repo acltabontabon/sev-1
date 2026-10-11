@@ -348,14 +348,19 @@ s.text('Uptime','UPTIME 99.999%',(-1.7,1.05,-15.6),.004,48,(.3,.95,.7,1))
 # Meeting wing: corridor x 14..18.5; Quick Sync and the pantry open off it.
 s.box('WingFloor',(20.75,-.25,0),(13,.5,32),'carpet',True)
 s.box('WingCeiling',(20.75,3.9,0),(13,.2,32),'ceiling_tile',True)
-s.box('WingEastWall',(27.25,2,0),(.5,4,32.5),'plaster',True)
+# Quick Sync annex adds four metres of width without enlarging the pantry.
+s.box('WingEastWall',(27.25,2,7),(.5,4,18.5),'plaster',True)
+s.box('SyncAnnexFloor',(29.25,-.25,-9),(4,.5,14),'carpet',True)
+s.box('SyncAnnexCeiling',(29.25,3.9,-9),(4,.2,14),'ceiling_tile',True)
+s.box('SyncEastWall',(31.25,2,-9),(.5,4,14.5),'plaster',True)
+s.box('SyncAnnexNorthWall',(29.25,2,-16),(4,4,.5),'plaster',True)
 for z in [-16,16]: s.box(f'WingEnd{z}',(20.75,2,z),(13,4,.5),'plaster',True)
 for name,(z,length,mat) in {'QuickSyncGlassNorth':(-12.625,6.25,'glass'),'QuickSyncGlassSouth':(-4.25,4.5,'glass'),'CopyRoomWall':(2.5,9,'plaster'),'PantryWallSouth':(12.875,5.75,'plaster')}.items():
     s.box(name,(18.5,1.9,z),(.15,3.8,length),mat,True)
 for z in [-15.75,-9.5,-6.5,-2]: s.box(f'QuickSyncMullion{z}',(18.5,1.9,z),(.12,3.8,.12),'metal')
 s.box('QuickSyncHeader',(18.5,3.45,-8),(.15,.7,3),'plaster')
 s.box('PantryHeader',(18.5,3.45,8.5),(.15,.7,3),'plaster')
-s.box('QuickSyncSouthWall',(22.75,1.9,-2),(8.5,3.8,.2),'plaster',True)
+s.box('QuickSyncSouthWall',(24.75,1.9,-2),(12.5,3.8,.2),'plaster',True)
 s.box('PantryNorthWall',(22.75,1.9,3.5),(8.5,3.8,.2),'plaster',True)
 s.box('PantryBackWall',(22.75,1.9,13),(8.5,3.8,.2),'plaster',True)
 # Sliding meeting doors: parked inside the glass; the trap moves them shut and solid.
@@ -367,16 +372,18 @@ s.text('QuickSyncStatus','IN USE SINCE 2021',(18.4,2.82,-8),.003,32,(1,.45,.35,1
 s.text('PantrySign','PANTRY  ·  RECOVERY ZONE',(18.4,3.1,8.5),.0045,44,(.95,.95,.95,1),rot=(0,-90,0))
 s.text('CopyRoomSign','COPY ROOM  ·  OUT OF TONER SINCE Q2',(18.4,2.2,1),.0038,32,(.75,.8,.82,1),rot=(0,-90,0))
 s.text('WingWayfinding','← OPERATIONS          DESKS →',(14.6,3.0,0),.004,40,(.75,.8,.82,1),rot=(0,90,0))
-# Quick Sync: the table is a real obstacle; the screen shows the invite that never ends.
-s.box('SyncTable',(22.75,.38,-8.75),(2.2,.76,6),'walnut',True)
-for x,rot in [(21.15,90),(24.35,-90)]:
-    for z in [-11,-9.5,-8,-6.5]: s.instance(f'SyncChair{x}_{z}','chair',(x,0,z),rot)
-s.box('SyncScreen',(26.95,2.0,-8.75),(.06,1.4,2.6),'plastic')
-s.box('SyncDisplay',(26.91,2.0,-8.75),(.01,1.25,2.45),'screen')
-s.text('SyncTitle','QUICK SYNC  (15 MIN)',(26.89,2.4,-8.75),.00405,52,(.95,.95,.95,1),rot=(0,-90,0))
-s.text('SyncDetail','Organizer: Leadership\n47 guests  ·  0 agenda items\nRecurring: daily, forever',(26.89,1.8,-8.75),.0033,36,(.75,.85,.9,1),rot=(0,-90,0))
-s.light('QuickSyncLight',(22.75,3.3,-8.75),(1,.86,.68),1.6,9)
-s.light('ProjectorGlow',(25.8,2.0,-8.75),(.4,.75,1),0.0,6)
+# Folded into breakout stations: an uninterrupted central floor for dodges and flanks.
+s.box('SyncTable',(24.75,.38,-14.2),(4.4,.76,1.1),'walnut',True)
+s.box('SyncBreakoutTable',(27.8,.38,-3.6),(3.2,.76,1.1),'walnut',True)
+for idx,(x,z,rot) in enumerate([(22.8,-15.1,0),(24.3,-15.1,0),(25.8,-15.1,0),(27,-2.65,180),(28.6,-2.65,180)]):
+    s.instance(f'SyncChair{idx}','chair',(x,0,z),rot)
+s.box('SyncScreen',(30.95,2.0,-8.75),(.06,1.4,2.6),'plastic')
+s.box('SyncDisplay',(30.91,2.0,-8.75),(.01,1.25,2.45),'screen')
+s.text('SyncTitle','QUICK SYNC  (15 MIN)',(30.89,2.4,-8.75),.00405,52,(.95,.95,.95,1),rot=(0,-90,0))
+s.text('SyncDetail','Production is down.\nFirst: align on alignment.\nThen: discuss going home.',(30.89,1.8,-8.75),.0033,36,(.75,.85,.9,1),rot=(0,-90,0))
+s.light('QuickSyncLight',(24.75,3.3,-8.75),(1,.86,.68),1.6,13)
+s.light('ProjectorGlow',(29.8,2.0,-8.75),(.4,.75,1),0.0,12)
+s.text('SyncParkingLot','THE PARKING LOT\nWhere urgent things go to die.',(24.75,2.2,-2.12),.0035,38,(.75,.85,.9,1),rot=(0,180,0))
 # Pantry: one meaningful machine, three honest reactions.
 s.collider('CounterCollision',(26.3,.45,6.8),(.96,.9,6.0))
 for idx,z in enumerate([4.3,5.16,6.02,7.74,8.6,9.46]): s.glb(f'Cabinet{idx}','kitchen_cabinet',(26.3,0,z),-90,2.0)
@@ -460,11 +467,11 @@ s.text('VaultTitle','PRODUCTION CORE  ·  LEDGER OF RECORD',(9,5.45,-45.27),.005
 for idx,(x,z,color) in enumerate([(4,-34,(.55,.3,1)),(14,-34,(.55,.3,1)),(9,-43,(1,.2,.12)),(9,-38,(.4,.6,1))]):
     s.light(f'VaultLight{idx}',(x,4.6,z),color,1.4,11)
 s.node('SpawnPoints','Node3D')
-for name,pos in [('A1',(-2,-8)),('A2',(2,1)),('A3',(-2,5)),('A4',(3,-4)),('D1',(-3,-11)),('D2',(2,-12)),('D3',(4,-7)),('D4',(-1,-6)),('B1',(25.5,-13.5)),('B2',(25.5,-3.5)),('B3',(20.2,-14)),('B4',(20.2,-3.6))]:
+for name,pos in [('A1',(-2,-8)),('A2',(2,1)),('A3',(-2,5)),('A4',(3,-4)),('D1',(-3,-11)),('D2',(2,-12)),('D3',(4,-7)),('D4',(-1,-6)),('B1',(28.5,-11.5)),('B2',(25.5,-3.5)),('B3',(22,-12)),('B4',(25,-5))]:
     s.marker('Spawn_'+name,(pos[0],.05,pos[1]))
 s.marker('VaultArrival',(9,.05,-38))
 s.marker('VaultEntry',(9,.05,-29))
-s.marker('QuickSyncCenter',(22.75,.05,-8.75))
+s.marker('QuickSyncCenter',(24.75,.05,-8.75))
 s.marker('CoffeeMachine',(25.4,.05,5.2))
 s.marker('VendingMachine',(20.4,.05,11.3))
 s.marker('Microwave',(25.4,.05,8.8))

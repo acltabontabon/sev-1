@@ -80,6 +80,8 @@ var attack_style: String = "slash"
 var last_state: State = State.IDLE
 ## Which CC0 rigged body to wear (MonsterRig.KINDS); archetypes set it before super._ready().
 var rig_kind: String = "record"
+## A visual variant can keep the archetype’s existing voiced reactions.
+var bark_kind: String = ""
 ## The overtime employee this incident is still wearing (employee_host.gd), and how long
 ## until it breaks out. Set by `disguise()` before the enemy enters the tree.
 var host: Node3D
@@ -645,11 +647,12 @@ func bark(moment: String, chance: float = 1.0, urgent: bool = false) -> bool:
 		if now - last_words_ms < 650:
 			return false
 		last_words_ms = now
-	var lines: Array = preload("res://game/incidents/dialogues.gd").data().get("barks", {}).get(rig_kind, {}).get(moment, [])
+	var voice_kind: String = rig_kind if bark_kind.is_empty() else bark_kind
+	var lines: Array = preload("res://game/incidents/dialogues.gd").data().get("barks", {}).get(voice_kind, {}).get(moment, [])
 	if lines.is_empty():
 		return false
 	var index: int = randi() % lines.size()
-	last_bark = "bark_%s_%s_%d" % [rig_kind, moment, index]
+	last_bark = "bark_%s_%s_%d" % [voice_kind, moment, index]
 	next_bark_ms = now + 2200
 	bark_cooldown = 5.0
 	bubble.text = lines[index]

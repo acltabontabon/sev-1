@@ -37,6 +37,10 @@ Human checkpoint: trigger a strange employee at close range, watch the full body
 change, then run/dodge away; repeat beside furniture and in the Quick Sync.
 Accept only if the staging reads clearly and the retreat feels fair.
 
+The 11 October Quick Sync refinement expands the room and adds projector action-item
+circles; see the [meeting encounter](game_design.md#emergency-alignment-meeting-implemented-prototype-11-october-2026).
+Human space, challenge, comedy and readability acceptance remain pending.
+
 ## Next acceptance increment
 
 Run the packaged Friday Deployment slice with the creator and a few external testers.

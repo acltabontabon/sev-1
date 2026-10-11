@@ -43,3 +43,9 @@ acceptance. See [release asset inventory](../../docs/asset_licenses.md).
 ## Authored speech
 
 Milestone 11 adds 22 candidate Kokoro speech clips under `voices/`, separate from the original synthesized effects. See the [voice guide](../../docs/voices.md), [manifest](voices/dialogue.json), and [provenance ledger](voices/provenance.json). Human listening acceptance is pending. Runtime needs no network or generator.
+
+
+The 11 October Quick Sync stand-up adds five original scripted lines, synthesized locally
+with the existing pinned Kokoro model and stock profiles. Their inputs, voices and output
+checksums are recorded in `voices/dialogue.json` and `voices/provenance.json`; the game
+plays prerecorded Ogg files only. Human casting/mix acceptance remains pending.
