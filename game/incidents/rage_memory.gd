@@ -29,7 +29,7 @@ func _ready() -> void:
 		body.position = memory[1]
 		body.scale = Vector3.ONE * .62
 		body.rotation.y = memory[3]
-		CREW.dress(body, entry.palette)
+		CREW.dress(body, entry.palette, entry.get("outfit", "office"))
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		animator.add_animation_library("ual", MOTION)
 		animator.play(memory[2])

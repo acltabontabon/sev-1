@@ -414,7 +414,7 @@ func _person(at: Vector3, model: String, palette: Array, clip: String) -> void:
 	var body: Node3D = load(ROOT + model).instantiate()
 	incident.add_child(body)
 	body.scale = Vector3.ONE * .62
-	CREW.dress(body, palette)
+	CREW.dress(body, palette, "athletic")
 	var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 	animator.add_animation_library("ual", MOTION)
 	animator.play(clip)

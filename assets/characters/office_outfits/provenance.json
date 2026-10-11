@@ -1,0 +1,15 @@
+{
+  "license": "CC0-1.0",
+  "source": "Existing Quaternius Ultimate Animated Character Pack female FBX assets",
+  "changes": "Original fitted skinned skirts, bare calf assignments, small head-bound earrings and one adult director V-neck blouse; original rigs and hairstyles retained",
+  "builder": "tools/build_office_outfits.gd",
+  "sha256": {
+    "assets/characters/office_outfits/director_skirt.res": "ea484cdf11d0669572ab7b7d0e7c54a4c74d645406a0f94f08eff567420dc5e5",
+    "assets/characters/office_outfits/blouse_skirt.res": "d2762afadf3f94132349229f050c934378015c102c9566bfe7b25c11dabf3f88",
+    "assets/characters/office_outfits/casual_skirt.res": "62d0dc9d23ddd23504810115d8f9a037be93bf37daad909bc1d4e4a34aad54b7",
+    "assets/characters/office_outfits/suit_skirt.res": "3a8b0e218d52c408fe6ff7f6f8bfac9b6e7279066899b94161719d5c2ef7ee78",
+    "assets/characters/quaternius/casual_female.fbx": "abde1b986cf3d5178e1de21efee3536b27984651b42d0e931c837615b3fcfd7a",
+    "assets/characters/quaternius/casual2_female.fbx": "4c07bb06db2a18a6ed262f0dcb62f175bea67317b713bac0a8c8934ded803a4a",
+    "assets/characters/quaternius/suit_female.fbx": "39668eca461ea0eabffd04d9dcfa0595395899a20cc935f3b86c78279fb19442"
+  }
+}

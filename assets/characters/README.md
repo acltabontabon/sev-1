@@ -151,10 +151,15 @@ from OpenGameArt without an account. They use a different (UE-style / Rigify) sk
 rotation from each library's A_TPose, and bakes them into `game/player/engineer_animations.res`.
 
 
-## MakeHuman coworker trial (11 October 2026)
+## Drew restoration (11 October 2026)
 
-Drew (Recruiter) alone uses a MakeHuman body and free office suit. The model is
-2.06 m tall at runtime to match the measured original cast, with a dedicated
-retargeted animation library and adjusted eye-height framing. Every other body is
-unchanged. [Sources and rebuild](makehuman_trial/README.md),
-[review checkpoint and limitations](../../docs/makehuman_trial.md).
+Drew (Recruiter) again uses the original Quaternius suit body and shared coworker
+motion. The creator requested removal of the human-model trial; its exported art,
+scene and build tools are removed. [Restoration checkpoint](../../docs/drew_restoration.md).
+
+## Female office outfits (11 October 2026)
+
+The existing female bodies now use original fitted skirts, blouses/skirt suits and
+small earrings. Marie alone has a shorter skirt and lower-cut blouse; Nadia and the
+female planted employees retain ordinary office outfits. Original FBX rigs and
+hairstyles are preserved. [Source, edits and review](office_outfits/README.md).

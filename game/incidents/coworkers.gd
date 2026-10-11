@@ -83,7 +83,12 @@ const CHAIR_FORWARD: float = .3
 const GESTURE_SECONDS: float = 3.5
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
-const RECRUITER_MOTION: AnimationLibrary = preload("res://assets/characters/makehuman_trial/recruiter_gestures.res")
+const FEMALE_OUTFITS: Dictionary = {
+	"casual_female.fbx": preload("res://assets/characters/office_outfits/casual_skirt.res"),
+	"casual2_female.fbx": preload("res://assets/characters/office_outfits/blouse_skirt.res"),
+	"suit_female.fbx": preload("res://assets/characters/office_outfits/suit_skirt.res"),
+}
+const DIRECTOR_OUTFIT: ArrayMesh = preload("res://assets/characters/office_outfits/director_skirt.res")
 ## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
 const CAST: Array[Dictionary] = [
@@ -103,12 +108,11 @@ const CAST: Array[Dictionary] = [
 		"line": "I'm working from home. This is home now.", "palette": [Color(.85, .35, .55), Color(.25, .25, .3), Color(.88, .7, .58), Color(.55, .4, .18)]},
 	{"name": "Microwave", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(24.4, 0, 8.8), "facing": PI * .5, "gesture": "Idle",
 		"line": "It said one minute. That was forty minutes ago.", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
-	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(10.25, 1.5, -9.25), "facing": PI * .15, "gesture": "Victory",
-		"trial_body": "res://game/incidents/makehuman_recruiter.tscn",
+	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(7.0, 1.5, -4.9), "facing": PI * .15, "gesture": "Victory",
 		"line": "We're like a family here. A family with KPIs.", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},
-	{"name": "SRE", "body": "casual_female.fbx", "routine": "sit", "at": Vector3(-6.5, 0, .87), "facing": PI,
+	{"name": "SRE", "body": "casual2_female.fbx", "routine": "sit", "at": Vector3(-6.5, 0, .87), "facing": PI,
 		"line": "I'm not on call. I AM the call.", "palette": [Color(.18, .2, .24), Color(.12, .12, .16), Color(.66, .46, .33), Color(.06, .05, .05)]},
-	{"name": "Director", "body": "suit_female.fbx", "routine": "pace", "at": Vector3(2.6, 0, -9.0), "facing": 0.0, "route": Vector3(0, 0, 6.5),
+	{"name": "Director", "body": "suit_female.fbx", "outfit": "low_cut", "routine": "pace", "at": Vector3(2.6, 0, -9.0), "facing": 0.0, "route": Vector3(0, 0, 6.5),
 		"line": "Love the energy! Can we make it… more?", "palette": [Color(.75, .2, .32), Color(.12, .1, .14), Color(.86, .66, .52), Color(.62, .44, .2)]},
 	{"name": "Designer", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-11.1, 0, -2.9), "facing": -.9, "gesture": "ual/talking",
 		"line": "My husband thinks I'm at the gym. Technically this is cardio.", "palette": [Color(.28, .62, .78), Color(.85, .8, .7), Color(.74, .55, .4), Color(.15, .1, .08)]},
@@ -126,15 +130,15 @@ func _ready() -> void:
 	aid_rng.randomize()
 	player = get_tree().get_first_node_in_group("players") as Node3D
 	for entry: Dictionary in CAST:
-		var body: Node3D = load(entry.get("trial_body", ROOT + entry.body)).instantiate()
+		var body: Node3D = load(ROOT + entry.body).instantiate()
 		body.name = entry.name
 		add_child(body)
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		# The same rig as the engineer: his retargeted library (talking, phone, repairs).
-		animator.add_animation_library("ual", RECRUITER_MOTION if entry.has("trial_body") else MOTION)
+		animator.add_animation_library("ual", MOTION)
 		for clip in ["Idle", "Walk", "Walk_Carry", "PickUp"]:
 			animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
-		dress(body, entry.palette)
+		dress(body, entry.palette, entry.get("outfit", "office"))
 		var line: Label3D = Label3D.new()
 		line.text = entry.line
 		line.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1021,10 +1025,15 @@ func _fighting() -> bool:
 
 
 ## Recolour a Quaternius office body: shirt, pants, skin, hair (shared with the hosts).
-static func dress(body: Node3D, palette: Array) -> void:
-	var names: Dictionary = {"Shirt": palette[0], "Pants": palette[1], "Skin": palette[2], "Hair": palette[3], "Face": Color(.04, .04, .05)}
+static func dress(body: Node3D, palette: Array, outfit: String = "office") -> void:
+	var names: Dictionary = {"Shirt": palette[0], "Pants": palette[1], "Skirt": palette[1], "OutfitSkin": palette[2], "Skin": palette[2], "Hair": palette[3], "Face": Color(.04, .04, .05)}
 	for mesh in body.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
+		var model: String = body.scene_file_path.get_file()
+		if outfit != "athletic" and FEMALE_OUTFITS.has(model) and instance.skin != null:
+			for surface in range(instance.mesh.get_surface_count()):
+				instance.set_surface_override_material(surface, null)
+			instance.mesh = DIRECTOR_OUTFIT if outfit == "low_cut" else FEMALE_OUTFITS[model]
 		for surface in instance.mesh.get_surface_count():
 			var source: Material = instance.mesh.surface_get_material(surface)
 			if source == null or not names.has(source.resource_name):

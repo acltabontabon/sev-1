@@ -1672,23 +1672,6 @@ position = Vector3(12.00000, 0.20000, 4.00000)
 mesh = SubResource("r36")
 
 
-[node name="Column12_12" type="StaticBody3D" parent="."]
-position = Vector3(12.00000, 2.75000, 12.00000)
-
-
-[node name="Mesh" type="MeshInstance3D" parent="Column12_12"]
-position = Vector3(0.00000, 0.00000, 0.00000)
-mesh = SubResource("r34")
-
-[node name="Collision" type="CollisionShape3D" parent="Column12_12"]
-position = Vector3(0.00000, 0.00000, 0.00000)
-shape = SubResource("r35")
-
-[node name="Base12_12" type="MeshInstance3D" parent="."]
-position = Vector3(12.00000, 0.20000, 12.00000)
-mesh = SubResource("r36")
-
-
 [node name="Mullion-14" type="MeshInstance3D" parent="."]
 position = Vector3(-13.75000, 3.00000, -14.00000)
 mesh = SubResource("r37")

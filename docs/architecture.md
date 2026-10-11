@@ -100,6 +100,13 @@ The final Milestone 5 results on 10 October 2026 report 155 assertions passing: 
 
 Known limits: furniture and characters still use simplified native geometry; art/animation and sounds are provisional; no permanent progression, export validation, long-duration performance soak, or Windows runtime test is present. The office 1080p Forward+/Metal measurement on M2 Pro averaged 119.36 FPS, with median/p95/max frame times of 8.27/10.65/67.43 ms (2,388 samples, five-second warm-up excluded). The maximum includes an unexplained isolated hitch. `tests/office_preview.gd -- --measure` reproduces the 25-second elevated-health combat scenario and captures images outside measurement; see README. This is not a release performance guarantee. Preserve the current playable while addressing these through the roadmap's separate gates.
 
+The female coworker/employee costumes are authored offline by
+`tools/build_office_outfits.gd` from the existing CC0 Quaternius meshes.
+`coworkers.dress` selects a shared skinned mesh and applies each person's palette;
+Nadia, Marie and female outbreak hosts keep the original rigs and motion libraries.
+Marie alone uses the lower-neckline variant. The remote fitness avatar keeps its
+athletic outfit. [Source and review](../assets/characters/office_outfits/README.md).
+
 ## Office After Hours environment
 
 The 28×32 m shell and original ramp/deck slope preserve the movement foundation. The

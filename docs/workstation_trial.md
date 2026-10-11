@@ -55,6 +55,10 @@ is rebaked; walking into a chair/drawer stops the capsule, and
 the existing enemy-pursuit and ramp checks cover the resulting routes. The conference
 outbreak point moves from between the now-solid chairs to the open entrance area;
 every outbreak site and its twelve surrounding spawn slots are checked for reachability.
+The creator subsequently requested removal of the stone obstruction beside the lounge
+doorway: the x=12, z=12 column and its base are removed, with navigation rebaked and
+a real walking check through that approach. The lounge outbreak point also moves
+onto clear floor so its reveal cannot settle onto a furniture-top navigation island.
 
 ## Review and retry
 
@@ -128,7 +132,7 @@ single-character trial, not authorization to replace the cast.
   animation retargeting required. Community add-ons carry their own licenses; only
   individually verified assets qualify.
 
-Source pages checked 11 October 2026. MakeHuman was subsequently selected for the
-[single Drew trial](makehuman_trial.md),
-with build-time export/retargeting and scale correction. Quaternius Universal Base
-Characters remains unimported. Neither source establishes finished facial animation.
+Source pages checked 11 October 2026. The single-coworker human-model trial was
+subsequently removed at the creator's request; Drew uses his original Quaternius suit
+model again. [Restoration checkpoint](drew_restoration.md). Neither candidate above
+is imported or accepted as a cast replacement.

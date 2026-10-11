@@ -36,7 +36,7 @@ const SITES: Array = [
 	["Operations", Vector3(0.0, 0, -12.0)],
 	["the east corridor", Vector3(16.2, 0, 5.5)],
 	["the conference deck", Vector3(8.0, 1.5, -4.6)],
-	["the lounge", Vector3(9.5, 0, 11.0)],
+	["the lounge", Vector3(9.5, 0, 9.0)],
 	["the meeting wing", Vector3(16.2, 0, -9.5)],
 ]
 const ROAM_DISTANCE: float = 14.0

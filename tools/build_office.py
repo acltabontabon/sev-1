@@ -276,6 +276,8 @@ s.box('SkirtingSouth',(0,.10,15.72),(27.5,.2,.05),'metal')
 for x,length in [(-3.4,20.7),(12.4,2.7)]: s.box(f'SkirtingNorth{x}',(x,.10,-15.72),(length,.2,.05),'metal')
 for x in [-12,12]:
     for z in [-12,-4,4,12]:
+        # The lounge-side doorway needs a clear approach, including its base.
+        if x == 12 and z == 12: continue
         s.box(f'Column{x}_{z}',(x,2.75,z),(.65,5.5,.65),'plaster',True)
         s.box(f'Base{x}_{z}',(x,.20,z),(.68,.4,.68),'metal')
 for z in range(-14,16,4):

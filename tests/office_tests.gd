@@ -120,6 +120,15 @@ func _run() -> void:
 	Input.action_release("move_forward")
 	check(player.position.z > 5.75 and player.position.z < 6.3, "walking stops at the desk's drawer pedestal")
 
+	player.camera_rig.reset_view()
+	player.position = Vector3(10,.05,12)
+	player.velocity = Vector3.ZERO
+	Input.action_press("move_right")
+	await frames(90)
+	Input.action_release("move_right")
+	check(player.position.x > 15.5 and player.position.x < 18.3,
+		"walking through the lounge-side doorway clears the removed column/base: %s" % player.position)
+
 	await setup_pair(Vector3(0, .05, 0))
 	player.position = Vector3(3, .05, -5)
 	await frames(5)

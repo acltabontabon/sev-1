@@ -1054,7 +1054,7 @@ func dialogue_camera(who: String, time: float, line: int) -> void:
 	toward = toward.normalized() if toward.length() > .1 else Vector3.FORWARD
 	var side: Vector3 = toward.cross(Vector3.UP).normalized()
 	var mine: Vector3 = from + Vector3.UP * 1.65
-	var eye_height: float = float(talk_speaker.get_meta("dialogue_focus_height", 1.65)) if talk_standing else 1.2
+	var eye_height: float = 1.65 if talk_standing else 1.2
 	var theirs: Vector3 = to + Vector3.UP * eye_height
 	var spot: Vector3
 	var look: Vector3

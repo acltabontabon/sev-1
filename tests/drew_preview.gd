@@ -41,20 +41,7 @@ func _run() -> void:
 		animator.play(entry[0], 0.0)
 		animator.seek(entry[1], true)
 		animator.pause()
-		await _grab("makehuman_" + entry[2])
-	# Baseline at the same position, scale, lighting and camera; review only.
-	body.hide()
-	var original: Node3D = load("res://assets/characters/quaternius/suit_male.fbx").instantiate()
-	crew.add_child(original)
-	original.transform = body.transform
-	crew.dress(original, person.entry.palette)
-	var original_animator: AnimationPlayer = original.find_child("AnimationPlayer", true, false)
-	original_animator.play("CharacterArmature|Idle")
-	original_animator.seek(.5, true)
-	original_animator.pause()
-	await _grab("makehuman_before")
-	original.queue_free()
-	body.show()
+		await _grab("drew_" + entry[2])
 	camera.current = false
 	(player.get_node("CameraRig/SpringArm3D/Camera3D") as Camera3D).make_current()
 	player.position = body.position + Vector3(0, .05, 1.6)
@@ -63,7 +50,7 @@ func _run() -> void:
 	incident.talk(target)
 	assert(incident.dialogue.is_open())
 	incident._talk_frame("them", .8, 1, "We're like a family here.")
-	await _grab("makehuman_dialogue")
+	await _grab("drew_dialogue")
 	incident.dialogue.close()
 	scene.queue_free()
 	await create_timer(.25).timeout

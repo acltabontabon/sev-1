@@ -137,10 +137,12 @@ readability, combo recovery and skill-contact acceptance remain pending. No new
 abilities, character replacement or published release are implied.
 
 
-The 11 October [one-coworker MakeHuman trial](makehuman_trial.md) uses only free CC0
-assets for Drew. Creator feedback corrected its initial size to the measured current
-cast height. His dialogue, gestures and retry remain the acceptance checkpoint;
-replacing the remaining cast is deferred until the creator reviews this comparison.
+Drew's original Quaternius suit model is restored at the creator's request. The
+human-model trial, its exported art, scene and build tools have been removed.
+[Restoration and playtest checkpoint](drew_restoration.md). The subsequent creator
+request adds feminine office silhouettes through fitted skirts, blouses/skirt suits
+and earrings, with one lower-neckline outfit for adult director Marie.
+[Outfit source and review](../assets/characters/office_outfits/README.md).
 
 The 11 October [finishing-duel choreography](game_design.md#stage-one-finishing-duel-implemented-prototype-11-october-2026)
 adds a reciprocal sword/trident lock, duck, riposte, block and knockback exchange before the existing

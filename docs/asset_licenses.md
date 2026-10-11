@@ -106,18 +106,6 @@ archive checksum and rebuild instructions: [weapon provenance](../assets/charact
 The original native Monolith remains available as a fallback. Creator visual acceptance
 is pending; this trial adds no new combat mechanics.
 
-## One-coworker MakeHuman trial — 11 October 2026
-
-Drew alone uses MakeHuman Community’s CC0 body, game-engine rig, skin, eyes, brows,
-hair and shoes, with Margaret Toigo’s CC0 Suits 01 jacket/tie outfit. Selected asset
-headers explicitly identify CC0. Source archive and output checksums, selected files,
-modifications and the bundled asset license are recorded in
-[MakeHuman trial provenance](../assets/characters/makehuman_trial/README.md).
-MPFB2 and portable Blender are development tools and do not ship; no GPL tool code
-is embedded in the game. Existing Quaternius CC0 motion is retargeted at build time.
-The exported GLB, extracted textures and two animation libraries use Git LFS.
-See the [scale, limitations and creator checkpoint](makehuman_trial.md).
-
 ## Optional local sword motion trial — 11 October 2026
 
 Kevin Iglesias' **Human Melee Animations FREE**, Godot/Unreal edition, provides the
@@ -135,3 +123,9 @@ uses Kay Lousberg's CC0 Skeleton Warrior, axe, shield and atlas from the same of
 Skeletons pack as the regular skeleton. Source revision and hashes are recorded in
 [provenance](../assets/enemies/warrior_trial/provenance.json). Runtime scale and dark
 armor presentation are local changes; attribution is optional. No paid assets are used.
+
+## Female office outfits — 11 October 2026
+
+Original skirt/blouse and earring mesh edits to the existing Quaternius CC0 female
+models. The unchanged source rigs and animation libraries are reused; generated
+ArrayMeshes use Git LFS. [Source, modifications and hashes](../assets/characters/office_outfits/README.md).
