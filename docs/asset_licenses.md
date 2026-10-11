@@ -8,6 +8,7 @@ included. The existing source and import sidecars are preserved.
 | Office geometry, materials, signs and skyline | Original Godot-native procedural work; [provenance](../assets/environment/README.md) | Usable native fallback; furniture/material fidelity remains provisional |
 | Engineer, keyboard blade, records and boss copies | Original AI-assisted procedural geometry; [provenance](../assets/characters/README.md) | Usable temporary art, not finished rigged characters |
 | Twelve WAV effects / office ambience | Original oscillator/noise synthesis; [provenance](../assets/audio/README.md) | Redistributable original work; listening/mix acceptance pending |
+| GARY's snoring (11 October 2026) | Original oscillator/noise synthesis; [provenance and behavior](snoring.md) | Implemented proximity loop; creator listening/mix acceptance pending |
 | UI, narrative, report text | Original project work | Implemented; creator editorial acceptance pending |
 | Engine, default font and default application icon | Official Godot 4.7.2 standard export templates | MIT engine and bundled library/font notices in [THIRD_PARTY_NOTICES.txt](../THIRD_PARTY_NOTICES.txt) |
 

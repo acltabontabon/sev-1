@@ -148,6 +148,11 @@ func _ready() -> void:
 		voice.unit_size = 6.0
 		voice.position.y = 1.5
 		body.add_child(voice)
+		if entry.routine == "asleep":
+			var snoring: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
+			snoring.name = "Snoring"
+			snoring.set_script(preload("res://game/incidents/sleeper_snoring.gd"))
+			body.add_child(snoring)
 		people.append({"entry": entry, "body": body, "animator": animator, "line": line,
 			"said": false, "line_left": 0.0, "clock": 0.0, "pause": 0.0, "out": true, "gesture_left": 0.0, "gesture_hold": 0.0,
 			"charging": false, "doom": 0.0, "fate": "", "engaged": false, "lapping": false, "fighting_for": 0.0, "wind": -1.0, "orbit": 0.0, "spin": 1.0,
