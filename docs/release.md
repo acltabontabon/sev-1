@@ -35,8 +35,8 @@ and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:
 
 ```sh
 git push origin main
-git tag -a v0.2.51 -m "SEV-1 0.2.51"
-git push origin v0.2.51
+git tag -a v0.2.52 -m "SEV-1 0.2.52"
+git push origin v0.2.52
 ```
 
 Tag and changelog/project/preset versions must agree. The pipeline requires no
@@ -49,6 +49,37 @@ checkout, exports the official universal template, then uses `lipo` to retain
 only Intel x86-64 in the executable and bundled dylibs before smoke testing.
 The original preset is restored after export.
 No paid identity or notarization is used by either path.
+
+## Verified playtest 0.2.51 — 12 October 2026
+
+Published [v0.2.51](https://github.com/acltabontabon/sev-1/releases/tag/v0.2.51)
+from `f2b56f2184719db03558faf59cd9c79eb20b7017` through
+[Actions run 38161182650](https://github.com/acltabontabon/sev-1/actions/runs/38161182650).
+The complete local validator and both native source validators passed. Windows
+export, packaged gameplay smoke, silent installation, installed-game smoke and
+uninstallation passed. Intel Mac export, architecture check, packaged gameplay
+smoke, DMG creation and verification passed.
+
+The public prerelease page was inspected in a logged-out browser: the playtest
+notice, artwork, current version and Windows/Intel Mac download table render.
+The six uploaded assets include both installers, their manifests and checksums.
+Downloaded public manifests/checksums match GitHub's asset digests; both manifests
+identify the exact tagged source above and agree with GitHub's installer digests.
+Windows setup is 140.2 MiB; the Intel Mac DMG is 156.1 MiB. Both remain unsigned
+and unnotarized.
+
+This snapshot combines the committed opening corrections with the rollback
+survey, crew promises, dialogue/grade pass and the intervening birthday, vault,
+outfit, menu and aftermath work listed in [the changelog](../CHANGELOG.md#0251--2026-10-12).
+README, release notes, player-facing release page and bundled tester guide were
+updated; the README's source-checkout preview section was removed. A synthetic
+PCM fixture exercises the speech-skip regression without leaking a headless Ogg
+decoder; runtime voice playback is unchanged by that test repair.
+
+Prior local rendered checks and the measured M2 Pro source probe are recorded in
+[the scene-flow checkpoint](scene_flow.md#acceptance-checkpoint). These checks do
+not establish ordinary Windows/Intel Mac GPU/audio performance, comedy, emotional
+impact or human acceptance. First-use hitches remain an open playtest concern.
 
 ## Verified playtest 0.2.50 — 11 October 2026
 
