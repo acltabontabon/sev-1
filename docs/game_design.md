@@ -213,6 +213,23 @@ boss; its reply eases back into the playable fight. The entire entrance remains
 skippable with TAB. This presentation adds about 12 seconds and no combat stat buff.
 The creator still needs to accept the emotional buildup, voice and hair silhouette.
 
+### Stage One finishing duel (implemented prototype, 11 October 2026)
+
+The lethal hit on The Variance now leads into a roughly 15-second reciprocal fight
+in the vault: standoff and charge, a sword-versus-trident shaft lock, breakaway, duck under a
+high trident sweep, low riposte, blocked heavy smash, knockback, recovery close-up and a
+second charge. The existing “CLOSED! AS! WON'T! FIX!” dismemberment completes it.
+The exchange keeps a consistent camera side, holds shared hand/blade contacts,
+and adds contact sparks, a wounded boss reaction and brief camera recoil. The boss
+keeps its trident and supports the shaft with both hands for the weapon clashes. Existing CC0 Quaternius clips supply both
+bodies; authored travel, blade poses and temporary arm IK coordinate the exchange.
+No new assets or gameplay abilities were introduced.
+
+TAB lands the final blow immediately; R can retry. The normal boss fight and the
+subsequent aftermath retain their existing rules. Human acceptance remains pending:
+judge whether both fighters look dangerous, the weapon lock and block connect, the duck
+reads clearly, the recovery feels earned, and the finisher remains the payoff.
+
 ### Incident 001 aftermath (implemented prototype, 11 October 2026)
 
 After the duel and the five memorial shots, the engineer looks down at JO and the

@@ -133,3 +133,9 @@ The 11 October [one-coworker MakeHuman trial](makehuman_trial.md) uses only free
 assets for Drew. Creator feedback corrected its initial size to the measured current
 cast height. His dialogue, gestures and retry remain the acceptance checkpoint;
 replacing the remaining cast is deferred until the creator reviews this comparison.
+
+The 11 October [finishing-duel choreography](game_design.md#stage-one-finishing-duel-implemented-prototype-11-october-2026)
+adds a reciprocal sword/trident lock, duck, riposte, block and knockback exchange before the existing
+boss finisher. Gate: creator accepts contact, weight, camera continuity, pacing and
+sound, including TAB skip and retry. It uses existing CC0 motion and adds no boss
+mechanic, new episode or release build.

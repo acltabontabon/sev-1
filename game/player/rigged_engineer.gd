@@ -54,6 +54,8 @@ var step_clip: StringName = &""
 ## spinning backhand, 2 leaping slam) and how far through it (0..1), set by the camera.
 var finish_style: int = 0
 var finish_progress: float = 0.0
+## A local duel director samples the body and sword together on its real-time clock.
+var duel_active: bool = false
 ## The finisher's timeline as fractions: wind-up, strike, then the follow-through.
 const FINISH_TIMING: Vector3 = Vector3(.16, .5, .34)
 ## Attacks and specials snap the body's facing to the aim at once (hitboxes need it);
@@ -131,6 +133,7 @@ func _ready() -> void:
 
 
 func reset_pose() -> void:
+	duel_active = false
 	story_hand_targets.clear()
 	story_walk_speed = 0.0
 	story_sit_progress = -1.0
@@ -332,6 +335,8 @@ func _physics_process(delta: float) -> void:
 			overtime_crackle = randf_range(.18, .45) / maxf(.2, overtime_strength)
 			var at: Vector3 = global_position + Vector3(randf_range(-.4, .4), randf_range(.4, 1.6), randf_range(-.4, .4))
 			ElementFx.bolt(self, at, at + Vector3(randf_range(-.5, .5), randf_range(-.4, .4), randf_range(-.5, .5)), Color(1, .9, .45), .08, .025)
+	if duel_active:
+		return
 	if not preview_clip.is_empty():
 		_scrub(preview_clip, animator.get_animation(_clip_name(preview_clip)).length * preview_at, 0.0, delta)
 		right_ik.active = false
@@ -615,6 +620,33 @@ func _on_hit_landed(target: Node3D) -> void:
 	if not called_out:
 		called_out = true
 		ElementFx.glyphs(self, global_position + Vector3.UP * 2.15, color, [ELEMENTS[index].call], .7, 0.0)
+
+
+## Cinematic only: no melee request, hitbox, health change or source root travel.
+func pose_duel(clip: String, progress: float, blade: Transform3D, offset: Vector3 = Vector3.ZERO, yaw: float = 0.0, ribbon: bool = false) -> void:
+	duel_active = true
+	story_pose = Pose.FINISH
+	story_walk_speed = 0.0
+	story_hand_targets.clear()
+	position = offset
+	rotation = Vector3(0, yaw, 0)
+	held = 0.0
+	shoulder_rest = 0.0
+	right_reach = 1.0
+	left_reach = 1.0
+	_scrub(clip, animator.get_animation(_clip_name(clip)).length * clampf(progress, 0.0, .999), 0.0, 0.0)
+	weapon.transform = blade
+	trail.emitting = ribbon
+	_solve(0.0)
+
+
+func end_duel() -> void:
+	duel_active = false
+	position = Vector3.ZERO
+	rotation = Vector3.ZERO
+	story_pose = Pose.ARMED
+	trail.emitting = false
+	trail.clear()
 
 
 func _staged(delta: float) -> void:

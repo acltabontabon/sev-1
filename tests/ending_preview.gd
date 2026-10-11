@@ -2,6 +2,7 @@ extends SceneTree
 ## Full duel/ending in the real application, ending on a usable main menu.
 ## sh tools/godot.sh --path . --script tests/ending_preview.gd
 ## -- --closing skips to Monday's final reply. --capture saves card/menu PNGs and quits.
+## -- --duel-only watches the real application duel, then closes at the aftermath.
 var app: Node
 var viewing: bool = true
 var captured: bool = false
@@ -30,6 +31,8 @@ func _capture_card() -> void:
 
 func _run() -> void:
 	app = load("res://game/release/front_end.tscn").instantiate()
+	if "--duel-only" in OS.get_cmdline_user_args():
+		app.preferences.path = "user://duel_preview.cfg"
 	root.add_child(app)
 	current_scene = app
 	await process_frame
@@ -68,6 +71,13 @@ func _run() -> void:
 		incident.boss.phase_time = 5.0
 		await create_timer(.2).timeout
 		incident.boss.receive_damage(incident.boss.health + 10, player.global_position)
+		if "--duel-only" in OS.get_cmdline_user_args():
+			while story.beat_shot != "all_hands":
+				await process_frame
+			await create_timer(1.5).timeout
+			print("DUEL PREVIEW COMPLETE")
+			quit()
+			return
 	while is_instance_valid(app.session):
 		await process_frame
 	viewing = false

@@ -765,7 +765,8 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   Overtime (`rigged_engineer.gd` `overtime()` / `overtime_fade()`). In the fight
   `variance_moves.gd` (a child of the boss) runs one move per shield cycle and owns its
   telegraphs and damage. A lethal blow is held (`spared`) and handed to `duel.gd`,
-  which plays the duel with the staged monster and calls `final_blow()` on the hidden
+  which samples a 15-second reciprocal duel with the staged monster and calls
+  `final_blow()` on the hidden
   real boss to slice it (severing limbs on the staged monster first and mirroring that on
   the real one); the RESOLVED ending then runs `all_hands.gd` (death, receipts, cent,
   memorial, tear close-up, desk sword placement and belongings pickup, the walk out
@@ -867,3 +868,39 @@ Original `keyboard_weapon.tscn` and the native engineer remain available; charac
 regeneration does not overwrite the selected weapon. Melee timing, damage, reach and
 trail offsets are unchanged. The authored metallic, normal and AO maps are embedded;
 roughness is a local constant. [Provenance and rebuilding](../assets/characters/heavy_greatsword/README.md).
+
+### Reciprocal boss duel (11 October 2026)
+
+`duel.gd` owns the local real-time choreography before the existing dismemberment.
+The engineer's `pose_duel()` samples existing CC0 body clips, authored blade transforms
+and its existing two-hand IK together; `duel_active` prevents the ordinary rig tick
+from overwriting these poses. The staged demon uses its own attack/run/hit clips and
+two temporary `TwoBoneIK3D` modifiers ending at `Middle1.L/R` (its wrist junctions).
+The trident remains visible. Its mesh is skinned to the left wrist; measured shaft
+points place the supporting hand and align the engineer’s blade at held clashes.
+Exit removes the modifiers, restores the modifier callback mode and releases the hero pose.
+Reset clears the override before returning to gameplay. No cinematic hit applies
+live damage until the original `final_blow()` handoff.
+
+`tests/duel_tests.gd` checks final skinned hand distances at the held contacts,
+reciprocal travel/duck/knockback, health preservation, real lethal-hit completion,
+TAB skip and mid-duel restart cleanup. `--preview` captures ten rendered beats;
+`--measure` samples a 60 FPS capped duel without captures, excluding its first three
+seconds. See the [playtest command](development.md#focused-playtest-checkpoints).
+
+Verification: the full `python3 tools/validate.py` suite passed after the armed
+choreography refinement. The dedicated headless and graphical duel checks passed, including
+visible trident, sword-to-shaft alignment and both fighters' grips, plus completion,
+skip and retry. Ten rendered shots were inspected; this corrected an opening camera
+outside the vault and an overly tilted recovery pose. The application preview also
+completed its duel-to-aftermath handoff with no engine errors; it emitted a nonfatal
+Camera3D physics-interpolation warning during the staged camera handoff.
+Its dedicated preferences/save path isolates
+future previews from player chapter progress.
+
+On Apple M2 Pro, 1280×720, Forward+/Metal with project defaults and a 60 FPS cap,
+a single rendered duel measured 59.92 FPS mean, 16.667 ms median, 17.028 ms p95 and
+25.706 ms maximum across 743 samples. The first three seconds and screenshot work
+were excluded. This staged measurement does not establish ordinary full-run
+performance or Windows runtime behavior. Human timing, weight and listening
+acceptance remain open; no release was rebuilt.

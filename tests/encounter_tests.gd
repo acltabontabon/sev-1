@@ -1031,7 +1031,7 @@ func _run() -> void:
 	await frames(2)
 	check(incident.presentation.beat_shot == "duel" and dueling.health > 0 and not dueling.visible and incident.presentation.demon.visible,
 		"the killing blow cuts to the duel; the real Variance waits, hidden, for it")
-	var duel_end: int = Time.get_ticks_msec() + 15000
+	var duel_end: int = Time.get_ticks_msec() + 25000
 	while incident.stage != incident.Stage.RESOLVED and Time.get_ticks_msec() < duel_end:
 		await frames(1)
 	await frames(2)

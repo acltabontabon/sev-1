@@ -72,4 +72,8 @@ unsigned-app prompts.
 
 ---
 
+Source-checkout checkpoint: double-click [duel_preview.command](duel_preview.command)
+to watch the new Stage One boss choreography directly. Creator pacing and sound
+review remain pending; this source refinement has not been packaged into a release.
+
 [Share playtest feedback](docs/testing.md) · [Credits](docs/asset_licenses.md) · [Development](docs/development.md)
