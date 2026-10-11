@@ -2,10 +2,12 @@ extends SceneTree
 ## Watch the cinematics in a window, in real time with sound: the narrated cold open, then
 ## the vault (the night shift's charge, the massacre and the hero entrance).
 ## sh tools/godot.sh --path . --script tests/cutscene_preview.gd [-- --vault | --finale]
+## `--play` hands control to the player after the entrance and keeps the game open.
 ## `--vault` skips straight to the vault; `--finale` also skips the massacre, then lands
 ## the killing blow: the duel and the ending. Close the window or wait for it to end.
 var scene: Node
 var captures: Dictionary = {}
+var playing: bool = false
 var player: CharacterBody3D
 
 
@@ -14,6 +16,8 @@ func _initialize() -> void:
 
 
 func _process(_delta: float) -> bool:
+	if playing:
+		return false
 	# A viewer, not a player: keep the incident running even without mouse capture.
 	if paused:
 		paused = false
@@ -30,8 +34,9 @@ func _run() -> void:
 	preferences.apply(scene)
 	var incident: Node = scene.get_node("Incident")
 	player = scene.get_node("Player")
-	player.max_health = 1000000
-	player.health = 1000000
+	if not "--play" in OS.get_cmdline_user_args():
+		player.max_health = 1000000
+		player.health = 1000000
 	player.camera_rig.set_capture(false)
 	if not ("--vault" in OS.get_cmdline_user_args() or "--finale" in OS.get_cmdline_user_args()):
 		while incident.stage == incident.Stage.ALERT:
@@ -92,5 +97,9 @@ func _run() -> void:
 			print("fell %d at %.1fs" % [fallen, (Time.get_ticks_msec() - began) / 1000.0])
 		await process_frame
 	print("the fight starts at %.1fs" % ((Time.get_ticks_msec() - began) / 1000.0))
+	if "--play" in OS.get_cmdline_user_args():
+		playing = true
+		player.camera_rig.set_capture(true)
+		return
 	await create_timer(6.0).timeout
 	quit()
