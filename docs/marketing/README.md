@@ -1,9 +1,35 @@
-# README screenshots
+# Screenshot provenance
+
+## Current release and README — 0.2.51, 12 October 2026
+
+Fresh, unretouched in-engine captures from Godot 4.7.2, Forward+ / Metal on
+Apple M2 Pro. Captured at `89293c4`; gameplay, project settings, assets and these
+preview scripts are identical to released `v0.2.51` (`f2b56f2`). Preview scripts
+stage encounters, cameras and timing; the survey fixture supplies Focus and a
+durable target. These screenshots demonstrate implemented presentation, not
+ordinary gameplay difficulty or measured performance. No runtime edits were made.
+
+| File | Local source capture | Resolution | Preview script |
+| --- | --- | --- | --- |
+| `v0_2_51_rollback.png` | `builds/heart_survey.png` | 1280 × 720 | `tests/heart_preview.gd -- --capture` |
+| `v0_2_51_crew.png` | `builds/heart_off_the_clock.png` | 1280 × 720 | `tests/heart_preview.gd -- --capture` |
+| `v0_2_51_birthday.png` | `builds/birthday_scene_4.png` | 1600 × 900 | `tests/birthday_preview.gd` |
+| `v0_2_51_vault.png` | `logs/arena_wide.png` | 1280 × 720 | `tests/vault_arena_preview.gd` |
+| `v0_2_51_title.png` | `builds/title_coffee_pickup.png` | 3200 × 1800 | `tests/title_coffee_preview.gd` |
+
+All five were visually reviewed for current character/office presentation, readable
+UI and relevant framing. The release page uses the first four to illustrate this
+build's changes. The root README uses the new title, survey and conversation.
+Existing game asset licenses apply; no outside or AI-generated promotional art was
+added. Git LFS and this directory's `.gdignore` cover these files.
+
+## Historical launch-page captures
 
 Unmodified captures of the actual SEV-1 development build, selected and visually
 reviewed on 11 October 2026. These are gameplay images, not promotional renders.
-The root README labels them as development screenshots; presentation may differ
-between versions. The title image includes the existing in-game SEV-1 wordmark.
+These were formerly used by the root README and release page. They are retained
+as historical captures, not current 0.2.51 illustrations. The title image includes
+the existing in-game SEV-1 wordmark.
 
 | File | Local source capture | Capture date |
 | --- | --- | --- |
