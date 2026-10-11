@@ -5,6 +5,11 @@ ordinary hardware playtesting remain separate from automated checks.
 
 ## Unreleased
 
+- Corrupted Records now use the free KayKit Skeleton Minion instead of the realistic
+  demon trials. Original cartoon materials and supplied animation clips retain
+  existing combat behavior, voices, hit timing and physical deaths. See
+  [integration and playtest checkpoint](assets/enemies/kaykit_trial/README.md).
+
 - Sword attacks now use full-body combat clips, two-handed grips, a distinct dash
   pose and counter guard. Kevin Iglesias' free two-handed attack is an optional
   local trial; public checkouts use the existing CC0 Quaternius fallback. See

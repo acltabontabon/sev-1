@@ -582,19 +582,19 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   for its `rig_kind` (record, blocker, invite, scope, variance, bug; archetypes set it
   before `super._ready()`) and hides the native boxes, keeping the record's loading halo
   and each archetype's prop (BLOCKED sign, invite card, sticky notes, status crown). The
-  rig (Quaternius' "Ultimate Monsters" plus the creator-authorized CC BY 3.0 demon
-  body trial, fixed per-kind scale with a shared 10% presentation size increase) plays
-  motion clips from AI state with a manually advanced
-  AnimationPlayer (spawn, locomotion, attack scrubbed to the melee windows, hit, cast,
-  death, sink). `monster_flesh.gdshader` dresses flat Quaternius materials; the
-  Night Demon and Chained Demon variants preserve their source albedo textures
-  (and Night Demon's normal map) beneath the damage blood. `corruption.gdshader`
-  remains an additive `next_pass`. Consecutive Corrupted Record spawns alternate
-  the two demon bodies, retaining record AI, stats and barks; full retry resets
-  the sequence. The new motions are locally authored provisional clips, not
-  supplied source animations. Scope Creep scales the rig with its growth; The Variance's
-  false positives are `projection()` copies of its rig. Provenance in
-  `assets/enemies/README.md`.
+  rig (KayKit Skeleton Minion for records; Quaternius "Ultimate Monsters" for
+  the other archetypes, with a shared 10% presentation size increase) plays supplied
+  motion clips from AI state with a manually advanced AnimationPlayer (spawn,
+  locomotion, attack scrubbed to melee windows, hit, cast, death, sink). The record
+  preserves its original atlas and emissive eyes with `corruption.gdshader` as an
+  additive next pass; it bypasses the procedural flesh material. Its punch reaches
+  contact at 37% of the source clip, pinned to the existing melee windup. KayKit's
+  `spine` and `upperleg.l/r` support the existing waist-slice death. Record AI,
+  stats, voices, awareness, wave composition and collision tuning are unchanged.
+  The realistic Night/Chained Demon trial is superseded and retained only for its
+  isolated viewer/provenance. `monster_flesh.gdshader` still dresses the other
+  archetypes. Scope Creep scales its rig with growth; The Variance's false positives
+  are `projection()` copies. Provenance in `assets/enemies/README.md`.
 - **Roaming outbreaks and patrols.** `missing_transaction.gd` gives each wave member its
   own site from `SITES` (desks, pantry, Operations, east corridor, conference deck,
   lounge, meeting wing) in rotation, skipping any within `ROAM_DISTANCE` (14 m) of the
@@ -673,11 +673,13 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   a human playtest gate.
 - **Physical deaths.** `MonsterRig._break_apart()` (rendered only, or `gore_in_headless`)
   reads `kill_style` meta (set by `special_moves._strike()`) or `incident.last_damage`:
-  `_slice()` clones the model into a top-level RigidBody3D and holds the `HUMANOID_CUT`
+  `_slice()` clones the model into a top-level RigidBody3D and holds the kind's cut
   bones at zero scale on each half (`collapsed`); `_tumble()` reparents the model into one;
   `_gibs()` spawns short-lived chunk bodies. All are children of the actor (freed with it)
   on collision layer 8 against the world only.
-- **Monster skin.** `MonsterRig._skin()` swaps each pack material for one shared
+- **Monster skin.** The accepted KayKit record duplicates its original materials,
+  retaining its atlas and emissive eyes under the additive combat overlay. It bypasses
+  flesh staining; external blood remains. Other rigs swap each pack material for one shared
   `ShaderMaterial` on `game/enemies/monster_flesh.gdshader`, coloured from `PALETTE` (per
   material name; a kind's `palette` can override). Its `gore` instance uniform is pinned to
   `instance_index(4)` because the overlay pass already uses slots 0-3 on the same mesh;

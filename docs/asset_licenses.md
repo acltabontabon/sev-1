@@ -68,7 +68,8 @@ Kenney's furniture chair and round table were evaluated and rejected as toy-like
 | Action clips (run, roll, death, jump, sword idles) | Quaternius "Lowpoly Animated Knight", OpenGameArt; CC0 1.0, retargeted at build time | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
 
 | Enemy bodies (original monster roster) | Quaternius "Ultimate Monsters" (retrieved from a public GitHub mirror while the official Drive link was over quota); CC0 1.0 | [assets/enemies](../assets/enemies/README.md) |
-| Corrupted Record demon body variations (11 October 2026) | Night Demon by Morgan Strauss (nubux); Chained Demon by Tor Halle-McIntyre (Mophs); both used under CC BY 3.0 with required attribution | [sources, archive checksums and modifications](../assets/enemies/demon_trials/README.md) |
+| Corrupted Record skeleton (11 October 2026) | Kay Lousberg, KayKit Character Pack: Skeletons 1.0, free Skeleton Minion; CC0 1.0 | [source revision, checksums and combat integration](../assets/enemies/kaykit_trial/README.md) |
+| Superseded demon body trial (sources and historical viewer retained) | Night Demon by Morgan Strauss (nubux); Chained Demon by Tor Halle-McIntyre (Mophs); both used under CC BY 3.0 with required attribution | [sources, archive checksums and modifications](../assets/enemies/demon_trials/README.md) |
 
 The rigged engineer replaced the native procedural engineer after creator feedback;
 the native scene and generator remain as a fallback. Elemental effects, enemy spells

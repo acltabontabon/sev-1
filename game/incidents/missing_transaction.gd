@@ -149,7 +149,6 @@ var boss: CharacterBody3D
 var pending: Array = []
 var pop_left: float = 0.0
 var wave_index: int = 0
-var record_body_index: int = 0
 var zones: Array[Node3D] = []
 var corpses: Dictionary = {}
 var bugs: Array[CharacterBody3D] = []
@@ -235,7 +234,6 @@ func _ready() -> void:
 
 
 func reset_incident() -> void:
-	record_body_index = 0
 	if dialogue.is_open():
 		# Restarting mid-conversation must not set the wave off on the way out.
 		armed = false
@@ -1062,9 +1060,8 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D], host: Node3D = nu
 	if ARCHETYPES[kind] != null:
 		actor.set_script(ARCHETYPES[kind])
 	elif kind == "record":
-		# Two licensed body variants share the existing record behavior and voice.
-		actor.rig_kind = "night_demon" if record_body_index % 2 == 0 else "chained_demon"
-		record_body_index += 1
+		# The accepted KayKit body uses the unchanged record behavior and voice.
+		actor.rig_kind = "record"
 		actor.bark_kind = "record"
 	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
 	if kind == "invite" and is_same(group, sync_alive):

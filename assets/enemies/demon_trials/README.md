@@ -1,9 +1,9 @@
 # Free demon body trial — 11 October 2026
 
-Authorized by the creator: try Night Demon and include Chained Demon for variation.
-Consecutive Corrupted Record spawns alternate these two bodies. Enemy stats, AI,
-telegraphs, voiced reactions, and encounter composition remain the existing record's.
-The other archetypes and The Variance keep their current Quaternius bodies.
+**Superseded trial.** The creator subsequently accepted the stylized
+[KayKit Skeleton Minion](../kaykit_trial/README.md), which now replaces both demon
+variants in normal Corrupted Record waves. The sources and historical viewer below
+remain available for provenance; they are not the active encounter bodies.
 
 ## Attribution and rights
 
@@ -51,9 +51,7 @@ Blender --background --factory-startup --python tools/build_demon_trials.py -- \
 
 ## Quick review
 
-Run the normal game with `sh tools/godot.sh --path .`: regular Corrupted Record
-waves show both body variants. Existing controls and retry behavior apply.
-For an isolated side-by-side office review:
+For the retained isolated side-by-side historical office review:
 
 ```sh
 sh tools/godot.sh --path . --script tests/demon_preview.gd
@@ -65,9 +63,8 @@ save game progress. It uses actual office lighting at 1920×1080, Forward+.
 For rendered strike or physical death evidence, append `-- --capture --pose=Attack`
 or `-- --capture --gore`, respectively.
 
-Regression checks: `sh tools/godot.sh --headless --path . --script tests/demon_tests.gd`.
-These exercise actual wave spawning, texture preservation, arm motion, damage,
-physical slice deaths and reset cleanup. Full checks: `python3 tools/validate.py`.
+Current replacement regression checks: `sh tools/godot.sh --headless --path . --script tests/skeleton_tests.gd`.
+Full checks: `python3 tools/validate.py`.
 Neither headless run establishes visual quality or fun.
 
 Verification on 11 October: the full `python3 tools/validate.py` suite passed in

@@ -52,9 +52,11 @@ const KINDS: Dictionary = {
 		"slice": {"upper": ["Spine2"], "lower": ["Hip.L", "Hips.R"], "center": "Spine2"},
 		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Attack", "impact": .5,
 		"hit": "HitReact", "death": "Death", "cast": ""},
-	"record": {"model": "res://assets/enemies/ultimate_monsters/orc_skull.gltf", "height": 2.1, "scale": .65, "slice": HUMANOID_CUT,
-		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Weapon", "impact": .45,
-		"hit": "HitReact", "death": "Death", "cast": ""},
+	"record": {"model": "res://assets/enemies/kaykit_trial/skeleton_minion.glb", "height": 2.1, "stylized": true,
+		"slice": {"upper": ["spine"], "lower": ["upperleg.l", "upperleg.r"], "center": "spine"},
+		"idle": "Idle", "walk": "Walking_D_Skeletons", "run": "Running_A",
+		"attack": "Unarmed_Melee_Attack_Punch_A", "impact": .37,
+		"hit": "Hit_A", "death": "Death_A", "cast": ""},
 	"blocker": {"model": "res://assets/enemies/ultimate_monsters/yeti.gltf", "height": 2.5, "scale": .88, "slice": HUMANOID_CUT,
 		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Punch", "impact": .45,
 		"hit": "HitReact", "death": "Death", "cast": "Wave"},
@@ -161,9 +163,15 @@ func _skin(source: Material) -> Material:
 	var key: String = source.resource_name if source != null else ""
 	# A kind can repaint a shared material name (the blob's spikes reuse "Eye_White").
 	var overrides: Dictionary = spec.get("palette", {})
-	var cache: String = (kind + ":" + key) if overrides.has(key) or spec.get("textured", false) else key
+	var cache: String = (kind + ":" + key) if overrides.has(key) or spec.get("textured", false) or spec.get("stylized", false) else key
 	if skins.has(cache):
 		return skins[cache]
+	# The accepted cartoon body keeps its atlas and emissive eyes. The shared next
+	# pass still supplies telegraph charge and hit flash; physical blood stays intact.
+	if spec.get("stylized", false) and source != null:
+		var original_skin: Material = source.duplicate()
+		skins[cache] = original_skin
+		return original_skin
 	var skin: ShaderMaterial = ShaderMaterial.new()
 	skin.shader = FLESH
 	var base: Color = (source as StandardMaterial3D).albedo_color.darkened(.45) if source is StandardMaterial3D else Color(.2, .2, .2)
@@ -474,7 +482,8 @@ func _shade(flash: float, charge: float, dissolve: float) -> void:
 	var hurt: float = 1.0 - clampf(float(actor.health) / maxf(1.0, actor.max_health), 0.0, 1.0) if actor != null else 0.0
 	var gore: float = 1.0 if dying > 0.0 else hurt * .85
 	for mesh in meshes:
-		mesh.set_instance_shader_parameter("gore", gore)
+		if not spec.get("stylized", false):
+			mesh.set_instance_shader_parameter("gore", gore)
 		mesh.set_instance_shader_parameter("glow", color)
 		mesh.set_instance_shader_parameter("flash", flash)
 		mesh.set_instance_shader_parameter("charge", charge)

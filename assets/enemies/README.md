@@ -1,13 +1,15 @@
 # Enemy bodies
 
-The [KayKit Skeleton Minion comparison](kaykit_trial/README.md) stages one free
-CC0 skeleton beside the current engineer in the office. This isolated visual trial
-has original materials and animations; it does not replace the encounter roster.
+Corrupted Records now wear **KayKit Skeleton Minion**, replacing the realistic
+Night Demon and Chained Demon bodies after the creator accepted the stylized
+comparison on 11 October 2026. The free CC0 model retains its original cartoon
+materials and supplied animations, with the existing record AI, stats, voices,
+melee timing, physical deaths and blood effects.
+[Source, integration and playtest checkpoint](kaykit_trial/README.md).
 
-The creator-authorized [free demon variation trial](demon_trials/README.md) now
-alternates Night Demon and Chained Demon on Corrupted Records. Both use CC BY 3.0
-with required attribution, original textures, and provisional local motion clips.
-The Quaternius bodies below remain the other archetypes and the record fallback.
+The [realistic demon trial](demon_trials/README.md) is superseded. Its licensed
+assets and isolated historical viewer remain available; normal encounters no
+longer spawn those bodies. Other archetypes retain their current Quaternius rigs.
 
 ## Quaternius "Ultimate Monsters", CC0
 
@@ -26,7 +28,7 @@ from lowercase names, and are stored with Git LFS.
 
 | File in `ultimate_monsters/` | Pack file | Worn by |
 | --- | --- | --- |
-| `orc_skull.gltf` | `Big/glTF/Orc_Skull.gltf` | Corrupted Record (skull-faced, spiked club) |
+| `orc_skull.gltf` | `Big/glTF/Orc_Skull.gltf` | Superseded Corrupted Record body (retained source) |
 | `yeti.gltf` | `Big/glTF/Yeti.gltf` | The Blocker (carries the BLOCKED sign) |
 | `dragon.gltf` | `Flying/glTF/Dragon_Evolved.gltf` | The Meeting Invite (invite card overhead) |
 | `spiky_blob.gltf` | `Blob/glTF/GreenSpikyBlob.gltf` | Scope Creep (sticky notes on it; grows) |

@@ -110,11 +110,12 @@ the engineer’s starting desk with CC0 Poly Haven props. It preserves the exist
 collision and screen staging. Creator visual acceptance remains pending; this is
 not a whole-office or character replacement. Further asset selection is free-only.
 
-The creator-authorized 11 October [free demon variation trial](../assets/enemies/demon_trials/README.md)
-alternates Night Demon and Chained Demon on Corrupted Records, with original
-textures and required CC BY 3.0 attribution. Existing behavior, stats and voices
-remain; locally authored motion clips are provisional. Creator silhouette,
-animation and moving-combat acceptance remain open; no new enemy archetype is added.
+The creator accepted the [free CC0 KayKit Skeleton Minion](../assets/enemies/kaykit_trial/README.md)
+comparison on 11 October and authorized replacing the realistic demon variants on
+Corrupted Records. Their existing combat behavior, stats, voices and physical deaths
+remain. The supplied animations replace provisional demon motion; moving-combat
+readability and death presentation remain human playtest checkpoints. This supersedes
+the earlier Night/Chained Demon trial and adds no enemy archetype.
 
 The creator selected a [CC0 Heavy Greatsword trial](../assets/characters/heavy_greatsword/README.md)
 on 11 October 2026. The rigged engineer carries the imported sword with the existing

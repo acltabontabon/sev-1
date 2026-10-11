@@ -1,4 +1,4 @@
-# KayKit skeleton visual trial — 11 October 2026
+# KayKit Skeleton Minion — 11 October 2026
 
 Skeleton Minion from **KayKit Character Pack: Skeletons 1.0**, created by
 **Kay Lousberg**. Free tier from the creator’s
@@ -28,14 +28,26 @@ matching bind-pose height; toggle **Original size** to see the author’s model 
 Use the buttons (or 1–3) for idle/walk/attack and F/S/B for front/side/back.
 Escape closes the viewer. Append `-- --capture` for an ignored 1080p screenshot.
 
-This is a visual comparison, not an enemy-roster replacement or approved art direction.
-Original KayKit materials are preserved without the monster flesh shader.
-The skeleton’s attack is its own unarmed punch animation; damage, AI and physical
-slicing are not connected. The engineer retains the current body, sword and idle
-presentation, including the local sword trial when present.
+The creator accepted this comparison and authorized replacing the two realistic
+demon variants on Corrupted Records. The comparison viewer remains isolated; the
+normal game now uses this body through `MonsterRig.KINDS.record`.
+
+Original KayKit materials (atlas and emissive eyes) are preserved without the
+monster flesh shader. The additive combat overlay retains telegraph charge, hit
+flash and corpse glow; external blood sprays/pools and waist slices/tumbles remain.
+The clean cartoon skin does not receive the old procedural flesh/blood staining.
+The punch, walk/run, hit and death clips are supplied by KayKit. Punch contact is
+sampled at approximately 0.54 seconds (37% of the source clip) and scrubbed to the
+existing melee windup/active/recovery windows. No damage, reach, movement, awareness,
+AI, dialogue, wave or input tuning changes. The record's 2.1 m target retains the
+existing shared 10% presentation increase, independently of collision dimensions.
+Waist cuts use the imported `spine` and `upperleg.l/r` hierarchy.
+
+The engineer retains the current body, sword and idle presentation, including the
+local sword trial when present.
 
 Creator checkpoint: compare proportions, skull silhouette and material brightness
-beside the engineer; inspect the walk and punch before accepting a combat trial.
+beside the engineer; inspect the walk and punch in a normal encounter.
 
 ## Rendered evidence
 
@@ -46,10 +58,35 @@ matched-height mode uses uniform scale 0.982, retaining its original proportions
 After 90 warm-up frames, 120 sampled staged frames averaged 8.34 ms with p95
 8.54 ms in the final gameplay-idle comparison (presentation/vsync included).
 This measures an isolated two-character review, not moving gameplay performance.
-Audio was disabled; combat damage, deaths and human visual acceptance remain open.
+Audio was disabled in the staged comparison; current combat checks are listed below.
+Human moving-combat and death-presentation acceptance remains open.
 Ignored captures: `builds/kaykit_comparison.png`, `kaykit_comparison_walk_side.png`
 and `kaykit_comparison_punch.png`.
 `python3 tools/validate.py` passed the complete import, script parsing and gameplay
 integration suite on 11 October 2026 with the concurrent local sword trial present.
 The final comparison script also passed its separate `--check-only` run and rendered
 smoke runs after the protagonist was switched to its normal gameplay idle stance.
+
+## Combat checkpoint
+
+Launch the normal game with `sh tools/godot.sh --path .` (or `play.command`), start
+Stage One, and use TAB to skip the opening if desired. Corrupted Record waves now
+show skeletons; the other enemy archetypes are unchanged. Check chase footwork,
+punch/telegraph contact, stagger, waist cuts and tumbles. R retries the incident.
+
+Regression: `sh tools/godot.sh --headless --path . --script tests/skeleton_tests.gd`.
+Outcome checks cover real wave spawning, retained materials and bark identity,
+windup safety, one active hit, misses outside reach, incoming damage, physical
+cuts and individual/full retry cleanup. `tests/skeleton_preview.gd` captures the
+actual gameplay rig in office light; `-- --pose=attack` or `-- --pose=gore` select
+contact and physical death. Ignored evidence: `builds/skeleton_combat_attack.png`
+and `builds/skeleton_combat_gore.png`. Headless and staged renders do not establish
+fun, ordinary moving-combat performance or human acceptance.
+
+The full `python3 tools/validate.py` suite passed after the replacement on
+11 October 2026. The final focused skeleton checks passed separately, including
+the real melee clock driving the contact pose. One earlier test fixture paused
+itself by clearing its last enemy; retaining a spare enemy corrected that fixture
+without changing runtime behavior. Contact and physical cut captures were reviewed
+on Apple M2 Pro, Godot 4.7.2, Metal Forward+, 1920×1080 with the existing office
+SSAO/glow/fog. These renders do not measure ordinary moving-combat performance.
