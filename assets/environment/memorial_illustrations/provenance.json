@@ -93,9 +93,9 @@
     {
       "name": "morgan",
       "file": "morgan_sketch.png",
-      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-211f2fab-6fe7-4b72-a415-cd808f0f988c.png",
-      "sha256": "70a4a784e77e8c5470ba992809a3314343cf18a22a5c5c7845375a9881fbfb92",
-      "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-ef929c84-34dc-4144-b029-c94a0e94664b.png",
+      "sha256": "15d5cd92968db675fe37b7bcef72ac186b289b624d534c13ddc974f3dc0e5e28",
+      "review": "Visually reviewed: Morgan is an adult woman in a navy office suit; engineer, coffee exchange, elevator action and sketch style preserved."
     },
     {
       "name": "nadia",
@@ -124,6 +124,22 @@
       "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-2fdbb417-75e5-4756-a60a-1e18e833ef89.png",
       "sha256": "eed11f7e13af38f2d021525e576cc6e2e1be96765f394e499e49a54aa7d2ee97",
       "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+    }
+  ],
+  "corrections": [
+    {
+      "date": "2026-10-11",
+      "character": "Morgan",
+      "instruction": "Creator confirmed Morgan is a woman; she/her.",
+      "provider": "OpenAI built-in imagegen",
+      "prompt": "Edit only Morgan, the blond person on the RIGHT, to correctly depict her as an adult WOMAN: short blond bob, a woman's face and proportions, navy business blazer, white blouse, navy office skirt and low flat shoes. She is Morgan, the female engineering manager. Keep her conspiratorial warm smile and exactly the same action: one foot holds the elevator door open while she hands a coffee to the engineer, carrying her second coffee and folder. Preserve the engineer on the LEFT completely unchanged. Preserve the elevator, coffee cups, interaction, sketch composition, graphite/ink strokes, selective amber watercolor, unfinished background and quiet lower caption area. Do not add text or change any other person. This is a precise gender/identity correction, not a new scene.",
+      "superseded_image": {
+        "name": "morgan",
+        "file": "morgan_sketch.png",
+        "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-211f2fab-6fe7-4b72-a415-cd808f0f988c.png",
+        "sha256": "70a4a784e77e8c5470ba992809a3314343cf18a22a5c5c7845375a9881fbfb92",
+        "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+      }
     }
   ]
 }

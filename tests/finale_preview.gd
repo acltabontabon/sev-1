@@ -34,6 +34,13 @@ func _run() -> void:
 	await process_frame
 	story.set_process(false)
 	var finale: Node = story.all_hands
+	if "--play-ending" in OS.get_cmdline_user_args():
+		finale._beat("receipts")
+		story.set_process(true)
+		while is_instance_valid(finale) and not finale.done:
+			await process_frame
+		quit()
+		return
 	finale._beat("receipts")
 	finale._beat("memorial")
 	if "--play-memorial" in OS.get_cmdline_user_args():
