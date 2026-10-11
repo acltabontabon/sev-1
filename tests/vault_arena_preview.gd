@@ -51,6 +51,10 @@ func _run() -> void:
 	scene.add_child(camera)
 	camera.fov = 76
 	camera.make_current()
+	if "--destruction" in OS.get_cmdline_user_args():
+		await destruction_preview(incident, camera)
+		quit()
+		return
 	await shot(camera, Vector3(9,5.0,-32.5),Vector3(9,2,-42),"wide")
 	await shot(camera, Vector3(8,3.5,-35),Vector3(-.4,2,-38),"service")
 	await shot(camera, Vector3(2.5,2.5,-38.2),Vector3(-.8,1.8,-38.75),"power")
@@ -74,3 +78,23 @@ func _run() -> void:
 	samples.sort()
 	print("ARENA PERFORMANCE ",JSON.stringify({"resolution":str(root.size),"samples":samples.size(),"median_ms":samples[samples.size()/2],"p95_ms":samples[int(samples.size()*.95)],"renderer":RenderingServer.get_current_rendering_method(),"gpu":RenderingServer.get_video_adapter_name(),"scenario":"stationary wide camera, active boss, 10 seconds after 5 second warmup"}))
 	quit()
+
+
+## A controlled real-time ring release against the actual six authored arena props.
+func destruction_preview(incident: Node, camera: Camera3D) -> void:
+	var boss: CharacterBody3D = incident.boss
+	boss.position = Vector3(9,.05,-40)
+	boss.moves.cancel()
+	player.position = Vector3(9,.05,-32)
+	player.invulnerable_left = 100
+	call_group("breakables", "reset_prop")
+	await shot(camera, Vector3(12,3.8,-31.8), Vector3(8,1,-41), "boss_before")
+	boss.moves.turn = boss.moves.ORDER.find("decommission")
+	boss.moves.start(player)
+	await create_timer(2.12).timeout
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://logs/arena_boss_ring.png")
+	await create_timer(2.0).timeout
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://logs/arena_boss_after.png")
+	print("Rendered boss ring destruction; remaining intact props: ", get_nodes_in_group("breakables").filter(func(prop: Node) -> bool: return prop.health > 0).size())
