@@ -86,6 +86,12 @@ func _desk_contacts() -> void:
 	backdrop.set_process(false)
 	var rig: Node3D = backdrop.character
 	var desk: Node3D = backdrop.room.get_node("YourWorkstation")
+	var solved: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO]
+	rig.left_ik.modification_processed.connect(func() -> void:
+		for side: int in range(2):
+			var bone: int = rig.skeleton.find_bone("Fist." + ("L" if side == 0 else "R"))
+			solved[side] = desk.to_local(rig.skeleton.global_transform * rig.skeleton.get_bone_global_pose(bone).origin)
+	)
 	await frames(120)
 	check(not rig.blade_art.is_visible_in_tree(), "title desk hides the sword")
 	var mug: Node3D = desk.get_node("Mug")
@@ -98,13 +104,15 @@ func _desk_contacts() -> void:
 		var clear: bool = true
 		for sample in range(90):
 			await frames(1)
-			for side: String in ["L", "R"]:
-				var fist: Vector3 = desk.to_local(rig.skeleton.global_transform * rig.skeleton.get_bone_global_pose(rig.skeleton.find_bone("Fist." + side)).origin)
+			for fist: Vector3 in solved:
 				# Observe the solved bones, including each transition; allow hand thickness.
 				if absf(fist.x) < 1.125 and absf(fist.z) < .475:
 					clear = clear and fist.y >= .875
 		check(clear, "seated pose %d and its transition keep both hands above the tabletop" % pose)
 		check(not rig.blade_art.is_visible_in_tree(), "desk reactions keep the sword hidden")
+	rig.story_pose = rig.Pose.TYPING
+	await frames(60)
+	await _coffee_cycle(backdrop)
 	rig.story_pose = rig.Pose.ARMED
 	await frames(2)
 	check(rig.blade_art.is_visible_in_tree(), "arming for the incident restores the sword")
@@ -113,6 +121,41 @@ func _desk_contacts() -> void:
 	check(not rig.blade_art.is_visible_in_tree(), "staging respects a separately hidden weapon pivot")
 	backdrop.queue_free()
 	await frames(2)
+
+
+func _coffee_cycle(backdrop: Node3D) -> void:
+	var rig: Node3D = backdrop.character
+	var mug: Node3D = rig.coffee_mug
+	var rest: Transform3D = mug.global_transform
+	for cycle: int in range(2):
+		rig.begin_coffee()
+		var grip_error: float = 0.0
+		var travel: float = 0.0
+		var jump: float = 0.0
+		var previous: Vector3 = mug.global_position
+		var lifted: bool = false
+		var sipped: bool = false
+		var above_desk: bool = true
+		for sample in range(330):
+			await frames(1)
+			jump = maxf(jump, previous.distance_to(mug.global_position))
+			previous = mug.global_position
+			travel = maxf(travel, rest.origin.distance_to(mug.global_position))
+			var cup: MeshInstance3D = mug.get_node("Body")
+			var box: AABB = cup.global_transform * cup.get_aabb()
+			above_desk = above_desk and box.position.y >= .821
+			if rig.coffee_time > .85 and rig.coffee_time < 4.2:
+				grip_error = maxf(grip_error, rig.solved_coffee_hand.distance_to(rig.coffee_grip))
+			if rig.coffee_time > 2.3 and rig.coffee_time < 2.8:
+				lifted = lifted or box.position.y > 1.15
+				sipped = sipped or (rig.coffee_lip.distance_to(rig.coffee_mouth) < .015 and mug.global_basis.y.dot(Vector3.UP) < .97)
+				backdrop.next_notice = 0.0
+				backdrop._process(0.0)
+		check(travel > .45 and lifted and sipped, "coffee cycle %d lifts and tilts the actual mug to his mouth" % cycle)
+		check(grip_error < .035, "coffee cycle %d keeps the solved hand on the handle (%.3f m)" % [cycle, grip_error])
+		check(jump < .045 and above_desk, "pickup and return stay smooth and clear of the tabletop")
+		check(not rig.coffee_active and mug.global_transform.is_equal_approx(rest) and rig.story_pose == rig.Pose.TYPING,
+			"notifications do not interrupt the sip; the mug returns exactly and typing resumes")
 
 
 func _effects(view: Node) -> int:

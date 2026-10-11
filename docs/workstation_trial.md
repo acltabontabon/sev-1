@@ -49,6 +49,18 @@ desk edge. `tests/presentation_tests.gd` checks sword visibility, mug support an
 fist bones through the title reactions. Inspect the title screen for a full reaction
 cycle to judge the placement and motion; human visual acceptance remains pending.
 
+The title-only `title_engineer.gd` stages a five-second reach, pickup, tilted sip,
+set-down and return to typing using the actual mug and solved right-arm IK. The
+title positions the mug within seated reach and turns its handle away from the
+camera so the cup stays visible. The first idle reaction is coffee, followed by
+alternating coffee and slump/relax beats. Notices continue without interrupting a
+held cup. No runtime props are spawned and gameplay/story coffee poses are unchanged.
+The presentation regression measures solved hand contact, cup travel and tabletop
+clearance, mouth contact and exact set-down across repeated cycles. Launch normally
+and watch the title for about 15 seconds to review the first pickup and sip.
+`sh tools/godot.sh --path . --fixed-fps 60 --script tests/title_coffee_preview.gd`
+captures the normally scheduled pickup, sip and return as `builds/title_coffee_*.png`.
+
 [Source, license and retrieval records](../assets/environment/poly_haven_workstation/README.md).
 `tools/build_office.py` owns the generated scenes. Generated scenes preserve existing story node paths. No purchased assets or new dependencies are required.
 

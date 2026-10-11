@@ -34,6 +34,7 @@ var flicker_light: Light3D
 var flicker_left: float = 0.0
 var bag: Array = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var reaction_index: int = 0
 
 
 func _ready() -> void:
@@ -42,6 +43,10 @@ func _ready() -> void:
 	camera = $Camera3D
 	character = $Engineer/Visual/Character
 	character.story_pose = PRESENTATION.Pose.TYPING
+	character.coffee_mug = room.get_node("YourWorkstation/Mug")
+	# Within a seated arm's reach, with the whole cup still supported by the desk.
+	character.coffee_mug.position = Vector3(.49, .8225, .37)
+	character.coffee_mug.rotation.y = deg_to_rad(160.0)
 	screen = DESK_SCREEN.new()
 	screen.name = "DeskScreen"
 	screen.position = Vector3(0, 1.26, -.192)
@@ -95,8 +100,9 @@ func _process(delta: float) -> void:
 		var notice: Array = _next_notice()
 		screen.post(notice[0], notice[1], notice[2])
 		_ping()
-		character.story_pose = PRESENTATION.Pose.GLANCE
-		pose_until = clock + 1.7
+		if not character.coffee_active:
+			character.story_pose = PRESENTATION.Pose.GLANCE
+			pose_until = clock + 1.7
 		next_notice = clock + rng.randf_range(7.0, 11.0)
 		if notice.size() > 3:
 			follow_up = clock + 2.1
@@ -105,11 +111,17 @@ func _process(delta: float) -> void:
 		follow_up = -1.0
 		screen.post(follow_text[0], follow_text[1], follow_text[2])
 		_ping()
-	if clock >= next_reaction and clock >= pose_until:
-		character.story_pose = [PRESENTATION.Pose.SLUMP, PRESENTATION.Pose.SIP, PRESENTATION.Pose.RELAX][rng.randi_range(0, 2)]
-		pose_until = clock + 2.6
+	if clock >= next_reaction and clock >= pose_until and not character.coffee_active:
+		var reaction: int = [PRESENTATION.Pose.SIP, PRESENTATION.Pose.SLUMP, PRESENTATION.Pose.SIP, PRESENTATION.Pose.RELAX][reaction_index % 4]
+		reaction_index += 1
+		if reaction == PRESENTATION.Pose.SIP:
+			character.begin_coffee()
+			pose_until = clock + character.COFFEE_DURATION
+		else:
+			character.story_pose = reaction
+			pose_until = clock + 2.6
 		next_reaction = clock + rng.randf_range(10.0, 15.0)
-	elif clock >= pose_until and character.story_pose != PRESENTATION.Pose.TYPING:
+	elif clock >= pose_until and not character.coffee_active and character.story_pose != PRESENTATION.Pose.TYPING:
 		character.story_pose = PRESENTATION.Pose.TYPING
 	_flicker(delta)
 
