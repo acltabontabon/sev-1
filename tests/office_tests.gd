@@ -22,6 +22,22 @@ func _run() -> void:
 	check(clear_floor, "central combat lane has continuous floor and no collision clutter")
 	var desk_ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(Vector3(-9, 2, 5), Vector3(-9, .1, 5), 1)
 	check(not space.intersect_ray(desk_ray).is_empty(), "workstation has world collision")
+	var starting_desk: Node3D = scene.get_node("OfficeAfterHours/YourWorkstation")
+	var desk_surface: Dictionary = space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		Vector3(-2.5, 2, 9.4), Vector3(-2.5, .1, 9.4), 1))
+	check(not desk_surface.is_empty() and absf(desk_surface.position.y - .8225) < .002,
+		"polished desk retains the starting workstation collision height")
+	var bounds: AABB
+	var first_mesh: bool = true
+	for node in starting_desk.get_node("DetailedDesk").find_children("*", "MeshInstance3D", true, false):
+		var mesh_node: MeshInstance3D = node
+		var box: AABB = starting_desk.global_transform.affine_inverse() * mesh_node.global_transform * mesh_node.get_aabb()
+		bounds = box if first_mesh else bounds.merge(box)
+		first_mesh = false
+	check(not first_mesh and absf(bounds.end.y - .8225) < .003 and bounds.size.x < 2.251 and bounds.size.z < .951,
+		"imported desk surface aligns with its collision and stays inside the existing footprint")
+	check(scene.find_children("DetailedDesk", "", true, false).size() == 1,
+		"the asset trial upgrades only the engineer's workstation")
 
 	await setup_pair(Vector3(0, .05, 0))
 	player.position = Vector3(3, .05, -5)

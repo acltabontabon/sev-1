@@ -4,6 +4,7 @@ Layout and modular prop sources live here; regenerate then rebake navigation.
 """
 from pathlib import Path
 import math
+import copy
 from pantry_layout import build_pantry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -180,6 +181,28 @@ for j,w in enumerate([.5,.65,.38,.59,.46]):
 desk.instance('Chair','chair',(0,0,.87),-8)
 desk.save('workstation')
 
+# One hero prop trial: preserve all gameplay paths, collision and screen staging.
+polished = copy.deepcopy(desk)
+polished.name = 'PolishedWorkstation'
+polished.nodes[0] = '[node name="PolishedWorkstation" type="Node3D"]'
+for i, node in enumerate(polished.nodes):
+    if ('name="Mesh"' in node and 'parent="Top"' in node) or any(f'name="{name}"' in node for name in ['Leg-0.94', 'Leg0.94', 'CableTray']):
+        polished.nodes[i] += '\nvisible = false'
+ref = polished.external('res://assets/environment/poly_haven_workstation/metal_office_desk.glb', 'PackedScene')
+polished.nodes.append(f'[node name="DetailedDesk" parent="." instance={ref}]\nscale = Vector3(1.125, 1.04444, 1.00294)')
+polished.box('DeskMat', (.04, .827, .24), (.94, .008, .40), 'fabric')
+# Small keycaps break the placeholder keyboard stripes into an actual keyboard.
+for row in range(4):
+    for key in range(13):
+        polished.box(f'Keycap{row}_{key}', (-.335 + key*.038, .871, .19 + row*.036), (.031, .012, .027), 'plastic')
+polished.box('Spacebar', (-.1, .872, .335), (.23, .012, .025), 'plastic')
+polished.box('MonitorLowerBezel', (0, .967, -.208), (1.0, .025, .015), 'plastic')
+polished.cylinder('PowerLED', (.45, .968, -.196), .003, .003, 'mint', rot=(90,0,0))
+polished.box('NotebookHeader', (-.80, .854, .12), (.20, .001, .015), 'plastic', rot=(0,12,0))
+for line in range(5):
+    polished.box(f'NotebookRule{line}', (-.80, .854, .18+line*.026), (.20, .001, .0015), 'metal', rot=(0,12,0))
+polished.save('polished_workstation')
+
 rack=Scene('ServerRack')
 rack.box('Cabinet',(0,1.2,0),(.85,2.4,.90),'metal',True)
 rack.box('Front',(0,1.2,.46),(.76,2.23,.025),'plastic')
@@ -282,7 +305,7 @@ s.box('TaskLampBase',(-3.35,.85,9.6),(.24,.045,.24),'metal')
 s.cylinder('TaskLampStem',(-3.35,1.10,9.6),.022,.5,'metal')
 s.box('TaskLampShade',(-3.35,1.37,9.53),(.32,.11,.22),'metal')
 s.box('TaskLampBulb',(-3.35,1.31,9.53),(.26,.015,.16),'warm')
-s.light('TaskLight',(-3.35,1.28,9.5),(1,.67,.36),2.8,3.5)
+s.light('TaskLight',(-3.35,1.30,9.36),(1,.76,.52),2.8,2.2,spot=True,shadow=True,rot=(-65,0,0))
 s.instance('CoworkerDesk','workstation',(-7,0,11),180)
 s.box('ForgottenBag',(-5,.22,9.6),(.36,.44,.25),'fabric')
 # Operations wall: large restrained information, hardware and ordered cable tray.
@@ -561,5 +584,13 @@ while placed<46:
     s.box(f'CityTower{placed}',(x,-70+h/2,z),(w,h,d),'facade')
     placed+=1
 s.box('CityGround',(7,-70.2,-10),(700,.4,700),'black')
+# Append trial resources last so unrelated scene resource IDs remain stable.
+polished_ref = s.external('res://game/rooms/office/polished_workstation.tscn', 'PackedScene')
+for i, node in enumerate(s.nodes):
+    if 'name="YourWorkstation"' in node:
+        s.nodes[i] = node.replace(s.external('res://game/rooms/office/workstation.tscn', 'PackedScene'), polished_ref)
+s.nodes = [node for node in s.nodes if not any(f'name="{name}"' in node for name in ['TaskLampBase', 'TaskLampStem', 'TaskLampShade', 'TaskLampBulb'])]
+lamp = s.external('res://assets/environment/poly_haven_workstation/desk_lamp_arm_01.glb', 'PackedScene')
+s.nodes.append(f'[node name="TaskLamp" parent="." instance={lamp}]\nposition = Vector3(-3.37, 0.8225, 9.12)\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(0.72, 0.72, 0.72)')
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')

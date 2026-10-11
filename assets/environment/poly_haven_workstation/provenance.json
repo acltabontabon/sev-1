@@ -1,0 +1,66 @@
+[
+  {
+    "asset": "metal_office_desk",
+    "retrieved": "2026-10-11",
+    "license": "CC0-1.0",
+    "files": {
+      "metal_office_desk.gltf": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/metal_office_desk/metal_office_desk_2k.gltf",
+        "md5": "f8b7985eb522e5c3508ccff43c05d922",
+        "size": 13510
+      },
+      "textures/metal_office_desk_nor_gl_2k.jpg": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/metal_office_desk/metal_office_desk_nor_gl_2k.jpg",
+        "md5": "b4bd4cd202f44d16a26e70c3fb6e611c",
+        "size": 490814
+      },
+      "textures/metal_office_desk_diff_2k.jpg": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/metal_office_desk/metal_office_desk_diff_2k.jpg",
+        "md5": "62e40035b94716516bd932f83e76ba0c",
+        "size": 1787420
+      },
+      "textures/metal_office_desk_arm_2k.jpg": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/metal_office_desk/metal_office_desk_arm_2k.jpg",
+        "md5": "69cfca0d98399bbc5dc62c007f1f2a4a",
+        "size": 2724325
+      },
+      "metal_office_desk.bin": {
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_office_desk/metal_office_desk.bin",
+        "md5": "96f258b9a64d36ca011f44de23da7c65",
+        "size": 229700
+      }
+    }
+  },
+  {
+    "asset": "desk_lamp_arm_01",
+    "retrieved": "2026-10-11",
+    "license": "CC0-1.0",
+    "files": {
+      "desk_lamp_arm_01.gltf": {
+        "size": 4453,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/desk_lamp_arm_01/desk_lamp_arm_01_2k.gltf",
+        "md5": "93587e189642dc55cd6567703dc88fd6"
+      },
+      "textures/desk_lamp_arm_01_nor_gl_2k.jpg": {
+        "size": 2491219,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/desk_lamp_arm_01/desk_lamp_arm_01_nor_gl_2k.jpg",
+        "md5": "f576a49c0203d1115fd4fb4b68f0548c"
+      },
+      "textures/desk_lamp_arm_01_diff_2k.jpg": {
+        "size": 2438937,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/desk_lamp_arm_01/desk_lamp_arm_01_diff_2k.jpg",
+        "md5": "18b2a20186590642bf99537784bdc414"
+      },
+      "desk_lamp_arm_01.bin": {
+        "size": 736804,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/desk_lamp_arm_01/desk_lamp_arm_01.bin",
+        "md5": "29ffa5bb6bee35b066e46073124fee1a"
+      },
+      "textures/desk_lamp_arm_01_arm_2k.jpg": {
+        "size": 2801607,
+        "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/desk_lamp_arm_01/desk_lamp_arm_01_arm_2k.jpg",
+        "md5": "7f4335c90f5be6ac9d9e0073a12cc7e5"
+      }
+    }
+  }
+]

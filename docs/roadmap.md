@@ -103,3 +103,9 @@ and an earlier tester unlock. Stage Two content and carry-over upgrade rules rem
 Gate: verify completion/unlock → quit/reopen → replay/restart → quit/reopen on the
 creator's device. Headless lifecycle and graphical menu checks support that checkpoint;
 Windows runtime acceptance remains open.
+
+
+The 11 October [free workstation fidelity trial](workstation_trial.md) upgrades only
+the engineer’s starting desk with CC0 Poly Haven props. It preserves the existing
+collision and screen staging. Creator visual acceptance remains pending; this is
+not a whole-office or character replacement. Further asset selection is free-only.
