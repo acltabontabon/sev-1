@@ -107,3 +107,15 @@ MPFB2 and portable Blender are development tools and do not ship; no GPL tool co
 is embedded in the game. Existing Quaternius CC0 motion is retargeted at build time.
 The exported GLB, extracted textures and two animation libraries use Git LFS.
 See the [scale, limitations and creator checkpoint](makehuman_trial.md).
+
+## Optional local sword motion trial — 11 October 2026
+
+Kevin Iglesias' **Human Melee Animations FREE**, Godot/Unreal edition, provides the
+engineer's first two-handed cut in the local source playable. The creator's direct
+itch.io/Gumroad license permits royalty-free commercial game use and optional
+credit, but restricts standalone redistribution. It is not CC0. Because this repo
+is public, both the source FBX and derived `sword_trial.res` stay Git-ignored. Both
+export presets exclude the source FBX. No published release has been rebuilt with
+this trial. A checkout without the optional library uses Quaternius CC0 motion.
+See [source, archive checksum and installation](../assets/characters/kevin_trial/README.md)
+and the [motion/playtest details](sword_motion_trial.md).

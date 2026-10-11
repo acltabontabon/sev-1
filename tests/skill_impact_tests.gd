@@ -83,6 +83,9 @@ func _run() -> void:
 
 	foe = await fixture(Vector3(1.5, .05, 5))
 	check(player.specials.works_on_my_machine(), "counter opens")
+	if "--preview" in OS.get_cmdline_user_args():
+		await frames(6)
+		await shot("guard")
 	check(not player.receive_damage(30, foe.global_position), "counter cancels incoming damage")
 	check(foe.health == 940 and player.melee.is_active(), "counter damage coincides with an already released riposte")
 	check(rig.spin > .1 and rig.right_ik.influence == 1.0, "counter's sword and grip snap to the contact before the hit pause")

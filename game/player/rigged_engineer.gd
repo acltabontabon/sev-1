@@ -1,16 +1,21 @@
 extends Node3D
-## The on-call engineer: Quaternius CC0 body with CC0 Knight-pack motion retargeted by
-## tools/build_engineer_rig.gd. Reads combat state only; never starts attacks or applies
+## The on-call engineer: Quaternius CC0 body and motion, plus an optional locally
+## licensed two-handed attack. Reads combat state only; never starts attacks or applies
 ## damage. Same contract as the native fallback (character_presentation.gd): reset_pose(),
 ## defeat(), story_pose, sit, crouch and the keyboard `weapon`.
 ##
-## Between swings the keyboard rides in the right fist and every clip moves it naturally.
-## During a swing the keyboard follows an authored arc in character space and two-bone IK
-## pulls the arms onto its grip, so the visible strike always matches the damage window.
+## Full-body combat clips follow the melee clock. The sword follows an authored arc
+## in character space and two-bone IK pulls both arms onto its grip, so the visible
+## strike matches the damage window. Shoulder carry returns between fights.
 
 enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, FINISH, RAGE }
 const SEATED: Array[int] = [Pose.TYPING, Pose.ALERT, Pose.SLUMP, Pose.SIP, Pose.RELAX, Pose.GLANCE]
 const ANIMATIONS: AnimationLibrary = preload("res://game/player/engineer_animations.res")
+const SWORD_TRIAL: String = "res://assets/characters/kevin_trial/sword_trial.res"
+## Source clip phases: anticipation ends, cutting motion ends. The melee clock owns
+## playback, including hit-stop; animation never drives damage or controller travel.
+const SWORD_PHASES: Vector2 = Vector2(.36, .64)
+const KEVIN_PHASES: Vector2 = Vector2(.44, .65)
 ## Weapon space: where each fist closes on the grip.
 const RIGHT_GRIP: Vector3 = Vector3(0, 0, -.2)
 const LEFT_GRIP: Vector3 = Vector3(0, 0, -.08)
@@ -28,6 +33,7 @@ const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
 
 
 @export var model_scale: float = .64
+@export var use_local_sword_trial: bool = true
 ## Ground speed the run clip's planted feet travel at rate 1.0 (measured: about 3 m/s);
 ## playback scales from it so the feet stay planted instead of skating.
 @export var run_reference_speed: float = 3.4
@@ -108,6 +114,10 @@ func _ready() -> void:
 	skeleton = model.find_child("Skeleton3D", true, false)
 	animator = model.find_child("AnimationPlayer", true, false)
 	animator.add_animation_library("rig", ANIMATIONS)
+	if use_local_sword_trial and ResourceLoader.exists(SWORD_TRIAL):
+		var trial: AnimationLibrary = load(SWORD_TRIAL) as AnimationLibrary
+		if trial != null and trial.has_animation("kevin_2h"):
+			animator.add_animation_library("sword_trial", trial)
 	animator.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	skeleton.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
 	for bone in ["Body", "Abdomen", "Torso", "Head", "Fist.R"]:
@@ -323,7 +333,7 @@ func _physics_process(delta: float) -> void:
 			var at: Vector3 = global_position + Vector3(randf_range(-.4, .4), randf_range(.4, 1.6), randf_range(-.4, .4))
 			ElementFx.bolt(self, at, at + Vector3(randf_range(-.5, .5), randf_range(-.4, .4), randf_range(-.5, .5)), Color(1, .9, .45), .08, .025)
 	if not preview_clip.is_empty():
-		_scrub(preview_clip, animator.get_animation("rig/" + preview_clip).length * preview_at, 0.0, delta)
+		_scrub(preview_clip, animator.get_animation(_clip_name(preview_clip)).length * preview_at, 0.0, delta)
 		right_ik.active = false
 		left_ik.active = false
 		skeleton.advance(delta)
@@ -384,8 +394,11 @@ func _gameplay(speed: float, delta: float) -> void:
 		_scrub("hit", (1.0 - actor.hurt_left / maxf(actor.hurt_duration, .01)) * .35, .04, delta)
 	elif not actor.is_on_floor() and story_walk_speed <= 0.0:
 		_scrub("jump", .45, .12, delta)
-	elif melee.attacking and actor.combo_index == 2 and melee.elapsed < melee.windup:
-		_scrub("jump", .25 + .3 * melee.elapsed / melee.windup, .05, delta)
+	elif melee.attacking:
+		# _pose_swing samples the whole-body strike below, once, on the melee clock.
+		pass
+	elif actor.specials != null and actor.specials.counter_left > 0.0:
+		_scrub("sword_block", ANIMATIONS.get_animation("sword_block").length * .45, .08, delta)
 	elif speed > 2.6:
 		_loop("run", clampf(speed / run_reference_speed, .8, 1.9), .14, delta)
 	elif speed > .35 or story_walk_speed > 0.0:
@@ -405,6 +418,11 @@ func _gameplay(speed: float, delta: float) -> void:
 	if melee.attacking:
 		hold_goal = 0.0
 		_swing(melee, delta)
+	elif actor.specials != null and actor.specials.counter_left > 0.0:
+		hold_goal = 0.0
+		left_reach = 1.0
+		weapon.transform = Transform3D(Basis.from_euler(Vector3(.15, -.3, -.5)), Vector3(.13, 1.12, -.48))
+		trail.emitting = false
 	else:
 		trail.emitting = false
 	held = move_toward(held, hold_goal, delta * (30.0 if hold_goal == 0.0 else 7.0))
@@ -421,9 +439,9 @@ func _gameplay(speed: float, delta: float) -> void:
 
 ## Authored moves for the three combo steps, phased exactly on the melee windows:
 ## a lunging diagonal slash, a spinning backhand, and a leap into an overhead slam.
-## Wind-ups snap into a held anticipation pose; strikes start at full speed.
-func _swing(melee: Node3D, _delta: float) -> void:
-	_pose_swing(maxi(actor.combo_index, 0), melee.elapsed, melee.windup, melee.active_time, melee.recovery)
+## Wind-ups ease into anticipation; strikes start at full speed.
+func _swing(melee: Node3D, delta: float) -> void:
+	_pose_swing(maxi(actor.combo_index, 0), melee.elapsed, melee.windup, melee.active_time, melee.recovery, delta)
 
 
 ## Specials resolve after the rig's tick. Pose the contact before hit-stop holds it,
@@ -448,7 +466,8 @@ func refresh_skill_contact() -> void:
 
 ## One authored strike at `elapsed` seconds into its wind-up/strike/recovery timeline:
 ## the combo steps on the melee clock, the finisher on the kill cam's.
-func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: float, recovery: float) -> void:
+func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: float, recovery: float, delta: float = 0.0) -> void:
+	_sword_body(index, elapsed, windup_time, active_time, recovery, delta)
 	var windup: float = clampf(elapsed / windup_time, 0, 1)
 	var strike: float = (elapsed - windup_time) / active_time
 	var settle: float = clampf((elapsed - windup_time - active_time) / recovery, 0, 1)
@@ -457,8 +476,9 @@ func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: fl
 	var target: Transform3D
 	var twist: float = 0.0
 	var dip: float = 0.0
-	var anticipation: float = ease(minf(1.0, windup / .7), .35)
+	var anticipation: float = smoothstep(0.0, .85, windup)
 	var release: float = 1.0 - ease(settle, 2.0)
+	left_reach = 1.0
 	trail.color = ELEMENTS[index].color
 	match index:
 		0:
@@ -517,10 +537,38 @@ func _pose_swing(index: int, elapsed: float, windup_time: float, active_time: fl
 	# The ribbon marks the cut itself, not the wind-up.
 	trail.emitting = elapsed >= windup_time * .9 and (strike < 1.0 or settle < .2)
 	weapon.transform = target
-	_turn("Abdomen", Vector3.UP, twist * .45)
-	_turn("Torso", Vector3.UP, twist * .55)
-	_turn("Abdomen", Vector3.RIGHT, dip * 2.5)
-	_drop(dip)
+	# The clips now supply weight transfer and torso motion; retain a small contact
+	# correction for the engineer's proportions and the authored blade arc.
+	_turn("Abdomen", Vector3.UP, twist * .15)
+	_turn("Torso", Vector3.UP, twist * .2)
+	_turn("Abdomen", Vector3.RIGHT, dip * .8)
+	_drop(dip * .35)
+
+
+## Retimed full-body motion under the blade/grip corrections. Root travel stays
+## with CharacterBody3D. Dash gets its own pose; spins keep their authored full turn.
+func _sword_body(index: int, elapsed: float, windup_time: float, active_time: float, recovery: float, delta: float) -> void:
+	# Sword B dives too far forward on the short engineer during a full turn.
+	# A supplies a planted cutting stance beneath the authored spinning backhand.
+	var clip: String = "sword_a" if index < 2 else "jump_attack"
+	var phases: Vector2 = SWORD_PHASES
+	if index == 0 and animator.has_animation("sword_trial/kevin_2h"):
+		clip = "sword_trial/kevin_2h"
+		phases = KEVIN_PHASES
+	if actor != null and actor.specials != null and actor.specials.dash_left > 0.0:
+		clip = "sword_dash"
+		phases = Vector2(.25, .6)
+	var fraction: float
+	if elapsed < windup_time:
+		fraction = lerpf(0.0, phases.x, clampf(elapsed / maxf(windup_time, .001), 0.0, 1.0))
+	elif elapsed < windup_time + active_time:
+		fraction = lerpf(phases.x, phases.y, clampf((elapsed - windup_time) / maxf(active_time, .001), 0.0, 1.0))
+	else:
+		fraction = lerpf(phases.y, 1.0, clampf((elapsed - windup_time - active_time) / maxf(recovery, .001), 0.0, 1.0))
+	if delta == 0.0:
+		# Immediate skill contact must finish any locomotion blend before hit-stop.
+		animator.play(_clip_name(clip), 0.0)
+	_scrub(clip, animator.get_animation(_clip_name(clip)).length * fraction, .035, delta)
 
 
 ## Each strike releases its element along the swing; hits get their own impact.
@@ -627,7 +675,8 @@ func _staged(delta: float) -> void:
 		position.x += sin(clock * 45.0) * .012 * overtime_strength
 		position.y += sin(clock * 32.0) * .008 * overtime_strength
 	if story_pose == Pose.FINISH:
-		_loop("sword_idle", 1.0, .1, delta)
+		# The finisher's clock samples its strike below; do not restart idle each frame.
+		pass
 	elif seated:
 		_scrub("sit_down", ANIMATIONS.get_animation("sit_down").length * (clampf(story_sit_progress, 0.0, 1.0) if story_sit_progress >= 0.0 else 1.0), .3, delta)
 	elif standing_left > 0:
@@ -659,7 +708,7 @@ func _staged(delta: float) -> void:
 		right_reach = 1.0
 		left_reach = 0.0
 		var t: float = clampf(finish_progress, 0.0, 1.0)
-		_pose_swing(finish_style, t, FINISH_TIMING.x, FINISH_TIMING.y, FINISH_TIMING.z)
+		_pose_swing(finish_style, t, FINISH_TIMING.x, FINISH_TIMING.y, FINISH_TIMING.z, delta)
 		rotation.y = spin
 		position = Vector3(0, lift, -lunge)
 	elif story_pose == Pose.RAGE:
@@ -672,7 +721,8 @@ func _staged(delta: float) -> void:
 
 func _solve(delta: float) -> void:
 	var swinging: bool = actor != null and actor.melee != null and actor.melee.attacking or story_pose == Pose.FINISH
-	if swinging or story_pose in SEATED:
+	var guarding: bool = actor != null and actor.specials != null and actor.specials.counter_left > 0.0
+	if swinging or guarding or story_pose in SEATED:
 		right_target.position = weapon.transform * RIGHT_GRIP if not story_pose in SEATED else hands[1]
 		left_target.position = weapon.transform * LEFT_GRIP if not story_pose in SEATED else hands[0]
 		right_pole.position = Vector3(.75, .35, .55)
@@ -689,7 +739,7 @@ func _solve(delta: float) -> void:
 	# The Monolith rests on the right shoulder whenever it is not swinging; the right hand
 	# goes up to hold it there.
 	var resting: bool = (weapon.visible and story_pose < Pose.TYPING and actor != null and actor.melee != null \
-		and not actor.melee.attacking and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
+		and not actor.melee.attacking and not guarding and not actor.dodging and actor.health > 0 and actor.hurt_left <= 0)
 	shoulder_rest = move_toward(shoulder_rest, 1.0 if resting else 0.0, delta * (5.0 if resting else 12.0))
 	if shoulder_rest > 0.0:
 		right_target.position = shoulder_transform() * RIGHT_GRIP
@@ -716,8 +766,12 @@ func _glow() -> void:
 		material.emission_energy_multiplier = .25 + 2.6 * battle
 
 
+func _clip_name(clip: String) -> String:
+	return clip if clip.contains("/") else "rig/" + clip
+
+
 func _scrub(clip: String, time: float, blend: float, delta: float) -> void:
-	var name: String = "rig/" + clip
+	var name: String = _clip_name(clip)
 	if animator.current_animation != name:
 		animator.play(name, blend)
 	animator.speed_scale = 1.0
@@ -726,7 +780,7 @@ func _scrub(clip: String, time: float, blend: float, delta: float) -> void:
 
 
 func _loop(clip: String, rate: float, blend: float, delta: float) -> void:
-	var name: String = "rig/" + clip
+	var name: String = _clip_name(clip)
 	if animator.current_animation != name:
 		animator.play(name, blend)
 	animator.speed_scale = rate

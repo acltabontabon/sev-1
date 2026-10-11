@@ -121,6 +121,12 @@ on 11 October 2026. The rigged engineer carries the imported sword with the exis
 combat and story poses; the original native Monolith stays available. Gate: creator
 accepts the materials, grip, shoulder carry, swing readability and parked story prop.
 
+The creator-authorized [free sword motion trial](sword_motion_trial.md) follows that
+weapon trial: full-body cuts, two-handed grips, dash and counter poses, using existing
+CC0 clips and an optional locally licensed Kevin Iglesias attack. Human weight,
+readability, combo recovery and skill-contact acceptance remain pending. No new
+abilities, character replacement or published release are implied.
+
 
 The 11 October [one-coworker MakeHuman trial](makehuman_trial.md) uses only free CC0
 assets for Drew. Creator feedback corrected its initial size to the measured current

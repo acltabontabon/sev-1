@@ -45,7 +45,7 @@ const UAL: Array = [
 ]
 const UAL_LOOPING: Array[String] = ["fold_arms", "phone", "zombie_walk", "zombie_idle", "no", "sword_idle", "jog", "sprint", "talking", "sitting_talking", "walk_formal"]
 const UAL_IN_PLACE: Array[String] = ["sword_dash", "jog", "sprint", "roll_ual", "zombie_walk", "walk_formal",
-	"sword_a", "sword_a_rec", "sword_b", "sword_b_rec", "sword_c", "sword_combo", "melee_hook", "sword_attack", "hit_knockback", "death_ual"]
+	"sword_a", "sword_a_rec", "sword_b", "sword_b_rec", "sword_c", "sword_combo", "melee_hook", "sword_attack", "hit_knockback", "death_ual", "kevin_2h"]
 const SAMPLE_RATE: float = 30.0
 ## Full-body lunges read as face-plants on the big-headed body: attacks keep their arms and
 ## torso but only part of the hips' rotation and drop, and most of the spine's.
@@ -108,12 +108,17 @@ func _initialize() -> void:
 ## matching body bone's world T-pose (its rest), then turned back into a local rotation down
 ## the body's hierarchy. The hips carry the root offset (scaled to the body); the feet,
 ## which hang off the root in this rig, are placed at the end of their leg chains.
-func _retarget(library: AnimationLibrary, body: Skeleton3D, skeleton_path: String, path: String, bone_map: Dictionary, clips: Dictionary) -> void:
+func _retarget(library: AnimationLibrary, body: Skeleton3D, skeleton_path: String, path: String, bone_map: Dictionary, clips: Dictionary, reference_clip: String = "A_TPose") -> void:
 	var source: Node = load(path).instantiate()
 	root.add_child(source)
 	var player: AnimationPlayer = source.find_child("AnimationPlayer", true, false)
 	var skeleton: Skeleton3D = source.find_child("Skeleton3D", true, false)
-	var reference: Dictionary = _sample(player, skeleton, "A_TPose", 0.0)
+	var reference: Dictionary = {}
+	if reference_clip.is_empty():
+		for index in skeleton.get_bone_count():
+			reference[skeleton.get_bone_name(index)] = skeleton.get_bone_global_rest(index)
+	else:
+		reference = _sample(player, skeleton, reference_clip, 0.0)
 	var inverse: Dictionary = {}
 	for bone: String in bone_map:
 		inverse[bone_map[bone]] = bone

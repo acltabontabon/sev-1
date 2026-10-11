@@ -719,6 +719,13 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   Universal Animation Libraries (`_retarget()`: world-space rotation from each library's
   A_TPose to the body's rest, hips root offset scaled, feet re-seated on the leg chains,
   hips/spine damped on attacks). Coworkers and hosts add it as the `ual` library.
+  The [free sword motion trial](sword_motion_trial.md) samples combat clips on the
+  melee clock beneath the sword/grip corrections. `tools/build_sword_trial.gd`
+  optionally bakes Kevin Iglesias' two-handed attack into a separate, Git-ignored
+  local library; absent that file, the engineer uses the CC0 Sword A fallback.
+  Dash travel uses Sword Dash, the guard uses Sword Block, and the leaping slam
+  uses the Knight jump attack. The finisher shares those clips. Source root travel
+  never moves the controller.
 - **Talk.** `game/ui/dialogue_box.gd` is a PROCESS_MODE_ALWAYS modal; `missing_transaction
   .talk()` pauses play (capture off; `modal_pending()` includes `talking`), turns the pair
   to each other, frames them via `presentation.dialogue_shot()`, and applies reply effects

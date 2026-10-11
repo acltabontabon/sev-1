@@ -16,3 +16,9 @@ __pycache__/
 export_credentials.cfg
 *.p12
 *.pfx
+
+# Kevin Iglesias' free motions permit game use, not standalone redistribution.
+# Keep licensed source files and derived animation resources local in this public repo.
+/assets/characters/kevin_trial/*.fbx
+/assets/characters/kevin_trial/*.fbx.import
+/assets/characters/kevin_trial/*.res
