@@ -1,0 +1,10 @@
+{
+  "license": "CC0-1.0",
+  "source": "Existing Quaternius Ultimate Animated Character Pack Casual_Male FBX asset",
+  "changes": "Triangles reassigned to hoodie, rib, glove, jogger, shoe, sole and hair-streak surfaces; no new geometry; original skin, bind poses and rig retained",
+  "builder": "tools/build_hero_outfit.gd",
+  "sha256": {
+    "assets/characters/hero_outfit/dev_hoodie.res": "d75858ff0acbcc48095451172713c41f8c981ffdeeb5c65c62df20f706e42c29",
+    "assets/characters/quaternius/casual_male.fbx": "d3c2ada76aede1be3b37f084de952fc8686668a5627c03fa854b45070f583997"
+  }
+}

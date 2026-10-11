@@ -606,7 +606,10 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   keyboard along authored arcs phased on `Melee` windows and `TwoBoneIK3D` modifiers
   (manual skeleton update) put the hands on its grip; between swings the keyboard
   follows the right fist. `weapon_trail.gd` draws the swing ribbon. The native scene
-  stays as a fallback; provenance in `assets/characters/README.md`.
+  stays as a fallback; provenance in `assets/characters/README.md`. Since 11 October
+  2026 the body wears the [developer outfit](../assets/characters/hero_outfit/README.md)
+  (`OUTFIT` mesh on the source skin) and `_dress()` builds his kit on `_rest_attach()`
+  holders; `gear_glow` entries brighten with `battle`, and `back_kit` hides while seated.
 - **Elements and spells.** `game/combat/element_fx.gd` (`ElementFx`) spawns transient,
   top-level effects under their emitter (sigils from `magic_circle.gdshader`,
   shockwaves, motes, shards, glyph words, light flashes, wind crescents, lightning

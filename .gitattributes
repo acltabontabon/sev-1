@@ -46,3 +46,6 @@ assets/enemies/warrior_trial/*.bin filter=lfs diff=lfs merge=lfs -text
 
 # Original CC0 female office outfit edits, retaining the source rigs.
 assets/characters/office_outfits/*.res filter=lfs diff=lfs merge=lfs -text
+
+# Original CC0 engineer developer outfit edit, retaining the source rig.
+assets/characters/hero_outfit/*.res filter=lfs diff=lfs merge=lfs -text

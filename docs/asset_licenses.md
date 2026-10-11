@@ -131,6 +131,14 @@ models. The unchanged source rigs and animation libraries are reused; generated
 ArrayMeshes use Git LFS. [Source, modifications and hashes](../assets/characters/office_outfits/README.md).
 
 
+## Engineer developer outfit — 11 October 2026
+
+Original surface reassignment of the existing Quaternius CC0 `Casual_Male` mesh into
+hoodie, gloves, joggers and sneakers, plus kit built at load from engine primitives.
+The unchanged source rig and clips are reused; the generated ArrayMesh uses Git LFS.
+[Source, modifications and hashes](../assets/characters/hero_outfit/README.md).
+
+
 ## Operations command station — 11 October 2026
 
 Two instances of Poly Haven **Caged Hanging Light** by Ulan Cabanilla, CC0 1.0.
