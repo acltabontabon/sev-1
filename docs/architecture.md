@@ -178,7 +178,7 @@ license, hashes and processing recorded in the voice manifests.
 
 The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player at the workstation with the gameplay camera. A fresh scene load also resets everything. Milestone 9 retains only opening/boss seen flags across R within the same scene session; gameplay state never persists between runs.
 
-`tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, containment briefing and automatic reveal, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/containment briefing/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
+`tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, Operations cutscene and automatic reveal, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/Operations/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
 Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with temporary upgrades but no healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor or Windows runtime test is included. Milestone 10 adds the macOS release build described below.
 
@@ -520,7 +520,7 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `BEATS` tables (50.5 s; 3 s on retry: a `FLY` spline fly-in from the night city, a narrated cold open, the `CREW` freeze-frame
   montage with a screen-reading desaturation shader and slammed name cards, the red
   monitor wave, the notification `STORM`, a dolly zoom, and a title slam; shots may carry
-  an end field of view or `"dolly"` and a dutch roll), the containment handoff, the vault arrival (no
+  an end field of view or `"dolly"` and a dutch roll), the Operations escalation, the vault arrival (no
   control loss), first-sighting slow motion and the terminal ending shot. A
   `sequence` queue plays lines that belong together through the bounded voice queue;
   stage changes clear it. A small music director cross-fades `assets/audio/music` beds on
@@ -823,3 +823,20 @@ partial and completed forms, raised hair, control/spawn handoff and skip/reset c
 `tests/rage_preview.gd` renders the entrance at 1280×720 on the development M2 Pro,
 Forward+/Metal, with phase captures under `/tmp/sev1_rage_*.png`. This is visual
 inspection, not a performance measurement or human acceptance of sound and pacing.
+
+
+The 11 October Quick Sync refinement extends only the meeting room four metres east;
+`build_office.py` owns the annex and perimeter tables, and the navigation bake bounds
+include it. `missing_transaction.gd` owns the projector countdown and tagged action-item
+zones, reusing `meeting_zone.gd` with custom warning/active captions. The countdown
+waits through reveals, retreat grace, modals and presentation shots. Victory removes
+tagged zones; reset uses the existing actor cleanup and restores the projector copy.
+The minimap consumes the expanded baked mesh. `quick_sync_preview.gd` captures the
+room, warning, active hazard and minutes with Forward+ for visual review.
+
+`quick_sync_standup.gd` stages the five-line estimate argument on entry, holds movement,
+frames each speaker, and plays local manifest clips on the Voice bus. TAB restores the
+HUD/camera/control and begins the transformation; restart frees it via actor cleanup.
+Headless encounter tests opt in with `standup_in_headless`. The facilitator alone uses
+the new CC0 Squidle model and `standup` palette/clip spec; other Meeting Invites retain
+the dragon. No enemy stats or special-move mechanics changed.

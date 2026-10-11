@@ -4,11 +4,12 @@ extends RefCounted
 ## severed half, and splats on the floor that fade after a while. Visual only. Splats are
 ## capped (oldest go first) and cleared on restart through the "blood" group.
 
-const COLOR: Color = Color(.3, 0, .015)
+const COLOR: Color = Color(.68, .008, .025)
 const MAX_SPLATS: int = 24
 const SPLAT_SECONDS: float = 10.0
 static var droplet: QuadMesh
 static var splat_textures: Array[ImageTexture] = []
+static var wet_texture: ImageTexture
 static var splats: Array[Decal] = []
 
 
@@ -36,6 +37,18 @@ static func prewarm() -> void:
 	if splat_textures.is_empty():
 		for seed in [3, 11, 29]:
 			splat_textures.append(_splat_texture(seed))
+	if wet_texture == null:
+		var orm: Image = Image.create(4, 4, false, Image.FORMAT_RGB8)
+		orm.fill(Color(1, .2, 0))
+		wet_texture = ImageTexture.create_from_image(orm)
+
+
+static func coating(mesh: MeshInstance3D) -> ShaderMaterial:
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = preload("res://game/combat/blood_coating.gdshader")
+	var extent: Vector3 = mesh.get_aabb().size
+	material.set_shader_parameter("stain_scale", 12.0 / maxf(.001, maxf(extent.x, maxf(extent.y, extent.z))))
+	return material
 
 
 ## An irregular pool with satellite drops and a few streaks thrown along +X.
@@ -140,7 +153,8 @@ static func splat(parent: Node, at: Vector3, direction: Vector3, size: float) ->
 	decal.name = "BloodSplat"
 	decal.add_to_group("blood")
 	decal.texture_albedo = splat_textures[randi() % splat_textures.size()]
-	decal.modulate = Color(.62, .03, .05, .95)
+	decal.modulate = Color(.76, .012, .035, .98)
+	decal.texture_orm = wet_texture
 	decal.size = Vector3(size, .8, size)
 	decal.upper_fade = .2
 	decal.lower_fade = .2

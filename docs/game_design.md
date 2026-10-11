@@ -179,6 +179,29 @@ Finance interruption, quiz, or extra fight. The two new local lines last about t
 seconds together; Tab skips straight to the decision. Human acceptance of the joke,
 clarity and pacing remains pending.
 
+### Emergency alignment meeting (implemented prototype, 11 October 2026)
+
+The optional Quick Sync now occupies a 12.5 m-wide room, with two short tables and
+chairs at the perimeter and a clear central fighting floor. Three strange attendees
+still transform: a unique horned, winged stand-up facilitator (Meeting Invite rules)
+and two Corrupted Records. On entry a short, voiced, TAB-skippable daily stand-up stages the engineer
+suggesting “one story point” to put out the production fire and go home. An attendee
+objects to the wasted estimation meetings; the facilitator demands eternal re-estimation
+and everyone transforms. This optional scene uses the existing local Kokoro voices,
+shot/reverse-shot framing and a clean handoff to the established retreat window.
+
+After the transformation and retreat grace, the projector waits six playable seconds,
+then assigns a floor action item every seven seconds: “Yesterday?”, “Today?”, or
+“Any blockers?”. Each 2 m circle warns for two seconds, then lasts
+three seconds, slowing attendance and dealing four damage per second. Running out
+stops both effects. Projector minutes count remaining attendees and conclude that
+this could have been an email. Defeating the attendees cancels the action items,
+opens the doors, and retains the once-only +30 health / −20 Burnout reward.
+
+Human acceptance remains pending: enter during investigation, watch the transformation,
+run and dodge through the center and annex, and judge whether the overlapping Invite
+and projector circles feel fair, readable and funny. R restarts the incident.
+
 ### Unpaid Overtime entrance (implemented prototype, 11 October 2026)
 
 The loss of the night shift drives the engineer's transformation before The Variance

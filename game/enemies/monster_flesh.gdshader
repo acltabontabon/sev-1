@@ -12,6 +12,7 @@ uniform float wet : hint_range(0.0, 1.0) = 0.25;
 uniform float detail_scale = 5.0;
 uniform vec3 emission_color : source_color = vec3(0.0);
 uniform float emission_strength = 0.0;
+uniform vec3 blood_color : source_color = vec3(0.66, 0.008, 0.028);
 // Slot 4: the overlay pass (corruption.gdshader) uses instance slots 0-3 on the same mesh.
 instance uniform float gore : instance_index(4) = 0.0;
 
@@ -57,7 +58,7 @@ void fragment() {
 	// Blood soaks in from many small patches as the body takes damage.
 	float soak = fbm(p * 0.8 + 19.0);
 	float blood = smoothstep(0.72 - gore * 0.4, 0.76 - gore * 0.4, soak) * step(0.001, gore);
-	color = mix(color, vec3(0.2, 0.008, 0.015) * (0.8 + mottle * 0.4), blood);
+	color = mix(color, blood_color * (0.78 + mottle * 0.32), blood);
 	// Silhouettes sink into shadow; no rim light, no neon.
 	float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.0);
 	color *= 1.0 - edge * 0.4;
