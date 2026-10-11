@@ -140,11 +140,18 @@ func _run() -> void:
 	player = scene.get_node("Player")
 	incident = scene.get_node("Incident")
 	var room: Node3D = incident.room
+	var cabinets_inside: bool = true
+	for index in range(6):
+		for part in room.get_node("Cabinet%d" % index).find_children("*", "MeshInstance3D", true, false):
+			var mesh_part: MeshInstance3D = part
+			if (mesh_part.global_transform * mesh_part.get_aabb()).end.x > 26.99:
+				cabinets_inside = false
+	check(cabinets_inside, "pantry cabinets remain inside the east wall instead of intersecting it")
 	player.camera_rig.set_capture(true)
 	incident.presentation.skip()
 	await frames(10)
-	# Decorative props have no physics collision, so navigation alone misses a chair
-	# or plant visually blocking the doorway. Check their actual transformed meshes.
+	# Navigation uses simplified furniture envelopes; foliage remains non-solid.
+	# Check actual transformed meshes as well to catch visual doorway clutter.
 	var lounge_approach: AABB = AABB(Vector3(11.8, .1, 10.5), Vector3(6.0, 2.5, 3.0))
 	var doorway_clutter: Array[String] = []
 	for node: Node in room.get_node("Decor").find_children("*", "MeshInstance3D", true, false):

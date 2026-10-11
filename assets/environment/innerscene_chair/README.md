@@ -23,8 +23,9 @@ and `.import` sidecars are retained for reproducible imports.
 The shared `chair.tscn` rotates the model 180° to face the existing desks, and scales
 only its vertical axis to 0.90615. Seat top: 0.56 m; fitted bounds: approximately
 0.731 × 0.701 × 1.058 m. Wheels sit at floor zero. All office/meeting/pantry chairs
-reuse it; lounge armchairs and the sofa retain their established art. No new world
-collision or runtime generation. Seated-character offsets remain unchanged.
+reuse it; lounge armchairs and the sofa retain their established art. A fitted static World-layer box covers each chair. There is no runtime generation.
+Staged seated offsets remain unchanged; opening/skip/retry release the player beside
+the chair with capsule clearance.
 
 Rebuild after import:
 

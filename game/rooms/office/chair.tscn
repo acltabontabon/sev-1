@@ -2,6 +2,9 @@
 
 [ext_resource type="PackedScene" path="res://assets/environment/innerscene_chair/vector_office_chair.glb" id="1"]
 
+[sub_resource type="BoxShape3D" id="r0"]
+size = Vector3(0.73000, 1.06000, 0.70000)
+
 [node name="OfficeChair" type="Node3D"]
 
 [node name="DetailedChair" parent="." instance=ExtResource("1")]
@@ -10,3 +13,12 @@ scale = Vector3(1, 0.90615, 1)
 
 [node name="SeatReference" type="Marker3D" parent="."]
 position = Vector3(0.00000, 0.56000, 0.00000)
+
+
+[node name="ChairCollision" type="StaticBody3D" parent="."]
+position = Vector3(0.00000, 0.53000, 0.05500)
+
+
+[node name="Collision" type="CollisionShape3D" parent="ChairCollision"]
+position = Vector3(0.00000, 0.00000, 0.00000)
+shape = SubResource("r0")

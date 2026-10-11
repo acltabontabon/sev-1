@@ -7,7 +7,7 @@ Unmodified GLB files, renamed to snake_case, stored with Git LFS.
 Pantry: `kitchen_cabinet`, `kitchen_sink`, `kitchen_coffee_machine`, `kitchen_microwave`,
 `toaster`, `kitchen_fridge_large`, `potted_plant`, `trashcan`.
 
-Night-shift decor (0.2.7, decorative only, no collision): `plant_small_1..3`,
+Night-shift decor: `plant_small_1..3`,
 `rug_round`, `lounge_design_sofa`, `lounge_chair_relax`, `table_coffee`,
 `lamp_round_floor`, `lamp_square_table`, `bookcase_open`, `books`,
 `cardboard_box_closed`, `cardboard_box_open`, `bench_cushion`, `television_modern`,
@@ -18,5 +18,7 @@ The kit is authored at roughly half scale and bright; `tools/build_office.py` sc
 each instance and `game/rooms/office/prop_tint.gd` darkens and desaturates their
 materials at load so they sit in the after-hours palette. Collision uses simplified
 generator boxes, not the meshes. The kit's chair and round table were evaluated and
-rejected as visually toy-like; the pantry uses the native office chair and a native
-table instead.
+rejected as visually toy-like; the pantry uses the shared Innerscene office chair
+and a native table instead. Lounge furniture, shelf, wing bench, supply boxes and
+window pots now have fitted static boxes; small clutter and foliage remain non-solid.
+Pantry counter/fridge collision accounts for the imported corner pivots.

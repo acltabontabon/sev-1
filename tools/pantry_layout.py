@@ -4,23 +4,25 @@
 def build_pantry(s, SIGN_FONT, TITLE_FONT, BODY_FONT):
     # Perimeter dining leaves a clear central lane through the expanded recovery room.
     s.box('PantryTileFloor',(22.75,.012,8.75),(8.25,.02,13.15),'stone')
-    s.collider('CounterCollision',(26.3,.45,6.8),(.96,.9,6.0))
-    for idx,z in enumerate([4.3,5.16,6.02,7.74,8.6,9.46]): s.glb(f'Cabinet{idx}','kitchen_cabinet',(26.3,0,z),-90,2.0)
-    s.glb('Sink','kitchen_sink',(26.3,0,6.88),-90,2.0)
-    s.glb('CoffeeMachine','kitchen_coffee_machine',(26.45,.9,5.2),-90,2.0)
+    # The kit's pivot is at a corner, not its centre. Keep its 0.9 m width inside
+    # the east wall's inner face at x=27 and centre collision on the visible cabinet.
+    s.collider('CounterCollision',(26.35,.45,7.31),(.9,.9,6.02))
+    for idx,z in enumerate([4.3,5.16,6.02,7.74,8.6,9.46]): s.glb(f'Cabinet{idx}','kitchen_cabinet',(25.9,0,z),-90,2.0)
+    s.glb('Sink','kitchen_sink',(25.9,0,6.88),-90,2.0)
+    s.glb('CoffeeMachine','kitchen_coffee_machine',(26.1,.9,5.2),-90,2.0)
     # Printed in a hurry, taped up crooked by someone who has given up.
     notice=s.node('CoffeeNoticeSheet','Node3D',(26.98,1.9,5.2),props='rotation_degrees = Vector3(0, -90, -2.5)\n')
     s.box('CoffeeNoticePaper',(0,0,0),(1.0,.5,.01),'paper',parent=notice)
     s.text('CoffeeNotice','PLEASE LIMIT\nCOFFEE TO ONE CUP\nPER EMPLOYEE',(0,0,.008),.0028,34,(.15,.15,.18,1),parent=notice,face=SIGN_FONT)
     for side in (-1,1): s.box(f'Tape{side+1}',(side*.46,.24,.007),(.18,.05,.002),'tape',parent=notice,rot=(0,0,side*-35))
-    s.glb('Microwave','kitchen_microwave',(26.45,.9,8.8),-90,2.0)
+    s.glb('Microwave','kitchen_microwave',(26.1,.9,8.8),-90,2.0)
     warning=s.node('MicrowaveNoticeSheet','Node3D',(26.98,1.78,8.8),props='rotation_degrees = Vector3(0, -90, 2)\n')
     s.box('MicrowaveNoticePaper',(0,0,0),(.8,.62,.01),'paper',parent=warning)
     s.text('MicrowaveNotice','DO NOT USE\nTICKET OPEN\nSINCE 2019',(0,0,.008),.0041,32,(.85,.15,.1,1),parent=warning,face=SIGN_FONT)
     for side in (-1,1): s.box(f'Tape{side+1}',(side*.36,.29,.007),(.16,.05,.002),'tape',parent=warning,rot=(0,0,side*35))
-    s.glb('Toaster','toaster',(26.4,.9,9.6),-90,2.0)
+    s.glb('Toaster','toaster',(26.1,.9,9.6),-90,2.0)
     s.glb('Fridge','kitchen_fridge_large',(26.35,0,11.55),-90,1.4)
-    s.collider('FridgeCollision',(26.35,.95,11.55),(.6,1.9,1.15))
+    s.collider('FridgeCollision',(26.545,.644,11.914),(.57,1.288,.728))
     s.box('VendingBody',(20.4,1.0,14.85),(1.1,2.0,.8),'black',True)
     s.box('VendingGlass',(20.25,1.15,14.44),(.75,1.45,.02),'screen')
     for row,y in enumerate([.65,.98,1.31]):

@@ -1,6 +1,6 @@
 """Static office finish: ceiling, workstation hardware and perimeter storage.
 
-Original native geometry; existing CC0 materials. No gameplay collision changes.
+Original native geometry; existing CC0 materials. Filing cabinets have fitted static collision; small finish remains decorative.
 """
 
 
@@ -30,9 +30,10 @@ def build_office_details(s):
         for note, (x, mat) in enumerate([(-9.5, 'sticky_yellow'), (-6.9, 'sticky_pink')]):
             s.box(f'BayNote{idx}_{note}', (x, 1.22, z+.052), (.12, .13, .008), mat, parent=p, rot=(0, 0, -5+note*9))
     # Low metal storage fills the unused south wall, outside circulation and the
-    # opening's approach to the desk. Visual-only, as with the existing small props.
+    # opening's approach to the desk. Fitted boxes stop bodies at the cabinet fronts.
     for idx, x in enumerate([-12.1, -10.8, -7.0]):
         cabinet = s.node(f'FileCabinet{idx}', 'Node3D', (x, 0, 15.18), parent=p)
+        s.collider('Collision', (0,.61,0), (1.16,1.22,.74), parent=cabinet)
         s.box('Carcass', (0, .63, 0), (1.16, 1.18, .70), 'office_enamel', parent=cabinet)
         s.box('Plinth', (0, .055, 0), (1.08, .11, .62), 'black', parent=cabinet)
         for drawer in range(3):

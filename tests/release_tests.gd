@@ -77,7 +77,9 @@ func _run() -> void:
 		await click_control(menu_button("Resume Suffering"))
 		await key(KEY_1)
 		check(incident.stage == incident.Stage.INVESTIGATION and not paused, "resume returns to upgrade and applies selection once")
-		player.position = incident.CONSOLE_POSITION
+		# Approach from the clear south side; planted employees can occupy
+		# the dashboard approach and E correctly prefers its local conversation there.
+		player.position = incident.CONSOLE_POSITION + Vector3(0, .05, 3.9)
 		await key(KEY_E)
 		await key(KEY_3)
 		await key(KEY_TAB)

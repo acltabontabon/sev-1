@@ -1,6 +1,19 @@
 extends "res://tests/combat_tests.gd"
 ## Environment integration: floor, furnishings, camera clearance, and actual pursuit.
 
+
+func visible_bounds(node: Node3D) -> AABB:
+	var box: AABB
+	var first: bool = true
+	for part in node.find_children("*", "MeshInstance3D", true, false):
+		var mesh_part: MeshInstance3D = part
+		if mesh_part.mesh == null or not mesh_part.is_visible_in_tree():
+			continue
+		var bounds: AABB = mesh_part.global_transform * mesh_part.get_aabb()
+		box = bounds if first else box.merge(bounds)
+		first = false
+	return box
+
 func _run() -> void:
 	scene = load("res://game/main.tscn").instantiate()
 	root.add_child(scene)
@@ -63,6 +76,49 @@ func _run() -> void:
 		if not is_equal_approx(chair.get_node("SeatReference").position.y, .56):
 			chairs_fit = false
 	check(chairs_fit, "detailed chairs sit on the floor and fit the desk bays at the established seated height")
+	var room: Node3D = scene.get_node("OfficeAfterHours")
+	var lounge_chair: AABB = visible_bounds(room.get_node("Decor/LoungeChairEast"))
+	var lounge_clear: bool = true
+	for neighbor: String in ["LoungeSofa", "LoungePlantB", "LoungeTV", "LoungeSpeakerB"]:
+		lounge_clear = lounge_clear and not lounge_chair.intersects(visible_bounds(room.get_node("Decor/" + neighbor)))
+	check(lounge_clear, "relocated lounge chair clears the sofa, plant, screen and speaker")
+	var supported: bool = true
+	for index in range(6):
+		var desk: Node3D = room.get_node("Workstation%d" % index)
+		var top: AABB = AABB(desk.position + Vector3(-1.125,.8225,-.475), Vector3(2.25,.01,.95))
+		for prefix: String in ["DeskPlant", "DeskBooks"]:
+			var prop_bounds: AABB = visible_bounds(room.get_node("Decor/%s%d" % [prefix,index]))
+			if absf(prop_bounds.position.y-top.position.y) > .002 or prop_bounds.position.x < top.position.x \
+					or prop_bounds.end.x > top.end.x or prop_bounds.position.z < top.position.z or prop_bounds.end.z > top.end.z:
+				supported = false
+	check(supported, "desk plants and books rest on their tabletops without sinking or overhanging")
+	for index in range(2):
+		var lamp: AABB = visible_bounds(room.get_node("Decor/DeskLamp%d" % index))
+		var desk: Node3D = room.get_node("Workstation%d" % (index*4))
+		check(absf(lamp.position.y-.8225) < .002 and lamp.position.x > desk.position.x-1.125 \
+			and lamp.end.x < desk.position.x+1.125 and lamp.position.z > desk.position.z-.475 \
+			and lamp.end.z < desk.position.z+.475, "desk lamp %d is supported by one desk" % index)
+	for index in range(6):
+		var box: AABB = visible_bounds(room.get_node("Decor/DeskBox%d" % index))
+		var clear: bool = true
+		for desk_index in range(6):
+			if box.intersects(visible_bounds(room.get_node("Workstation%d/DetailedDesk" % desk_index))):
+				clear = false
+		check(clear, "supply box %d does not intersect desk drawers" % index)
+	# Actual walking must stop at the chair and drawer, not pass through visible art.
+	player.camera_rig.reset_view()
+	player.position = Vector3(-9,.05,7.5)
+	player.velocity = Vector3.ZERO
+	Input.action_press("move_forward")
+	await frames(70)
+	Input.action_release("move_forward")
+	check(player.position.z > 6.5 and player.position.z < 7.2, "walking stops in front of the office chair")
+	player.position = Vector3(-8.15,.05,7)
+	player.velocity = Vector3.ZERO
+	Input.action_press("move_forward")
+	await frames(70)
+	Input.action_release("move_forward")
+	check(player.position.z > 5.75 and player.position.z < 6.3, "walking stops at the desk's drawer pedestal")
 
 	await setup_pair(Vector3(0, .05, 0))
 	player.position = Vector3(3, .05, -5)

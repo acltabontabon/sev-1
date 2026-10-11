@@ -23,6 +23,10 @@ the existing wing. Its doorway grows from 3 m to 4.5 m; dining furniture moves t
 the north edge and vending to the back wall. A concrete floor and a second warm
 light distinguish the recovery room. Navigation is rebaked offline for this layout.
 
+The cabinet run and its countertop appliances now sit inside the east wall. Counter
+and fridge collision match the imported corner pivots and visible footprints; chairs
+use the shared fitted World-layer box. The centre and appliance approaches stay open.
+
 Strange employees resolve their standing height against physical floor collision,
 with the existing 5 cm body clearance, rather than the elevated navigation voxels.
 This applies at every outbreak site and is checked again when a transformation

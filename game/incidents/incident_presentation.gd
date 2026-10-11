@@ -608,7 +608,7 @@ func reset_story() -> void:
 	desk.set_live(true)
 	var character: Node3D = incident.player.get_node("Visual/Character")
 	if short_opening:
-		incident.player.position = Vector3(-1.8, .05, 10.8)
+		incident.player.position = Vector3(-1.7, .05, 10.95)
 		incident.player.visual.rotation.y = .35
 	else:
 		incident.player.position = SEAT
@@ -1469,6 +1469,11 @@ func _environment(delta: float) -> void:
 
 func _end_opening() -> void:
 	# However the opening ends, play starts in a clean, lit, readable office.
+	# Sitting is staged without physics. Release beside the now-solid chair rather
+	# than enabling movement with the engineer's capsule inside its seat/backrest.
+	if incident.player.position.distance_to(SEAT) < .8:
+		incident.player.position = Vector3(-1.7, .05, 10.95)
+		incident.player.velocity = Vector3.ZERO
 	for mesh in monitors:
 		mesh.material_override = screen_material
 	for mesh in displays:

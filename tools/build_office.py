@@ -155,6 +155,7 @@ chair_ref = chair.external('res://assets/environment/innerscene_chair/vector_off
 # .56 m and keep the caster floor at zero, preserving the established sitting poses.
 chair.nodes.append(f'[node name="DetailedChair" parent="." instance={chair_ref}]\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(1, 0.90615, 1)')
 chair.node('SeatReference', 'Marker3D', (0, .56, 0))
+chair.collider('ChairCollision', (0, .53, .055), (.73, 1.06, .70))
 chair.save('chair')
 
 # Workstation dimensions are workplace scale, not oversized boxes.
@@ -189,6 +190,8 @@ for i, node in enumerate(polished.nodes):
         polished.nodes[i] += '\nvisible = false'
 ref = polished.external('res://assets/environment/poly_haven_workstation/metal_office_desk.glb', 'PackedScene')
 polished.nodes.append(f'[node name="DetailedDesk" parent="." instance={ref}]\nscale = Vector3(1.125, 1.04444, 1.00294)')
+for side,x in [('Left',-.805), ('Right',.81)]:
+    polished.collider(f'{side}DrawerCollision', (x, .38, .045), (.54, .76, .89))
 polished.box('DeskMat', (.04, .827, .24), (.94, .008, .40), 'fabric')
 # Small keycaps break the placeholder keyboard stripes into an actual keyboard.
 for row in range(4):
@@ -209,6 +212,8 @@ for i, node in enumerate(shared.nodes):
         shared.nodes[i] += '\nvisible = false'
 ref = shared.external('res://assets/environment/poly_haven_workstation/metal_office_desk.glb', 'PackedScene')
 shared.nodes.append(f'[node name="DetailedDesk" parent="." instance={ref}]\nscale = Vector3(1.125, 1.04444, 1.00294)')
+for side,x in [('Left',-.805), ('Right',.81)]:
+    shared.collider(f'{side}DrawerCollision', (x, .38, .045), (.54, .76, .89))
 shared.box('DeskMat', (.04, .827, .24), (.94, .008, .40), 'fabric')
 shared.save('workstation')
 
@@ -484,8 +489,8 @@ for z in range(-3,4): s.box(f'WallSlat{z}',(13.68,2.6,z),(.045,3.4,.04),'metal')
 s.text('QuietNotice','QUIET HOURS',(13.60,3,0),.006,60,rot=(0,-90,0))
 s.text('QuietSubtext','16:59 — UNTIL RESOLVED',(13.60,2.4,0),.0035,38,rot=(0,-90,0))
 # ---------------------------------------------------------------- Night-shift decor
-# Purely decorative (no collision, outside the combat lanes): life left behind by the
-# people who still work here. A brighter PropTint keeps the colour that the after-hours
+# Furniture has restrained collision outside combat lanes; small props show life
+# left behind by the people who still work here. A brighter PropTint keeps the colour that the after-hours
 # palette strips from the pantry kit.
 s.node('Decor','Node3D')
 s.node('DecorTint','Node',parent='Decor',props='script = '+s.external('res://game/rooms/office/prop_tint.gd','Script')+'\nvalue = 0.85\nsaturation = 0.95')
@@ -497,33 +502,49 @@ for idx,z in enumerate([-5.8,5.4]):
     s.light(f'WindowLampLight{idx}',(-12.9,2.4,z),(1,.72,.45),1.1,4.5)
 # Desks: the overtime crew's clutter, a lamp per cluster, boxes nobody unpacked.
 for idx,(x,z) in enumerate([(-9.0,5.0),(-6.5,5.0),(-9.0,0.0),(-6.5,0.0),(-9.0,-6.0),(-6.5,-6.0)]):
-    decor(f'DeskPlant{idx}',['plant_small_1','plant_small_2','plant_small_3'][idx%3],(x-.75,.76,z-.25),idx*55,1.6)
-    decor(f'DeskBooks{idx}','books',(x+.7,.76,z-.2),idx*30,1.5)
-    decor(f'DeskBox{idx}','cardboard_box_open' if idx%2 else 'cardboard_box_closed',(x+.55,0,z+.55),idx*25,1.6)
-for idx,(x,z) in enumerate([(-7.75,5.0),(-7.75,-6.0)]):
-    decor(f'DeskLamp{idx}','lamp_square_table',(x,.76,z-.3),0,1.8)
-    s.light(f'DeskLampLight{idx}',(x,1.35,z-.3),(1,.78,.5),.9,3.2)
+    decor(f'DeskPlant{idx}',['plant_small_1','plant_small_2','plant_small_3'][idx%3],(x-.75,.8225,z-.25),idx*55,1.6)
+    decor(f'DeskBooks{idx}','books',(x+.7,.8225,z),idx*30,1.5)
+    # The imported boxes previously occupied the desk's solid drawer pedestals.
+    bx = -12.4 + idx*.5
+    decor(f'DeskBox{idx}','cardboard_box_closed',(bx,0,13.7),0,1.4)
+    s.collider(f'SupplyBoxCollision{idx}', (bx+.14875,.1967,13.55125), (.2975,.3934,.2975))
+for idx,(x,z) in enumerate([(-8.18,5.0),(-8.18,-6.0)]):
+    decor(f'DeskLamp{idx}','lamp_square_table',(x,.8225,z-.24),0,1.8)
+    s.light(f'DeskLampLight{idx}',(x+.108,1.42,z-.24),(1,.78,.5),.9,3.2)
 # The lounge (south-east): a compact seating group, clear of the wing doorway.
 # Keep x >= 11.8, z 10.5..13.5 free for the approach; imported pivots are off-centre.
 decor('LoungeRug','rug_round',(6.4,0.012,13.4),0,3.4)
 decor('LoungeSofa','lounge_design_sofa',(9.4,0,13.9),180,2.1)
 decor('LoungeChairWest','lounge_chair_relax',(7.0,0,12.5),90,2.0)
-decor('LoungeChairEast','lounge_chair_relax',(9.8,0,11.4),-90,2.0)
+# Keep the solid chair clear of the x=12,z=12 column and the enemy route to
+# the wing; it previously pinched that route when navigation gained its envelope.
+decor('LoungeChairEast','lounge_chair_relax',(10.2,0,14.5),-90,2.0)
 decor('LoungeTable','table_coffee',(8.8,0,12.0),0,2.0)
 decor('LoungeLaptop','laptop',(8.3,0.46,11.95),0,0.9)
 decor('LoungeLamp','lamp_round_floor',(11.8,0,14.6),0,2.2)
 decor('LoungePlantA','potted_plant',(6.2,0,15.0),0,2.5)
-decor('LoungePlantB','potted_plant',(10.9,0,14.6),70,2.1)
+decor('LoungePlantB','potted_plant',(10.9,0,13.1),70,2.1)
 decor('LoungeTV','television_modern',(9.4,.9,15.55),180,2.0)
 decor('LoungeSpeakerA','speaker',(8.1,0,15.4),180,1.8)
-decor('LoungeSpeakerB','speaker',(10.7,0,15.4),180,1.8)
+decor('LoungeSpeakerB','speaker',(10.0,0,14.9),180,1.8)
 decor('LoungeShelf','bookcase_open',(5.6,0,15.35),180,2.0)
 s.light('LoungeLampLight',(11.8,2.3,14.6),(1,.7,.42),1.2,5)
 s.light('LoungeTVGlow',(9.4,1.6,14.9),(.35,.75,1),.8,4)
 # Deck and wing: plants on the deck corners, a bench and greenery along the corridor.
 for idx,x in enumerate([5.6,10.4]): decor(f'DeckPlant{idx}','potted_plant',(x,1.5,-10.5),idx*90,2.0)
-decor('WingBench','bench_cushion',(18.05,0,-1.2),-90,2.0)
+decor('WingBench','bench_cushion',(17.95,0,-1.2),-90,2.0)
+s.collider('WingBenchCollision',(18.15,.46,-.8),(.4,.92,.8))
 for idx,z in enumerate([-14.6,14.6]): decor(f'WingPlant{idx}','potted_plant',(17.9,0,z),idx*120,2.3)
+# Restrained envelopes for solid furnishings; foliage and tabletop clutter stay soft.
+for idx,z in enumerate([-13.2,-8.6,-3.2,2.6,8.2,13.4]):
+    s.collider(f'WindowPlanterCollision{idx}',(-13.1,.25,z),(.36,.5,.36))
+for name,pos,size in [
+    ('LoungeSofaCollision',(8.224,.42,14.3305),(2.352,.84,.861)),
+    ('LoungeChairWestCollision',(6.3253,.63,12.01),(1.3494,1.26,.98)),
+    ('LoungeChairEastCollision',(10.8747,.63,14.99),(1.3494,1.26,.98)),
+    ('LoungeTableCollision',(8.539,.23,11.8),(1.322,.46,.8)),
+    ('LoungeShelfCollision',(5.2,.88,15.6),(.8,1.76,.5))]:
+    s.collider(name,pos,size)
 # Neon: the company's three beliefs, lit in colour so the floor never reads grey.
 for name,text,pos,rot,mat,color in [
     ('NeonMoveFast','MOVE FAST',(-8.8,4.3,-15.7),0,'neon_cyan',(.2,.88,1)),

@@ -10,16 +10,17 @@ geometry, keeping the close-up keycaps confined to the starting desk.
 
 The dedicated `polished_workstation.tscn` retains the tabletop collision, chair origin,
 monitor/display positions and existing story node paths. The imported desk is fitted
-to the original 2.25 × 0.95 m footprint and 0.8225 m surface height. It adds no
-collision or navigation obstacles. The monitor and mug remain simplified;
+to the original 2.25 × 0.95 m footprint and 0.8225 m surface height. Tabletop and
+drawer-pedestal boxes fit the imported geometry. The monitor and mug remain simplified;
 this pass does not establish final art quality for the whole office.
 
 `tools/office_details.py`, called by the office builder, adds a suspended acoustic
 ceiling with tee runners and air returns, framed fabric desk dividers and pinboard
 notes, three perimeter filing cabinets with binders, glass privacy bands, sliding-door
-handles and conference-call equipment. The existing lighting is preserved. All new
-finish is visual-only; world collision, navigation, spawn positions and interaction
-paths stay intact. The conference display and its text now sit on the screen housing
+handles and conference-call equipment. The existing lighting is preserved. Ceiling
+and small finish remain visual-only; perimeter filing cabinets now have
+fitted world collision. Navigation is rebaked after furniture changes. The conference
+display and its text now sit on the screen housing
 instead of floating 1.25 metres in front of it. Many small props remain simplified.
 No new downloaded assets were needed for the ceiling/storage extension.
 
@@ -34,12 +35,26 @@ consolidated offline from 60 pieces to five material surfaces, with no runtime b
 `sh tools/godot.sh --path . --script tests/capture_chairs.gd` writes four fixed views
 under `builds/chair_*.png`; the desk fit, seated engineer, title backdrop and conference
 table were visually inspected. Existing seated offsets and chair world origins are
-preserved. Judge the upholstery, proportions, character fit and camera readability
+preserved during the staged sitting pose. Gameplay now releases the engineer beside
+the solid chair, with capsule clearance checked on skip and retry. Judge the upholstery,
+proportions, character fit and camera readability
 by starting a normal run and walking around the desk bays. R retries the incident.
 
 [Source, license and retrieval records](../assets/environment/poly_haven_workstation/README.md).
-`tools/build_office.py` owns the generated scenes. Regeneration preserves unrelated
-resource IDs. No purchased assets or new dependencies are required.
+`tools/build_office.py` owns the generated scenes. Generated scenes preserve existing story node paths. No purchased assets or new dependencies are required.
+
+The collision/overlap refinement fits static boxes to chairs, desk drawers, filing
+cabinets, lounge seating/table/shelf, the wing bench, supply boxes and window pots.
+Tabletop plants/books/lamps now rest at the 0.8225 m desk surface, with lamps inside
+their supporting desk footprint. Boxes move clear of drawer pedestals. Pantry cabinets
+and appliances move inside the east wall; counter and fridge collision match the
+imported corner pivots. Loose tabletop clutter and foliage remain non-solid.
+The east lounge chair moves beside the sofa, clear of the structural column and
+wing approach, with its nearby plant moved clear of the chair. The navigation mesh
+is rebaked; walking into a chair/drawer stops the capsule, and
+the existing enemy-pursuit and ramp checks cover the resulting routes. The conference
+outbreak point moves from between the now-solid chairs to the open entrance area;
+every outbreak site and its twelve surrounding spawn slots are checked for reachability.
 
 ## Review and retry
 
@@ -87,7 +102,12 @@ Full `python3 tools/validate.py` passed, including import, script parsing and ev
 integration suite. Added office checks cover starting-desk collision height, imported
 mesh alignment/footprint, all eight detailed desks, and visual clearance of the central
 fighting lane. Chair checks cover floor alignment, bay dimensions and the established
-seat reference. Existing environment checks cover routes and camera clipping. The tiny notebook caption
+seat reference. The collision refinement also passed the full suite, including
+walking stops at chairs/drawers, opening/retry capsule clearance, tabletop support,
+lounge prop separation, pantry wall clearance and every outbreak spawn route.
+Final desk, pantry, storage, standing-handoff and lounge views were rendered and
+visually inspected. Human snagging/flow acceptance remains pending. Existing
+environment checks cover routes and camera clipping. The tiny notebook caption
 was removed after the readability check rejected it; the notebook now uses markings.
 
 ## Free character candidates — current status

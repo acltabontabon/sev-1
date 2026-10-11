@@ -1,5 +1,16 @@
 extends "res://tests/incident_tests.gd"
 
+func clear_standing_space() -> bool:
+	var body: CollisionShape3D = player.get_node("CollisionShape3D")
+	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+	query.shape = body.shape
+	query.transform = body.global_transform
+	query.transform.origin.y += .02
+	query.collision_mask = 1
+	query.exclude = [player.get_rid()]
+	return player.get_world_3d().direct_space_state.intersect_shape(query).is_empty()
+
+
 func _run() -> void:
 	scene = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
@@ -27,6 +38,7 @@ func _run() -> void:
 	story.skip_unlocked = true
 	await key(KEY_TAB)
 	check(incident.stage == incident.Stage.ENCOUNTER_ONE and not player.narrative_hold and not story.camera.current, "Tab restores gameplay camera and input")
+	check(clear_standing_space(), "opening releases the capsule clear of solid furniture")
 	check(not story.emerging.visible and not story.card.visible and not story.letterbox[0].visible and scene.get_node("HUD").visible, "skip clears cinematic frame and restores HUD")
 	await frames(150)
 	check(is_instance_valid(incident.active_enemy) and incident.alert_played, "skipped opening declares incident and spawns normally")
@@ -48,6 +60,7 @@ func _run() -> void:
 	await key(KEY_R)
 	check(incident.run.peak_burnout == 0 and incident.enemies_defeated == 0 and story.seen.is_empty(), "restart clears run statistics and one-shot messages")
 	check(story.short_opening and not player.narrative_hold, "seen opening shortens on retry")
+	check(clear_standing_space(), "short retry starts clear of solid furniture")
 	player.camera_rig.set_capture(true)
 	await frames(320)
 	check(is_instance_valid(incident.active_enemy), "repeat run reaches combat within six seconds")

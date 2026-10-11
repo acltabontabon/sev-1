@@ -105,9 +105,11 @@ Known limits: furniture and characters still use simplified native geometry; art
 The 28×32 m shell and original ramp/deck slope preserve the movement foundation. The
 central x=−4…4 circulation spine remains open for combat; workstations occupy the west
 side, the spawn has a task-lit workstation, the east deck holds the glazed conference
-room, and the north wall contains production dashboards and racks. Chairs and small
-clutter are visual-only; desktops, partitions, architectural glass, ramp guards, and
-major cabinets have simple world-layer box collision. The old movement lab remains
+room, and the north wall contains production dashboards and racks. Chairs, desktop
+drawer pedestals, lounge furniture, supply boxes, window pots,
+partitions, architectural glass, ramp guards and cabinets have fitted World-layer
+box collision. Small tabletop clutter and foliage remain visual-only. The old
+movement lab remains
 available as a reference scene but is no longer the main environment.
 
 `tools/build_office.py` deterministically authors the static `.tscn` layout, reusable
@@ -120,12 +122,16 @@ priorities live in [assets/environment/README.md](../assets/environment/README.m
 The [free office furnishing pass](workstation_trial.md) extends the existing CC0
 Metal Office Desk to all eight workstations. `tools/office_details.py` adds static
 ceiling finish, divider hardware, perimeter filing storage and conference details;
-it is called during scene authoring, never at runtime. New details have no World
-collision and preserve the baked routes. Large visible finish still participates in
+it is called during scene authoring, never at runtime. Filing cabinets have World
+collision; small finish remains visual-only. The
+navigation mesh is rebaked after collision changes. Large visible finish still
+participates in
 the existing camera-only blocker generation. The shared chair now instances the CC0
 Innerscene ergonomic model, consolidated offline into five material surfaces by
-`tools/build_office_chair.gd`. Seat height, chair origins, sitting poses and navigation
-are preserved; [source and build record](../assets/environment/innerscene_chair/README.md).
+`tools/build_office_chair.gd`. Seat height, chair origins and staged sitting poses are
+preserved; gameplay
+releases the engineer beside the solid chair, and capsule clearance is tested;
+[source and build record](../assets/environment/innerscene_chair/README.md).
 
 Lighting uses subdued cool ambient fill, six ceiling spot pools (two shadow-casting),
 a warm workstation lamp, restrained incident spill, window bounce, and conference fill.
