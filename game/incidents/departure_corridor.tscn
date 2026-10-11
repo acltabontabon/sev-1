@@ -1,0 +1,403 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://game/rooms/office/stone.tres" id="stone"]
+[ext_resource type="Material" path="res://game/rooms/office/plaster.tres" id="wall"]
+[ext_resource type="Material" path="res://game/rooms/office/frame.tres" id="metal"]
+[ext_resource type="Material" path="res://game/rooms/office/carpet.tres" id="carpet"]
+
+[sub_resource type="StandardMaterial3D" id="glow"]
+shading_mode = 0
+albedo_color = Color(0.8, 0.72, 0.55, 1)
+emission_enabled = true
+emission = Color(1, 0.83, 0.59, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="door"]
+albedo_color = Color(0.19, 0.22, 0.25, 1)
+metallic = 0.75
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="mesh_Floor"]
+size = Vector3(24, 0.24, 10)
+
+[sub_resource type="BoxShape3D" id="shape_Floor"]
+size = Vector3(24, 0.24, 10)
+
+[sub_resource type="BoxMesh" id="mesh_Runner"]
+size = Vector3(22, 0.016, 3.2)
+
+[sub_resource type="BoxMesh" id="mesh_BackWall"]
+size = Vector3(24, 3.8, 0.25)
+
+[sub_resource type="BoxShape3D" id="shape_BackWall"]
+size = Vector3(24, 3.8, 0.25)
+
+[sub_resource type="BoxMesh" id="mesh_FrontWall"]
+size = Vector3(24, 3.8, 0.25)
+
+[sub_resource type="BoxShape3D" id="shape_FrontWall"]
+size = Vector3(24, 3.8, 0.25)
+
+[sub_resource type="BoxMesh" id="mesh_Ceiling"]
+size = Vector3(24, 0.2, 10)
+
+[sub_resource type="BoxShape3D" id="shape_Ceiling"]
+size = Vector3(24, 0.2, 10)
+
+[sub_resource type="BoxMesh" id="mesh_EndWall"]
+size = Vector3(0.25, 3.8, 10)
+
+[sub_resource type="BoxShape3D" id="shape_EndWall"]
+size = Vector3(0.25, 3.8, 10)
+
+[sub_resource type="BoxMesh" id="mesh_StartWall"]
+size = Vector3(0.25, 3.8, 10)
+
+[sub_resource type="BoxShape3D" id="shape_StartWall"]
+size = Vector3(0.25, 3.8, 10)
+
+[sub_resource type="BoxMesh" id="mesh_SkirtingLeft"]
+size = Vector3(23.6, 0.3, 0.06)
+
+[sub_resource type="BoxMesh" id="mesh_PilasterLeft_0"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLightLeft_0"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_PilasterLeft_1"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLightLeft_1"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_PilasterLeft_2"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLightLeft_2"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_PilasterLeft_3"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLightLeft_3"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_PilasterLeft_4"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLightLeft_4"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_Skirting1"]
+size = Vector3(23.6, 0.3, 0.06)
+
+[sub_resource type="BoxMesh" id="mesh_Pilaster1_0"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLight1_0"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_Pilaster1_1"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLight1_1"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_Pilaster1_2"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLight1_2"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_Pilaster1_3"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLight1_3"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_Pilaster1_4"]
+size = Vector3(0.14, 3.7, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_WallLight1_4"]
+size = Vector3(0.08, 0.9, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_CeilingStrip0"]
+size = Vector3(0.08, 0.04, 6.5)
+
+[sub_resource type="BoxMesh" id="mesh_CeilingStrip1"]
+size = Vector3(0.08, 0.04, 6.5)
+
+[sub_resource type="BoxMesh" id="mesh_CeilingStrip2"]
+size = Vector3(0.08, 0.04, 6.5)
+
+[sub_resource type="BoxMesh" id="mesh_CeilingStrip3"]
+size = Vector3(0.08, 0.04, 6.5)
+
+[sub_resource type="BoxMesh" id="mesh_LiftFrame"]
+size = Vector3(0.16, 3.1, 3.1)
+
+[sub_resource type="BoxMesh" id="mesh_LiftDoorLeft"]
+size = Vector3(0.08, 2.96, 1.34)
+
+[sub_resource type="BoxMesh" id="mesh_LiftDoor1"]
+size = Vector3(0.08, 2.96, 1.34)
+
+[sub_resource type="BoxMesh" id="mesh_CallPanel"]
+size = Vector3(0.06, 0.3, 0.16)
+
+[sub_resource type="BoxMesh" id="mesh_CallButton"]
+size = Vector3(0.03, 0.045, 0.045)
+
+[node name="DepartureCorridor" type="Node3D"]
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 0)
+mesh = SubResource("mesh_Floor")
+material_override = ExtResource("stone")
+
+[node name="Solid" type="StaticBody3D" parent="Floor"]
+[node name="Shape" type="CollisionShape3D" parent="Floor/Solid"]
+shape = SubResource("shape_Floor")
+
+[node name="Runner" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.008, 0)
+mesh = SubResource("mesh_Runner")
+material_override = ExtResource("carpet")
+
+[node name="BackWall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.9, 5)
+mesh = SubResource("mesh_BackWall")
+material_override = ExtResource("wall")
+
+[node name="Solid" type="StaticBody3D" parent="BackWall"]
+[node name="Shape" type="CollisionShape3D" parent="BackWall/Solid"]
+shape = SubResource("shape_BackWall")
+
+[node name="FrontWall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.9, -5)
+mesh = SubResource("mesh_FrontWall")
+material_override = ExtResource("wall")
+
+[node name="Solid" type="StaticBody3D" parent="FrontWall"]
+[node name="Shape" type="CollisionShape3D" parent="FrontWall/Solid"]
+shape = SubResource("shape_FrontWall")
+
+[node name="Ceiling" type="MeshInstance3D" parent="."]
+position = Vector3(0, 3.85, 0)
+mesh = SubResource("mesh_Ceiling")
+material_override = ExtResource("wall")
+
+[node name="Solid" type="StaticBody3D" parent="Ceiling"]
+[node name="Shape" type="CollisionShape3D" parent="Ceiling/Solid"]
+shape = SubResource("shape_Ceiling")
+
+[node name="EndWall" type="MeshInstance3D" parent="."]
+position = Vector3(11.8, 1.9, 0)
+mesh = SubResource("mesh_EndWall")
+material_override = ExtResource("wall")
+
+[node name="Solid" type="StaticBody3D" parent="EndWall"]
+[node name="Shape" type="CollisionShape3D" parent="EndWall/Solid"]
+shape = SubResource("shape_EndWall")
+
+[node name="StartWall" type="MeshInstance3D" parent="."]
+position = Vector3(-11.8, 1.9, 0)
+mesh = SubResource("mesh_StartWall")
+material_override = ExtResource("wall")
+
+[node name="Solid" type="StaticBody3D" parent="StartWall"]
+[node name="Shape" type="CollisionShape3D" parent="StartWall/Solid"]
+shape = SubResource("shape_StartWall")
+
+[node name="SkirtingLeft" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.15, -4.84)
+mesh = SubResource("mesh_SkirtingLeft")
+material_override = ExtResource("metal")
+
+[node name="PilasterLeft_0" type="MeshInstance3D" parent="."]
+position = Vector3(-8, 1.85, -4.79)
+mesh = SubResource("mesh_PilasterLeft_0")
+material_override = ExtResource("metal")
+
+[node name="WallLightLeft_0" type="MeshInstance3D" parent="."]
+position = Vector3(-8, 2.35, -4.66)
+mesh = SubResource("mesh_WallLightLeft_0")
+material_override = SubResource("glow")
+
+[node name="PilasterLeft_1" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 1.85, -4.79)
+mesh = SubResource("mesh_PilasterLeft_1")
+material_override = ExtResource("metal")
+
+[node name="WallLightLeft_1" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 2.35, -4.66)
+mesh = SubResource("mesh_WallLightLeft_1")
+material_override = SubResource("glow")
+
+[node name="PilasterLeft_2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.85, -4.79)
+mesh = SubResource("mesh_PilasterLeft_2")
+material_override = ExtResource("metal")
+
+[node name="WallLightLeft_2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.35, -4.66)
+mesh = SubResource("mesh_WallLightLeft_2")
+material_override = SubResource("glow")
+
+[node name="PilasterLeft_3" type="MeshInstance3D" parent="."]
+position = Vector3(4, 1.85, -4.79)
+mesh = SubResource("mesh_PilasterLeft_3")
+material_override = ExtResource("metal")
+
+[node name="WallLightLeft_3" type="MeshInstance3D" parent="."]
+position = Vector3(4, 2.35, -4.66)
+mesh = SubResource("mesh_WallLightLeft_3")
+material_override = SubResource("glow")
+
+[node name="PilasterLeft_4" type="MeshInstance3D" parent="."]
+position = Vector3(8, 1.85, -4.79)
+mesh = SubResource("mesh_PilasterLeft_4")
+material_override = ExtResource("metal")
+
+[node name="WallLightLeft_4" type="MeshInstance3D" parent="."]
+position = Vector3(8, 2.35, -4.66)
+mesh = SubResource("mesh_WallLightLeft_4")
+material_override = SubResource("glow")
+
+[node name="Skirting1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.15, 4.84)
+mesh = SubResource("mesh_Skirting1")
+material_override = ExtResource("metal")
+
+[node name="Pilaster1_0" type="MeshInstance3D" parent="."]
+position = Vector3(-8, 1.85, 4.79)
+mesh = SubResource("mesh_Pilaster1_0")
+material_override = ExtResource("metal")
+
+[node name="WallLight1_0" type="MeshInstance3D" parent="."]
+position = Vector3(-8, 2.35, 4.66)
+mesh = SubResource("mesh_WallLight1_0")
+material_override = SubResource("glow")
+
+[node name="Pilaster1_1" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 1.85, 4.79)
+mesh = SubResource("mesh_Pilaster1_1")
+material_override = ExtResource("metal")
+
+[node name="WallLight1_1" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 2.35, 4.66)
+mesh = SubResource("mesh_WallLight1_1")
+material_override = SubResource("glow")
+
+[node name="Pilaster1_2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.85, 4.79)
+mesh = SubResource("mesh_Pilaster1_2")
+material_override = ExtResource("metal")
+
+[node name="WallLight1_2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.35, 4.66)
+mesh = SubResource("mesh_WallLight1_2")
+material_override = SubResource("glow")
+
+[node name="Pilaster1_3" type="MeshInstance3D" parent="."]
+position = Vector3(4, 1.85, 4.79)
+mesh = SubResource("mesh_Pilaster1_3")
+material_override = ExtResource("metal")
+
+[node name="WallLight1_3" type="MeshInstance3D" parent="."]
+position = Vector3(4, 2.35, 4.66)
+mesh = SubResource("mesh_WallLight1_3")
+material_override = SubResource("glow")
+
+[node name="Pilaster1_4" type="MeshInstance3D" parent="."]
+position = Vector3(8, 1.85, 4.79)
+mesh = SubResource("mesh_Pilaster1_4")
+material_override = ExtResource("metal")
+
+[node name="WallLight1_4" type="MeshInstance3D" parent="."]
+position = Vector3(8, 2.35, 4.66)
+mesh = SubResource("mesh_WallLight1_4")
+material_override = SubResource("glow")
+
+[node name="CeilingStrip0" type="MeshInstance3D" parent="."]
+position = Vector3(-7, 3.72, 0)
+mesh = SubResource("mesh_CeilingStrip0")
+material_override = SubResource("glow")
+
+[node name="Pool0" type="OmniLight3D" parent="."]
+position = Vector3(-7, 3.1, 0)
+light_color = Color(0.81, 0.86, 1, 1)
+light_energy = 1.8
+omni_range = 7.0
+shadow_enabled = true
+
+[node name="CeilingStrip1" type="MeshInstance3D" parent="."]
+position = Vector3(-2, 3.72, 0)
+mesh = SubResource("mesh_CeilingStrip1")
+material_override = SubResource("glow")
+
+[node name="Pool1" type="OmniLight3D" parent="."]
+position = Vector3(-2, 3.1, 0)
+light_color = Color(0.81, 0.86, 1, 1)
+light_energy = 1.8
+omni_range = 7.0
+shadow_enabled = true
+
+[node name="CeilingStrip2" type="MeshInstance3D" parent="."]
+position = Vector3(3, 3.72, 0)
+mesh = SubResource("mesh_CeilingStrip2")
+material_override = SubResource("glow")
+
+[node name="Pool2" type="OmniLight3D" parent="."]
+position = Vector3(3, 3.1, 0)
+light_color = Color(0.81, 0.86, 1, 1)
+light_energy = 1.8
+omni_range = 7.0
+shadow_enabled = true
+
+[node name="CeilingStrip3" type="MeshInstance3D" parent="."]
+position = Vector3(8, 3.72, 0)
+mesh = SubResource("mesh_CeilingStrip3")
+material_override = SubResource("glow")
+
+[node name="Pool3" type="OmniLight3D" parent="."]
+position = Vector3(8, 3.1, 0)
+light_color = Color(0.81, 0.86, 1, 1)
+light_energy = 1.8
+omni_range = 7.0
+shadow_enabled = true
+
+[node name="LiftFrame" type="MeshInstance3D" parent="."]
+position = Vector3(11.59, 1.55, 0)
+mesh = SubResource("mesh_LiftFrame")
+material_override = ExtResource("metal")
+
+[node name="LiftDoorLeft" type="MeshInstance3D" parent="."]
+position = Vector3(11.48, 1.48, -0.68)
+mesh = SubResource("mesh_LiftDoorLeft")
+material_override = SubResource("door")
+
+[node name="LiftDoor1" type="MeshInstance3D" parent="."]
+position = Vector3(11.48, 1.48, 0.68)
+mesh = SubResource("mesh_LiftDoor1")
+material_override = SubResource("door")
+
+[node name="CallPanel" type="MeshInstance3D" parent="."]
+position = Vector3(11.4, 1.15, -2)
+mesh = SubResource("mesh_CallPanel")
+material_override = ExtResource("metal")
+
+[node name="CallButton" type="MeshInstance3D" parent="."]
+position = Vector3(11.35, 1.18, -2)
+mesh = SubResource("mesh_CallButton")
+material_override = SubResource("glow")
+
+[node name="LiftSign" type="Label3D" parent="."]
+position = Vector3(11.3, 3.3, 0)
+rotation = Vector3(0, -1.5707963, 0)
+text = "GROUND FLOOR  /  EXIT"
+font_size = 48
+pixel_size = 0.003
+outline_size = 0
+modulate = Color(0.9, 0.83, 0.67, 1)

@@ -8,8 +8,8 @@ extends Node3D
 ##  "memorial"  In Memoriam: a glide past each of the five where they fell.
 ##  "grief"     a last look at JO; a tear rolls down the engineer's cheek.
 ##  "desk"      back at his desk: he collects his mug and personal effects.
-##  "exit"      he walks out across the dark floor to a sad theme; the five come back as
-##              fading memories at desks along his way, ordinary coffee/lunch/gossip
+##  "exit"      he walks through the empty lift corridor to a sad theme; the five return as
+##              fading memories along its edges, ordinary coffee/lunch/gossip
 ##              fragments with matching quiet captions; the motion lights click off behind him.
 ##  "street"    midnight, street level, rain: he walks out of the tower and away.
 ##  "window"    up in the one lit window: five silhouettes watching him go. The narrator.
@@ -33,17 +33,18 @@ const MEMORIAL: Array = [
 	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Never got a badge photo."],
 	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Her deck will be presented by someone else."]]
 const MEMORIAL_EACH: float = 2.4
-## The way out: their memories at desks along his path, doing what they did ([who, where,
-## clip, facing]); each recalls an ordinary conversation with him.
+## The way out: each memory recalls an ordinary conversation beside the clear route.
 const MEMORIES: Array = [
-	["Manager", Vector3(-1.2, 0, 13.4), "ual/phone", PI],
-	["SRE", Vector3(1.5, 0, 9.7), "ual/interact", 0.0],
-	["Designer", Vector3(4.2, 0, 13.5), "ual/talking", PI],
-	["Intern", Vector3(6.8, 0, 9.8), "ual/yes", 0.0],
-	["Director", Vector3(9.2, 0, 13.5), "ual/phone", PI]]
+	["Manager", "ual/phone"],
+	["SRE", "ual/interact"],
+	["Designer", "ual/talking"],
+	["Intern", "ual/yes"],
+	["Director", "ual/phone"]]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
-const EXIT_PATH: Array[Vector3] = [Vector3(-2.5, .05, 11.4), Vector3(10.6, .05, 11.8)]
+const DEPARTURE: PackedScene = preload("res://game/incidents/departure_corridor.tscn")
+const DEPARTURE_AT: Vector3 = Vector3(0, -120, 0)
+const EXIT_PATH: Array[Vector3] = [DEPARTURE_AT + Vector3(-6, .05, 0), DEPARTURE_AT + Vector3(7.1, .05, 0)]
 const EXIT_SECONDS: float = 9.0
 ## The street at the foot of the tower (its west face), and his way away from it.
 const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 5.0), Vector3(-23.0, -69.95, 8.0)]
@@ -89,6 +90,7 @@ var parked_sword: Node3D
 var sword_from: Transform3D
 var sword_rest: Transform3D
 var saved_clock: String
+var departure: Node3D
 
 
 func _init(presentation: Node) -> void:
@@ -186,9 +188,15 @@ func _beat(next: String) -> void:
 			character.story_pose = 0
 			character.sit = 0.0
 			player.global_position = EXIT_PATH[0]
+			departure = DEPARTURE.instantiate()
+			incident.add_child(departure)
+			departure.global_position = DEPARTURE_AT
+			props.append(departure)
 			_summon_memories()
 		"street":
 			# A cut to the street: rain, a sodium lamp, the tower going up into the dark.
+			if is_instance_valid(departure):
+				departure.hide()
 			for memory: Dictionary in memories:
 				memory.body.hide()
 			memory_caption.hide()
@@ -351,26 +359,27 @@ func tick(delta: float) -> bool:
 			if t >= 6.0:
 				_beat("exit")
 		"exit":
-			# Out across the floor, slowly, past them; each light goes out behind him.
+			# A dedicated corridor keeps furniture and live coworkers out of the shot.
 			var walk: float = _walk_progress(t, exit_duration)
 			character.story_walk_speed = _walk_speed(t, exit_duration, EXIT_PATH[0].distance_to(EXIT_PATH[1]))
 			player.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], walk)
+			engineer = player.global_position
 			var heading: Vector3 = EXIT_PATH[1] - EXIT_PATH[0]
 			player.visual.rotation.y = atan2(-heading.x, -heading.z)
-			for pool: Light3D in story.pools:
+			for pool: Light3D in departure.find_children("Pool*", "Light3D", false, false):
 				if pool.light_energy > 0.0 and pool.global_position.x < engineer.x - 1.8 and absf(pool.global_position.z - engineer.z) < 6.0:
 					pool.light_energy = 0.0
 					story.sting(preload("res://assets/audio/sfx/light_relay.ogg"), -14)
 			_haunt(t)
 			if t < exit_duration * .55:
 				# Side on, a little ahead of him: the memories pass between us.
-				camera.global_position = engineer + Vector3(-2.4, 2.4, -1.1)
-				camera.look_at(engineer + Vector3(.8, 1.0, 0))
-				camera.fov = 46.0
+				camera.global_position = engineer + Vector3(-2.8, 1.7, -3.0)
+				camera.look_at(engineer + Vector3(.4, 1.0, .7))
+				camera.fov = 50.0
 			else:
-				camera.global_position = engineer - heading.normalized() * 3.6 + Vector3(0, 1.5, .5)
-				camera.look_at(engineer + Vector3.UP * 1.0 + heading.normalized() * 2.0)
-				camera.fov = 48.0
+				camera.global_position = engineer - heading.normalized() * 4.4 + Vector3(0, 1.7, -2.0)
+				camera.look_at(engineer + Vector3(1.2, 1.0, 1.0))
+				camera.fov = 54.0
 			if t >= exit_duration:
 				_beat("street")
 		"street":
@@ -663,7 +672,7 @@ func _box_part(size: Vector3, at: Vector3, material: Material) -> void:
 	belongings.add_child(part)
 
 
-## The five, as he remembers them tonight: pale, translucent, at desks along his way.
+## The five, as he remembers them tonight: pale, translucent, beside the lift corridor.
 func _summon_memories() -> void:
 	var cue: float = .7
 	for entry: Array in MEMORIES:
@@ -674,8 +683,7 @@ func _summon_memories() -> void:
 		var body: Node3D = load(ROOT + cast.body).instantiate()
 		incident.add_child(body)
 		body.scale = Vector3.ONE * .62
-		body.global_position = entry[1]
-		body.rotation.y = entry[3]
+		body.global_position = EXIT_PATH[0]
 		var ghost: StandardMaterial3D = StandardMaterial3D.new()
 		ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -685,7 +693,7 @@ func _summon_memories() -> void:
 			(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		animator.add_animation_library("ual", MOTION)
-		animator.play(entry[2])
+		animator.play(entry[1])
 		var remembered: Dictionary = DIALOGUES.memory(entry[0])
 		var whisper: AudioStreamPlayer = AudioStreamPlayer.new()
 		whisper.bus = &"Voice"
@@ -697,6 +705,13 @@ func _summon_memories() -> void:
 			"cue": cue, "length": length, "text": remembered.text, "who": DIALOGUES.tree(entry[0]).who})
 		cue += length + .9
 	exit_duration = maxf(EXIT_SECONDS, cue + .7)
+	# Place each memory beside the route at the time its own voice is heard.
+	# Variable-length takes must not leave the active memory behind the camera.
+	for index in range(memories.size()):
+		var memory: Dictionary = memories[index]
+		var at: float = float(memory.cue) + float(memory.length) * .4
+		memory.body.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], _walk_progress(at, exit_duration)) + Vector3(0, -.05, 2.25)
+		memory.body.rotation.y = 0.0
 
 
 ## One intelligible fragment at a time. A memory vanishes after its line, not mid-word.

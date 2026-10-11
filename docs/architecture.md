@@ -811,7 +811,12 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   reject any tabletop or monitor intersection. `Dialogues.remembered_lines` stores
   the exact ordinary take heard this run; reset clears it while shuffled take bags
   continue across retries. Memory clips play sequentially with matching captions;
-  the mourning WAV loops locally through the departure. `tests/finale_tests.gd`
+  the mourning WAV loops locally through the departure. The departure instantiates
+  `departure_corridor.tscn` below the playable map, with a continuous floor and clear
+  hero/camera tracks; memory positions follow their voice cue timing. The scene is
+  hidden at the street cut and freed with the other aftermath props on skip or retry.
+  Physics regression samples the whole hero and camera route for solid intersections.
+  `tests/finale_tests.gd`
   checks recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
   replacements; the engineer objects before the note-taker records unanimous consent.
   Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting

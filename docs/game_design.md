@@ -240,11 +240,17 @@ stands and collects a small box
 with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays beside the desk, with its tip on the floor and clear of the monitor;
 he leaves the office unarmed with his personal effects.
 
+The departure cuts from his workstation to an empty lift corridor, staged separately
+from the furnished playable office. A carpet runner leads toward the ground-floor lift;
+wall lights and metal trim frame a clear walking lane and two unobstructed camera tracks.
+The temporary corridor disappears at the street cut and is removed on skip or retry.
+
 Faint, warm memories recall the five as people: coffee invitations, lunch plans and
 ridiculous gossip. “Tell me something normal” in their living conversations cycles
 five locally prerecorded takes per coworker (coffee, lunch and three gossip stories). The walk recalls the exact take heard
 this run; an unvisited coworker supplies a shuffled take. Memory audio is sequential,
-with captions that respect the subtitle preference. The walk accommodates complete
+with captions that respect the subtitle preference. Their positions beside the lane
+match the timing of each recorded line. The walk accommodates complete
 clips; TAB skips and R clears the props and this run's recalled lines. Hand contacts,
 stand-up motion and prop movement are blended; the box stays upright as he walks.
 Explicit cinematic gait matches the eased travel pace, including slow movement below

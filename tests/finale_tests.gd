@@ -91,7 +91,30 @@ func _run() -> void:
 	character.story_walk_speed = .2
 	character._physics_process(1.0 / 60.0)
 	check(character.animator.current_animation == "rig/walk", "even slower cinematic travel keeps walking below the gameplay idle threshold")
+	var corridor: Node = finale.departure
+	var clear_route: bool = true
+	var probe: SphereShape3D = SphereShape3D.new()
+	probe.radius = .45
+	var query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.new()
+	query.shape = probe
+	query.exclude = [incident.player.get_rid()]
+	for sample in range(101):
+		finale.clock = finale.beat_at + finale.exit_duration * float(sample) / 101.0
+		finale.tick(.001)
+		query.transform = Transform3D(Basis.IDENTITY, incident.player.global_position + Vector3.UP * .95)
+		clear_route = clear_route and scene.get_world_3d().direct_space_state.intersect_shape(query).is_empty()
+		query.transform.origin = story.camera.global_position
+		clear_route = clear_route and scene.get_world_3d().direct_space_state.intersect_shape(query).is_empty()
+	check(clear_route and corridor.is_visible_in_tree(), "the full departure keeps the hero and both camera tracks clear of solid furniture and architecture")
+	var grounded: bool = true
+	for sample in range(11):
+		var at: Vector3 = finale.EXIT_PATH[0].lerp(finale.EXIT_PATH[1], float(sample) / 10.0)
+		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(at + Vector3.UP, at - Vector3.UP)
+		ray.exclude = [incident.player.get_rid()]
+		grounded = grounded and not scene.get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
+	check(grounded, "the departure route has a continuous physical floor beneath it")
 	finale._beat("street")
+	check(not corridor.visible, "the lift corridor disappears at the rainy street cut")
 	for frame in range(40):
 		finale.tick(1.0 / 60.0)
 		await physics_frame
@@ -114,7 +137,7 @@ func _run() -> void:
 	story.skip()
 	await process_frame
 	await process_frame
-	check(not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
+	check(not is_instance_valid(corridor) and not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
 		"TAB removes the tear, carried props and memory audio and restores the weapon")
 	scene.reset_encounter()
 	await process_frame
