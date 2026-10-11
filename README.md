@@ -51,9 +51,9 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 
 **Windows · Intel Mac · Keyboard & mouse**
 
-Download, install, and choose **Acknowledge Incident**. No developer tools needed.
+Download, install, and choose **Play** → **The Reconciliation Abyss**. No developer tools needed.
 **Work in progress:** these releases are for playtesting and feedback while
-development continues. The current playtest includes one stage; more is planned. Contains graphic violence
+development continues. The campaign menu lists the six planned circles; only Circle I is playable. Contains graphic violence
 and strong language. See [installation help](docs/install.md) for requirements and
 unsigned-app prompts.
 
@@ -61,8 +61,8 @@ unsigned-app prompts.
 <summary>Quick controls</summary>
 
 **WASD** move · **Mouse** look · **Left-click** attack · **Right-click** dodge ·
-**E** interact · **Escape** pause. Open **Onboarding Docs** in-game for all controls.
-**Corporate Policy** contains subtitles, audio, display, and camera comfort settings.
+**E** interact · **Escape** pause. Open **Controls** in-game for all moves.
+**Settings** contains subtitles, audio, display, and camera comfort settings.
 
 </details>
 

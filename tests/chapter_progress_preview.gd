@@ -10,6 +10,8 @@ func _run() -> void:
 	root.add_child(app)
 	current_scene = app
 	await shot("chapter_fresh")
+	app.show_page("campaign")
+	await shot("chapter_campaign")
 	app.show_page("tester_unlock")
 	await shot("chapter_unlock")
 	app.unlock_stage_one()

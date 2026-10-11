@@ -46,24 +46,24 @@ func _run() -> void:
 	capture("tester_unlock")
 	var unlock: Button
 	for button: Node in app.box.find_children("*", "Button", true, false):
-		if button.text == "Unlock Stage One Completion":
+		if button.text == "Mark Circle I Cleared":
 			unlock = button
 	check(unlock != null, "packaged earlier tester unlock is available")
 	if unlock != null:
 		unlock.pressed.emit()
 		await frames(3)
-		check(app.progress.stage_one_completed and app.page == "main", "packaged earlier tester unlock saves completion and returns to title")
+		check(app.progress.stage_one_completed and app.page == "campaign", "packaged earlier tester unlock saves completion and returns to the campaign")
 	if "--menus-only" in OS.get_cmdline_user_args():
-		capture("saved_title")
+		capture("saved_campaign")
 		var replay_button: Button
 		for button: Node in app.box.find_children("*", "Button", true, false):
-			if button.text == "Replay Stage One":
+			if button.text == app.CIRCLES[0]:
 				replay_button = button
-		check(replay_button != null, "packaged completed title offers Replay Stage One")
+		check(replay_button != null, "packaged completed campaign offers Circle I replay")
 		if replay_button != null:
 			replay_button.pressed.emit()
 			await frames(3)
-			check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged menu replay starts Stage One and keeps completion")
+			check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged menu replay starts Circle I and keeps completion")
 			app.main_menu()
 			await frames(3)
 		var menu_save: RefCounted = load("res://game/release/chapter_progress.gd").new()
@@ -148,19 +148,21 @@ func _run() -> void:
 	app.main_menu()
 	await frames(3)
 	check(app.session == null and get_tree().get_nodes_in_group("players").is_empty(), "packaged return to title frees incident")
+	app.show_page("campaign")
+	await frames(3)
 	var replay: Button
 	var menu_text: String = ""
 	for button: Node in app.box.find_children("*", "Button", true, false):
-		if button.text == "Replay Stage One":
+		if button.text == app.CIRCLES[0]:
 			replay = button
 	for label: Node in app.box.find_children("*", "Label", true, false):
 		menu_text += label.text + "\n"
-	check(replay != null and "Progress saved. Stage Two coming soon." in menu_text, "packaged title offers replay and the saved-progress message")
-	capture("saved_title")
+	check(replay != null and "CLEARED" in menu_text, "packaged campaign offers replay and marks Circle I cleared")
+	capture("saved_campaign")
 	if replay != null:
 		replay.pressed.emit()
 		await frames(3)
-		check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged Replay Stage One keeps completion and starts a fresh incident")
+		check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged Circle I replay keeps completion and starts a fresh incident")
 		app.main_menu()
 		await frames(3)
 	saved.load_progress()

@@ -211,7 +211,7 @@ not a temperature or fan-speed measurement. Another snapshot showed the regular
 packaged game at 48.6% CPU. No unrelated processes were stopped.
 
 The application now limits rendering to **60 FPS** during focused gameplay, **30 FPS**
-on title/menu/pause/report screens, and **15 FPS** when unfocused. Corporate Policy
+on title/menu/pause/report screens, and **15 FPS** when unfocused. Settings
 includes a saved **120 FPS** gameplay option, with its higher power-use tradeoff.
 Existing settings files acquire the 60 FPS default; invalid frame-limit values fall back
 to it. Physics remains 60 ticks/second; focus loss retains the existing automatic pause.
