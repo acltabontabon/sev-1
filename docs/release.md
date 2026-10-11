@@ -1,4 +1,46 @@
-# Release engineering — Friday Deployment 0.2.0
+# Release engineering
+
+## Tagged GitHub releases (0.2.47 onward)
+
+The creator has accepted unsigned, unnotarized distribution for this personal
+project. Developer ID certificates and notarization are not release requirements.
+This does not close gameplay, visual, audio or performance acceptance gates.
+
+`.github/workflows/release.yml` runs on `v*` tag pushes. Native `windows-2022` and
+Intel `macos-15-intel` runners check out Git LFS assets, install official Godot
+4.7.2 standard and templates (verified against official SHA-512 sums), run the full
+validator, export x86-64 only and run packaged headless gameplay smoke. Windows
+uses the runner's Inno Setup 6 compiler and verifies silent installation, installed
+gameplay smoke and uninstallation. Mac builds and verifies a drag-to-Applications
+DMG. Packages include installation, changelog, testing and license notes.
+
+Both builds must pass before a draft GitHub release is created, assets/checksums/
+source manifests uploaded, and the release published. Build failures leave logs
+in Actions artifacts. Publication retries use the same tag and replace its assets;
+manual retries must select an existing version tag, not `main`. Do not move a
+published tag. Headless runner checks do not prove ordinary GPU/audio compatibility.
+
+For the next release, update `config/version` in `project.godot`, all version/path
+fields in `export_presets.cfg`, `VERSION` in `tools/release.py`, the README version,
+and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:
+
+```sh
+git push origin main
+git tag -a v0.2.48 -m "SEV-1 0.2.48"
+git push origin v0.2.48
+```
+
+Tag and changelog/project/preset versions must agree. The pipeline requires no
+signing secrets. Only its publication job has `contents: write` permission.
+[Install and unsigned-app instructions](install.md) own user-facing setup.
+
+The existing `sh tools/release.sh` remains a separate local universal Mac tester
+gate with an ad-hoc integrity signature. CI temporarily overrides its preset to
+Intel and disables signing in its isolated checkout, restoring it after export.
+No paid identity or notarization is used by either path.
+
+## Historical local tester evidence
+
 
 Milestone 12 moved the version to **0.2.0**; `tools/release.py` derives archive and
 staging names from `VERSION`. The sections below describe the 0.1.0 baseline workflow,
@@ -98,8 +140,10 @@ Do not embed signing credentials in source or claim trusted public distribution.
 Only the current M2 Pro is the graphical execution/performance baseline. Another-Mac,
 Intel, minimum OS and Windows runtime tests are outstanding. The first-use hitches
 and ordinary human gameplay/audio acceptance remain open. A successful build produces
-a local tester candidate; **Milestone 10 is not creator-accepted or public-release ready**
-until these remaining gates are explicitly accepted or resolved.
+a local tester candidate; **Milestone 10 is not creator-accepted**
+until the remaining gameplay/performance gates are explicitly accepted or resolved.
+Unsigned public distribution was subsequently accepted for the personal project;
+see the tagged-release policy above.
 
 
 ## Verified checkpoint

@@ -1,4 +1,12 @@
-# Release asset and license inventory — 0.1.0
+# Release asset and license inventory
+
+The current 0.2.47 release includes the outside assets and speech listed in the
+later sections. The 0.1.0 inventory below is historical, preceding those imports.
+Each source/license record stays with its owning asset directory. Making the
+repository public does not assign an open-source license to original game code
+or art; the original-content rights remain with the creator.
+
+## Historical 0.1.0 baseline
 
 Inspected 10 October 2026. No outside art, sample, font, animation or model pack is
 included. The existing source and import sidecars are preserved.

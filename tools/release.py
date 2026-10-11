@@ -12,7 +12,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.46"
+VERSION = "0.2.47"
 OUT = ROOT / "builds/releases" / VERSION
 LOGS = ROOT / "logs"
 APP = OUT / "SEV-1 Friday Deployment.app"
@@ -22,7 +22,7 @@ ERROR = re.compile(r"SCRIPT ERROR:|(?:^|\n)ERROR:|Parse Error:|FAIL:")
 def run(name, args, timeout=180, cwd=ROOT):
     try:
         result = subprocess.run(args, cwd=cwd, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, text=True, timeout=timeout)
+                                stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired as exc:
         output = exc.stdout or b""
         (LOGS / f"release_{name}.log").write_bytes(output if isinstance(output, bytes) else output.encode())
