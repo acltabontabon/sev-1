@@ -80,6 +80,7 @@ const CHAIR_FORWARD: float = .3
 ## How long a looping gesture (talking) runs before they settle back to idle.
 const GESTURE_SECONDS: float = 3.5
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
+const HAIRSTYLES: Script = preload("res://game/incidents/hairstyles.gd")
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 const FEMALE_OUTFITS: Dictionary = {
 	"casual_female.fbx": preload("res://assets/characters/office_outfits/casual_skirt.res"),
@@ -89,31 +90,32 @@ const FEMALE_OUTFITS: Dictionary = {
 const DIRECTOR_OUTFIT: ArrayMesh = preload("res://assets/characters/office_outfits/director_skirt.res")
 ## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
+## Each has their own haircut (hairstyles.gd); Nadia keeps the pack's tied-back hair.
 const CAST: Array[Dictionary] = [
 	{"name": "Sleeper", "body": "casual2_male.fbx", "routine": "asleep", "at": Vector3(-9.0, 0, .87), "facing": PI,
-		"line": "zZz… LGTM… zZz", "palette": [Color(.42, .3, .5), Color(.12, .13, .2), Color(.82, .62, .48), Color(.2, .12, .08)]},
+		"line": "zZz… LGTM… zZz", "hair": "bedhead", "palette": [Color(.42, .3, .5), Color(.12, .13, .2), Color(.82, .62, .48), Color(.2, .12, .08)]},
 	{"name": "Bystander", "body": "casual3_male.fbx", "routine": "sit", "at": Vector3(-6.5, 0, -5.13), "facing": PI,
-		"line": "Don't look at me. I'm on a different incident.", "palette": [Color(.55, .58, .52), Color(.2, .22, .14), Color(.46, .3, .2), Color(.08, .07, .06)]},
+		"line": "Don't look at me. I'm on a different incident.", "hair": "buzz_beard", "palette": [Color(.55, .58, .52), Color(.2, .22, .14), Color(.46, .3, .2), Color(.08, .07, .06)]},
 	{"name": "Manager", "body": "suit_female.fbx", "routine": "pace", "at": Vector3(6.2, 0, 7.0), "facing": PI, "route": Vector3(0, 0, -5.0),
-		"line": "Yes, someone's on it. No, I don't know who.", "palette": [Color(.2, .22, .3), Color(.1, .1, .14), Color(.9, .72, .6), Color(.45, .36, .2)]},
+		"line": "Yes, someone's on it. No, I don't know who.", "hair": "side_part", "palette": [Color(.2, .22, .3), Color(.1, .1, .14), Color(.9, .72, .6), Color(.45, .36, .2)]},
 	{"name": "Facilities", "body": "worker_male.fbx", "routine": "fix", "at": Vector3(21.6, 0, 10.6), "facing": -1.04,
-		"line": "Ticket open since 2019. Today's the day. Probably.", "palette": [Color(.85, .45, .12), Color(.2, .3, .45), Color(.6, .4, .28), Color(.1, .08, .06)]},
+		"line": "Ticket open since 2019. Today's the day. Probably.", "hair": "mullet", "palette": [Color(.85, .45, .12), Color(.2, .3, .45), Color(.6, .4, .28), Color(.1, .08, .06)]},
 	{"name": "Standup", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-8.5, 0, -12.6), "facing": -.6, "gesture": "ual/talking",
-		"line": "Yesterday: meetings. Today: meetings. Blockers: meetings.", "palette": [Color(.2, .55, .35), Color(.15, .14, .12), Color(.7, .5, .36), Color(.35, .2, .1)]},
+		"line": "Yesterday: meetings. Today: meetings. Blockers: meetings.", "hair": "man_bun", "palette": [Color(.2, .55, .35), Color(.15, .14, .12), Color(.7, .5, .36), Color(.35, .2, .1)]},
 	{"name": "Intern", "body": "casual2_male.fbx", "routine": "carry", "at": Vector3(-5.2, 0, 12.6), "facing": -PI * .5, "route": Vector3(-6.8, 0, 0),
-		"line": "Is it normal to be on call on day one?", "palette": [Color(.95, .55, .2), Color(.18, .2, .3), Color(.55, .36, .25), Color(.12, .09, .07)]},
+		"line": "Is it normal to be on call on day one?", "hair": "curly", "palette": [Color(.95, .55, .2), Color(.18, .2, .3), Color(.55, .36, .25), Color(.12, .09, .07)]},
 	{"name": "Remote", "body": "casual2_male.fbx", "routine": "sit", "at": Vector3(9.4, 0, 13.55), "facing": PI,
-		"line": "I'm working from home. This is home now.", "palette": [Color(.85, .35, .55), Color(.25, .25, .3), Color(.88, .7, .58), Color(.55, .4, .18)]},
+		"line": "I'm working from home. This is home now.", "hair": "shoulder", "palette": [Color(.85, .35, .55), Color(.25, .25, .3), Color(.88, .7, .58), Color(.55, .4, .18)]},
 	{"name": "Microwave", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(24.4, 0, 8.8), "facing": PI * .5, "gesture": "Idle",
-		"line": "It said one minute. That was forty minutes ago.", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
+		"line": "It said one minute. That was forty minutes ago.", "hair": "mohawk", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
 	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(7.0, 1.5, -4.9), "facing": PI * .15, "gesture": "Victory",
-		"line": "We're like a family here. A family with KPIs.", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},
+		"line": "We're like a family here. A family with KPIs.", "hair": "pompadour", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},
 	{"name": "SRE", "body": "casual2_female.fbx", "routine": "sit", "at": Vector3(-6.5, 0, .87), "facing": PI,
 		"line": "I'm not on call. I AM the call.", "palette": [Color(.18, .2, .24), Color(.12, .12, .16), Color(.66, .46, .33), Color(.06, .05, .05)]},
 	{"name": "Director", "body": "suit_female.fbx", "outfit": "low_cut", "routine": "pace", "at": Vector3(2.6, 0, -9.0), "facing": 0.0, "route": Vector3(0, 0, 6.5),
-		"line": "Love the energy! Can we make it… more?", "palette": [Color(.75, .2, .32), Color(.12, .1, .14), Color(.86, .66, .52), Color(.62, .44, .2)]},
+		"line": "Love the energy! Can we make it… more?", "hair": "chignon", "palette": [Color(.75, .2, .32), Color(.12, .1, .14), Color(.86, .66, .52), Color(.62, .44, .2)]},
 	{"name": "Designer", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(-11.1, 0, -2.9), "facing": -.9, "gesture": "ual/talking",
-		"line": "My husband thinks I'm at the gym. Technically this is cardio.", "palette": [Color(.28, .62, .78), Color(.85, .8, .7), Color(.74, .55, .4), Color(.15, .1, .08)]},
+		"line": "My husband thinks I'm at the gym. Technically this is cardio.", "hair": "undercut", "palette": [Color(.28, .62, .78), Color(.85, .8, .7), Color(.74, .55, .4), Color(.86, .5, .64)]},
 ]
 
 var player: Node3D
@@ -136,7 +138,7 @@ func _ready() -> void:
 		animator.add_animation_library("ual", MOTION)
 		for clip in ["Idle", "Walk", "Walk_Carry", "PickUp"]:
 			animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
-		dress(body, entry.palette, entry.get("outfit", "office"))
+		dress(body, entry.palette, entry.get("outfit", "office"), entry.get("hair", ""))
 		var line: Label3D = Label3D.new()
 		line.text = entry.line
 		line.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -1014,8 +1016,10 @@ func _fighting() -> bool:
 
 
 ## Recolour a Quaternius office body: shirt, pants, skin, hair (shared with the hosts).
-static func dress(body: Node3D, palette: Array, outfit: String = "office") -> void:
+## A `hair` style from hairstyles.gd replaces the body's stock haircut; "" keeps it.
+static func dress(body: Node3D, palette: Array, outfit: String = "office", hair: String = "") -> void:
 	var names: Dictionary = {"Shirt": palette[0], "Pants": palette[1], "Skirt": palette[1], "OutfitSkin": palette[2], "Skin": palette[2], "Hair": palette[3], "Face": Color(.04, .04, .05)}
+	var stock: Material
 	for mesh in body.find_children("*", "MeshInstance3D", true, false):
 		var instance: MeshInstance3D = mesh as MeshInstance3D
 		var model: String = body.scene_file_path.get_file()
@@ -1023,6 +1027,12 @@ static func dress(body: Node3D, palette: Array, outfit: String = "office") -> vo
 			for surface in range(instance.mesh.get_surface_count()):
 				instance.set_surface_override_material(surface, null)
 			instance.mesh = DIRECTOR_OUTFIT if outfit == "low_cut" else FEMALE_OUTFITS[model]
+		if hair != "" and instance.skin != null:
+			for surface in instance.mesh.get_surface_count():
+				var source: Material = instance.mesh.surface_get_material(surface)
+				if source != null and source.resource_name == "Hair":
+					stock = source
+			instance.mesh = HAIRSTYLES.without_hair(instance.mesh)
 		for surface in instance.mesh.get_surface_count():
 			var source: Material = instance.mesh.surface_get_material(surface)
 			if source == null or not names.has(source.resource_name):
@@ -1030,3 +1040,5 @@ static func dress(body: Node3D, palette: Array, outfit: String = "office") -> vo
 			var material: StandardMaterial3D = (source as StandardMaterial3D).duplicate()
 			material.albedo_color = names[source.resource_name]
 			instance.set_surface_override_material(surface, material)
+	if hair != "":
+		HAIRSTYLES.fit(body, hair, palette[3], stock)

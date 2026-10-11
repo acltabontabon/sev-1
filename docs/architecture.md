@@ -1021,3 +1021,19 @@ seconds excluded) measured 119.95 mean FPS, 8.325 ms median, 9.009 ms p95 and 17
 maximum across 2,400 samples on Apple M2 Pro at 1280×720, Forward+/Metal, MSAA 2×,
 SSAO, glow and fog. Headless validation ran concurrently; this sample describes the
 lab combat view, not a worst-case Operations fight or a release performance guarantee.
+
+
+## Coworker hairstyles (12 October 2026)
+
+`game/incidents/hairstyles.gd` builds and caches nineteen original hair meshes fitted
+against the Quaternius scalp measurements. `coworkers.gd dress()` optionally removes
+the stock Hair surface and attaches a replacement through the animated Head bone.
+Existing outfit surfaces and head rig remain intact. Each cut shares its geometry;
+colour and corruption materials remain actor-local. The same dressing path serves
+planted employees, street strangers and rage memories. An empty style keeps stock hair.
+
+Continuous curved locks, textured curl shells and denser scalp caps refine the initial
+primitive cuts. Morgan keeps the female suit body. Hair follows existing animation,
+corruption overlays, upper-body slicing and reset; no hair physics or extra runtime
+asset loading is introduced. The faint `all_hands.gd` ghosts retain stock hair.
+[Provenance, visual previews and human checkpoint](../assets/characters/README.md#office-haircuts-12-october-2026).

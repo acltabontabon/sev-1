@@ -60,7 +60,7 @@ func _ready() -> void:
 	animator.add_animation_library("ual", preload("res://game/player/engineer_animations.res"))
 	for clip in ["Idle", "RecieveHit"]:
 		animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
-	preload("res://game/incidents/coworkers.gd").dress(body, PALETTES[hash(identity.name) % PALETTES.size()])
+	preload("res://game/incidents/coworkers.gd").dress(body, PALETTES[hash(identity.name) % PALETTES.size()], "office", identity.get("hair", ""))
 	if overlay == null:
 		overlay = ShaderMaterial.new()
 		overlay.shader = OVERLAY

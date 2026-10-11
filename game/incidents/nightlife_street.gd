@@ -236,7 +236,7 @@ func _person(label: String, model: String, at: Vector3, facing: float, clip: Str
 	body.rotation.y = facing
 	body.scale = Vector3.ONE * .62
 	add_child(body)
-	CREW.dress(body, [shirt, Color(.065, .07, .1), Color(.68, .46, .34), Color(.08, .045, .03)])
+	CREW.dress(body, [shirt, Color(.065, .07, .1), Color(.68, .46, .34), Color(.08, .045, .03)], "office", CREW.HAIRSTYLES.pick(label))
 	var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 	animator.add_animation_library("ual", MOTION)
 	animator.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
