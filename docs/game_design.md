@@ -4,9 +4,9 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. There are no saves or permanent unlocks.
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. Stage One completion now autosaves as a chapter boundary; replay preserves it. Stage Two remains unavailable. See [chapter saves](chapter_saves.md).
 
-**Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence rules are unsettled.
+**Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence beyond chapter completion remains unsettled.
 
 ## Combat philosophy
 

@@ -1,6 +1,7 @@
 extends Node
 ## Own the application screens; Incident retains sole ownership of the run.
 const INCIDENT: PackedScene = preload("res://game/incidents/missing_transaction.tscn")
+const CHAPTER_PROGRESS: Script = preload("res://game/release/chapter_progress.gd")
 const PREFERENCES: Script = preload("res://game/release/preferences.gd")
 const BACKDROP: PackedScene = preload("res://game/release/menu_backdrop.tscn")
 const CONTROLS: String = "WASD / arrows      Move relative to camera\nMouse / wheel      Look / zoom\nShift / Space      Sprint / jump\nLeft mouse / F     Light attack; press late to chain three hits\nQ / right mouse    Dodge; stationary dodges backward\nC / middle mouse   Reply All: a crescent that hits everyone in line\nX / dodge + attack Blame Shift: dash through; they take +30% for 4 s\nZ                  Circle Back: fire whirlwind; survivors parked\nG                  Works On My Machine: counter stance (time it)\nV                  Force Rollback (ultimate, when FOCUS is full)\nE                  Inspect the nearby OPERATIONS console\n1 / 2 / 3          Select evidence or a decision\nTab                Skip opening (after first viewing) / boss arrival\nR                  Restart incident\nEscape             Pause / back\n\nFace the threat with the camera. Dodge orange warnings, then\nstrike during recovery. The boss is vulnerable during OPEN."
@@ -25,6 +26,9 @@ const FIELD_NOTES: Array[String] = [
 	"Bugs die in one hit. The Blocker shields friends: hit it mid-cast or take it down first.",
 	"Meeting zones start after a countdown. Scope Creep grows if ignored; any hit resets it.",
 	"The Variance only takes damage while OPEN. Trust the solid ◆."]
+var progress: RefCounted = CHAPTER_PROGRESS.new()
+var completion_attempted: bool = false
+var progress_notice: String = ""
 var preferences: RefCounted = PREFERENCES.new()
 var session: Node3D
 var backdrop: Node3D
@@ -48,6 +52,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if "--release-smoke" in OS.get_cmdline_user_args():
 		preferences.path = "user://smoke_nonexistent.cfg"
+	# Isolate automated/preview sessions from the player's chapter save.
+	if preferences.path != "user://settings.cfg":
+		progress.path = preferences.path + ".chapters.json"
+	progress.load_progress()
 	preferences.load_settings()
 	preferences.apply()
 	overlay = CanvasLayer.new()
@@ -245,11 +253,26 @@ func show_page(next: String) -> void:
 			box.add_child(bar)
 			_label("Works on My Machine", 26, "Subhead")
 			_space(22)
-			_entry("Acknowledge Incident", "New run", start_incident)
+			if progress.stage_one_completed:
+				_label("Progress saved. Stage Two coming soon.", 0, "Caption")
+				_entry("Replay Stage One", "Keeps saved progress", start_incident)
+			else:
+				_entry("Acknowledge Incident", "New run", start_incident)
+				_entry("I already finished Stage One", "Earlier testers", func() -> void: show_page("tester_unlock"))
+			if not progress.load_notice.is_empty():
+				_label(progress.load_notice, 0, "Caption")
+			if not progress_notice.is_empty():
+				_label(progress_notice, 0, "Caption")
+				_entry("Retry Save", "Save Stage One completion", retry_progress_save)
 			_entry("Corporate Policy", "Settings", open_settings)
 			_entry("Onboarding Docs", "Controls", open_controls)
 			_entry("Legal Has Reviewed This", "Credits & licenses", func() -> void: show_page("credits"))
 			_entry("Attempt to Log Off", "Quit", open_logoff)
+		"tester_unlock":
+			_label("Earlier tester progress", 0, "Headline")
+			_label("Finished Stage One in an older build? Record its completion here so you can continue when Stage Two arrives. This does not skip into unfinished content.", 0, "Caption")
+			_entry("Unlock Stage One Completion", "Save progress", unlock_stage_one)
+			_entry("Back to Desk", "Main menu", func() -> void: show_page("main"))
 		"pause":
 			_label("INC-001  ·  STATUS: ON HOLD", 0, "Eyebrow")
 			_label("Incident on hold", 0, "Headline")
@@ -299,11 +322,13 @@ func show_page(next: String) -> void:
 			var won: bool = incident.stage == incident.Stage.RESOLVED
 			_label("POSTMORTEM  ·  INC-001  ·  BLAMELESS FORMAT  ·  v1 (final) (2)", 0, "Eyebrow")
 			_label("Incident 001 — %s" % ("Resolved" if won else "Reopened"), 0, "Headline")
+			if won:
+				_label("Progress saved. Stage Two coming soon." if progress.stage_one_completed else progress_notice, 0, "Caption")
 			# Actions first: the document can be long, the way out never is.
 			var actions: HBoxContainer = HBoxContainer.new()
 			actions.add_theme_constant_override("separation", 10)
 			box.add_child(actions)
-			for entry: Array in [["Restart Incident", restart_incident], ["Back to Desk", main_menu], ["Attempt to Log Off", open_logoff]]:
+			for entry: Array in [["Replay Stage One" if won else "Restart Incident", restart_incident], ["Back to Desk", main_menu], ["Attempt to Log Off", open_logoff]]:
 				var button: Button = _button(entry[0], entry[1])
 				button.reparent(actions)
 				button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -524,9 +549,33 @@ func _close_backdrop() -> void:
 		backdrop = null
 
 
+func _save_progress() -> void:
+	completion_attempted = true
+	var result: Error = progress.complete_stage_one()
+	progress_notice = "" if result == OK else "Could not save Stage One completion. Retry Save from the main menu before quitting."
+
+
+func _record_completion() -> void:
+	if session != null and not completion_attempted:
+		var incident: Node = session.get_node("Incident")
+		if incident.stage == incident.Stage.RESOLVED:
+			_save_progress()
+
+
+func unlock_stage_one() -> void:
+	_save_progress()
+	show_page("main")
+
+
+func retry_progress_save() -> void:
+	_save_progress()
+	show_page("main")
+
+
 func start_incident() -> void:
 	if session != null:
 		return
+	completion_attempted = false
 	_close_backdrop()
 	session = INCIDENT.instantiate()
 	add_child(session)
@@ -550,12 +599,15 @@ func pause_incident() -> void:
 
 
 func restart_incident() -> void:
+	_record_completion()
+	completion_attempted = false
 	session.reset_encounter()
 	preferences.apply(session)
 	resume_incident()
 
 
 func main_menu() -> void:
+	_record_completion()
 	if session != null:
 		remove_child(session)
 		session.queue_free()
@@ -586,11 +638,13 @@ func go_back() -> void:
 
 
 func quit_game() -> void:
+	_record_completion()
 	get_tree().paused = false
 	get_tree().quit()
 
 
 func _process(_delta: float) -> void:
+	_record_completion()
 	if is_instance_valid(report_subtitle) and session != null:
 		report_subtitle.text = session.get_node("Incident/Voice").subtitle
 	if session != null:
@@ -617,7 +671,7 @@ func _input(event: InputEvent) -> void:
 			"": pause_incident()
 			"pause": resume_incident()
 			"controls", "settings", "logoff": go_back()
-			"credits": show_page("main")
+			"credits", "tester_unlock": show_page("main")
 	elif not page.is_empty() and event.is_action_pressed("reset_player"):
 		get_viewport().set_input_as_handled()
 		if session != null and page in ["pause", "report"] and not event.is_echo():

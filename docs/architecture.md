@@ -5,7 +5,7 @@ from `assets/audio/voices/talk.json`, with matching locally baked speech. While 
 conversation pauses combat, the engineer uses a standing casual idle so frozen dodge
 or hit state cannot keep him crouched in the dialogue camera.
 
-This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, and Milestone 8 stabilization, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no campaign, run-generation framework, saved run progression, or runtime AI service. Milestone 10 adds local device preferences only.
+This describes Office After Hours, Incident 001, the Milestone 5 presentation pass, Milestone 6 run progression, and Milestone 7 Burnout/corporate decisions, and Milestone 8 stabilization, implemented on 10 October 2026. Future story and systems belong in [game design](game_design.md), and sequencing belongs in the [roadmap](roadmap.md). There is no playable second chapter, run-generation framework, saved mid-incident state, or runtime AI service. Milestone 10 adds local device preferences; [chapter completion saves](chapter_saves.md) now persist Stage One completion separately.
 
 ## Runtime composition
 

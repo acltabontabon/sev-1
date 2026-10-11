@@ -13,6 +13,7 @@ func menu_button(title: String) -> Button:
 
 func _run() -> void:
 	DirAccess.remove_absolute(TEST_SETTINGS)
+	DirAccess.remove_absolute(TEST_SETTINGS + ".chapters.json")
 	app = load("res://game/release/front_end.tscn").instantiate()
 	app.preferences.path = TEST_SETTINGS
 	root.add_child(app)
@@ -41,7 +42,7 @@ func _run() -> void:
 	await key(KEY_ESCAPE)
 	check(app.page == "main" and app.backdrop != null and app.backdrop.is_inside_tree(), "Escape cancels log off back to the live title backdrop")
 	for cycle in range(10):
-		await click_control(menu_button("Acknowledge Incident"))
+		await click_control(menu_button("Replay Stage One" if app.progress.stage_one_completed else "Acknowledge Incident"))
 		scene = app.session
 		player = scene.get_node("Player")
 		incident = scene.get_node("Incident")
@@ -79,6 +80,7 @@ func _run() -> void:
 		player.position = incident.CONSOLE_POSITION
 		await key(KEY_E)
 		await key(KEY_3)
+		await key(KEY_TAB)
 		await key(KEY_ESCAPE)
 		app.open_settings()
 		app.go_back()
@@ -88,6 +90,8 @@ func _run() -> void:
 		incident.fail()
 		await frames(3)
 		check(app.page == "report" and paused and menu_button("Restart Incident") != null, "defeat reaches actionable report")
+		if cycle == 0:
+			check(not app.progress.stage_one_completed, "losing Stage One does not record completion")
 		await click_control(menu_button("Restart Incident"))
 		await frames(3)
 		check(incident.stage == incident.Stage.ALERT and incident.run.debt == 0 and incident.run.burnout == 0 and incident.run.choices.is_empty() and not paused and scene.find_children("*", "", true, false).size() == count, "cycle %d: restart clears actors, decisions, modifiers and pause with stable nodes" % cycle)
@@ -98,6 +102,7 @@ func _run() -> void:
 		incident.active_enemy.receive_damage(10000, player.position)
 		await frames(3)
 		check(app.page == "report" and incident.stage == incident.Stage.RESOLVED, "victory reaches report in release application")
+		check(app.progress.stage_one_completed and menu_button("Replay Stage One") != null, "victory saves completion and offers replay")
 		await click_control(menu_button("Back to Desk"))
 		await frames(4)
 		check(app.session == null and get_nodes_in_group("enemies").is_empty() and get_nodes_in_group("players").is_empty(), "cycle %d: main menu unloads all actors and audio owners" % cycle)
@@ -145,6 +150,7 @@ func _run() -> void:
 	saved.load_settings()
 	check(saved.values.sensitivity == .2 and saved.values.master == .8 and saved.values.quality == 1, "invalid persisted settings safely clamp or use defaults")
 	DirAccess.remove_absolute(TEST_SETTINGS)
+	DirAccess.remove_absolute(TEST_SETTINGS + ".chapters.json")
 	app.queue_free()
 	paused = false
 	await frames(3)

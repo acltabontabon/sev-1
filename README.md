@@ -22,7 +22,11 @@ The title screen is the office at 16:59. **Acknowledge Incident** starts a run;
 This** the credits and **Attempt to Log Off** quits (after one confirmation). Settings
 persist master, effects, voice and music volume, subtitles, sensitivity, camera shake,
 damage flash, fullscreen and effects quality, plus whether this device has seen the
-opening (which unlocks skipping it). No run progress is saved. Keyboard and mouse only.
+opening (which unlocks skipping it). Stage One completion autosaves separately: the title
+shows **Progress saved. Stage Two coming soon.** and **Replay Stage One** keeps that
+progress. Earlier testers can use **I already finished Stage One** → **Unlock Stage One
+Completion**. Mid-incident state and temporary upgrades are not saved. Keyboard and mouse only.
+See [chapter saves](docs/chapter_saves.md) for update compatibility and the quick checkpoint.
 See the [tester guide and feedback questions](docs/testing.md).
 
 | Input | Action |

@@ -82,10 +82,19 @@ for severity-classified limitations and [architecture](architecture.md) for actu
 
 - The old first-playable proposal combined a 3–5-minute wave encounter with an upgrade choice. It is superseded: the current one-opponent lab is milestone 1; the 5–10-minute narrative incident is milestone 4; temporary progression is implemented in milestone 6 following the explicitly requested presentation milestone.
 - The Friday Deployment title now launches by default and starts Incident 001 in the Office After Hours. The original single-opponent arena remains available for regression tests.
-- Dodge and combos remain Combat Alpha experiments. Handcrafted reports and Friday incident reset fiction are implemented; the six circles and persistent progression remain deferred.
+- Dodge and combos remain Combat Alpha experiments. Handcrafted reports and Friday incident reset fiction are implemented; the six circles and progression beyond chapter completion remain deferred.
 - The old proposed folder tree included progression/UI/data concepts that do not exist. [Architecture](architecture.md) now describes only the inspected implementation.
 - The old movement lab has been replaced in the main scene by Office After Hours. Characters and simplified furniture remain provisional; the director has not yet accepted the final visual standard.
 
 Office After Hours preserves Combat Alpha tuning, the free camera, and the existing movement baseline. Automated results do not replace the pending human playtest.
 
 Milestone 11 was explicitly authorized as The Voices of Production on 10 October 2026. It adds authored prerecorded speech only. Milestone 12 was authorized the same day as a creative revitalization of Incident 001 only; it does not authorize Circle II, new currencies or progression systems. External playtest and platform gates remain open; generated content does not establish creative acceptance.
+
+## Stage One completion saves
+
+Implemented on 11 October 2026 by explicit creator request: [chapter boundary saves](chapter_saves.md),
+a saved-progress / Stage Two coming soon message, Replay Stage One that preserves completion,
+and an earlier tester unlock. Stage Two content and carry-over upgrade rules remain deferred.
+Gate: verify completion/unlock → quit/reopen → replay/restart → quit/reopen on the
+creator's device. Headless lifecycle and graphical menu checks support that checkpoint;
+Windows runtime acceptance remains open.
