@@ -174,3 +174,10 @@ previous presentation and requested a bolder redesign. Power-ups are now free, f
 single-effect rewards; normal upgrade debt costs and pursuit penalties are retired.
 [Implementation and playtest checkpoint](architecture.md#operations-and-choice-clarity-11-october-2026).
 Creator visual and comprehension acceptance remains open.
+
+
+The 11 October vault follow-up expands the existing boss room to 24 × 21 m, adds
+detailed industrial equipment, a taller ceiling and six resettable breakable props.
+The boss, fire-response stations and story remain in their existing encounter.
+`boss_arena_preview.command` is the direct combat checkpoint; creator judgment of
+visual quality, dodge space and destruction feel remains open.

@@ -30,6 +30,7 @@ func _on_player_died() -> void:
 
 
 func reset_encounter() -> void:
+	get_tree().call_group("breakables", "reset_prop")
 	player.reset_player()
 	if has_node("Incident"):
 		$Incident.reset_incident()

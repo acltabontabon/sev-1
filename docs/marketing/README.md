@@ -70,3 +70,20 @@ licensed assets. These captures verify composition, not performance or human acc
 | --- | --- |
 | `boss_response.png` | `logs/vault_hose.png` |
 | `boss_destructive_feedback.png` | `logs/vault_spell_2.png` |
+
+
+## Expanded vault captures — 11 October 2026
+
+Unmodified 1280 × 720 captures from Godot 4.7.2 Forward+ / Metal on Apple M2 Pro.
+`boss_arena.png` comes from `logs/vault_wide.png`, the fire-response entrance replay.
+`boss_arena_equipment.png` comes from `logs/arena_power.png`, captured by
+`tests/vault_arena_preview.gd`. They show the expanded production core and the
+licensed Poly Haven electrical cabinet beside original server cabinets.
+[Asset provenance](../../assets/environment/vault/README.md) records the CC0 source.
+These images do not establish performance or creator acceptance.
+
+The separate final arena preview measured 1,197 frame intervals over ten seconds
+after five seconds of warmup: median 8.303 ms, p95 10.589 ms. Hardware/settings:
+Apple M2 Pro, 1280 × 720, Forward+ / Metal, MSAA 2×, SSAO, glow and fog. Scenario:
+stationary wide camera with an active boss; captures excluded, validation finished.
+This narrow sample is not a full-combat or cross-platform performance guarantee.

@@ -1,0 +1,545 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://game/rooms/office/plastic.tres" id="1"]
+[ext_resource type="Material" path="res://game/rooms/office/black.tres" id="2"]
+[ext_resource type="Material" path="res://game/rooms/office/metal.tres" id="3"]
+[ext_resource type="Material" path="res://game/rooms/office/amber.tres" id="4"]
+[ext_resource type="Material" path="res://game/rooms/office/mint.tres" id="5"]
+[ext_resource type="FontFile" path="res://assets/fonts/barlow_condensed_bold.ttf" id="6"]
+
+[sub_resource type="BoxMesh" id="r0"]
+size = Vector3(1.05000, 3.10000, 1.15000)
+material = ExtResource("1")
+
+[sub_resource type="BoxShape3D" id="r1"]
+size = Vector3(1.05000, 3.10000, 1.15000)
+
+[sub_resource type="BoxMesh" id="r2"]
+size = Vector3(1.12000, 0.18000, 1.20000)
+material = ExtResource("2")
+
+[sub_resource type="BoxMesh" id="r3"]
+size = Vector3(0.05500, 2.90000, 0.06500)
+material = ExtResource("3")
+
+[sub_resource type="BoxMesh" id="r4"]
+size = Vector3(0.88000, 0.22500, 0.10000)
+material = ExtResource("3")
+
+[sub_resource type="BoxMesh" id="r5"]
+size = Vector3(0.51000, 0.14500, 0.01400)
+material = ExtResource("2")
+
+[sub_resource type="BoxMesh" id="r6"]
+size = Vector3(0.02500, 0.10500, 0.01000)
+material = ExtResource("1")
+
+[sub_resource type="BoxMesh" id="r7"]
+size = Vector3(0.07500, 0.11500, 0.04500)
+material = ExtResource("2")
+
+[sub_resource type="BoxMesh" id="r8"]
+size = Vector3(0.02700, 0.02700, 0.01300)
+material = ExtResource("4")
+
+[sub_resource type="BoxMesh" id="r9"]
+size = Vector3(0.02700, 0.02700, 0.01300)
+material = ExtResource("5")
+
+[sub_resource type="BoxMesh" id="r10"]
+size = Vector3(0.94000, 0.34000, 0.08000)
+material = ExtResource("2")
+
+[node name="ProductionRack" type="Node3D"]
+
+[node name="Cabinet" type="StaticBody3D" parent="."]
+position = Vector3(0.00000, 1.55000, 0.00000)
+
+
+[node name="Mesh" type="MeshInstance3D" parent="Cabinet"]
+position = Vector3(0.00000, 0.00000, 0.00000)
+mesh = SubResource("r0")
+
+[node name="Collision" type="CollisionShape3D" parent="Cabinet"]
+position = Vector3(0.00000, 0.00000, 0.00000)
+shape = SubResource("r1")
+
+[node name="Toe" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 0.09000, 0.05000)
+mesh = SubResource("r2")
+
+
+[node name="Rail-0.48" type="MeshInstance3D" parent="."]
+position = Vector3(-0.48000, 1.58000, 0.61000)
+mesh = SubResource("r3")
+
+
+[node name="Rail0.48" type="MeshInstance3D" parent="."]
+position = Vector3(0.48000, 1.58000, 0.61000)
+mesh = SubResource("r3")
+
+
+[node name="Blade0" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 0.31000, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.31000, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent0_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 0.31000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent0_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 0.31000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent0_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.31000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent0_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 0.31000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent0_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 0.31000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle0" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 0.31000, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status0" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 0.34800, 0.67700)
+mesh = SubResource("r8")
+
+
+[node name="Blade1" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 0.56500, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.56500, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent1_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 0.56500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent1_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 0.56500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent1_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.56500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent1_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 0.56500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent1_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 0.56500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle1" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 0.56500, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status1" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 0.60300, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade2" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 0.82000, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.82000, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent2_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 0.82000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent2_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 0.82000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent2_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 0.82000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent2_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 0.82000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent2_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 0.82000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle2" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 0.82000, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status2" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 0.85800, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade3" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 1.07500, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.07500, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent3_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 1.07500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent3_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 1.07500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent3_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.07500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent3_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 1.07500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent3_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 1.07500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle3" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 1.07500, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status3" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 1.11300, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade4" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 1.33000, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.33000, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent4_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 1.33000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent4_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 1.33000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent4_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.33000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent4_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 1.33000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent4_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 1.33000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle4" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 1.33000, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status4" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 1.36800, 0.67700)
+mesh = SubResource("r8")
+
+
+[node name="Blade5" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 1.58500, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.58500, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent5_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 1.58500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent5_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 1.58500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent5_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.58500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent5_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 1.58500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent5_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 1.58500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle5" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 1.58500, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status5" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 1.62300, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade6" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 1.84000, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.84000, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent6_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 1.84000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent6_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 1.84000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent6_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 1.84000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent6_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 1.84000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent6_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 1.84000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle6" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 1.84000, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status6" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 1.87800, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade7" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 2.09500, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.09500, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent7_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 2.09500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent7_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 2.09500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent7_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.09500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent7_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 2.09500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent7_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 2.09500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle7" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 2.09500, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status7" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 2.13300, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Blade8" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 2.35000, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.35000, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent8_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 2.35000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent8_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 2.35000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent8_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.35000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent8_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 2.35000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent8_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 2.35000, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle8" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 2.35000, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status8" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 2.38800, 0.67700)
+mesh = SubResource("r8")
+
+
+[node name="Blade9" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 2.60500, 0.60700)
+mesh = SubResource("r4")
+
+
+[node name="Intake9" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.60500, 0.66500)
+mesh = SubResource("r5")
+
+
+[node name="Vent9_0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33000, 2.60500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent9_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.22500, 2.60500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent9_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12000, 2.60500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent9_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01500, 2.60500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Vent9_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.09000, 2.60500, 0.67900)
+mesh = SubResource("r6")
+
+
+[node name="Handle9" type="MeshInstance3D" parent="."]
+position = Vector3(0.33000, 2.60500, 0.70000)
+mesh = SubResource("r7")
+
+
+[node name="Status9" type="MeshInstance3D" parent="."]
+position = Vector3(0.20000, 2.64300, 0.67700)
+mesh = SubResource("r9")
+cast_shadow = 0
+
+[node name="Header" type="MeshInstance3D" parent="."]
+position = Vector3(0.00000, 2.99000, 0.61000)
+mesh = SubResource("r10")
+
+
+[node name="RackTag" type="Label3D" parent="."]
+position = Vector3(0.00000, 3.00000, 0.66500)
+text = "CORE"
+font = ExtResource("6")
+font_size = 36
+pixel_size = 0.005
+modulate = Color(0.65, 0.77, 0.77, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)

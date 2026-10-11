@@ -217,6 +217,9 @@ func _shout(key: String, title: String, ultimate: bool = false) -> void:
 ## Hit with a special, telling the target how to die if this kills it (monster_rig.gd):
 ## blades slice, the slam launches, the whirlwind sends bodies tumbling.
 func _strike(target: Node3D, amount: int, source: Vector3, style: String) -> bool:
+	if target.is_in_group("breakables"):
+		target.receive_damage(roundi(amount * player.melee.damage_multiplier), source)
+		return false
 	target.set_meta("kill_style", style)
 	var landed: bool = target.receive_damage(roundi(amount * player.melee.damage_multiplier), source)
 	if is_instance_valid(target) and target.get("health") != 0:
@@ -538,7 +541,7 @@ func _tick_dash(delta: float) -> void:
 	dash_left -= delta
 	# Everything the engineer passes is cut as they go by.
 	var here: Vector3 = player.global_position
-	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+	for candidate in _damage_targets():
 		var target: Node3D = candidate as Node3D
 		if target == null or dash_marked.has(target) or target.get("health") == 0:
 			continue
@@ -599,7 +602,7 @@ func _tick_spin(delta: float) -> void:
 	ElementFx.flame_ring(player, at, SPIN_RADIUS * .8, .35)
 	ElementFx.motes(player, at + Vector3.UP * .8, SPIN_COLOR, 16, 5.0, .45, 1.0, .14)
 	var landed: bool = false
-	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+	for candidate in _damage_targets():
 		var target: Node3D = candidate as Node3D
 		if target == null or not target.has_method("receive_damage") or target.get("health") == 0:
 			continue
@@ -710,7 +713,7 @@ func _advance(blade: Dictionary, delta: float) -> void:
 	if int(blade.travelled) != int(blade.travelled - before.distance_to(after)):
 		ElementFx.motes(player, after, WAVE_COLOR, 6, 2.0, .45, -1.0, .12, -blade.direction, 60.0)
 	(node.get_child(0) as OmniLight3D).light_energy = 2.5 * (1.0 - blade.travelled / WAVE_RANGE)
-	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+	for candidate in _damage_targets():
 		var target: Node3D = candidate as Node3D
 		if target == null or blade.hit.has(target) or not target.has_method("receive_damage") or target.get("health") == 0:
 			continue
@@ -747,7 +750,7 @@ func _slam() -> void:
 	if player.hitstop_enabled:
 		ElementFx.freeze(player, .10, .04)
 	player.camera_rig.add_impulse(2.2)
-	for candidate in player.get_tree().get_nodes_in_group("enemies"):
+	for candidate in _damage_targets():
 		var target: Node3D = candidate as Node3D
 		if target == null or not target.has_method("receive_damage") or target.get("health") == 0:
 			continue
@@ -801,3 +804,9 @@ func _blade_mesh() -> ArrayMesh:
 	blade_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	blade_material.vertex_color_use_as_albedo = true
 	return blade_mesh
+
+
+func _damage_targets() -> Array[Node]:
+	var targets: Array[Node] = player.get_tree().get_nodes_in_group("enemies")
+	targets.append_array(player.get_tree().get_nodes_in_group("breakables"))
+	return targets
