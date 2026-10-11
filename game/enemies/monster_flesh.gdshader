@@ -5,6 +5,10 @@ shader_type spatial;
 render_mode blend_mix, cull_back, diffuse_burley, specular_schlick_ggx;
 
 uniform vec3 base_color : source_color = vec3(0.3, 0.3, 0.3);
+uniform bool use_source_texture = false;
+uniform sampler2D source_albedo : source_color, filter_linear_mipmap;
+uniform bool use_source_normal = false;
+uniform sampler2D source_normal : hint_normal, filter_linear_mipmap;
 uniform float roughness_base : hint_range(0.0, 1.0) = 0.75;
 uniform float metallic_base : hint_range(0.0, 1.0) = 0.0;
 uniform float grime : hint_range(0.0, 1.0) = 0.7;
@@ -53,7 +57,11 @@ void fragment() {
 	vec3 p = local_position * detail_scale;
 	float mottle = fbm(p);
 	float bruise = smoothstep(0.48, 0.78, fbm(p * 0.45 + 7.3));
-	vec3 color = base_color * mix(1.0 - grime * 0.5, 1.0 + grime * 0.12, mottle);
+	vec3 original = use_source_texture ? texture(source_albedo, UV).rgb * base_color : base_color;
+	vec3 color = original * mix(1.0 - grime * 0.5, 1.0 + grime * 0.12, mottle);
+	if (use_source_normal) {
+		NORMAL_MAP = texture(source_normal, UV).rgb;
+	}
 	color = mix(color, color * vec3(0.5, 0.38, 0.4), bruise * grime * 0.7);
 	// Blood soaks in from many small patches as the body takes damage.
 	float soak = fbm(p * 0.8 + 19.0);

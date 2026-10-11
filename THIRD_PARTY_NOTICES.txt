@@ -2066,3 +2066,15 @@ Attribution is not required; credit is given voluntarily. Files, retrieval and u
 
 Universal Animation Library / Universal Animation Library 2 (Standard) by Quaternius
 CC0 1.0 Universal (public domain dedication). https://quaternius.com
+
+SEV-1 free demon body variations
+-------------------------------
+Night Demon / demon by Morgan Strauss (nubux).
+Source: https://opengameart.org/content/night-demon
+Chained Demon by Tor Halle-McIntyre (Mophs).
+Source: https://opengameart.org/content/chained-demon
+Both used under Creative Commons Attribution 3.0 Unported:
+https://creativecommons.org/licenses/by/3.0/
+Modified for SEV-1: material conversion, normalized scale, exportable rig hierarchy,
+and original provisional motion clips. Original skin textures retained.
+Download records and detailed modifications: assets/enemies/demon_trials/README.md.

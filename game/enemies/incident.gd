@@ -78,7 +78,7 @@ var magic_radius: float = 1.1
 ## How the strike lands: slash (crack + crescent), quake (ground slam), splat, cataclysm.
 var attack_style: String = "slash"
 var last_state: State = State.IDLE
-## Which CC0 rigged body to wear (MonsterRig.KINDS); archetypes set it before super._ready().
+## Which licensed rigged body to wear (MonsterRig.KINDS); archetypes set it before super._ready().
 var rig_kind: String = "record"
 ## A visual variant can keep the archetype’s existing voiced reactions.
 var bark_kind: String = ""

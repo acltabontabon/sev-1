@@ -1,6 +1,6 @@
 class_name MonsterRig
 extends Node3D
-## Rigged body for an incident: a CC0 model played from the enemy's own state (pursuit
+## Rigged body for an incident: a licensed model played from the enemy's own state (pursuit
 ## speed, melee windows, stagger, casts, manifesting, death). Presentation only: it never
 ## moves the body, starts attacks or applies damage. Provenance: assets/enemies/README.md.
 
@@ -42,6 +42,14 @@ const PALETTE: Dictionary = {
 ## stays (legs and hips), the lower ones from the half that flies.
 const HUMANOID_CUT: Dictionary = {"upper": ["Abdomen"], "lower": ["UpperLeg.L", "UpperLeg.R", "Foot.L", "Foot.R"], "center": "Torso"}
 const KINDS: Dictionary = {
+	"night_demon": {"model": "res://assets/enemies/demon_trials/night_demon.glb", "height": 2.1, "scale": 1.0, "textured": true,
+		"slice": {"upper": ["ORG-spine"], "lower": ["ORG-thigh.L", "ORG-thigh.R"], "center": "ORG-spine"},
+		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Attack", "impact": .5,
+		"hit": "HitReact", "death": "Death", "cast": ""},
+	"chained_demon": {"model": "res://assets/enemies/demon_trials/chained_demon.glb", "height": 2.1, "scale": 1.0, "textured": true,
+		"slice": {"upper": ["Spine2"], "lower": ["Hip.L", "Hips.R"], "center": "Spine2"},
+		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Attack", "impact": .5,
+		"hit": "HitReact", "death": "Death", "cast": ""},
 	"record": {"model": "res://assets/enemies/ultimate_monsters/orc_skull.gltf", "height": 2.1, "scale": .65, "slice": HUMANOID_CUT,
 		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Weapon", "impact": .45,
 		"hit": "HitReact", "death": "Death", "cast": ""},
@@ -146,7 +154,7 @@ func _skin(source: Material) -> Material:
 	var key: String = source.resource_name if source != null else ""
 	# A kind can repaint a shared material name (the blob's spikes reuse "Eye_White").
 	var overrides: Dictionary = spec.get("palette", {})
-	var cache: String = (kind + ":" + key) if overrides.has(key) else key
+	var cache: String = (kind + ":" + key) if overrides.has(key) or spec.get("textured", false) else key
 	if skins.has(cache):
 		return skins[cache]
 	var skin: ShaderMaterial = ShaderMaterial.new()
@@ -160,6 +168,16 @@ func _skin(source: Material) -> Material:
 	skin.set_shader_parameter("emission_color", Color(.9, .55, .15))
 	skin.set_shader_parameter("emission_strength", look[4])
 	skin.set_shader_parameter("detail_scale", 4.0)
+	if spec.get("textured", false) and source is StandardMaterial3D:
+		var original: StandardMaterial3D = source as StandardMaterial3D
+		skin.set_shader_parameter("use_source_texture", true)
+		skin.set_shader_parameter("source_albedo", original.albedo_texture)
+		skin.set_shader_parameter("base_color", original.albedo_color)
+		skin.set_shader_parameter("grime", .15)
+		skin.set_shader_parameter("wet", .1)
+		if original.normal_enabled and original.normal_texture != null:
+			skin.set_shader_parameter("use_source_normal", true)
+			skin.set_shader_parameter("source_normal", original.normal_texture)
 	skins[cache] = skin
 	return skin
 

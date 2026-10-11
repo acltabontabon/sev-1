@@ -212,12 +212,15 @@ func _run() -> void:
 	for foe: CharacterBody3D in incident.alive:
 		second_nearest = minf(second_nearest, Vector2(foe.global_position.x - player.global_position.x, foe.global_position.z - player.global_position.z).length())
 	check(incident.wave_area != "" and second_nearest > 10.0, "the next wave also breaks out away from the engineer")
-	# Every archetype wears its own CC0 rigged body; the native boxes stay hidden.
+	# Each archetype keeps its rigged presentation; records allow the licensed variants.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var worn: Array = []
 	for kind: String in ["record", "blocker", "invite", "scope"]:
 		var body: CharacterBody3D = spawn(kind, Vector3(worn.size() * 2.5 - 4, .05, -6))
-		worn.append([body.rig.kind if body.rig != null else "", body.get_node("Visual/Body").visible])
+		var body_kind: String = body.rig.kind if body.rig != null else ""
+		if kind == "record" and body_kind in ["night_demon", "chained_demon"] and body.bark_kind == "record":
+			body_kind = "record"
+		worn.append([body_kind, body.get_node("Visual/Body").visible])
 	check(worn == [["record", false], ["blocker", false], ["invite", false], ["scope", false]], "each archetype wears its own rigged body")
 	# A Blocker's slam lands as a quake: camera tremor near the impact, effects on the floor.
 	await fresh_stage(incident.Stage.INVESTIGATION)

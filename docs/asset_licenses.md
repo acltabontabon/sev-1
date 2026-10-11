@@ -67,7 +67,8 @@ Kenney's furniture chair and round table were evaluated and rejected as toy-like
 | Rigged engineer body and office clips | Quaternius "Ultimate Animated Character Pack" (`Casual_Male`), OpenGameArt; CC0 1.0 | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
 | Action clips (run, roll, death, jump, sword idles) | Quaternius "Lowpoly Animated Knight", OpenGameArt; CC0 1.0, retargeted at build time | [assets/characters](../assets/characters/README.md#rigged-engineer-quaternius-cc0) |
 
-| Enemy bodies (six monsters) | Quaternius "Ultimate Monsters" (retrieved from a public GitHub mirror while the official Drive link was over quota); CC0 1.0 | [assets/enemies](../assets/enemies/README.md) |
+| Enemy bodies (original monster roster) | Quaternius "Ultimate Monsters" (retrieved from a public GitHub mirror while the official Drive link was over quota); CC0 1.0 | [assets/enemies](../assets/enemies/README.md) |
+| Corrupted Record demon body variations (11 October 2026) | Night Demon by Morgan Strauss (nubux); Chained Demon by Tor Halle-McIntyre (Mophs); both used under CC BY 3.0 with required attribution | [sources, archive checksums and modifications](../assets/enemies/demon_trials/README.md) |
 
 The rigged engineer replaced the native procedural engineer after creator feedback;
 the native scene and generator remain as a fallback. Elemental effects, enemy spells

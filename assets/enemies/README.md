@@ -1,6 +1,13 @@
-# Enemy bodies (Quaternius "Ultimate Monsters", CC0)
+# Enemy bodies
 
-Every enemy wears a model from Quaternius' **Ultimate Monsters** pack (50 animated
+The creator-authorized [free demon variation trial](demon_trials/README.md) now
+alternates Night Demon and Chained Demon on Corrupted Records. Both use CC BY 3.0
+with required attribution, original textures, and provisional local motion clips.
+The Quaternius bodies below remain the other archetypes and the record fallback.
+
+## Quaternius "Ultimate Monsters", CC0
+
+The original consistent roster uses Quaternius' **Ultimate Monsters** pack (50 animated
 monsters, glTF), CC0 1.0. The pack's official download is a public Google Drive folder
 linked from [quaternius.com](https://quaternius.com/packs/ultimatemonsters.html). On 10
 October 2026 that folder answered every request with "quota exceeded", so the files

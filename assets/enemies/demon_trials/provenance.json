@@ -1,0 +1,36 @@
+[
+  {
+    "name": "night_demon",
+    "source": "https://opengameart.org/content/night-demon",
+    "download": "https://opengameart.org/sites/default/files/demon.rar",
+    "archive_sha256": "999a9bc99b3f6628e851e1164599f85d9ac6345edd004067dc8ffadf6ed4aa99",
+    "author": "Morgan Strauss (nubux)",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0/",
+    "retrieved": "2026-10-11",
+    "modifications": [
+      "Legacy material converted to glTF PBR; original albedo preserved",
+      "Authoring scale normalized to 2.1m",
+      "Original provisional idle, locomotion, strike, stagger and death motions added locally",
+      "Unused authoring controls removed; Night Demon Rigify constraints replaced with exportable bone hierarchy; embedded scripts never enabled"
+    ],
+    "export_sha256": "3080e796ef9d1cebf8ad6eedb0544b31532cf9260824f50b4e3945ce026eaaad"
+  },
+  {
+    "name": "chained_demon",
+    "source": "https://opengameart.org/content/chained-demon",
+    "download": "https://opengameart.org/sites/default/files/Chained_Demon_0.zip",
+    "archive_sha256": "d274de7049e4ac5fd63153b38827a7b829edcbc4e6f22113df0cb5933f38d271",
+    "author": "Tor Halle-McIntyre (Mophs)",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0/",
+    "retrieved": "2026-10-11",
+    "modifications": [
+      "Legacy material converted to glTF PBR; original albedo preserved",
+      "Authoring scale normalized to 2.1m",
+      "Original provisional idle, locomotion, strike, stagger and death motions added locally",
+      "Unused authoring controls removed; Night Demon Rigify constraints replaced with exportable bone hierarchy; embedded scripts never enabled"
+    ],
+    "export_sha256": "01462d0cf5be38774f3d27d8c481e4690a62e318d84efe66ca97824d5f571d68"
+  }
+]

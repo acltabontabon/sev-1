@@ -582,11 +582,16 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   for its `rig_kind` (record, blocker, invite, scope, variance, bug; archetypes set it
   before `super._ready()`) and hides the native boxes, keeping the record's loading halo
   and each archetype's prop (BLOCKED sign, invite card, sticky notes, status crown). The
-  rig (models from Quaternius' "Ultimate Monsters", fixed per-kind scale) plays the
-  CC0 model's clips from AI state with a manually advanced
+  rig (Quaternius' "Ultimate Monsters" plus the creator-authorized CC BY 3.0 demon
+  body trial, fixed per-kind scale) plays motion clips from AI state with a manually advanced
   AnimationPlayer (spawn, locomotion, attack scrubbed to the melee windows, hit, cast,
-  death, sink) and keeps the model's materials with `corruption.gdshader` as an
-  additive `next_pass`. Scope Creep scales the rig with its growth; The Variance's
+  death, sink). `monster_flesh.gdshader` dresses flat Quaternius materials; the
+  Night Demon and Chained Demon variants preserve their source albedo textures
+  (and Night Demon's normal map) beneath the damage blood. `corruption.gdshader`
+  remains an additive `next_pass`. Consecutive Corrupted Record spawns alternate
+  the two demon bodies, retaining record AI, stats and barks; full retry resets
+  the sequence. The new motions are locally authored provisional clips, not
+  supplied source animations. Scope Creep scales the rig with its growth; The Variance's
   false positives are `projection()` copies of its rig. Provenance in
   `assets/enemies/README.md`.
 - **Roaming outbreaks and patrols.** `missing_transaction.gd` gives each wave member its
