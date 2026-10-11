@@ -2,6 +2,7 @@ extends SceneTree
 ## Watch the cinematics in a window, in real time with sound: the narrated cold open, then
 ## the vault (the night shift's charge, the massacre and the hero entrance).
 ## sh tools/godot.sh --path . --script tests/cutscene_preview.gd [-- --vault | --finale]
+## `--opening` stops after the cold open; combine with `--play` to explore the office.
 ## `--play` hands control to the player after the entrance and keeps the game open.
 ## `--vault` skips straight to the vault; `--finale` also skips the massacre, then lands
 ## the killing blow: the duel and the ending. Close the window or wait for it to end.
@@ -41,6 +42,13 @@ func _run() -> void:
 	if not ("--vault" in OS.get_cmdline_user_args() or "--finale" in OS.get_cmdline_user_args()):
 		while incident.stage == incident.Stage.ALERT:
 			await process_frame
+		if "--opening" in OS.get_cmdline_user_args():
+			if "--play" in OS.get_cmdline_user_args():
+				playing = true
+				player.camera_rig.set_capture(true)
+			else:
+				quit()
+			return
 		await create_timer(2.0).timeout
 	else:
 		incident.presentation.skip()

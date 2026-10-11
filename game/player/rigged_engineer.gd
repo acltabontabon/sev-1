@@ -33,8 +33,8 @@ const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .9, -.5), Vector3(.13, .9, -.5
 ## Hidden during seated desk staging; the existing rest transform remains available.
 const SEATED_SWORD: Transform3D = Transform3D(Basis(Vector3.RIGHT, -PI * .5), Vector3(1.45, 2.34, -.87))
 ## The sitting clip was authored for a lower stool set further back: seated, the body
-## shifts up onto the cushion and forward off the backrest so the chair never cuts it.
-const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
+## places the skinned trouser seat at the .56 m cushion, not just the pelvis bone.
+const SEATED_OFFSET: Vector3 = Vector3(0, .24, -.3)
 
 
 @export var model_scale: float = .64
@@ -676,13 +676,13 @@ func _staged(delta: float) -> void:
 	standing_left = maxf(0.0, standing_left - delta)
 	var targets: Array[Vector3] = [DESK_HANDS[0] + Vector3(0, absf(sin(clock * 13.0)) * .018, 0), DESK_HANDS[1] + Vector3(0, absf(sin(clock * 11.0 + 1.3)) * .018, 0)]
 	var look: Vector2 = Vector2(.12, 0)
-	var target_lean: float = -.12
+	var target_lean: float = -.08
 	var reach: float = 1.0
 	match story_pose:
 		Pose.ALERT:
 			targets = [Vector3(-.2, .92, -.42), Vector3(.16, .92, -.42)]
 			look = Vector2(-.04, 0)
-			target_lean = .02
+			target_lean = -.04
 		Pose.SLUMP:
 			targets = [Vector3(-.22, .62, .25), Vector3(.22, .62, .25)]
 			look = Vector2(.55, .05)
@@ -692,9 +692,9 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.12, .08)
 			target_lean = .08
 		Pose.RELAX:
-			targets = [Vector3(-.14, 1.45, .12), Vector3(.14, 1.45, .12)]
+			targets = [Vector3(-.2, .52, .12), Vector3(.2, .52, .12)]
 			look = Vector2(-.22, 0)
-			target_lean = .25
+			target_lean = -.06
 		Pose.GLANCE:
 			targets = [Vector3(-.2, .9, -.46), Vector3(.16, .9, -.46)]
 			look = Vector2(.02, -.4)
