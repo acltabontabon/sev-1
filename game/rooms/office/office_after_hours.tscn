@@ -79,6 +79,8 @@
 [ext_resource type="Material" path="res://game/rooms/office/facade.tres" id="77"]
 [ext_resource type="PackedScene" path="res://game/rooms/office/polished_workstation.tscn" id="78"]
 [ext_resource type="PackedScene" path="res://assets/environment/poly_haven_workstation/desk_lamp_arm_01.glb" id="79"]
+[ext_resource type="Material" path="res://game/rooms/office/office_enamel.tres" id="80"]
+[ext_resource type="Material" path="res://game/rooms/office/frosted_glass.tres" id="81"]
 
 [sub_resource type="BoxMesh" id="r0"]
 size = Vector3(28.00000, 0.50000, 32.00000)
@@ -1108,6 +1110,112 @@ material = ExtResource("77")
 size = Vector3(700.00000, 0.40000, 700.00000)
 material = ExtResource("6")
 
+[sub_resource type="BoxMesh" id="r264"]
+size = Vector3(27.50000, 0.06000, 31.50000)
+material = ExtResource("29")
+
+[sub_resource type="BoxMesh" id="r265"]
+size = Vector3(0.02500, 0.02500, 31.50000)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r266"]
+size = Vector3(27.50000, 0.02500, 0.02500)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r267"]
+size = Vector3(1.00000, 0.06000, 0.60000)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r268"]
+size = Vector3(0.90000, 0.01500, 0.50000)
+material = ExtResource("6")
+
+[sub_resource type="BoxMesh" id="r269"]
+size = Vector3(0.90000, 0.02000, 0.02500)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r270"]
+size = Vector3(5.03000, 0.04000, 0.12000)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r271"]
+size = Vector3(0.04000, 0.75000, 0.13000)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r272"]
+size = Vector3(0.12000, 0.13000, 0.00800)
+material = ExtResource("26")
+
+[sub_resource type="BoxMesh" id="r273"]
+size = Vector3(0.12000, 0.13000, 0.00800)
+material = ExtResource("27")
+
+[sub_resource type="BoxMesh" id="r274"]
+size = Vector3(1.16000, 1.18000, 0.70000)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r275"]
+size = Vector3(1.08000, 0.11000, 0.62000)
+material = ExtResource("6")
+
+[sub_resource type="BoxMesh" id="r276"]
+size = Vector3(1.09000, 0.34000, 0.02400)
+material = ExtResource("80")
+
+[sub_resource type="BoxMesh" id="r277"]
+size = Vector3(0.27000, 0.03000, 0.03500)
+material = ExtResource("4")
+
+[sub_resource type="BoxMesh" id="r278"]
+size = Vector3(0.17000, 0.06500, 0.00900)
+material = ExtResource("4")
+
+[sub_resource type="BoxMesh" id="r279"]
+size = Vector3(0.14000, 0.04400, 0.00300)
+material = ExtResource("18")
+
+[sub_resource type="BoxMesh" id="r280"]
+size = Vector3(0.10000, 0.28000, 0.25000)
+material = ExtResource("10")
+
+[sub_resource type="BoxMesh" id="r281"]
+size = Vector3(0.10000, 0.28000, 0.25000)
+material = ExtResource("13")
+
+[sub_resource type="BoxMesh" id="r282"]
+size = Vector3(0.00800, 0.18000, 7.85000)
+material = ExtResource("81")
+
+[sub_resource type="BoxMesh" id="r283"]
+size = Vector3(0.00800, 0.18000, 6.10000)
+material = ExtResource("81")
+
+[sub_resource type="BoxMesh" id="r284"]
+size = Vector3(0.00800, 0.18000, 4.35000)
+material = ExtResource("81")
+
+[sub_resource type="BoxMesh" id="r285"]
+size = Vector3(0.06000, 0.42000, 0.04000)
+material = ExtResource("4")
+
+[sub_resource type="CylinderMesh" id="r286"]
+top_radius = 0.19
+bottom_radius = 0.19
+height = 0.05
+radial_segments = 12
+material = ExtResource("10")
+
+[sub_resource type="BoxMesh" id="r287"]
+size = Vector3(0.30000, 0.01500, 0.24000)
+material = ExtResource("18")
+
+[sub_resource type="CylinderMesh" id="r288"]
+top_radius = 0.065
+bottom_radius = 0.065
+height = 0.16
+radial_segments = 12
+material = ExtResource("25")
+
 [node name="OfficeAfterHours" type="Node3D"]
 script = ExtResource("1")
 
@@ -1865,12 +1973,12 @@ mesh = SubResource("r60")
 
 
 [node name="MeetingDisplay" type="MeshInstance3D" parent="."]
-position = Vector3(8.00000, 3.50000, -9.65100)
+position = Vector3(8.00000, 3.50000, -10.85100)
 mesh = SubResource("r61")
 cast_shadow = 0
 
 [node name="MeetingTitle" type="Label3D" parent="."]
-position = Vector3(8.00000, 3.80000, -9.63000)
+position = Vector3(8.00000, 3.80000, -10.83000)
 text = "Q4 ALIGNMENT"
 font_size = 55
 pixel_size = 0.004
@@ -1880,7 +1988,7 @@ rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
 
 
 [node name="MeetingTarget" type="Label3D" parent="."]
-position = Vector3(8.00000, 3.30000, -9.63000)
+position = Vector3(8.00000, 3.30000, -10.83000)
 text = "DO MORE.\nWITH LESS."
 font_size = 55
 pixel_size = 0.005
@@ -2432,11 +2540,13 @@ rotation_degrees = Vector3(-90.00000, 0.00000, 0.00000)
 position = Vector3(-5.00000, 5.15000, 0.00000)
 mesh = SubResource("r87")
 
+visible = false
 
 [node name="Duct5" type="MeshInstance3D" parent="."]
 position = Vector3(5.00000, 5.15000, 0.00000)
 mesh = SubResource("r87")
 
+visible = false
 
 [node name="WindowBounce" type="OmniLight3D" parent="."]
 position = Vector3(-11.00000, 3.50000, 0.00000)
@@ -5220,3 +5330,751 @@ cast_shadow = 0
 position = Vector3(-3.37, 0.8225, 9.12)
 rotation_degrees = Vector3(0, 180, 0)
 scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="OfficeFinish" type="Node3D" parent="."]
+position = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="AcousticCeiling" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.50000, 0.00000)
+mesh = SubResource("r264")
+
+
+[node name="CeilingTeeX-13" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-13.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-11" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-11.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-9" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-9.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-7" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-5.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-3.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX-1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-1.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(1.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(3.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(5.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX7" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(7.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX9" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(9.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX11" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(11.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeX13" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(13.00000, 5.45500, 0.00000)
+mesh = SubResource("r265")
+
+
+[node name="CeilingTeeZ-15" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -15.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-13" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -13.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-11" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -11.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-9" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -9.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-7" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -7.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -5.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -3.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ-1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, -1.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 1.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 3.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 5.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ7" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 7.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ9" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 9.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ11" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 11.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ13" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 13.00000)
+mesh = SubResource("r266")
+
+
+[node name="CeilingTeeZ15" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(0.00000, 5.45500, 15.00000)
+mesh = SubResource("r266")
+
+
+[node name="AirReturnFrame0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.40500, -10.00000)
+mesh = SubResource("r267")
+
+
+[node name="AirReturnWell0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.37000, -10.00000)
+mesh = SubResource("r268")
+
+
+[node name="AirReturn0Slat0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -10.21000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn0Slat1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -10.12600)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn0Slat2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -10.04200)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn0Slat3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -9.95800)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn0Slat4" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -9.87400)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn0Slat5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, -9.79000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturnFrame1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.40500, 10.00000)
+mesh = SubResource("r267")
+
+
+[node name="AirReturnWell1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.37000, 10.00000)
+mesh = SubResource("r268")
+
+
+[node name="AirReturn1Slat0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 9.79000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn1Slat1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 9.87400)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn1Slat2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 9.95800)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn1Slat3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 10.04200)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn1Slat4" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 10.12600)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn1Slat5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.00000, 5.35500, 10.21000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturnFrame2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.40500, 10.00000)
+mesh = SubResource("r267")
+
+
+[node name="AirReturnWell2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.37000, 10.00000)
+mesh = SubResource("r268")
+
+
+[node name="AirReturn2Slat0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 9.79000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn2Slat1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 9.87400)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn2Slat2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 9.95800)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn2Slat3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 10.04200)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn2Slat4" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 10.12600)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn2Slat5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(10.00000, 5.35500, 10.21000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturnFrame3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.40500, -6.00000)
+mesh = SubResource("r267")
+
+
+[node name="AirReturnWell3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.37000, -6.00000)
+mesh = SubResource("r268")
+
+
+[node name="AirReturn3Slat0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -6.21000)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn3Slat1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -6.12600)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn3Slat2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -6.04200)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn3Slat3" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -5.95800)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn3Slat4" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -5.87400)
+mesh = SubResource("r269")
+
+
+[node name="AirReturn3Slat5" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(2.00000, 5.35500, -5.79000)
+mesh = SubResource("r269")
+
+
+[node name="DividerCap0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.41200, 4.45000)
+mesh = SubResource("r270")
+
+
+[node name="DividerPost0_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.25000, 1.05000, 4.45000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost0_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.05000, 4.45000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost0_2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-5.25000, 1.05000, 4.45000)
+mesh = SubResource("r271")
+
+
+[node name="BayNote0_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-9.50000, 1.22000, 4.50200)
+mesh = SubResource("r272")
+rotation_degrees = Vector3(0.00000, 0.00000, -5.00000)
+
+
+[node name="BayNote0_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-6.90000, 1.22000, 4.50200)
+mesh = SubResource("r273")
+rotation_degrees = Vector3(0.00000, 0.00000, 4.00000)
+
+
+[node name="DividerCap1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.41200, -0.55000)
+mesh = SubResource("r270")
+
+
+[node name="DividerPost1_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.25000, 1.05000, -0.55000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost1_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.05000, -0.55000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost1_2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-5.25000, 1.05000, -0.55000)
+mesh = SubResource("r271")
+
+
+[node name="BayNote1_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-9.50000, 1.22000, -0.49800)
+mesh = SubResource("r272")
+rotation_degrees = Vector3(0.00000, 0.00000, -5.00000)
+
+
+[node name="BayNote1_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-6.90000, 1.22000, -0.49800)
+mesh = SubResource("r273")
+rotation_degrees = Vector3(0.00000, 0.00000, 4.00000)
+
+
+[node name="DividerCap2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.41200, -6.55000)
+mesh = SubResource("r270")
+
+
+[node name="DividerPost2_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-10.25000, 1.05000, -6.55000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost2_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-7.75000, 1.05000, -6.55000)
+mesh = SubResource("r271")
+
+
+[node name="DividerPost2_2" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-5.25000, 1.05000, -6.55000)
+mesh = SubResource("r271")
+
+
+[node name="BayNote2_0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-9.50000, 1.22000, -6.49800)
+mesh = SubResource("r272")
+rotation_degrees = Vector3(0.00000, 0.00000, -5.00000)
+
+
+[node name="BayNote2_1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(-6.90000, 1.22000, -6.49800)
+mesh = SubResource("r273")
+rotation_degrees = Vector3(0.00000, 0.00000, 4.00000)
+
+
+[node name="FileCabinet0" type="Node3D" parent="OfficeFinish"]
+position = Vector3(-12.10000, 0.00000, 15.18000)
+
+
+[node name="Carcass" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.63000, 0.00000)
+mesh = SubResource("r274")
+
+
+[node name="Plinth" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.05500, 0.00000)
+mesh = SubResource("r275")
+
+
+[node name="Drawer0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.27000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.33000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.21500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.21500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.64000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 0.70000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.58500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.58500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 1.01000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.00000, 1.07000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.95500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(0.32000, 0.95500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Binder0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(-0.40000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(-0.27000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="Binder2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(-0.14000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder3" type="MeshInstance3D" parent="OfficeFinish/FileCabinet0"]
+position = Vector3(-0.01000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="FileCabinet1" type="Node3D" parent="OfficeFinish"]
+position = Vector3(-10.80000, 0.00000, 15.18000)
+
+
+[node name="Carcass" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.63000, 0.00000)
+mesh = SubResource("r274")
+
+
+[node name="Plinth" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.05500, 0.00000)
+mesh = SubResource("r275")
+
+
+[node name="Drawer0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.27000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.33000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.21500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.21500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.64000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 0.70000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.58500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.58500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 1.01000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.00000, 1.07000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.95500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(0.32000, 0.95500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Binder0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(-0.40000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(-0.27000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="Binder2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(-0.14000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder3" type="MeshInstance3D" parent="OfficeFinish/FileCabinet1"]
+position = Vector3(-0.01000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="FileCabinet2" type="Node3D" parent="OfficeFinish"]
+position = Vector3(-7.00000, 0.00000, 15.18000)
+
+
+[node name="Carcass" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.63000, 0.00000)
+mesh = SubResource("r274")
+
+
+[node name="Plinth" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.05500, 0.00000)
+mesh = SubResource("r275")
+
+
+[node name="Drawer0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.27000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.33000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.21500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.21500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.64000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 0.70000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.58500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.58500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Drawer2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 1.01000, -0.36100)
+mesh = SubResource("r276")
+
+
+[node name="Pull2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.00000, 1.07000, -0.39000)
+mesh = SubResource("r277")
+
+
+[node name="LabelFrame2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.95500, -0.37800)
+mesh = SubResource("r278")
+
+
+[node name="Label2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(0.32000, 0.95500, -0.38400)
+mesh = SubResource("r279")
+
+
+[node name="Binder0" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(-0.40000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder1" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(-0.27000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="Binder2" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(-0.14000, 1.37000, 0.03000)
+mesh = SubResource("r280")
+
+
+[node name="Binder3" type="MeshInstance3D" parent="OfficeFinish/FileCabinet2"]
+position = Vector3(-0.01000, 1.37000, 0.03000)
+mesh = SubResource("r281")
+
+
+[node name="ConferencePrivacyWest" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(4.99900, 2.55000, -7.00000)
+mesh = SubResource("r282")
+
+
+[node name="SyncPrivacy0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(18.41100, 1.45000, -12.62500)
+mesh = SubResource("r283")
+
+
+[node name="SyncPrivacy1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(18.41100, 1.45000, -4.25000)
+mesh = SubResource("r284")
+
+
+[node name="Handle" type="MeshInstance3D" parent="QuickSyncDoorA"]
+position = Vector3(-0.07500, 0.00000, 0.00000)
+mesh = SubResource("r285")
+
+
+[node name="Handle" type="MeshInstance3D" parent="QuickSyncDoorB"]
+position = Vector3(-0.07500, 0.00000, 0.00000)
+mesh = SubResource("r285")
+
+
+[node name="ConferenceSpeaker" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(8.00000, 2.38000, -8.00000)
+mesh = SubResource("r286")
+
+
+[node name="MeetingPad0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(6.90000, 2.36800, -7.50000)
+mesh = SubResource("r287")
+rotation_degrees = Vector3(0.00000, 7.00000, 0.00000)
+
+
+[node name="MeetingCup0" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(7.18000, 2.44000, -7.60000)
+mesh = SubResource("r288")
+
+
+[node name="MeetingPad1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(9.10000, 2.36800, -7.50000)
+mesh = SubResource("r287")
+rotation_degrees = Vector3(0.00000, -7.00000, 0.00000)
+
+
+[node name="MeetingCup1" type="MeshInstance3D" parent="OfficeFinish"]
+position = Vector3(9.38000, 2.44000, -7.60000)
+mesh = SubResource("r288")

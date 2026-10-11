@@ -6,6 +6,7 @@ from pathlib import Path
 import math
 import copy
 from pantry_layout import build_pantry
+from office_details import build_office_details
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'game/rooms/office'
@@ -38,6 +39,8 @@ materials = {
  'pin_red': ((.8,.08,.06,1), .3, 0), 'sticky_yellow': ((.98,.86,.32,1), .85, 0),
  'sticky_pink': ((.98,.55,.72,1), .85, 0), 'sticky_green': ((.62,.92,.55,1), .85, 0),
  'wellness_purple': ((.36,.24,.6,1), .8, 0),
+ 'office_enamel': ((.63,.66,.65,1), .48, .15),
+ 'frosted_glass': ((.72,.8,.8,.28), .8, 0),
 }
 # CC0 photographs for the culture-deck prints (assets/environment/posters, see its README).
 photos = ['family', 'fail_fast', 'wellbeing', 'machine', 'wellness']
@@ -77,7 +80,7 @@ color_ramp = SubResource("Grain")
     if name.startswith('neon_'):
         extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = 3.2\n'
     if name=='glass': extra+='transparency = 1\ncull_mode = 2\n'
-    if name in ('poster_glass','tape'): extra+='transparency = 1\n'
+    if name in ('poster_glass','tape','frosted_glass'): extra+='transparency = 1\n'
     if name=='poster_glass': extra+='metallic_specular = 1.0\n'
     (OUT/f'{name}.tres').write_text(f'[gd_resource type="StandardMaterial3D" format=3]\n\n{header}{resources}\n[resource]\nalbedo_color = {col(color)}\nroughness = {rough}\nmetallic = {metallic}\n'+extra)
 for name in photos:
@@ -144,7 +147,7 @@ class Scene:
         self.node(name,'SpotLight3D' if spot else 'OmniLight3D',pos,props=props)
     def save(self,file):
         ext='\n'.join(f'[ext_resource type="{kind}" path="{path}" id="{rid}"]' for path,(rid,kind) in self.ext.items())
-        (OUT/f'{file}.tscn').write_text('[gd_scene format=3]\n\n'+ext+'\n\n'+'\n\n'.join(self.res+self.nodes)+'\n')
+        (OUT/f'{file}.tscn').write_text(('[gd_scene format=3]\n\n'+ext+'\n\n'+'\n\n'.join(self.res+self.nodes)).rstrip()+'\n')
 
 chair=Scene('OfficeChair')
 chair.box('Seat',(0,.5,0),(.56,.12,.56),'fabric')
@@ -202,6 +205,16 @@ polished.box('NotebookHeader', (-.80, .854, .12), (.20, .001, .015), 'plastic', 
 for line in range(5):
     polished.box(f'NotebookRule{line}', (-.80, .854, .18+line*.026), (.20, .001, .0015), 'metal', rot=(0,12,0))
 polished.save('polished_workstation')
+# Reuse the existing CC0 desk throughout the office, retaining the tested tabletop
+# collider and story paths. The hero desk keeps its extra close-up keycaps.
+shared = copy.deepcopy(desk)
+for i, node in enumerate(shared.nodes):
+    if ('name="Mesh"' in node and 'parent="Top"' in node) or any(f'name="{name}"' in node for name in ['Leg-0.94', 'Leg0.94', 'CableTray']):
+        shared.nodes[i] += '\nvisible = false'
+ref = shared.external('res://assets/environment/poly_haven_workstation/metal_office_desk.glb', 'PackedScene')
+shared.nodes.append(f'[node name="DetailedDesk" parent="." instance={ref}]\nscale = Vector3(1.125, 1.04444, 1.00294)')
+shared.box('DeskMat', (.04, .827, .24), (.94, .008, .40), 'fabric')
+shared.save('workstation')
 
 rack=Scene('ServerRack')
 rack.box('Cabinet',(0,1.2,0),(.85,2.4,.90),'metal',True)
@@ -288,9 +301,9 @@ for x in [6.8,8,9.2]:
     s.instance(f'ChairA{x}','chair',(x,1.5,-9.35),180)
     s.instance(f'ChairB{x}','chair',(x,1.5,-6.6),0)
 s.box('MeetingScreen',(8,3.5,-10.90),(3.2,1.5,.07),'plastic')
-s.box('MeetingDisplay',(8,3.5,-9.651),(3.02,1.32,.008),'screen')
-s.text('MeetingTitle','Q4 ALIGNMENT',(8,3.8,-9.63),.004,55)
-s.text('MeetingTarget','DO MORE.\nWITH LESS.',(8,3.3,-9.63),.005,55)
+s.box('MeetingDisplay',(8,3.5,-10.851),(3.02,1.32,.008),'screen')
+s.text('MeetingTitle','Q4 ALIGNMENT',(8,3.8,-10.83),.004,55)
+s.text('MeetingTarget','DO MORE.\nWITH LESS.',(8,3.3,-10.83),.005,55)
 s.text('MeetingName','04  /  ALIGNMENT',(5.0,4.45,-5),.005,45,rot=(0,-90,0))
 # Workstation bays keep the central dodge/combo lanes clear.
 for idx,(x,z,rot) in enumerate([(-9,5,0),(-6.5,5,0),(-9,0,0),(-6.5,0,0),(-9,-6,0),(-6.5,-6,0)]):
@@ -592,5 +605,6 @@ for i, node in enumerate(s.nodes):
 s.nodes = [node for node in s.nodes if not any(f'name="{name}"' in node for name in ['TaskLampBase', 'TaskLampStem', 'TaskLampShade', 'TaskLampBulb'])]
 lamp = s.external('res://assets/environment/poly_haven_workstation/desk_lamp_arm_01.glb', 'PackedScene')
 s.nodes.append(f'[node name="TaskLamp" parent="." instance={lamp}]\nposition = Vector3(-3.37, 0.8225, 9.12)\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(0.72, 0.72, 0.72)')
+build_office_details(s)
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')

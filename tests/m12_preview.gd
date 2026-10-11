@@ -774,13 +774,16 @@ func office_life() -> void:
 			await frames(3)
 		await shot(view[0])
 	var ceiling: Node3D = incident.room.get_node("Ceiling")
+	var finish_ceiling: Node3D = incident.room.get_node("OfficeFinish/AcousticCeiling")
 	ceiling.hide()
+	finish_ceiling.hide()
 	camera.position = Vector3(2.0, 22.0, 6.0)
 	camera.look_at(Vector3(2.0, 0, -1.0))
 	camera.fov = 70
 	await live(1.5)
 	await shot("office_patrols")
 	ceiling.show()
+	finish_ceiling.show()
 	app.main_menu()
 	await frames(5)
 

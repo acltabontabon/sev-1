@@ -9,6 +9,8 @@
 [ext_resource type="Material" path="res://game/rooms/office/black.tres" id="7"]
 [ext_resource type="Material" path="res://game/rooms/office/mint.tres" id="8"]
 [ext_resource type="PackedScene" path="res://game/rooms/office/chair.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://assets/environment/poly_haven_workstation/metal_office_desk.glb" id="10"]
+[ext_resource type="Material" path="res://game/rooms/office/fabric.tres" id="11"]
 
 [sub_resource type="BoxMesh" id="r0"]
 size = Vector3(2.25000, 0.06500, 0.95000)
@@ -91,6 +93,10 @@ material = ExtResource("8")
 size = Vector3(0.46000, 0.01200, 0.00500)
 material = ExtResource("8")
 
+[sub_resource type="BoxMesh" id="r19"]
+size = Vector3(0.94000, 0.00800, 0.40000)
+material = ExtResource("11")
+
 [node name="Workstation" type="Node3D"]
 
 [node name="Top" type="StaticBody3D" parent="."]
@@ -100,6 +106,7 @@ position = Vector3(0.00000, 0.79000, 0.00000)
 [node name="Mesh" type="MeshInstance3D" parent="Top"]
 position = Vector3(0.00000, 0.00000, 0.00000)
 mesh = SubResource("r0")
+visible = false
 
 [node name="Collision" type="CollisionShape3D" parent="Top"]
 position = Vector3(0.00000, 0.00000, 0.00000)
@@ -109,16 +116,19 @@ shape = SubResource("r1")
 position = Vector3(-0.94000, 0.38000, 0.00000)
 mesh = SubResource("r2")
 
+visible = false
 
 [node name="Leg0.94" type="MeshInstance3D" parent="."]
 position = Vector3(0.94000, 0.38000, 0.00000)
 mesh = SubResource("r2")
 
+visible = false
 
 [node name="CableTray" type="MeshInstance3D" parent="."]
 position = Vector3(0.00000, 0.53000, -0.27000)
 mesh = SubResource("r3")
 
+visible = false
 
 [node name="Monitor" type="MeshInstance3D" parent="."]
 position = Vector3(0.00000, 1.26000, -0.25000)
@@ -214,3 +224,10 @@ cast_shadow = 0
 [node name="Chair" parent="." instance=ExtResource("9")]
 position = Vector3(0.00000, 0.00000, 0.87000)
 rotation_degrees = Vector3(0, -8, 0)
+
+[node name="DetailedDesk" parent="." instance=ExtResource("10")]
+scale = Vector3(1.125, 1.04444, 1.00294)
+
+[node name="DeskMat" type="MeshInstance3D" parent="."]
+position = Vector3(0.04000, 0.82700, 0.24000)
+mesh = SubResource("r19")

@@ -569,4 +569,3 @@ rotation_degrees = Vector3(0.00000, 12.00000, 0.00000)
 position = Vector3(-0.80000, 0.85400, 0.28400)
 mesh = SubResource("r25")
 rotation_degrees = Vector3(0.00000, 12.00000, 0.00000)
-

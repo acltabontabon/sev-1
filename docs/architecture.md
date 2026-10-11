@@ -117,6 +117,13 @@ overwritten. No runtime prop generation or new dependencies are required. All pr
 are visible and editable in the Godot editor. Original asset provenance and replacement
 priorities live in [assets/environment/README.md](../assets/environment/README.md).
 
+The [free office furnishing pass](workstation_trial.md) extends the existing CC0
+Metal Office Desk to all eight workstations. `tools/office_details.py` adds static
+ceiling finish, divider hardware, perimeter filing storage and conference details;
+it is called during scene authoring, never at runtime. New details have no World
+collision and preserve the baked routes. Large visible finish still participates in
+the existing camera-only blocker generation. Chairs remain native placeholders.
+
 Lighting uses subdued cool ambient fill, six ceiling spot pools (two shadow-casting),
 a warm workstation lamp, restrained incident spill, window bounce, and conference fill.
 Existing Forward+, SSAO, MSAA 2×, glow, and fog remain; glow was reduced. Roughness and

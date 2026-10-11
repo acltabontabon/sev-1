@@ -2,6 +2,11 @@
 
 Advance through playable evidence, not calendar promises. Each milestone has an acceptance gate; completion of an automated check does not establish that combat is fun or the art is finished. The human director accepts creative outcomes. The six-circle vision is long-term scope that can be reduced if production cost exceeds what this indie project can sustain.
 
+The 11 October [office furnishing pass](workstation_trial.md) extends the existing
+free detailed desk to all eight workstations and adds acoustic ceiling finish, storage
+and meeting-room details. It is an implemented visual candidate; director acceptance
+and moving-combat performance remain open under the Office After Hours gate.
+
 ## Milestones
 
 | Milestone | Scope and current status | Gate before expansion |

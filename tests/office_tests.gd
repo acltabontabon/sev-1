@@ -36,8 +36,15 @@ func _run() -> void:
 		first_mesh = false
 	check(not first_mesh and absf(bounds.end.y - .8225) < .003 and bounds.size.x < 2.251 and bounds.size.z < .951,
 		"imported desk surface aligns with its collision and stays inside the existing footprint")
-	check(scene.find_children("DetailedDesk", "", true, false).size() == 1,
-		"the asset trial upgrades only the engineer's workstation")
+	check(scene.find_children("DetailedDesk", "", true, false).size() == 8,
+		"all eight office workstations share the detailed desk")
+	var visual_clear: bool = true
+	var combat_lane: AABB = AABB(Vector3(-4, .08, -13), Vector3(8, 2.1, 21))
+	for node in scene.get_node("OfficeAfterHours/OfficeFinish").find_children("*", "MeshInstance3D", true, false):
+		var detail: MeshInstance3D = node
+		if detail.mesh != null and combat_lane.intersects(detail.global_transform * detail.get_aabb()):
+			visual_clear = false
+	check(visual_clear, "office finish leaves the central fighting lane visually clear")
 
 	await setup_pair(Vector3(0, .05, 0))
 	player.position = Vector3(3, .05, -5)

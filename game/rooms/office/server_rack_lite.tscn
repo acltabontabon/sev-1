@@ -80,4 +80,3 @@ cast_shadow = 0
 [node name="Vent" type="MeshInstance3D" parent="."]
 position = Vector3(-0.05000, 1.20000, 0.49500)
 mesh = SubResource("r5")
-

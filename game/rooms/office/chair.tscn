@@ -97,4 +97,3 @@ mesh = SubResource("r4")
 [node name="Support0.34" type="MeshInstance3D" parent="."]
 position = Vector3(0.34000, 0.60000, 0.09000)
 mesh = SubResource("r5")
-

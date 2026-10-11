@@ -77,10 +77,11 @@ and the battle-mode grade are original procedural work (shaders and particles in
 
 `assets/characters/animations/ual1_standard.glb`, `ual2_standard.glb` (0.2.24): Quaternius, Universal Animation Library and Universal Animation Library 2, Standard editions; CC0 1.0 (licence files kept beside them). Downloaded 10 October 2026 from OpenGameArt (`opengameart.org/content/universal-animation-library-2`, `opengameart.org/node/174563`), no account. Retargeted at build time by `tools/build_engineer_rig.gd` into `game/player/engineer_animations.res`.
 
-## Free workstation trial — 11 October 2026
+## Free office furnishing pass — 11 October 2026
 
-The starting workstation alone uses Poly Haven’s **Metal Office Desk** (Ulan Cabanilla)
-and **Desk Lamp Arm 01** (Kuutti Siitonen; rigging by Yann Kervran), both CC0 1.0.
+All eight workstations use Poly Haven’s **Metal Office Desk** (Ulan Cabanilla).
+The starting desk also uses **Desk Lamp Arm 01** (Kuutti Siitonen; rigging by Yann
+Kervran); both assets are CC0 1.0.
 Official 2K glTF downloads were checksum-verified and packed into self-contained GLBs
 without changing mesh or texture content. Attribution is voluntary. Records and exact
 URLs: [workstation provenance](../assets/environment/poly_haven_workstation/README.md).

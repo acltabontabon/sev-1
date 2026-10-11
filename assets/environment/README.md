@@ -1,16 +1,27 @@
 # Office After Hours — asset provenance
 
-All environment geometry, layout, signage, materials, and skyline silhouettes in
-`game/rooms/office/` were authored for SEV-1 in this milestone using Godot-native
-primitives and text resources. `tools/build_office.py` is the deterministic authoring
-source. No downloaded meshes, textures, fonts, generated AI images, or third-party
-asset packs were added. There are no new third-party attribution obligations.
+The architectural shell, layout, signage and skyline silhouettes in
+`game/rooms/office/` are original Godot-native geometry and text resources.
+`tools/build_office.py` is the deterministic authoring source, with focused finish
+in `tools/office_details.py` and pantry layout in `tools/pantry_layout.py`.
+The current office also uses verified free CC0 assets:
+
+- [PBR materials and night sky](textures/README.md) from ambientCG and Poly Haven.
+- [Furniture and plants](kenney_furniture/README.md) from Kenney.
+- [Photographic culture prints](posters/README.md) from Poly Haven.
+- [Detailed desks and starting-desk lamp](poly_haven_workstation/README.md) from Poly Haven.
+
+See those records for authors, sources and license details. All eight workstations
+now reuse the detailed desk. New ceiling runners, vents, divider hardware, filing
+cabinets and conference details are original native geometry. No new external assets
+were introduced by that extension; its [review record](../../docs/workstation_trial.md)
+includes captures and performance limitations.
 The project has not declared an overall distribution license; these files do not
 assert that the game or its original assets are public domain.
 
-Carpet, fabric, plaster, and wood use 128×128 Godot FastNoiseLite/NoiseTexture2D
-resources with a fixed seed. Other materials use native roughness/metallic controls.
-Signage uses Godot's built-in font through Label3D. The city and repeated service-door
+Large surface materials use the recorded photographed PBR sets; chair fabric retains
+a seeded Godot NoiseTexture2D. Other materials use native roughness/metallic controls.
+Signage uses Label3D with project fonts (see [font licenses](../fonts/README.md)). The city and repeated service-door
 frames are original abstract geometry, not photographs or a traversable extra level.
 Existing placeholder audio retains its separate provenance in `assets/audio/README.md`.
 

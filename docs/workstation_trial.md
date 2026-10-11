@@ -1,17 +1,27 @@
-# Free workstation fidelity trial — 11 October 2026
+# Free office furnishing pass — 11 October 2026
 
 ## Implemented prototype
 
-Only the engineer’s starting workstation uses Poly Haven’s CC0 Metal Office Desk
-and Desk Lamp Arm 01, with 2K textures embedded in self-contained GLBs. Original
-keycaps, desk mat, notebook markings and a shadowed warm task-light pool complete
-the trial. The shared workstation scene remains the art for every other desk.
+All eight workstations now use Poly Haven’s CC0 Metal Office Desk, with 2K textures
+embedded in self-contained GLBs. The starting desk additionally uses Desk Lamp Arm
+01, original keycaps, desk mat, notebook markings and a shadowed warm task-light pool.
+Other desks share the detailed desk and mat with the existing lighter monitor/keyboard
+geometry, keeping the close-up keycaps confined to the starting desk.
 
 The dedicated `polished_workstation.tscn` retains the tabletop collision, chair,
 monitor/display positions and existing story node paths. The imported desk is fitted
 to the original 2.25 × 0.95 m footprint and 0.8225 m surface height. It adds no
 collision or navigation obstacles. The chair, monitor and mug remain simplified;
-this trial does not establish final art quality for the whole office.
+this pass does not establish final art quality for the whole office.
+
+`tools/office_details.py`, called by the office builder, adds a suspended acoustic
+ceiling with tee runners and air returns, framed fabric desk dividers and pinboard
+notes, three perimeter filing cabinets with binders, glass privacy bands, sliding-door
+handles and conference-call equipment. The existing lighting is preserved. All new
+finish is visual-only; world collision, navigation, spawn positions and interaction
+paths stay intact. The conference display and its text now sit on the screen housing
+instead of floating 1.25 metres in front of it. The original chair and many small props
+remain visibly simplified. No new downloaded assets were needed for this extension.
 
 [Source, license and retrieval records](../assets/environment/poly_haven_workstation/README.md).
 `tools/build_office.py` owns the generated scenes. Regeneration preserves unrelated
@@ -35,14 +45,26 @@ It writes `builds/workstation_after.png`. The pre-change capture is
 output. The camera and office lighting were identical for both captures apart from
 the workstation’s own task-light replacement. The title backdrop was also inspected with the seated engineer. Human visual acceptance is pending.
 
-Static rendered review: Apple M2 Pro, Godot 4.7.2, Metal Forward+, 1920 × 1080,
-project environment with SSAO/glow/fog, 90 warm-up frames and 120 measured frames:
-mean 8.47 ms, p95 8.61 ms. This includes presentation/vsync and has no actors or
-combat; it is not a whole-run performance claim or a before/after benchmark.
+Matching whole-office captures are available with:
+
+```sh
+sh tools/godot.sh --path . --script tests/capture_office_finish.gd
+```
+
+It writes `builds/office_finish_{desks,floor,conference,storage}_after.png`. Local
+`_before.png` images retain the identical pre-change cameras. All four new views were
+visually inspected. Apple M2 Pro, Godot 4.7.2, Metal Forward+, 1920 × 1080, project
+MSAA 2×/SSAO/glow/fog, 90 warm-up frames and 120 samples per view: after mean
+8.33–8.34 ms, p95 8.48–8.51 ms; before mean 8.33 ms, p95 8.46–8.48 ms.
+The desk view rises from 227 to 245 draw calls; the central floor from 212 to 240.
+These static, actor-free measurements include vsync, which masks GPU headroom;
+they do not establish combat performance. Human visual and moving-combat acceptance
+remain pending.
 
 Full `python3 tools/validate.py` passed, including import, script parsing and every
 integration suite. Added office checks cover starting-desk collision height, imported
-mesh alignment/footprint and limiting the trial to one desk. The tiny notebook caption
+mesh alignment/footprint, all eight detailed desks, and visual clearance of the central
+fighting lane. Existing environment checks cover routes and camera clipping. The tiny notebook caption
 was removed after the readability check rejected it; the notebook now uses markings.
 
 ## Free character candidates — current status
