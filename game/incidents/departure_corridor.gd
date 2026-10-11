@@ -1,8 +1,9 @@
 extends Node3D
-## Local departure staging: ordinary strides, held memories and a real opening doorway.
+## Local departure staging: continuous strides, recalled voices and an opening doorway.
 const THRESHOLD: float = 9.8
-const LEG_SECONDS: float = 2.0
-var legs: Array[Dictionary] = []
+const STRIDE_SPEED: float = 1.15
+var walk_from: Vector3
+var walk_to: Vector3
 var duration: float = 0.0
 var door_open: float = 0.0
 
@@ -46,34 +47,81 @@ func _ready() -> void:
 	set_door(0.0)
 
 
-func configure(memories: Array[Dictionary], from: Vector3, to: Vector3) -> void:
-	legs.clear()
-	var at: float = 0.0
-	for index in range(memories.size() + 1):
-		var start: Vector3 = from.lerp(to, float(index) / 6.0)
-		var end: Vector3 = from.lerp(to, float(index + 1) / 6.0)
-		legs.append({"at": at, "from": start, "to": end})
-		at += LEG_SECONDS
-		if index < memories.size():
-			var memory: Dictionary = memories[index]
-			memory.cue = at + .2
-			memory.body.global_position = end + Vector3(.45, -.05, 2.25)
-			at = float(memory.cue) + float(memory.length) + .8
-	duration = at
+func configure(memories: Array[Dictionary], _from: Vector3, to: Vector3) -> void:
+	var cue: float = .7
+	for memory: Dictionary in memories:
+		memory.cue = cue
+		cue += float(memory.length) + .9
+	duration = cue + .7
+	walk_to = to
+	# Match the corridor length to the complete recalled takes, rather than slowing his feet.
+	walk_from = to - Vector3.RIGHT * STRIDE_SPEED * (duration - .6)
+	_extend_to(to_local(walk_from).x - 6.0)
+	for memory: Dictionary in memories:
+		var at: float = float(memory.cue) + float(memory.length) * .4
+		var sample: Vector4 = travel(at)
+		memory.body.global_position = Vector3(sample.x, sample.y - .05, sample.z + 2.25)
 
 
-## A short eased stride between memories; he rests while listening to each full line.
+## Continuous travel under the recalled voices, with only the departure/end eased.
 func travel(time: float) -> Vector4:
-	for leg: Dictionary in legs:
-		var t: float = time - float(leg.at)
-		if t <= LEG_SECONDS:
-			var u: float = clampf(t / LEG_SECONDS, 0.0, 1.0)
-			var ease: float = u * u * (3.0 - 2.0 * u)
-			var point: Vector3 = (leg.from as Vector3).lerp(leg.to, ease)
-			var speed: float = (leg.from as Vector3).distance_to(leg.to) * 6.0 * u * (1.0 - u) / LEG_SECONDS
-			return Vector4(point.x, point.y, point.z, speed)
-	var last: Vector3 = legs.back().to
-	return Vector4(last.x, last.y, last.z, 0.0)
+	var t: float = clampf(time, 0.0, duration)
+	var ramp: float = .6
+	var distance: float
+	if t < ramp:
+		distance = pow(t, 3) / pow(ramp, 2) - .5 * pow(t, 4) / pow(ramp, 3)
+	elif t > duration - ramp:
+		var remaining: float = duration - t
+		distance = duration - ramp - (pow(remaining, 3) / pow(ramp, 2) - .5 * pow(remaining, 4) / pow(ramp, 3))
+	else:
+		distance = t - ramp * .5
+	var point: Vector3 = walk_from.lerp(walk_to, distance / (duration - ramp))
+	var speed: float = STRIDE_SPEED * smoothstep(0.0, ramp, t) * (1.0 - smoothstep(duration - ramp, duration, t))
+	return Vector4(point.x, point.y, point.z, speed)
+
+
+## Temporary architecture only: a clear corridor sized for this run's voice takes.
+func _extend_to(start: float) -> void:
+	get_node("StartWall").queue_free()
+	var width: float = maxf(0.0, -12.0 - start)
+	if width <= 0.0:
+		return
+	var center: float = (start - 12.0) * .5
+	_extension_box("ExtendedFloor", Vector3(center, -.12, 0), Vector3(width, .24, 10), get_node("Floor").material_override)
+	_extension_box("ExtendedCeiling", Vector3(center, 3.85, 0), Vector3(width, .2, 10), get_node("Ceiling").material_override)
+	for side in [-1, 1]:
+		_extension_box("ExtendedWall", Vector3(center, 1.9, side * 5.0), Vector3(width, 3.8, .25), get_node("BackWall").material_override)
+	for index in range(int(ceil(width / 6.0))):
+		var x: float = -15.0 - index * 6.0
+		for side in [-1, 1]:
+			_extension_box("Trim", Vector3(x, 1.85, side * 4.79), Vector3(.14, 3.7, .15), get_node("PilasterLeft_0").material_override, false)
+			_extension_box("WallLamp", Vector3(x, 2.35, side * 4.66), Vector3(.08, .9, .08), get_node("WallLightLeft_0").material_override, false)
+		var pool: OmniLight3D = OmniLight3D.new()
+		pool.name = "PoolExtension%d" % index
+		pool.position = Vector3(x, 3.1, 0)
+		pool.light_color = Color(.81, .86, 1)
+		pool.light_energy = 1.8
+		pool.omni_range = 8.0
+		add_child(pool)
+
+
+func _extension_box(part_name: String, at: Vector3, size: Vector3, material: Material, colliding: bool = true) -> void:
+	var part: MeshInstance3D = MeshInstance3D.new()
+	part.name = part_name
+	var mesh: BoxMesh = BoxMesh.new()
+	mesh.size = size
+	part.mesh = mesh
+	part.material_override = material
+	part.position = at
+	add_child(part)
+	if colliding:
+		var solid: StaticBody3D = StaticBody3D.new()
+		var shape: CollisionShape3D = CollisionShape3D.new()
+		var bounds: BoxShape3D = BoxShape3D.new()
+		bounds.size = size
+		shape.shape = bounds
+		solid.add_child(shape)
+		part.add_child(solid)
 
 
 func set_door(amount: float) -> void:

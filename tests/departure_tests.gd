@@ -55,14 +55,22 @@ func _run() -> void:
 	var held_at: Vector3 = incident.player.global_position
 	finale.tick(.5)
 	await physics_frame
-	check(incident.player.global_position.distance_to(held_at) < .001 and character.story_walk_speed == 0.0 and character.animator.current_animation == "rig/idle",
-		"he pauses for a memory instead of sliding across the floor in slow motion")
+	check(incident.player.global_position.distance_to(held_at) > .4 and character.story_walk_speed > 1.0 and character.animator.current_animation == "rig/walk",
+		"he keeps walking naturally while a remembered coworker speaks")
 	var previous_end: float = 0.0
 	var spaced: bool = true
 	for memory: Dictionary in finale.memories:
 		spaced = spaced and float(memory.cue) > previous_end
 		previous_end = float(memory.cue) + float(memory.length)
-	check(spaced and finale.exit_duration > previous_end, "complete remembered lines stay sequential through the new walk pacing")
+	check(spaced and finale.exit_duration > previous_end, "complete remembered lines stay sequential through the continuous walk")
+	var covered: bool = true
+	for sample in range(101):
+		var travel: Vector4 = corridor.travel(finale.exit_duration * float(sample) / 101.0)
+		var point: Vector3 = Vector3(travel.x, travel.y, travel.z)
+		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(point + Vector3.UP, point - Vector3.UP)
+		ray.exclude = [incident.player.get_rid()]
+		covered = covered and not scene.get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
+	check(covered, "the full voice-length corridor has a continuous physical floor")
 	finale.clock = finale.beat_at + finale.exit_duration
 	finale.tick(.001)
 	check(finale.beat == "door", "the memory walk proceeds to a shown doorway crossing")

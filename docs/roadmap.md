@@ -34,7 +34,7 @@ The intended Windows release target is preserved. Native Windows runtime testing
 The 11 October source aftermath refinement adds the tear, sword left at the workstation,
 personal-effects pickup and ordinary voiced memories. The departure now uses a
 dedicated empty exit corridor to clear lounge furniture from the hero/camera route.
-Normal walking legs alternate with remembered lines, followed by a visible door opening
+Continuous natural walking accompanies remembered lines, followed by a visible door opening
 and full threshold crossing beneath the SYNERGEX mark; see the
 [Incident 001 aftermath](game_design.md#incident-001-aftermath-implemented-prototype-11-october-2026).
 Human emotional, animation and listening acceptance remain pending.

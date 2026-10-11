@@ -43,7 +43,7 @@ to return directly to its scene. Tab skips supported cinematics.
 | Quick Sync | `sh tools/godot.sh --path . --script tests/quick_sync_preview.gd -- --play` | Walk into Meeting Room 3; judge retreat space, transformations, floor hazards, comedy |
 | Boss duel | Double-click `duel_preview.command`, or `sh duel_preview.command` | Sword/trident lock, duck, reciprocal attacks, knockback, recovery and finish; TAB skips, window closes at the aftermath |
 | Ending | `sh tools/godot.sh --path . --script tests/ending_preview.gd` | Duel, departure, Monday, and return to menu |
-| Office departure | `sh tools/godot.sh --path . --script tests/ending_preview.gd -- --departure` | Normal strides, memory pauses, opening door, complete crossing and readable SYNERGEX mark |
+| Office departure | `sh tools/godot.sh --path . --script tests/ending_preview.gd -- --departure` | Continuous natural strides through the memories, opening door, complete crossing and readable SYNERGEX mark |
 | Finale | `sh tools/godot.sh --path . --script tests/finale_preview.gd` | Grief, sword placement, pickup, memories, animation, and music mix |
 | Closing shots | `sh tools/godot.sh --path . --script tests/finale_preview.gd -- --closing` | Final reply and return to work |
 

@@ -116,6 +116,7 @@ func _run() -> void:
 	check(grounded, "the departure route has a continuous physical floor beneath it")
 	finale._beat("street")
 	check(not corridor.visible, "the lift corridor disappears at the rainy street cut")
+	finale.tick(2.0)
 	for frame in range(40):
 		finale.tick(1.0 / 60.0)
 		await physics_frame
