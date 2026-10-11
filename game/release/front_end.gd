@@ -46,10 +46,13 @@ var report_subtitle: Label
 var ui_sound: AudioStreamPlayer
 var quiet: bool = false
 var stamps: Array[Label] = []
+var previous_frame_limit: int = 0
+var applied_frame_limit: int = -1
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	previous_frame_limit = Engine.max_fps
 	if "--release-smoke" in OS.get_cmdline_user_args():
 		preferences.path = "user://smoke_nonexistent.cfg"
 	# Isolate automated/preview sessions from the player's chapter save.
@@ -407,6 +410,13 @@ func show_page(next: String) -> void:
 			quality.custom_minimum_size.y = 42
 			quality.item_selected.connect(func(index: int) -> void: change_setting("quality", index))
 			box.add_child(quality)
+			var frames: OptionButton = OptionButton.new()
+			frames.add_item("60 FPS — lower heat and power use")
+			frames.add_item("120 FPS — smoother motion, higher power use")
+			frames.selected = 1 if preferences.values.frame_limit == 120 else 0
+			frames.custom_minimum_size.y = 42
+			frames.item_selected.connect(func(index: int) -> void: change_setting("frame_limit", 120 if index == 1 else 60))
+			box.add_child(frames)
 			save_notice = _label("Saved locally. No run progress is saved.", 15, "Caption")
 			_button("Back", go_back)
 		"credits":
@@ -643,7 +653,32 @@ func quit_game() -> void:
 	get_tree().quit()
 
 
+## Rendering budgets only: simulation, animation and audio retain their normal timing.
+func frame_budget(focused: bool) -> int:
+	if not focused:
+		return 15
+	if not page.is_empty() or get_tree().paused:
+		return 30
+	return int(preferences.values.frame_limit)
+
+
+func _update_frame_budget() -> void:
+	# Fixed-frame headless checks must not acquire wall-clock waits.
+	if DisplayServer.get_name() == "headless":
+		return
+	var limit: int = frame_budget(DisplayServer.window_is_focused())
+	if limit != applied_frame_limit:
+		Engine.max_fps = limit
+		applied_frame_limit = limit
+
+
+func _exit_tree() -> void:
+	if applied_frame_limit >= 0 and Engine.max_fps == applied_frame_limit:
+		Engine.max_fps = previous_frame_limit
+
+
 func _process(_delta: float) -> void:
+	_update_frame_budget()
 	_record_completion()
 	if is_instance_valid(report_subtitle) and session != null:
 		report_subtitle.text = session.get_node("Incident/Voice").subtitle

@@ -187,3 +187,11 @@ in the [asset inventory](docs/asset_licenses.md). `tools/build_ui_theme.gd`,
 `tools/build_characters.py` and `tools/build_music.py` regenerate the theme, office,
 characters and music. Speech lines live in `assets/audio/voices/dialogue.json` and are
 generated locally with `tools/voices.py`.
+
+## Frame limits
+
+Gameplay defaults to 60 FPS to reduce heat and power use. **Corporate Policy** offers
+120 FPS for smoother motion with higher power use. Menus and pause/report screens run
+at up to 30 FPS; an unfocused game runs at up to 15 FPS and keeps the existing automatic
+pause. Use `play.command` for the updated source; already-running packaged apps keep
+their previous code. See [fan/load evidence](docs/stabilization.md#fanload-investigation-and-frame-budgets--11-october-2026).

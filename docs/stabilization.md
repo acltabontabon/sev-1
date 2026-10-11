@@ -199,6 +199,46 @@ melee and specials, use Force Rollback, then visit the vault and retry. Report t
 moment of any pause, especially whether it happens only on first use or repeats, and
 confirm health/readiness/countdown text still changes promptly.
 
+### Fan/load investigation and frame budgets — 11 October 2026
+
+A live process snapshot showed Apple's `MTLCompilerService` at 810.4% CPU while a
+packaged test launched from a temporary build. It disappeared from the high-load
+process list in the next snapshot roughly half a minute later. This is evidence of a
+transient Metal compilation burst, plausibly contributing to fan noise; it does not
+identify the compiler's client or establish that every fan event has the same cause.
+`pmset -g therm` reported no thermal or performance warning in both snapshots. That is
+not a temperature or fan-speed measurement. Another snapshot showed the regular
+packaged game at 48.6% CPU. No unrelated processes were stopped.
+
+The application now limits rendering to **60 FPS** during focused gameplay, **30 FPS**
+on title/menu/pause/report screens, and **15 FPS** when unfocused. Corporate Policy
+includes a saved **120 FPS** gameplay option, with its higher power-use tradeoff.
+Existing settings files acquire the 60 FPS default; invalid frame-limit values fall back
+to it. Physics remains 60 ticks/second; focus loss retains the existing automatic pause.
+Headless validation bypasses wall-clock frame caps. The standalone uncapped combat
+performance probe is unchanged. The application restores its previous cap on unload.
+This uses Godot's [Engine.max_fps](https://docs.godotengine.org/en/latest/classes/class_engine.html#class-engine-property-max-fps),
+which is documented to reduce power use through frame limiting; actual watts and fan
+RPM were not measured.
+
+`tests/frame_budget_tests.gd` passed seven checks covering menu/background limits,
+default gameplay, saved 120 FPS, pause/resume timing, unchanged physics/game speed,
+and corrupt settings. Run with `sh tools/godot.sh --headless --fixed-fps 60 --path . --script tests/frame_budget_tests.gd`.
+`tests/frame_budget_probe.gd` renders the same animated title scene under three budgets,
+with two seconds settling and six seconds measurement each: **114.03 FPS** at a 120
+cap, **30.00 FPS** at 30, and **15.00 FPS** at 15. Conditions: Apple M2 Pro, 16 GB,
+macOS, Godot 4.7.2 Forward+/Metal, 1920×1080, VSync disabled to isolate the cap, another
+packaged game running. Lower caps rendered roughly 74% and 87% fewer frames, not
+measured equivalent power reductions. The settings screen was visually inspected. A separate rendered integration check
+confirmed that the front end applied 15 FPS while unfocused. The full
+`python3 tools/validate.py` suite passed after these changes.
+
+Use the updated source launcher `play.command`; an already-running packaged executable
+keeps its old code. Try five minutes of combat at 60 FPS, pause for a minute, then switch
+to another app. Report whether fan noise settles and whether mouse/combo response feels
+acceptable. Shader compilation and automated import/export work can still briefly raise
+CPU load; capped rendering cannot prevent that. Windows energy behavior remains unmeasured.
+
 ## Remaining limits and human gate
 
 The full ordinary run has no measured human duration. One enemy is damaging at a time;

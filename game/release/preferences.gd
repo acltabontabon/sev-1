@@ -2,7 +2,7 @@ extends RefCounted
 ## Device preferences only; never serialize incident state or run modifiers.
 ## Exception: opening_seen records that this device watched the opening once, which
 ## unlocks skipping it. It carries no run progress.
-const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "music": 0.6, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1, "opening_seen": false}
+const DEFAULTS: Dictionary = {"master": 0.8, "effects": 0.8, "voice": 0.8, "music": 0.6, "subtitles": true, "sensitivity": 1.0, "shake": 1.0, "flash": true, "fullscreen": false, "quality": 1, "frame_limit": 60, "opening_seen": false}
 var values: Dictionary = DEFAULTS.duplicate()
 var path: String = "user://settings.cfg"
 
@@ -22,6 +22,7 @@ func load_settings() -> void:
 				match key:
 					"sensitivity": values[key] = clampf(float(value), 0.2, 3.0)
 					"quality": values[key] = clampi(int(value), 0, 1)
+					"frame_limit": values[key] = 120 if int(value) == 120 else 60
 					_: values[key] = clampf(float(value), 0.0, 1.0)
 
 
