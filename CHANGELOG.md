@@ -8,12 +8,12 @@ ordinary hardware playtesting remain separate from automated checks.
 - Corrupted Records now use the free KayKit Skeleton Minion instead of the realistic
   demon trials, at their original imported size. Original cartoon materials and supplied animation clips retain
   existing combat behavior, voices, hit timing and physical deaths. See
-  [integration and playtest checkpoint](assets/enemies/kaykit_trial/README.md).
+  [integration and playtest checkpoint](https://github.com/acltabontabon/sev-1/blob/v0.2.50/assets/enemies/kaykit_trial/README.md).
 
 - Sword attacks now use full-body combat clips, two-handed grips, a distinct dash
   pose and counter guard. Kevin Iglesias' free two-handed attack is an optional
   local trial; public checkouts use the existing CC0 Quaternius fallback. See
-  [trial and playtest checkpoint](docs/sword_motion_trial.md).
+  [trial and playtest checkpoint](https://github.com/acltabontabon/sev-1/blob/v0.2.50/docs/sword_motion_trial.md).
 - Other monster bodies are 10% larger, with matching label clearance, hover offsets and death
   effect sizing. Collision, attack reach and movement tuning remain unchanged.
 
