@@ -225,12 +225,18 @@ physical remains and a CROPPED TO SCOPE stamp. Prone bodies, separated pieces,
 charred legs, the downsized director, casualty pools and dropped tools persist into
 combat. The ensuing grief and Unpaid Overtime transformation remain intact.
 
-The existing 18.5 × 16.5 m vault accommodates the stations and clear center; its room
-size and combat collisions are unchanged. Flames use continuous tapered shaders,
+The vault now spans **24 × 21 m**, roughly 65% more floor area, with a 7.5 m ceiling.
+Detailed server cabinets, cooling banks, structural frames, overhead cable trays,
+industrial power boxes and a monumental ledger wall frame a clear central fight.
+Side and rear lanes leave room to dodge. Six equipment cases and coolant canisters
+can be smashed with melee, Reply All, Blame Shift or Circle Back; each leaves six
+physical pieces that settle on the floor without blocking movement. Props award no
+kill credit or ultimate charge, and retry restores them. Flames use continuous tapered shaders,
 water follows a connected curved stream, smoke is sparse, and impact debris is
 restrained. Ten crew recordings and all eight boss lines were regenerated locally. The Variance
 uses a lower stock voice, shifted down five semitones, with measured executive delivery.
 TAB skips directly to a playable fight with its aftermath; restart removes the response.
+`boss_arena_preview.command` jumps straight into the expanded arena for a combat retry.
 Use `boss_intro_preview.command` for the source checkpoint. Director acceptance of
 hose grip, effects, death choreography, sound and comedy remains pending.
 

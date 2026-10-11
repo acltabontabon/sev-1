@@ -161,3 +161,14 @@ reuse the licensed Quaternius assets above. Ten revised crew recordings and
 all eight Variance lines use the existing local voice pipeline; exact text, profiles and output
 hashes remain in `assets/audio/voices/talk/provenance.json` and `provenance.json`.
 Rendered creator review remains a separate gate from automated validation.
+
+
+## Expanded production vault — 11 October 2026
+
+[Poly Haven Power Box 01](https://polyhaven.com/a/power_box_01), by Rico Cilliers
+and Yann Kervran, is CC0 1.0. The original 1K glTF geometry and textures are embedded
+in a GLB with source checksums preserved in
+[the asset record](../assets/environment/vault/README.md). Git LFS tracks the model.
+Caged hanging lights and PBR surfaces reuse the existing licensed library. The
+server cabinets, cooling banks, structural frames, cable trays, arena and breakable
+equipment are original AI-assisted project geometry. No runtime download is needed.

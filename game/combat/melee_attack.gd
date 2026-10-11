@@ -118,7 +118,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _resolve_hits() -> void:
-	for candidate in get_tree().get_nodes_in_group(target_group):
+	var candidates: Array[Node] = get_tree().get_nodes_in_group(target_group)
+	if target_group == "enemies":
+		candidates.append_array(get_tree().get_nodes_in_group("breakables"))
+	for candidate in candidates:
 		var target: Node3D = candidate as Node3D
 		if target == null or hit_targets.has(target.get_instance_id()):
 			continue
@@ -134,10 +137,11 @@ func _resolve_hits() -> void:
 			continue
 		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(global_position, target_center, 1)
 		ray.hit_from_inside = true
-		if not get_world_3d().direct_space_state.intersect_ray(ray).is_empty():
+		var obstruction: Dictionary = get_world_3d().direct_space_state.intersect_ray(ray)
+		if not obstruction.is_empty() and obstruction.collider != target:
 			continue
 		hit_targets.append(target.get_instance_id())
-		if target.receive_damage(effective_damage(), global_position):
+		if target.receive_damage(effective_damage(), global_position) and not target.is_in_group("breakables"):
 			hit_landed.emit(target)
 
 

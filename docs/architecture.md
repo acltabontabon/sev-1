@@ -568,6 +568,17 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `prop_tint.gd`) and `calendar_drift.gd`. `tools/bake_office_navigation.gd` bakes the
   larger footprint. The gate and Quick Sync doors are generated without collision so
   navigation bakes through them; the incident enables collision while they are shut.
+- **Production vault.** `tools/vault_layout.py` authors the 24 × 21 m room, reusable
+  `production_rack.tscn`, cooling banks, cable trays, taller structure and equipment.
+  The outer tower shell clears its 7.5 m ceiling. Navigation includes the expanded
+  floor and conservative envelopes around the six intact breakables.
+  `vault_breakable.gd` owns prop health, recoil, six bounded physical fragments and
+  reset. Melee permits a ray to hit the target prop itself; other walls still block it.
+  Area/projectile specials include the breakables group without enemy hit credit,
+  FOCUS, kill stamps or target-lock changes. Debris uses layer 128 and collides only
+  with the world, so it cannot obstruct the player. `main.gd` restores props on retry.
+  `tests/vault_arena_tests.gd` exercises real sword/skill hits, obstruction, settling,
+  reset and rear-lane paths; `vault_arena_preview.gd -- --play` starts a boss retry.
 - **Interactions.** `game/incidents/interaction_point.gd` is a distance-checked prompt;
   `missing_transaction.gd` owns what each pantry object does. Coffee adds
   `run.motivation` (outgoing damage) and `player.move_multiplier` for 40 s.

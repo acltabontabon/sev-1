@@ -8,6 +8,7 @@ import copy
 from pantry_layout import build_pantry
 from office_details import build_office_details
 from operations_layout import build_operations
+from vault_layout import build_vault
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'game/rooms/office'
@@ -23,6 +24,7 @@ materials = {
  'carpet': ((.62,.66,.7,1), 1, 0), 'plaster': ((.5,.53,.54,1), 1, 0),
  'walnut': ((.85,.7,.6,1), 1, 0), 'metal': ((.45,.5,.55,1), 1, 1),
  'plastic': ((.022,.028,.033,1), .65, 0), 'fabric': ((.08,.11,.12,1), .98, 0),
+ 'vault_concrete': ((.25,.30,.32,1), .9, 0),
  'stone': ((.55,.58,.6,1), 1, 0), 'paper': ((.93,.91,.85,1), .9, 0),
  'ceramic': ((.38,.40,.36,1), .25, 0), 'black': ((.012,.017,.025,1), .85, 0),
  'screen': ((.015,.055,.068,1), .42, 0), 'warm': ((1,.74,.43,1), .45, 0),
@@ -46,7 +48,7 @@ materials = {
 # CC0 photographs for the culture-deck prints (assets/environment/posters, see its README).
 photos = ['family', 'fail_fast', 'wellbeing', 'machine', 'wellness']
 textured = {'carpet': ('carpet', .45), 'plaster': ('painted_plaster', .35), 'walnut': ('walnut_veneer', 1.0),
- 'stone': ('polished_concrete', .3), 'metal': ('brushed_metal', 1.0), 'vault_floor': ('vault_floor', .5),
+ 'vault_concrete': ('polished_concrete', .13), 'stone': ('polished_concrete', .3), 'metal': ('brushed_metal', 1.0), 'vault_floor': ('vault_floor', .5),
  'ceiling_tile': ('ceiling_tile', .42), 'paper': ('paper', 1.4)}
 for name,(color,rough,metallic) in materials.items():
     extra=''; resources=''; header=''
@@ -453,25 +455,7 @@ s.text('DeploymentDetail','100% complete\n0 errors  ·  0 warnings\n0 monitors c
 for idx,z in enumerate([-21.2,-25.3]):
     s.light(f'SparkLight{idx}',(6.6,1.6,z),(1,.6,.25),0.0,2.5)
     s.box(f'Spark{idx}',(6.47,1.6,z),(.04,.04,.04),'amber')
-s.box('VaultFloor',(9,-.25,-38.1),(18.5,.5,16.5),'vault_floor',True)
-s.box('VaultCeiling',(9,6.1,-38),(18.5,.2,16.5),'black',True)
-for name,(x,length) in {'VaultSouthWest':(2.75,6),'VaultSouthEast':(15.25,6)}.items(): s.box(name,(x,3,-30),(length,6,.5),'plaster',True)
-s.box('VaultHeader',(9,5.05,-30),(7,1.9,.5),'plaster',True)
-s.box('VaultNorth',(9,3,-46.25),(18.5,6,.5),'plaster',True)
-for x in [-.25,18.25]: s.box(f'VaultSide{x}',(x,3,-38),(.5,6,16.5),'plaster',True)
-for idx in range(8):
-    z=-32.5-idx*1.5
-    s.instance(f'VaultRackW{idx}','server_rack_lite',(1.0,0,z),90)
-    s.instance(f'VaultRackE{idx}','server_rack_lite',(17.0,0,z),-90)
-for idx in range(6): s.instance(f'VaultRackN{idx}','server_rack_lite',(2.8+idx*1.1 if idx<3 else 11.0+(idx-3)*1.1,0,-45.4),0)
-# The ledger the whole incident argues with: three truths, one wall.
-s.box('CoreLedger',(9,2.6,-45.6),(5,5.2,.6),'black',True)
-for idx,(text,color) in enumerate([('SUCCESS',(.3,1,.6,1)),('FAILED',(1,.3,.15,1)),('NOT FOUND',(1,.75,.25,1))]):
-    s.box(f'LedgerFace{idx}',(9,4.1-idx*1.25,-45.28),(4.4,1.0,.02),'screen')
-    s.text(f'LedgerText{idx}',text,(9,4.1-idx*1.25,-45.26),.008,72,color)
-s.text('VaultTitle','PRODUCTION CORE  ·  LEDGER OF RECORD',(9,5.45,-45.27),.005,44,(.8,.85,.9,1))
-for idx,(x,z,color) in enumerate([(4,-34,(.55,.3,1)),(14,-34,(.55,.3,1)),(9,-43,(1,.2,.12)),(9,-38,(.4,.6,1))]):
-    s.light(f'VaultLight{idx}',(x,4.6,z),color,1.4,11)
+build_vault(s, Scene, SIGN_FONT)
 s.node('SpawnPoints','Node3D')
 for name,pos in [('A1',(-2,-8)),('A2',(2,1)),('A3',(-2,5)),('A4',(3,-4)),('D1',(-3,-11)),('D2',(2,-12)),('D3',(4,-7)),('D4',(-1,-6)),('B1',(28.5,-11.5)),('B2',(25.5,-3.5)),('B3',(22,-12)),('B4',(25,-5))]:
     s.marker('Spawn_'+name,(pos[0],.05,pos[1]))
@@ -596,10 +580,10 @@ s.light('LogoWash',(-.3,5.0,14.7),(.75,.88,1),1.1,3.4)
 # Our tower wraps the office floor (above every ceiling, below every floor, and out past
 # the west glass), so the opening can fly in from the city and through the window.
 for name,(x0,x1,y0,y1,z0,z1) in {
-        'TowerAbove': (-14.3, 28.5, 6.4, 92.0, -47.0, 25.0),
-        'TowerBelow': (-14.3, 28.5, -70.0, -.55, -47.0, 25.0),
-        'TowerNorth': (-14.3, -1.0, -.55, 6.4, -47.0, -16.2),
-        'TowerSouth': (-14.3, 14.3, -.55, 6.4, 16.2, 25.0)}.items():
+        'TowerAbove': (-14.3, 28.5, 8.0, 92.0, -52.0, 25.0),
+        'TowerBelow': (-14.3, 28.5, -70.0, -.55, -52.0, 25.0),
+        'TowerNorth': (-14.3, -3.3, -.55, 8.0, -52.0, -16.2),
+        'TowerSouth': (-14.3, 14.3, -.55, 8.0, 16.2, 25.0)}.items():
     s.box(name,((x0+x1)/2,(y0+y1)/2,(z0+z1)/2),(x1-x0,y1-y0,z1-z0),'facade')
 # The city: towers on every side, kept off the opening's flight line in from the west.
 import random
