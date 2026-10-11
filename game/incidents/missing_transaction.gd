@@ -106,6 +106,7 @@ var boss_time: float = 0.0
 var coffee_left: float = 0.0
 var coffee_cups: int = 0
 var interactions: Dictionary = {}
+var pantry: Node3D
 var voice: Node
 var presentation: CanvasLayer
 var battle_mode: CanvasLayer
@@ -216,8 +217,9 @@ func _ready() -> void:
 	# The incident runs always (menus, voice); the night shift stops when play does.
 	coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(coworkers)
-	# Pantry objects: honest reactions, one of them useful.
-	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"]]:
+	pantry = room.get_node("PantryAntics")
+	# Coffee helps once; the other appliances get stranger on repeat visits.
+	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"], ["fridge", "Fridge", "E — CHECK FRIDGE"]]:
 		var point: Node3D = INTERACTION.new()
 		point.name = "Use_" + entry[0]
 		point.prompt = entry[2]
@@ -249,6 +251,7 @@ func reset_incident() -> void:
 	boss_time = 0
 	coffee_left = 0
 	coffee_cups = 0
+	pantry.reset()
 	player.move_multiplier = 1.0
 	player.zone_multiplier = 1.0
 	quick_sync = "idle"
@@ -1512,16 +1515,13 @@ func use(key: String) -> void:
 			else:
 				presentation.say("coffee_water")
 				message = "The machine dispenses hot water. Motivation not included."
-		"vending":
-			presentation.say("vending")
-			message = "SNACK-O-MATIC: ERR ITEM 404. Your snack exists in a different environment."
-		"microwave":
-			presentation.say("microwave")
-			message = "Facilities ticket #2019-0412 (Microwave): status changed to WON'T FIX."
-		"poster":
-			presentation.say("poster")
-			message = "Wellness tip of the week: Burnout is a mindset."
-	presentation.used(key)
+		"vending", "microwave", "poster", "fridge":
+			message = pantry.react(key, coworkers)
+			# Existing recorded reactions play once; fresh punchlines remain text.
+			if key != "fridge" and int(pantry.counts.get(key, 0)) == 1:
+				presentation.say(key)
+	if key == "coffee":
+		presentation.used(key)
 
 
 func buff_text() -> String:

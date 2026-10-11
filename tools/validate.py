@@ -50,6 +50,7 @@ if __name__ == "__main__":
     run("release", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/release_tests.gd"])
     run("voice", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/voice_tests.gd"])
     run("environment", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/environment_tests.gd"])
+    run("pantry", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/pantry_tests.gd"])
     run("encounter", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/encounter_tests.gd"])
     run("skill_impact", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/skill_impact_tests.gd"])
     run("opening_stare", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/opening_stare_tests.gd"])

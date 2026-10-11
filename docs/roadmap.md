@@ -43,6 +43,13 @@ Human space, challenge, comedy and readability acceptance remain pending.
 
 ## Next acceptance increment
 
+The 11 October [pantry refinement](pantry.md) expands the recovery room and doorway,
+moves dining furniture out of the central lane, and adds repeat appliance hauntings:
+Sam's mug tribunal, Casey's organised leftovers, a vending receipt and mandatory
+wellness breathing. Coffee keeps its existing benefit. Full validation passed;
+new appliance replies are text, with human comedy/layout/audio acceptance pending.
+The linked checkpoint starts beside the pantry for a quick playtest.
+
 Run the packaged Friday Deployment slice with the creator and a few external testers.
 Use the [tester guide](testing.md) and record ordinary completion time, unfair hits,
 confusing choices, readability, humor and desire to replay. Compare all management

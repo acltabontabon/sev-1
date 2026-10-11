@@ -4,6 +4,7 @@ Layout and modular prop sources live here; regenerate then rebake navigation.
 """
 from pathlib import Path
 import math
+from pantry_layout import build_pantry
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'game/rooms/office'
@@ -355,14 +356,14 @@ s.box('SyncAnnexCeiling',(29.25,3.9,-9),(4,.2,14),'ceiling_tile',True)
 s.box('SyncEastWall',(31.25,2,-9),(.5,4,14.5),'plaster',True)
 s.box('SyncAnnexNorthWall',(29.25,2,-16),(4,4,.5),'plaster',True)
 for z in [-16,16]: s.box(f'WingEnd{z}',(20.75,2,z),(13,4,.5),'plaster',True)
-for name,(z,length,mat) in {'QuickSyncGlassNorth':(-12.625,6.25,'glass'),'QuickSyncGlassSouth':(-4.25,4.5,'glass'),'CopyRoomWall':(2.5,9,'plaster'),'PantryWallSouth':(12.875,5.75,'plaster')}.items():
+for name,(z,length,mat) in {'QuickSyncGlassNorth':(-12.625,6.25,'glass'),'QuickSyncGlassSouth':(-4.25,4.5,'glass'),'CopyRoomWall':(2.125,8.25,'plaster'),'PantryWallSouth':(13.25,5.0,'plaster')}.items():
     s.box(name,(18.5,1.9,z),(.15,3.8,length),mat,True)
 for z in [-15.75,-9.5,-6.5,-2]: s.box(f'QuickSyncMullion{z}',(18.5,1.9,z),(.12,3.8,.12),'metal')
 s.box('QuickSyncHeader',(18.5,3.45,-8),(.15,.7,3),'plaster')
-s.box('PantryHeader',(18.5,3.45,8.5),(.15,.7,3),'plaster')
+s.box('PantryHeader',(18.5,3.45,8.5),(.15,.7,4.5),'plaster')
 s.box('QuickSyncSouthWall',(24.75,1.9,-2),(12.5,3.8,.2),'plaster',True)
-s.box('PantryNorthWall',(22.75,1.9,3.5),(8.5,3.8,.2),'plaster',True)
-s.box('PantryBackWall',(22.75,1.9,13),(8.5,3.8,.2),'plaster',True)
+s.box('PantryNorthWall',(22.75,1.9,2.0),(8.5,3.8,.2),'plaster',True)
+s.box('PantryBackWall',(22.75,1.9,15.5),(8.5,3.8,.2),'plaster',True)
 # Sliding meeting doors: parked inside the glass; the trap moves them shut and solid.
 for name,z in [('QuickSyncDoorA',-10.25),('QuickSyncDoorB',-5.75)]:
     s.box(name,(18.42,1.6,z),(.08,3.2,1.5),'glass',True,body='collision_layer = 0\n')
@@ -384,47 +385,8 @@ s.text('SyncDetail','Production is down.\nFirst: align on alignment.\nThen: disc
 s.light('QuickSyncLight',(24.75,3.3,-8.75),(1,.86,.68),1.6,13)
 s.light('ProjectorGlow',(29.8,2.0,-8.75),(.4,.75,1),0.0,12)
 s.text('SyncParkingLot','THE PARKING LOT\nWhere urgent things go to die.',(24.75,2.2,-2.12),.0035,38,(.75,.85,.9,1),rot=(0,180,0))
-# Pantry: one meaningful machine, three honest reactions.
-s.collider('CounterCollision',(26.3,.45,6.8),(.96,.9,6.0))
-for idx,z in enumerate([4.3,5.16,6.02,7.74,8.6,9.46]): s.glb(f'Cabinet{idx}','kitchen_cabinet',(26.3,0,z),-90,2.0)
-s.glb('Sink','kitchen_sink',(26.3,0,6.88),-90,2.0)
-s.glb('CoffeeMachine','kitchen_coffee_machine',(26.45,.9,5.2),-90,2.0)
-# Printed in a hurry, taped up crooked by someone who has given up.
-notice=s.node('CoffeeNoticeSheet','Node3D',(26.98,1.9,5.2),props='rotation_degrees = Vector3(0, -90, -2.5)\n')
-s.box('CoffeeNoticePaper',(0,0,0),(1.0,.5,.01),'paper',parent=notice)
-s.text('CoffeeNotice','PLEASE LIMIT\nCOFFEE TO ONE CUP\nPER EMPLOYEE',(0,0,.008),.0028,34,(.15,.15,.18,1),parent=notice,face=SIGN_FONT)
-for side in (-1,1): s.box(f'Tape{side+1}',(side*.46,.24,.007),(.18,.05,.002),'tape',parent=notice,rot=(0,0,side*-35))
-s.glb('Microwave','kitchen_microwave',(26.45,.9,8.8),-90,2.0)
-warning=s.node('MicrowaveNoticeSheet','Node3D',(26.98,1.78,8.8),props='rotation_degrees = Vector3(0, -90, 2)\n')
-s.box('MicrowaveNoticePaper',(0,0,0),(.8,.62,.01),'paper',parent=warning)
-s.text('MicrowaveNotice','DO NOT USE\nTICKET OPEN\nSINCE 2019',(0,0,.008),.0041,32,(.85,.15,.1,1),parent=warning,face=SIGN_FONT)
-for side in (-1,1): s.box(f'Tape{side+1}',(side*.36,.29,.007),(.16,.05,.002),'tape',parent=warning,rot=(0,0,side*35))
-s.glb('Toaster','toaster',(26.4,.9,9.6),-90,2.0)
-s.glb('Fridge','kitchen_fridge_large',(26.35,0,11.55),-90,1.4)
-s.collider('FridgeCollision',(26.35,.95,11.55),(.6,1.9,1.15))
-s.box('VendingBody',(20.4,1.0,12.45),(1.1,2.0,.8),'black',True)
-s.box('VendingGlass',(20.25,1.15,12.04),(.75,1.45,.02),'cool')
-s.box('VendingPanel',(20.83,1.15,12.04),(.2,1.0,.02),'plastic')
-s.text('VendingName','SNACK-O-MATIC',(20.4,1.94,12.03),.00205,40,(1,.85,.3,1),rot=(0,180,0))
-s.box('VendingErrorStrip',(20.25,1.74,12.026),(.72,.15,.004),'screen',rot=(0,180,0))
-s.text('VendingError','ERR: ITEM 404',(20.25,1.74,12.022),.0028,30,(1,.35,.25,1),rot=(0,180,0),face=SIGN_FONT)
-s.cylinder('PantryTableTop',(22.6,.74,8.1),.6,.04,'walnut')
-s.cylinder('PantryTableStem',(22.6,.37,8.1),.06,.72,'metal')
-s.collider('PantryTableCollision',(22.6,.4,8.1),(1.1,.8,1.1))
-s.cylinder('PantryMug',(22.4,.81,7.9),.05,.1,'ceramic')
-for idx,(x,z,rot) in enumerate([(21.6,8.1,-90),(23.6,8.1,90),(22.6,9.1,180)]): s.instance(f'PantryChair{idx}','chair',(x,0,z),rot)
-s.node('PropTint','Node',props='script = '+s.external('res://game/rooms/office/prop_tint.gd','Script'))
-s.glb('PantryPlant','potted_plant',(19.2,0,4.2),0,2.4)
-s.glb('PantryTrash','trashcan',(25.7,0,12.4),0,1.4)
-# People & Culture flyer: purple header, a calming stock sky, four pins.
-flyer=s.node('WellnessFlyer','Node3D',(22.4,1.75,3.62))
-s.box('WellnessPoster',(0,0,0),(1.2,1.6,.01),'paper',parent=flyer)
-s.box('WellnessBand',(0,.56,.006),(1.2,.48,.004),'wellness_purple',parent=flyer)
-s.text('WellnessTitle','BURNOUT IS\nA MINDSET',(0,.56,.01),.00229,60,(1,.97,.92,1),parent=flyer,face=TITLE_FONT)
-s.quad('WellnessPhoto',(0,-.02,.007),(1.0,.66),'photo_wellness',parent=flyer)
-s.text('WellnessBody','Wellness Week:\ntake one deep breath\n(between meetings)',(0,-.57,.008),.003,34,(.2,.2,.25,1),parent=flyer,face=BODY_FONT)
-for idx,(x,y) in enumerate([(-.54,.74),(.54,.74),(-.54,-.74),(.54,-.74)]): s.cylinder(f'Pin{idx}',(x,y,.012),.018,.02,'pin_red',parent=flyer,rot=(90,0,0))
-s.light('PantryLight',(22.75,3.3,8.25),(1,.78,.55),1.8,8)
+# Pantry props have their own authoring module for a focused recovery-room pass.
+build_pantry(s, SIGN_FONT, TITLE_FONT, BODY_FONT)
 for idx,z in enumerate([-10,0,10]): s.light(f'WingLight{idx}',(16.3,3.4,z),(.68,.8,.88),1.2,7)
 s.node('CalendarDrift','Node3D',(16.3,0,0),props='script = '+s.external('res://game/rooms/office/calendar_drift.gd','Script'))
 
@@ -473,9 +435,10 @@ s.marker('VaultArrival',(9,.05,-38))
 s.marker('VaultEntry',(9,.05,-29))
 s.marker('QuickSyncCenter',(24.75,.05,-8.75))
 s.marker('CoffeeMachine',(25.4,.05,5.2))
-s.marker('VendingMachine',(20.4,.05,11.3))
+s.marker('VendingMachine',(20.4,.05,13.65))
 s.marker('Microwave',(25.4,.05,8.8))
-s.marker('WellnessPoster',(22.4,.05,4.4))
+s.marker('WellnessPoster',(23.4,.05,3.2))
+s.marker('Fridge',(25.3,.05,11.55))
 nav=s.external('res://game/rooms/office/navigation.tres','NavigationMesh')
 s.node('Navigation','NavigationRegion3D',props=f'navigation_mesh = {nav}')
 # Quiet lounge edge fills the right foreground without narrowing the combat lane.
