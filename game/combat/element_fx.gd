@@ -5,6 +5,8 @@ extends Node3D
 ## removed immediately by the emitter's reset through clear_from().
 
 const CIRCLE_SHADER: Shader = preload("res://game/combat/magic_circle.gdshader")
+const SMOKE_TEXTURE: Texture2D = preload("res://assets/effects/kenney_smoke/smoke_puff.png")
+const DISTORTION: Script = preload("res://game/combat/shockwave_distortion.gd")
 static var circle_material: ShaderMaterial
 static var glow_material: StandardMaterial3D
 static var ribbon_material: StandardMaterial3D
@@ -67,9 +69,11 @@ static func sigil(emitter: Node, at: Vector3, color: Color, radius: float, durat
 ## An expanding ring: impacts, landings, spell releases.
 static func shockwave(emitter: Node, at: Vector3, color: Color, radius: float, duration: float = .45, upright: bool = false) -> ElementFx:
 	var effect: ElementFx = spawn(emitter, at + Vector3.UP * .05, duration)
-	var disc: MeshInstance3D = _disc(effect, radius, color, 1.0)
+	var ring_color: Color = Color(color.lerp(Color(.3, .28, .26), .25), color.a * .6)
+	var disc: MeshInstance3D = _disc(effect, radius, ring_color, 1.0)
 	if upright:
 		disc.rotation.x = PI * .5
+	DISTORTION.emit(effect, radius)
 	effect.on_tick = func(t: float) -> void:
 		disc.scale = Vector3.ONE * lerpf(.1, 1.0, ease(t, .35))
 		disc.set_instance_shader_parameter("fade", 1.0 - t)
@@ -341,7 +345,7 @@ static func tremor(emitter: Node, at: Vector3, strength: float, radius: float) -
 
 
 ## Glowing fractures that split across the floor from a point and fade.
-static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, count: int = 7, duration: float = 1.4) -> ElementFx:
+static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, count: int = 7, duration: float = 1.4, highlight: float = .35) -> ElementFx:
 	var effect: ElementFx = spawn(emitter, at + Vector3.UP * .03, duration)
 	var strand: MeshInstance3D = MeshInstance3D.new()
 	strand.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -370,7 +374,7 @@ static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, coun
 				var width: float = .09 * (1.0 - float(index) / points.size()) + .015
 				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
 				mesh.surface_add_vertex(point + across * width)
-				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha).lerp(Color(1, 1, 1, alpha), .35))
+				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha).lerp(Color(1, 1, 1, alpha), highlight))
 				mesh.surface_add_vertex(point - across * width)
 			mesh.surface_end()
 	effect.on_tick.call(0.0)
@@ -379,35 +383,59 @@ static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, coun
 
 ## Floor chunks thrown up by an impact.
 static func debris(emitter: Node, at: Vector3, amount: int, speed: float, duration: float = 1.1, color: Color = Color(.32, .31, .3)) -> ElementFx:
-	return shards(emitter, at + Vector3.UP * .1, color, amount, speed, duration, Vector3.UP, .17)
+	var effect: ElementFx = shards(emitter, at + Vector3.UP * .1, color, amount, speed, duration, Vector3.UP, .17)
+	var particles: CPUParticles3D = effect.get_child(0) as CPUParticles3D
+	var chunk: BoxMesh = particles.mesh as BoxMesh
+	chunk.size = Vector3(.17, .12, .14)
+	var stone: StandardMaterial3D = StandardMaterial3D.new()
+	stone.albedo_color = color
+	stone.roughness = 1.0
+	chunk.material = stone
+	return effect
 
 
 ## Rolling dust that spreads along the floor (alpha-blended, not glowing).
-static func dust(emitter: Node, at: Vector3, radius: float, duration: float = 1.2, color: Color = Color(.55, .52, .48)) -> ElementFx:
+static func dust(emitter: Node, at: Vector3, radius: float, duration: float = 1.2, color: Color = Color(.38, .35, .32)) -> ElementFx:
 	var effect: ElementFx = spawn(emitter, at + Vector3.UP * .25, duration)
 	if dust_material == null:
-		_dot_mesh(.1)
 		dust_material = StandardMaterial3D.new()
-		dust_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		dust_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		dust_material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 		dust_material.vertex_color_use_as_albedo = true
-		dust_material.albedo_texture = soft_dot
+		dust_material.albedo_texture = SMOKE_TEXTURE
+		dust_material.albedo_color = Color(.62, .59, .55)
+		dust_material.roughness = 1.0
 		dust_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	var quad: QuadMesh = QuadMesh.new()
-	quad.size = Vector2.ONE * .9
+	quad.size = Vector2.ONE * .95
 	quad.material = dust_material
 	var puffs: CPUParticles3D = _particles(26, duration * .9, quad)
+	puffs.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
+	puffs.emission_ring_axis = Vector3.UP
+	puffs.emission_ring_radius = radius * .3
+	puffs.emission_ring_inner_radius = radius * .15
+	puffs.emission_ring_height = .05
 	puffs.direction = Vector3.UP
-	puffs.spread = 85.0
-	puffs.flatness = .85
-	puffs.initial_velocity_min = radius * 1.2
-	puffs.initial_velocity_max = radius * 2.2
-	puffs.damping_min = radius * 1.5
-	puffs.damping_max = radius * 2.5
-	puffs.scale_amount_curve = _swell_curve()
+	puffs.spread = 25.0
+	puffs.initial_velocity_min = .25
+	puffs.initial_velocity_max = .65
+	puffs.radial_accel_min = radius * 1.8
+	puffs.radial_accel_max = radius * 2.8
+	puffs.damping_min = .5
+	puffs.damping_max = 1.0
+	puffs.gravity = Vector3(0, -.15, 0)
+	puffs.angle_min = -180.0
+	puffs.angle_max = 180.0
+	puffs.angular_velocity_min = -18.0
+	puffs.angular_velocity_max = 18.0
+	var expansion: Curve = Curve.new()
+	expansion.add_point(Vector2(0, .35))
+	expansion.add_point(Vector2(.3, .85))
+	expansion.add_point(Vector2(1, 1.4))
+	puffs.scale_amount_curve = expansion
 	var ramp: Gradient = Gradient.new()
-	ramp.set_color(0, Color(color.r, color.g, color.b, .55))
+	ramp.set_color(0, Color(color.r, color.g, color.b, .0))
+	ramp.add_point(.08, Color(color.r, color.g, color.b, .5))
 	ramp.set_color(1, Color(color.r, color.g, color.b, 0))
 	puffs.color_ramp = ramp
 	effect.add_child(puffs)
@@ -424,11 +452,11 @@ static func quake(emitter: Node, at: Vector3, color: Color, radius: float, stren
 		first.call(t)
 		if t > .3 and not echoed[0]:
 			echoed[0] = true
-			shockwave(emitter, at, Color(1, 1, 1, .7), radius * 1.4, .4)
-	cracks(emitter, at, color, radius)
+			shockwave(emitter, at, Color(color.lerp(Color(.45, .4, .36), .65), .45), radius * 1.4, .4)
+	cracks(emitter, at, Color(color * .55, color.a), radius, 7, 1.4, .12)
 	debris(emitter, at, int(10 + radius * 4), 3.5 + radius)
 	dust(emitter, at, radius)
-	flash(emitter, at + Vector3.UP * .6, color, 4.0, radius * 3.0, .3)
+	flash(emitter, at + Vector3.UP * .6, color, 1.8, radius * 2.0, .2)
 	tremor(emitter, at, strength, radius * 4.0)
 	return effect
 
