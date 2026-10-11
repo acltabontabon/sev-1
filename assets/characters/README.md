@@ -149,3 +149,12 @@ Animation Library 1 and 2, Standard editions (CC0 1.0; `License_UAL1.txt`, `Lice
 from OpenGameArt without an account. They use a different (UE-style / Rigify) skeleton;
 `tools/build_engineer_rig.gd` retargets the clips it lists onto the office rig by world-space
 rotation from each library's A_TPose, and bakes them into `game/player/engineer_animations.res`.
+
+
+## MakeHuman coworker trial (11 October 2026)
+
+Drew (Recruiter) alone uses a MakeHuman body and free office suit. The model is
+2.06 m tall at runtime to match the measured original cast, with a dedicated
+retargeted animation library and adjusted eye-height framing. Every other body is
+unchanged. [Sources and rebuild](makehuman_trial/README.md),
+[review checkpoint and limitations](../../docs/makehuman_trial.md).

@@ -84,7 +84,7 @@ without changing mesh or texture content. Attribution is voluntary. Records and 
 URLs: [workstation provenance](../assets/environment/poly_haven_workstation/README.md).
 These binaries use the established Git LFS rules. Original desk mat, keycaps and notebook
 markings add no outside rights. See [implementation and review checkpoint](workstation_trial.md).
-Free character candidates in that document remain unimported.
+Character selection and subsequent trial status are recorded in that document.
 
 ## Heavy Greatsword trial — 11 October 2026
 
@@ -94,3 +94,15 @@ GLB using the existing character Git LFS rules. Voluntary attribution, exact dow
 archive checksum and rebuild instructions: [weapon provenance](../assets/characters/heavy_greatsword/README.md).
 The original native Monolith remains available as a fallback. Creator visual acceptance
 is pending; this trial adds no new combat mechanics.
+
+## One-coworker MakeHuman trial — 11 October 2026
+
+Drew alone uses MakeHuman Community’s CC0 body, game-engine rig, skin, eyes, brows,
+hair and shoes, with Margaret Toigo’s CC0 Suits 01 jacket/tie outfit. Selected asset
+headers explicitly identify CC0. Source archive and output checksums, selected files,
+modifications and the bundled asset license are recorded in
+[MakeHuman trial provenance](../assets/characters/makehuman_trial/README.md).
+MPFB2 and portable Blender are development tools and do not ship; no GPL tool code
+is embedded in the game. Existing Quaternius CC0 motion is retargeted at build time.
+The exported GLB, extracted textures and two animation libraries use Git LFS.
+See the [scale, limitations and creator checkpoint](makehuman_trial.md).

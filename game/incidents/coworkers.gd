@@ -83,6 +83,7 @@ const CHAIR_FORWARD: float = .3
 const GESTURE_SECONDS: float = 3.5
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
+const RECRUITER_MOTION: AnimationLibrary = preload("res://assets/characters/makehuman_trial/recruiter_gestures.res")
 ## Routines: asleep / sit (seated), pace / carry (walk to `route` and back), fix (kneeling
 ## loop), stand (idle with an occasional `gesture`). Palette: shirt, pants, skin, hair.
 const CAST: Array[Dictionary] = [
@@ -102,7 +103,8 @@ const CAST: Array[Dictionary] = [
 		"line": "I'm working from home. This is home now.", "palette": [Color(.85, .35, .55), Color(.25, .25, .3), Color(.88, .7, .58), Color(.55, .4, .18)]},
 	{"name": "Microwave", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(24.4, 0, 8.8), "facing": PI * .5, "gesture": "Idle",
 		"line": "It said one minute. That was forty minutes ago.", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
-	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(8.0, 1.5, -9.4), "facing": PI * .15, "gesture": "Victory",
+	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(10.25, 1.5, -9.25), "facing": PI * .15, "gesture": "Victory",
+		"trial_body": "res://game/incidents/makehuman_recruiter.tscn",
 		"line": "We're like a family here. A family with KPIs.", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},
 	{"name": "SRE", "body": "casual_female.fbx", "routine": "sit", "at": Vector3(-6.5, 0, .87), "facing": PI,
 		"line": "I'm not on call. I AM the call.", "palette": [Color(.18, .2, .24), Color(.12, .12, .16), Color(.66, .46, .33), Color(.06, .05, .05)]},
@@ -124,12 +126,12 @@ func _ready() -> void:
 	aid_rng.randomize()
 	player = get_tree().get_first_node_in_group("players") as Node3D
 	for entry: Dictionary in CAST:
-		var body: Node3D = load(ROOT + entry.body).instantiate()
+		var body: Node3D = load(entry.get("trial_body", ROOT + entry.body)).instantiate()
 		body.name = entry.name
 		add_child(body)
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		# The same rig as the engineer: his retargeted library (talking, phone, repairs).
-		animator.add_animation_library("ual", MOTION)
+		animator.add_animation_library("ual", RECRUITER_MOTION if entry.has("trial_body") else MOTION)
 		for clip in ["Idle", "Walk", "Walk_Carry", "PickUp"]:
 			animator.get_animation("CharacterArmature|" + clip).loop_mode = Animation.LOOP_LINEAR
 		dress(body, entry.palette)

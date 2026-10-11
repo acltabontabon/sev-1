@@ -45,7 +45,7 @@ integration suite. Added office checks cover starting-desk collision height, imp
 mesh alignment/footprint and limiting the trial to one desk. The tiny notebook caption
 was removed after the readability check rejected it; the notebook now uses markings.
 
-## Free character candidates — researched, not imported
+## Free character candidates — current status
 
 The creator set a free-only asset budget. These are candidates for a separate
 single-character trial, not authorization to replace the cast.
@@ -63,5 +63,7 @@ single-character trial, not authorization to replace the cast.
   animation retargeting required. Community add-ons carry their own licenses; only
   individually verified assets qualify.
 
-Source pages checked 11 October 2026. Neither candidate has been imported or tested
-in SEV-1. Neither is a claim of turnkey Godot compatibility or finished facial animation.
+Source pages checked 11 October 2026. MakeHuman was subsequently selected for the
+[single Drew trial](makehuman_trial.md),
+with build-time export/retargeting and scale correction. Quaternius Universal Base
+Characters remains unimported. Neither source establishes finished facial animation.

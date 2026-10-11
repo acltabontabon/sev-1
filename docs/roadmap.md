@@ -114,3 +114,9 @@ The creator selected a [CC0 Heavy Greatsword trial](../assets/characters/heavy_g
 on 11 October 2026. The rigged engineer carries the imported sword with the existing
 combat and story poses; the original native Monolith stays available. Gate: creator
 accepts the materials, grip, shoulder carry, swing readability and parked story prop.
+
+
+The 11 October [one-coworker MakeHuman trial](makehuman_trial.md) uses only free CC0
+assets for Drew. Creator feedback corrected its initial size to the measured current
+cast height. His dialogue, gestures and retry remain the acceptance checkpoint;
+replacing the remaining cast is deferred until the creator reviews this comparison.

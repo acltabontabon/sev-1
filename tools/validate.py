@@ -58,6 +58,7 @@ if __name__ == "__main__":
     run("skill_impact", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/skill_impact_tests.gd"])
     run("opening_stare", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/opening_stare_tests.gd"])
     run("coworker_aid", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/coworker_aid_tests.gd"])
+    run("makehuman", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/makehuman_tests.gd"])
     run("finale", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/finale_tests.gd"])
     run("rage", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/rage_tests.gd"])
     run("interface", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/interface_tests.gd"])
