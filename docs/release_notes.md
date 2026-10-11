@@ -1,5 +1,31 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.50 — Office collision and cast refinement (11 October 2026)
+
+This playtest packages the source refinements since 0.2.49. Earlier source/package
+remarks below describe historical snapshots. The office gains detailed desks,
+realistic CC0 ergonomic chairs, acoustic ceiling/storage finish and fitted furniture
+collision. Tabletop clutter, pantry wall intersections and floor boxes are corrected;
+the stone column/base beside the lounge hallway is removed. Navigation, outbreak
+positions and opening/retry standing clearance follow the solid furniture.
+
+Drew returns to his original Quaternius suit model; the human-model trial and its
+art/build assets are removed. Female office characters wear fitted skirts,
+blouses/skirt suits and small earrings. Adult director Marie alone has a shorter
+skirt and lower neckline; Nadia has a longer skirt. Existing identities, voices,
+conversations, animation rigs, combat and progression remain in place.
+
+The build also includes the CC0 Heavy Greatsword, revised sword body motion and
+particle trails, the KayKit Skeleton Minion record presentation, The Variance's
+violet aura and reciprocal finishing-duel choreography. Public packages use the CC0
+sword-motion fallback; the optional locally licensed attack is not in the repository.
+
+The complete local validator passed, with separate rendered checks for Drew,
+female outfits and the cleared hallway. GitHub builds validate again before exporting
+the Windows x86-64 installer and Intel Mac x86-64 DMG. Checksums/manifests accompany
+both. This remains an unsigned, unnotarized work-in-progress playtest. Ordinary target
+GPU/audio performance, costume fit in long play, combat feel and pacing need human review.
+
 ## 0.2.46 — Chapter completion saves (11 October 2026)
 
 Stage One completion now saves automatically. The completed title shows “Progress

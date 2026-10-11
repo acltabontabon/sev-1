@@ -35,8 +35,8 @@ and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:
 
 ```sh
 git push origin main
-git tag -a v0.2.50 -m "SEV-1 0.2.50"
-git push origin v0.2.50
+git tag -a v0.2.51 -m "SEV-1 0.2.51"
+git push origin v0.2.51
 ```
 
 Tag and changelog/project/preset versions must agree. The pipeline requires no

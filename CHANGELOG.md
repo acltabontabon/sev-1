@@ -3,7 +3,7 @@
 Changes describe the implemented playable prototype. Creative acceptance and
 ordinary hardware playtesting remain separate from automated checks.
 
-## Unreleased
+## [0.2.50] — 2026-10-11
 
 - Corrupted Records now use the free KayKit Skeleton Minion instead of the realistic
   demon trials, at their original imported size. Original cartoon materials and supplied animation clips retain
@@ -16,6 +16,30 @@ ordinary hardware playtesting remain separate from automated checks.
   [trial and playtest checkpoint](docs/sword_motion_trial.md).
 - Other monster bodies are 10% larger, with matching label clearance, hover offsets and death
   effect sizing. Collision, attack reach and movement tuning remain unchanged.
+
+- The engineer carries the CC0 Heavy Greatsword, with refined sword trails, smoke,
+  sparks and restrained shockwave refraction. The Variance gains a pulsing violet
+  aura with curling trails, and the finishing duel gains a reciprocal sword/trident
+  exchange before the existing finisher.
+- Detailed CC0 desks now fill all workstation bays. Acoustic ceiling finish,
+  filing storage and conference details make the office more cohesive.
+- Fitted CC0 ergonomic office chairs replace the native desk, conference and
+  pantry chairs. Chairs, desk drawers, storage and lounge furniture now have solid
+  collision; tabletop props, pantry cabinets and floor boxes clear their supports.
+- Enemy navigation is rebaked around furniture. Opening and retry control resumes
+  clear of the starting chair, and conference/lounge outbreaks use clear floor areas.
+- Drew's original Quaternius suit model and coworker motion are restored. The
+  human-model trial and its art/build assets are removed. His standing position
+  leaves room for the chairs and dialogue camera.
+- Removed the stone column and base blocking the lounge-side hallway doorway;
+  the passage has a real walking regression check.
+- Female office NPCs now wear fitted skirts, blouses or skirt suits, with their
+  original female rigs/hairstyles and small earrings. Nadia has a longer skirt;
+  adult director Marie has a shorter skirt and lower neckline. Sitting/walking
+  motion, conversations and retry are checked with the new outfits.
+- Same GitHub prerelease delivery as 0.2.49: Windows x86-64 setup installer,
+  Intel Mac x86-64 DMG, SHA-256 checksums and source manifests. Ordinary graphical
+  and audio playtesting on those target machines remains pending.
 
 ## [0.2.49] — 2026-10-11
 
