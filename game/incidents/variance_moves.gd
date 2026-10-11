@@ -7,6 +7,7 @@ extends Node3D
 
 const ORDER: Array[String] = ["delayer", "pop", "decommission", "expose", "downsize"]
 const DAMAGE: int = 15
+const PROP_DAMAGE: int = 40
 const LENGTH: Dictionary = {"delayer": 1.9, "pop": 2.6, "decommission": 2.9, "expose": 2.8, "downsize": 2.6}
 const NOTES: Array[String] = ["MAKE IT POP", "MORE SYNERGY", "CAN IT BE BLUE?"]
 const SHRUNK: float = .55
@@ -74,6 +75,7 @@ func _physics_process(delta: float) -> void:
 				if is_instance_valid(shadow):
 					shadow.global_position = lock
 			if before < 1.55 and t >= 1.55:
+				smash_props(lock, 1.7)
 				ElementFx.quake(_level(), lock, Color(.9, .12, .1), 2.0, .9)
 				ElementFx.cracks(_level(), lock, Color(.8, .1, .08), 1.8)
 				ElementFx.dust(_level(), lock, 1.6)
@@ -98,6 +100,7 @@ func _physics_process(delta: float) -> void:
 				var previous: float = ring_radius
 				ring_radius = (t - .8) * 6.5
 				ring.scale = Vector3(ring_radius, 1, ring_radius)
+				smash_props(ring.global_position, ring_radius, previous)
 				var away: float = Vector2(target.global_position.x - boss.global_position.x, target.global_position.z - boss.global_position.z).length()
 				if previous < away and ring_radius >= away and target.receive_damage(DAMAGE, boss.global_position):
 					ElementFx.glyphs(_level(), target.global_position + Vector3.UP * 1.6, Color(1, .3, .2), ["END OF LIFE"], .9, .2)
@@ -109,6 +112,7 @@ func _physics_process(delta: float) -> void:
 					ElementFx.flash(_level(), bulb, Color(1, 1, .95), 4.0, 4.0, .08)
 					ElementFx.glyphs(_level(), target.global_position + Vector3.UP * 2.2, Color(1, .95, .6), [["3", "2", "1"][[.4, .9, 1.4].find(at)]], .45, 0.0)
 			if before < 1.9 and t >= 1.9:
+				smash_props(boss.global_position, 6.0)
 				ElementFx.flash(_level(), boss.global_position + Vector3.UP * 2.5, Color(1, 1, .95), 10.0, 18.0, .35)
 				if _facing() and target.receive_damage(DAMAGE, boss.global_position):
 					ElementFx.glyphs(_level(), target.global_position + Vector3.UP * 1.6, Color(1, .95, .6), ["+EXPOSURE"], 1.0, .3)
@@ -126,6 +130,7 @@ func _physics_process(delta: float) -> void:
 			if before < 1.3 and t >= 1.3:
 				ElementFx.sigil(_level(), lock, Color(.4, 1, .6), 1.2, .5, 2.0)
 			if before < 1.8 and t >= 1.8:
+				smash_props(lock, 1.2)
 				ElementFx.bolt(_level(), boss.global_position + Vector3.UP * 3.2, lock + Vector3.UP * .5, Color(.6, 1, .8), .3, .12)
 				ElementFx.flash(_level(), lock + Vector3.UP, Color(.5, 1, .7), 4.0, 5.0, .25)
 				if _flat(lock) < 1.2 and target.receive_damage(DAMAGE / 2, boss.global_position):
@@ -210,6 +215,7 @@ func _lob(note: String, at: Vector3, delay: float) -> void:
 
 func _burst(bubble: Node3D) -> void:
 	var at: Vector3 = bubble.global_position
+	smash_props(at, 1.3)
 	for colour: Color in [Color(1, .3, .7), Color(.3, .8, 1), Color(1, .85, .2)]:
 		ElementFx.shards(_level(), at, colour, 12, 5.0, 1.0)
 	ElementFx.shockwave(_level(), Vector3(at.x, .05, at.z), Color(1, .4, .7), 1.4, .3)
@@ -258,3 +264,24 @@ func _level() -> Node:
 func _story() -> Node:
 	var level: Node = boss.get_parent()
 	return level.get("presentation") if level != null else null
+
+
+## Resolve scenery at the visible impact, independently of whether the player evades.
+## The expanding ring sweeps only its newly crossed band, even on a long frame.
+func smash_props(at: Vector3, radius: float, inner_radius: float = -1.0) -> void:
+	for candidate: Node in get_tree().get_nodes_in_group("breakables"):
+		var prop: Node3D = candidate as Node3D
+		if prop == null or prop.get("health") == 0:
+			continue
+		var offset: Vector3 = prop.global_position - at
+		var distance: float = Vector2(offset.x, offset.z).length()
+		# Include the existing equipment's half-width, not just its center point.
+		if absf(offset.y) > 1.8 or distance > radius + .425 or distance + .425 < inner_radius:
+			continue
+		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+			at + Vector3.UP * .65, prop.global_position + Vector3.UP * .65, 1)
+		ray.hit_from_inside = true
+		var obstruction: Dictionary = get_world_3d().direct_space_state.intersect_ray(ray)
+		if not obstruction.is_empty() and obstruction.collider != prop:
+			continue
+		prop.receive_damage(PROP_DAMAGE, boss.global_position)

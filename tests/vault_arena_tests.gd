@@ -86,7 +86,82 @@ func _run() -> void:
 	for spot: Vector3 in [Vector3(3.6,0,-47),Vector3(14.4,0,-47),Vector3(9,0,-48)]:
 		var path: PackedVector3Array = NavigationServer3D.map_get_path(map,Vector3(9,0,-32),spot,true)
 		check(not path.is_empty() and path[path.size()-1].distance_to(spot)<.8,"expanded arena has a reachable dodge lane at %s" % spot)
+	await boss_destruction(scene, player, incident, props)
 	scene.queue_free()
 	paused = false
 	await frames(3)
 	quit(1 if failures else 0)
+
+
+func boss_destruction(scene: Node, player: CharacterBody3D, incident: Node, props: Array[Node]) -> void:
+	player.camera_rig.set_capture(true)
+	incident.presentation.skip()
+	incident._cleanup()
+	incident.stage = incident.Stage.BOSS
+	incident._spawn()
+	var boss: CharacterBody3D = incident.boss
+	boss.set_physics_process(false)
+	boss.position = Vector3(9,.05,-40)
+	boss.visual.rotation.y = PI
+	player.set_physics_process(false)
+	player.invulnerable_left = 100
+	player.position = Vector3(9,.05,-35.2)
+	var near_prop: Node3D = props[0]
+	var far_prop: Node3D = props[1]
+	near_prop.position = Vector3(9,0,-36)
+	far_prop.position = Vector3(20,0,-50)
+	for move: String in ["delayer", "pop", "decommission", "expose", "downsize"]:
+		call_group("breakables", "reset_prop")
+		await frames(3)
+		boss.moves.turn = boss.moves.ORDER.find(move)
+		boss.moves.start(player)
+		await frames(30)
+		check(near_prop.health == 32, "%s telegraph leaves equipment intact" % move)
+		var deadline: int = 240
+		while boss.moves.active() and deadline > 0:
+			await frames(1)
+			deadline -= 1
+		check(near_prop.health == 0 and near_prop.debris.size() == 6 and far_prop.health == 32,
+			"%s destroys contacted equipment once while distant equipment survives an evaded attack" % move)
+	call_group("breakables", "reset_prop")
+	await frames(3)
+	boss.moves.turn = 0
+	boss.moves.start(player)
+	await frames(30)
+	boss.moves.cancel()
+	await frames(100)
+	check(near_prop.health == 32, "cancelled boss windup cannot destroy equipment later")
+	# The ring crosses the near case first, then a second case farther along the lane.
+	far_prop.position = Vector3(9,0,-33)
+	await frames(3)
+	boss.moves.turn = boss.moves.ORDER.find("decommission")
+	boss.moves.start(player)
+	await frames(90)
+	check(near_prop.health == 0 and far_prop.health == 32, "the visible ring breaks equipment progressively, not all at cast time")
+	await frames(80)
+	check(far_prop.health == 0, "the farther case breaks when the ring reaches it")
+	call_group("breakables", "reset_prop")
+	await frames(3)
+	boss.moves.turn = 0
+	boss.moves.start(player)
+	# Put a wall between the committed slam point and the nearby prop.
+	var wall: StaticBody3D = StaticBody3D.new()
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	var box: BoxShape3D = BoxShape3D.new()
+	box.size = Vector3(3,3,.15)
+	shape.shape = box
+	wall.add_child(shape)
+	scene.add_child(wall)
+	wall.position = Vector3(9,1.5,-35.6)
+	await frames(140)
+	check(near_prop.health == 32, "boss impacts cannot destroy equipment through an intervening wall")
+	wall.queue_free()
+	await frames(3)
+	boss._release_magic()
+	await frames(3)
+	check(near_prop.health == 0, "the close-range cataclysm also smashes equipment at its quake footprint")
+	check(player.specials.focus == 0, "boss destruction awards no player ultimate charge")
+	scene.reset_encounter()
+	await frames(4)
+	check(props.all(func(prop: Node) -> bool: return prop.health == 32 and prop.debris.is_empty()),
+		"retry restores scenery destroyed by the boss")

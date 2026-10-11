@@ -231,7 +231,13 @@ industrial power boxes and a monumental ledger wall frame a clear central fight.
 Side and rear lanes leave room to dodge. Six equipment cases and coolant canisters
 can be smashed with melee, Reply All, Blame Shift or Circle Back; each leaves six
 physical pieces that settle on the floor without blocking movement. Props award no
-kill credit or ultimate charge, and retry restores them. Flames use continuous tapered shaders,
+kill credit or ultimate charge, and retry restores them. The boss also destroys equipment
+at its actual attack impacts: local quake/slam footprints, feedback landings, the
+downsizing beam impact and nearby exposure overload. Decommission sweeps props
+away as its expanding ring reaches them. Windups and cancelled attacks do no
+scenery damage; intervening walls protect props. Boss destruction remains independent
+of whether the engineer dodges the attack and awards no player credit.
+Flames use continuous tapered shaders,
 water follows a connected curved stream, smoke is sparse, and impact debris is
 restrained. Ten crew recordings and all eight boss lines were regenerated locally. The Variance
 uses a lower stock voice, shifted down five semitones, with measured executive delivery.
