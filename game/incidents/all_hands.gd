@@ -49,9 +49,8 @@ const EXIT_PATH: Array[Vector3] = [DEPARTURE_AT + Vector3(-6, .05, 0), DEPARTURE
 const EXIT_SECONDS: float = 9.0
 const DOOR_PATH: Array[Vector3] = [EXIT_PATH[1], DEPARTURE_AT + Vector3(14.2, .05, 0)]
 const DOOR_SECONDS: float = 6.5
-## The street at the foot of the tower (its west face), and his way away from it.
-const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 6.2), Vector3(-23.0, -69.95, 8.0)]
-const STREET_SECONDS: float = 7.5
+## The exterior owns its opening doorway and sidewalk route.
+const STREET_SECONDS: float = NIGHTLIFE.SECONDS
 ## The office's west window, where the night shift stands to watch him go.
 const WINDOW: Vector3 = Vector3(-13.3, .05, 2.0)
 ## Every line the same width (monospace), so a centred block reads as a printed column.
@@ -214,9 +213,13 @@ func _beat(next: String) -> void:
 			_exposure(.5)
 			story._restore_lights()
 			_stage_street()
-			player.global_position = STREET_PATH[0]
-			var away: Vector3 = STREET_PATH[1] - STREET_PATH[0]
-			player.visual.rotation.y = atan2(-away.x, -away.z)
+			character.story_pose = 0
+			character.sit = 0.0
+			character.story_hand_targets.clear()
+			var entry: Vector4 = nightlife.travel(0.0)
+			player.global_position = Vector3(entry.x, entry.y, entry.z)
+			player.visual.rotation.y = nightlife.facing(0.0)
+			story.sting(preload("res://assets/audio/sfx/door_open.ogg"), -14)
 			story.say("doc_end")
 		"window":
 			if is_instance_valid(nightlife):
@@ -409,14 +412,16 @@ func tick(delta: float) -> bool:
 			if t >= DOOR_SECONDS:
 				_beat("street")
 		"street":
-			# Low across the wet street, the tower behind him; he walks out of frame.
+			# The panels open, he emerges, then turns into the living street.
 			nightlife.tick(t)
-			var walk: float = _walk_progress(t, STREET_SECONDS)
-			character.story_walk_speed = _walk_speed(t, STREET_SECONDS, STREET_PATH[0].distance_to(STREET_PATH[1]))
-			player.global_position = STREET_PATH[0].lerp(STREET_PATH[1], walk)
-			camera.global_position = Vector3(-30.0, -68.1, 12.8) + Vector3(.6, .15, -.4) * walk
-			camera.look_at(Vector3(-18.0, -68.0, 5.5) + Vector3(0, 3.0, 0) * smoothstep(.6, 1.0, walk))
-			camera.fov = 50.0
+			var travel: Vector4 = nightlife.travel(t)
+			character.story_walk_speed = travel.w
+			player.global_position = Vector3(travel.x, travel.y, travel.z)
+			player.visual.rotation.y = nightlife.facing(t)
+			var reveal: float = smoothstep(3.6, 7.2, t)
+			camera.global_position = nightlife.to_global(Vector3(9.0, 2.2, 13.0).lerp(Vector3(9.0, 2.7, 20.5), reveal))
+			camera.look_at(nightlife.to_global(Vector3(nightlife.EXIT_X, 1.6, 2.0).lerp(Vector3(3.5, 1.6, 2.0), reveal)) + Vector3.UP * smoothstep(10.0, 12.0, t))
+			camera.fov = lerpf(50.0, 57.0, reveal)
 			if t >= STREET_SECONDS:
 				_beat("window")
 		"window":

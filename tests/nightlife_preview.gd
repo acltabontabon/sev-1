@@ -1,15 +1,36 @@
 extends SceneTree
 ## Independent street preview; does not modify the shared finale preview.
 var scene: Node
+var finale: Node
+var shots: int = 0
+var started: bool = false
+const CHECKPOINTS: Array[float] = [.15, 1.3, 3.9, 7.0, 10.5]
 
 
 func _initialize() -> void:
 	_run.call_deferred()
 
 
-func _process(_delta: float) -> bool:
+func _process(delta: float) -> bool:
 	paused = false
+	if started and is_instance_valid(finale):
+		finale.tick(delta)
+		var elapsed: float = finale.clock - finale.beat_at
+		if shots < CHECKPOINTS.size() and elapsed >= CHECKPOINTS[shots]:
+			_capture(shots)
+			shots += 1
+		if finale.beat != "street":
+			started = false
+			finale.finish(false)
+			quit()
 	return false
+
+
+func _capture(index: int) -> void:
+	await RenderingServer.frame_post_draw
+	var path: String = "res://logs/nightlife_motion_%d.png" % index
+	root.get_texture().get_image().save_png(path)
+	print("SHOT ", path)
 
 
 func _run() -> void:
@@ -31,19 +52,9 @@ func _run() -> void:
 	incident._enter(incident.Stage.RESOLVED)
 	await process_frame
 	story.set_process(false)
-	var finale: Node = story.all_hands
+	finale = story.all_hands
 	finale._beat("receipts")
 	finale._beat("grief")
 	finale._beat("desk")
 	finale._beat("street")
-	for frame in range(430):
-		finale.tick(1.0 / 60.0)
-		await physics_frame
-		if frame in [30, 180, 410]:
-			await RenderingServer.frame_post_draw
-			var path: String = "res://logs/nightlife_%d.png" % frame
-			root.get_texture().get_image().save_png(path)
-			print("SHOT ", path)
-	finale.finish(false)
-	await process_frame
-	quit()
+	started = true

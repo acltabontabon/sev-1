@@ -45,17 +45,61 @@ func _run() -> void:
 	var nightlife: Node3D = finale.nightlife
 	check(nightlife.is_visible_in_tree() and nightlife.patrons.size() == 9, "the actual street cut adds animated nightlife patrons and pedestrians")
 	check("STRIP CLUB" in nightlife.get_node("ClubType").text and nightlife.get_node("FoodSign").text == "MIDNIGHT NOODLES", "the club frontage and late-night food counter have readable identities")
+	var initial: Vector3 = nightlife.to_local(incident.player.global_position)
+	check(initial.z < 1.0 and initial.z < nightlife.door_panels[0].position.z and incident.player.get_node("Visual/Character").story_pose == 0,
+		"the engineer begins inside the vestibule in a standing pose")
+	var character: Node = incident.player.get_node("Visual/Character")
+	character._physics_process(1.0 / 60.0)
+	check(character.animator.current_animation == "rig/idle", "waiting inside the opening door keeps a grounded standing animation")
 	var clear: bool = true
+	var door_clear: bool = true
+	var continuous: bool = true
+	var actor_clear: bool = true
 	var first: Vector3 = nightlife.walkers[0].body.global_position
-	for sample in range(75):
+	for sample in range(120):
 		finale.clock = finale.beat_at + float(sample) / 10.0
 		finale.tick(.001)
+		if sample > 20 and sample < 115:
+			continuous = continuous and character.story_walk_speed > .9
+		var volume: AABB = AABB(incident.player.global_position + Vector3(-.35, .1, -.35), Vector3(.7, 1.5, .7))
+		for panel: MeshInstance3D in nightlife.door_panels:
+			door_clear = door_clear and not volume.intersects(panel.global_transform * panel.get_aabb())
+		for first_actor in range(nightlife.patrons.size()):
+			for second_actor in range(first_actor + 1, nightlife.patrons.size()):
+				actor_clear = actor_clear and nightlife.patrons[first_actor].global_position.distance_to(nightlife.patrons[second_actor].global_position) > .7
 		for patron: Node3D in nightlife.patrons:
 			var offset: Vector3 = patron.global_position - incident.player.global_position
 			offset.y = 0
 			clear = clear and offset.length() > .8
+	check(continuous, "he keeps a steady walking pace through the rounded sidewalk turn")
+	finale.clock = finale.beat_at + 2.8
+	finale.tick(.001)
+	character._physics_process(1.0 / 60.0)
+	var hero_phase: float = character.animator.current_animation_position
+	for frame in range(12):
+		finale.tick(1.0 / 60.0)
+		await physics_frame
+	check(character.animator.current_animation == "rig/walk" and character.animator.current_animation_position != hero_phase,
+		"the emerging engineer uses an advancing standing walk cycle rather than the desk pose")
+	finale.clock = finale.beat_at + 11.8
+	finale.tick(.001)
+	check(door_clear, "the opening panels never intersect the engineer as he crosses the exterior threshold")
+	check(actor_clear, "patrons and passing pedestrians remain spaced apart throughout the shot")
 	check(clear, "every street actor stays clear of the engineer throughout the walk")
 	check(nightlife.walkers[0].body.global_position.distance_to(first) > 4.5, "pedestrians travel visibly during cinematic time")
+	var pedestrian: Node3D = nightlife.walkers[0].body
+	var animator_probe: AnimationPlayer = pedestrian.find_child("AnimationPlayer", true, false)
+	nightlife.tick(2.0)
+	var clip_before: float = animator_probe.current_animation_position
+	nightlife.tick(2.4)
+	check(animator_probe.current_animation_position != clip_before, "pedestrian walk cycles advance with their cinematic travel")
+	nightlife.tick(1.4)
+	check(nightlife.door_open > .99 and nightlife.to_local(incident.player.global_position).z > 2.5, "the door opens fully and the engineer has emerged onto the sidewalk by the end of the shot")
+	var food: MeshInstance3D = nightlife.get_node("FoodFacade")
+	var club: MeshInstance3D = nightlife.get_node("ClubFacade")
+	var bar: MeshInstance3D = nightlife.get_node("BarFacade")
+	check(food.position.x + food.mesh.size.x * .5 < club.position.x - club.mesh.size.x * .5 - 3.0 and bar.position.x - bar.mesh.size.x * .5 > 10.0,
+		"the venues have visible gaps and the office has its own wide entrance")
 	for frame in range(4):
 		await physics_frame
 	var animated: bool = true

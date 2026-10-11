@@ -364,7 +364,7 @@ func _physics_process(delta: float) -> void:
 		return
 	clock += delta
 	var speed: float = distance / maxf(delta, .001)
-	if story_walk_speed > 0.0:
+	if story_walk_speed > 0.0 or actor.narrative_hold:
 		speed = story_walk_speed
 	# Omnislash blinks teleport; they are not a burst of running.
 	if actor.specials != null and actor.specials.omnislashing():
@@ -403,7 +403,7 @@ func _gameplay(speed: float, delta: float) -> void:
 		_scrub("roll", clampf(actor.dodge_elapsed / total, 0, 1) * .92, .05, delta)
 	elif actor.hurt_left > 0:
 		_scrub("hit", (1.0 - actor.hurt_left / maxf(actor.hurt_duration, .01)) * .35, .04, delta)
-	elif not actor.is_on_floor() and story_walk_speed <= 0.0:
+	elif not actor.is_on_floor() and story_walk_speed <= 0.0 and not actor.narrative_hold:
 		_scrub("jump", .45, .12, delta)
 	elif melee.attacking:
 		# _pose_swing samples the whole-body strike below, once, on the melee clock.
