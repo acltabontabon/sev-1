@@ -156,3 +156,16 @@ full prompt set, original generated paths, selected-file checksums and visual re
 These are AI-generated candidate illustrations; creator acceptance remains pending.
 Git LFS tracks the PNGs. Narration retains the existing stock Kokoro documentary
 profile and its recorded provenance; no runtime generation or paid runtime AI.
+
+## Corporate firefighting cutscene — 11 October 2026
+
+`game/incidents/vault_response.gd`, `vault_flame.gdshader` and `vault_spell.gdshader`
+are original AI-assisted Godot geometry/shaders: extinguisher, nozzle, hose, fan,
+bucket, clipboard, damaged equipment, flame silhouettes and cutting crescents.
+No outside models or textures were added. Sparse smoke reuses the existing
+[Kenney Smoke Pack CC0 texture](../assets/effects/kenney_smoke/README.md), and
+casualty pools reuse the game's generated blood textures. Crew bodies and motion
+reuse the licensed Quaternius assets above. Ten revised crew recordings and
+all eight Variance lines use the existing local voice pipeline; exact text, profiles and output
+hashes remain in `assets/audio/voices/talk/provenance.json` and `provenance.json`.
+Rendered creator review remains a separate gate from automated validation.

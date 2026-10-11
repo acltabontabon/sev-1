@@ -49,3 +49,9 @@ The 11 October Quick Sync stand-up adds five original scripted lines, synthesize
 with the existing pinned Kokoro model and stock profiles. Their inputs, voices and output
 checksums are recorded in `voices/dialogue.json` and `voices/provenance.json`; the game
 plays prerecorded Ogg files only. Human casting/mix acceptance remains pending.
+
+The 11 October corporate-firefighting revision regenerates ten cavalry lines and
+all eight Variance lines locally. The boss uses stock `bm_george`, speed 0.92,
+five semitones down, with the existing short doubling effect. `move_pop` now calls Destructive Feedback, matching the designer's
+cutting-frame death. `voices/talk.json` and `voices/dialogue.json` own the text;
+their corresponding provenance manifests record synthesis settings and output hashes.

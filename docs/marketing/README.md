@@ -56,3 +56,17 @@ outside assets were downloaded. These are visual checks, not performance measure
 | `ending_ghost_facing.png` | `logs/finale_exit_3.png` |
 | `ending_rainy_departure.png` | `logs/finale_street_8.png` |
 | `ending_window.png` | `logs/finale_window_2.png` |
+
+## Corporate firefighting captures — 11 October 2026
+
+Unmodified 1280 × 720 staged captures from Godot 4.7.2, Forward+ / Metal on
+Apple M2 Pro, using `tests/cutscene_preview.gd -- --vault --capture`.
+`boss_response.png` shows the two-handed nozzle grip and curved water stream;
+`boss_destructive_feedback.png` shows the cutting frame replacing the balloon pop.
+Props and shaders are original; characters, animation and smoke reuse the existing
+licensed assets. These captures verify composition, not performance or human acceptance.
+
+| File | Local source |
+| --- | --- |
+| `boss_response.png` | `logs/vault_hose.png` |
+| `boss_destructive_feedback.png` | `logs/vault_spell_2.png` |

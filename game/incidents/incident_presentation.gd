@@ -183,6 +183,7 @@ var massacre_last: float = 0.0
 ## The engineer's entrance: walk, grief, memories, charge, roar, reply.
 var hero_phase: String = ""
 var hero_phase_at: float = 0.0
+var hero_walk_from: Vector3 = Vector3(9, .05, -26.8)
 var roar_length: float = 2.2
 var roar: AudioStreamPlayer
 var powerup: AudioStreamPlayer
@@ -580,6 +581,7 @@ func reset_story() -> void:
 	finale_completed = false
 	if incident != null and is_instance_valid(incident.player):
 		incident.player.get_node("Visual/Character").overtime(false)
+		incident.player.get_node("Visual/Character").story_walk_speed = 0.0
 	if boss_move_strip != null:
 		boss_move_strip.hide()
 	if beat_shot == "killcam":
@@ -837,6 +839,7 @@ func skip() -> void:
 	elif incident.stage == incident.Stage.BOSS and not is_instance_valid(incident.active_enemy):
 		voice.clear()
 		incident.coworkers.fall_all_now()
+		incident.player.get_node("Visual/Character").story_walk_speed = 0.0
 		if beat_shot in ["massacre", "casualty"]:
 			_end_rage_memory()
 			# Skipped, it still happened: he fights in Unpaid Overtime.
@@ -965,10 +968,12 @@ func vault_entered() -> void:
 		massacre_last = 0.0
 		massacre_eye = incident.coworkers.stage_camera()
 		massacre_look = incident.coworkers.stage_focus()
-		hero_phase = ""
+		hero_phase = "response"
+		hero_phase_at = 0.0
 		# Whatever they were shouting in the corridor stops: the vault has the floor.
-		incident.coworkers.hush()
-		incident.player.global_position = Vector3(9, .05, -26.8)
+		incident.coworkers.begin_response()
+		_caption_layout(true)
+		incident.player.global_position = Vector3(7.5, .05, -26.8)
 		incident.player.velocity = Vector3.ZERO
 		return
 	incident.coworkers.fall_all_now()
@@ -1777,6 +1782,11 @@ func _massacre_shot(delta: float) -> void:
 			return
 	var hero_time: float = massacre_time - hero_phase_at
 	match hero_phase:
+		"response":
+			if hero_time >= 10.0 and voices_idle():
+				hero_phase = ""
+				massacre_last = massacre_time
+				player.get_node("Visual/Character").story_walk_speed = 0.0
 		"walk":
 			if hero_time >= HERO_WALK:
 				_hero_phase("grief")
@@ -1802,6 +1812,24 @@ func _massacre_shot(delta: float) -> void:
 	hero_time = massacre_time - hero_phase_at
 	var face: Vector3 = player.global_position + Vector3.UP * 1.45
 	match hero_phase:
+		"response":
+			var follow: float = smoothstep(2.0, 5.2, hero_time)
+			player.global_position = Vector3(7.5, .05, -26.8).lerp(Vector3(8.2, .05, -29.0), follow)
+			player.visual.rotation.y = -.3
+			player.get_node("Visual/Character").story_walk_speed = 1.0 if hero_time > 2.0 and hero_time < 5.2 else 0.0
+			crew.response.intensity = lerpf(1.0, .4, smoothstep(5.0, 9.0, hero_time))
+			if hero_time < 3.2:
+				camera.global_position = Vector3(12.0, 2.1, -32.5)
+				camera.look_at(Vector3(9, 1.0, -27.5))
+				camera.fov = 56.0
+			elif hero_time < 6.5:
+				camera.global_position = Vector3(13.8, 3.4, -31.7)
+				camera.look_at(Vector3(9, 1.2, -38.5))
+				camera.fov = 65.0
+			else:
+				camera.global_position = Vector3(12.2, 1.4, -35.4)
+				camera.look_at(Vector3(14.7, 1.0, -39.6))
+				camera.fov = 56.0
 		"":
 			# Wide on whichever scene it is on, drifting over as it leaps to the next one.
 			massacre_eye = massacre_eye.lerp(crew.stage_camera(), 1.0 - exp(-1.8 * delta))
@@ -1812,9 +1840,10 @@ func _massacre_shot(delta: float) -> void:
 		"walk":
 			# Over the monster's shoulder: he walks in over his colleagues.
 			var walk: float = smoothstep(0.0, HERO_WALK, hero_time)
-			player.global_position = Vector3(9, .05, -26.8).lerp(Vector3(9, .05, -30.4), walk)
+			player.global_position = hero_walk_from.lerp(Vector3(9, .05, -30.4), walk)
+			player.get_node("Visual/Character").story_walk_speed = 1.1 if walk < .99 else 0.0
 			player.visual.rotation.y = 0.0
-			camera.global_position = boss_at + Vector3(1.5, 2.9, -1.7) + Vector3(0, -.3, .5) * walk
+			camera.global_position = Vector3(13.6, 2.8, -35.5).lerp(Vector3(12.8, 2.3, -34.8), walk)
 			camera.look_at(player.global_position + Vector3.UP * 1.25)
 			camera.fov = lerpf(40.0, 36.0, walk)
 			camera.rotate_object_local(Vector3.BACK, deg_to_rad(-6.0 * (1.0 - walk)))
@@ -1884,8 +1913,12 @@ func _hero_phase(phase: String) -> void:
 	var character: Node = player.get_node("Visual/Character")
 	match phase:
 		"walk":
+			hero_walk_from = player.global_position
+			if is_instance_valid(incident.coworkers.response):
+				incident.coworkers.response.extinguish()
 			sting(preload("res://assets/audio/sfx/low_boom.ogg"), -3)
 		"grief":
+			character.story_walk_speed = 0.0
 			# Their blood runs to his shoes.
 			character.story_pose = CHARACTER.Pose.RAGE
 			say("rage_quiet")
@@ -2304,8 +2337,8 @@ func _vault_demon(delta: float) -> void:
 			leap_t = -1.0
 			demon.global_position = leap_to
 			var floor_at: Vector3 = Vector3(leap_to.x, .05, leap_to.z)
-			ElementFx.quake(incident, floor_at, Color(.9, .15, .1), 2.6, .7)
-			ElementFx.dust(incident, floor_at, 2.0)
+			ElementFx.cracks(incident, floor_at, Color(.35, .07, .025), 1.2, 5, .7, .15)
+			ElementFx.shockwave(incident, floor_at + Vector3.UP * .03, Color(.65, .16, .07, .4), 1.4, .35)
 			ElementFx.tremor(incident, floor_at, .3, 14.0)
 			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -4)
 	# It only has eyes for whoever it is taking apart; then for the engineer.
@@ -2317,7 +2350,7 @@ func _vault_demon(delta: float) -> void:
 	if Vector2(toward.x, toward.z).length() > .3:
 		demon.rotation.y = lerp_angle(demon.rotation.y, atan2(-toward.x, -toward.z), 1.0 - exp(-(9.0 if leap_blown else 5.0) * delta))
 	demon_swing -= delta
-	if leap_t < 0.0 and demon_swing <= 0.0 and crew.cavalry_standing() > 0 and not crew.executing() and crew.landed():
+	if leap_t < 0.0 and demon_swing <= 0.0 and crew.executing() and crew.landed():
 		demon_swing = randf_range(1.1, 1.8)
 		demon.animator.play(demon.clips.attack, .1)
 	elif not demon.animator.is_playing():
@@ -2384,8 +2417,10 @@ func _process(delta: float) -> void:
 	if incident.player.dodging and incident.stage in [incident.Stage.ENCOUNTER_ONE, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
 		say("first_dodge")
 	caption.text = voice.subtitle
+	if caption.text.is_empty() and beat_shot in ["massacre", "casualty"] and voice.subtitles_enabled:
+		caption.text = incident.coworkers.cinematic_subtitle()
 	if incident.stage == incident.Stage.ALERT and "\n" in caption.text:
 		# Film subtitles: the line only; the shot already shows who is speaking.
 		caption.text = caption.text.get_slice("\n", 1)
 	# Film subtitles belong to the cinematic; in play, speech arrives as chat cards.
-	panel.visible = not voice.subtitle.is_empty() and in_cinematic()
+	panel.visible = not caption.text.is_empty() and (in_cinematic() or beat_shot in ["massacre", "casualty"])

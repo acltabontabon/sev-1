@@ -787,9 +787,14 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   on routines (asleep, sit, pace, carry, fix, stand with a periodic gesture). No collision. Each
   has one line shown when the engineer walks past; they cower while `battle_mode` is
   engaged and the manager claims credit when a fight ends. `reset()` restores them.
-- **The vault and the finale.** When the gate opens five of the crew charge the staged
-  monster (`coworkers.gd` CAVALRY/STAGE: one victim at a time at their own spot, the rest
-  lapping away from it, one voice at a time via `_say` modes). The presentation's
+- **The vault and the finale.** When the gate opens five of the crew await the engineer, then rush through
+  the doorway to fixed firefighting stations (`coworkers.gd` CAVALRY/STAGE). The
+  `response` phase holds executions while he follows them; `_say` modes serialize voices.
+  `vault_response.gd` owns the original firefighting props, continuous flame/crescent
+  shaders, a curved hose and water stream, two local SRE hand IK modifiers, dropped
+  tools and persistent casualty decals. Its reset also removes the hand modifiers.
+  The four-sided Destructive Feedback frame replaces the designer inflation; physical
+  slices and prone remains survive until the incident resets. The presentation's
   massacre beat calls `execute_next()` once the floor is quiet; each death is one of The
   Variance's `MOVES` (`variance.gd`) with its own wind-up and casualty framing. The
   engineer's entrance (`_hero_phase`: walk, grief, roar, reply) puts him into Unpaid

@@ -210,6 +210,30 @@ Human acceptance remains pending: enter during investigation, watch the transfor
 run and dodge through the center and annex, and judge whether the overlapping Invite
 and projector circles feel fair, readable and funny. R restarts the incident.
 
+### Corporate firefighting entrance (implemented prototype, 11 October 2026)
+
+Before the Stage One boss fight, the crew rushes past the engineer through the vault
+door and takes five response stations. He sees them go and follows. Morgan brings
+an extinguisher labelled HOTFIX; Nadia deploys a two-handed hose; Jun fans the
+metrics; Jo brings a CLOUD BACKUP bucket; Val accepts the risk on everyone else's
+behalf. A brief reduction in the flames lets the response appear to work.
+
+The Variance answers with five deliberate magical executions. Continuous copper-red
+crescents establish the spell before contact. Jun's former balloon pop is replaced by
+**Destructive Feedback**: a four-sided cutting frame closes around her, leaving
+physical remains and a CROPPED TO SCOPE stamp. Prone bodies, separated pieces,
+charred legs, the downsized director, casualty pools and dropped tools persist into
+combat. The ensuing grief and Unpaid Overtime transformation remain intact.
+
+The existing 18.5 × 16.5 m vault accommodates the stations and clear center; its room
+size and combat collisions are unchanged. Flames use continuous tapered shaders,
+water follows a connected curved stream, smoke is sparse, and impact debris is
+restrained. Ten crew recordings and all eight boss lines were regenerated locally. The Variance
+uses a lower stock voice, shifted down five semitones, with measured executive delivery.
+TAB skips directly to a playable fight with its aftermath; restart removes the response.
+Use `boss_intro_preview.command` for the source checkpoint. Director acceptance of
+hose grip, effects, death choreography, sound and comedy remains pending.
+
 ### Unpaid Overtime entrance (implemented prototype, 11 October 2026)
 
 The loss of the night shift drives the engineer's transformation before The Variance
