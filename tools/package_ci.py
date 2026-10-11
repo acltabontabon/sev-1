@@ -52,7 +52,9 @@ def main():
         if f'{key}="{VERSION}"' not in original:
             raise SystemExit(f"Preset {key} must match {VERSION}")
     # Only this isolated CI checkout changes: local tester export keeps its ad-hoc signature.
-    ci_presets = original.replace('binary_format/architecture="universal"', 'binary_format/architecture="x86_64"').replace('codesign/codesign=3', 'codesign/codesign=0')
+    # Official macOS templates only contain a universal executable. Export it first,
+    # then thin the delivered bundle to Intel; an x86_64 preset needs a custom template.
+    ci_presets = original.replace('codesign/codesign=3', 'codesign/codesign=0')
     ci_presets = ci_presets.replace('[preset.1.options]', '[preset.1.options]\ndebug/export_console_wrapper=2')
     presets.write_text(ci_presets)
     try:
@@ -71,6 +73,15 @@ def main():
         if info["CFBundleShortVersionString"] != VERSION:
             raise SystemExit("Mac bundle version mismatch")
         executable = app / "Contents/MacOS" / info["CFBundleExecutable"]
+        for binary in [executable, *app.rglob("*.dylib")]:
+            architectures = run("ci_template_architecture", ["lipo", "-archs", str(binary)]).split()
+            if "x86_64" not in architectures:
+                raise SystemExit(f"Mac template lacks Intel architecture: {binary}")
+            if len(architectures) > 1:
+                thinned = binary.with_name(binary.name + ".intel")
+                run("ci_thin", ["lipo", str(binary), "-thin", "x86_64", "-output", str(thinned)])
+                shutil.copymode(binary, thinned)
+                thinned.replace(binary)
         if run("ci_architecture", ["lipo", "-archs", str(executable)]) != "x86_64":
             raise SystemExit("Mac export must contain Intel x86_64 only")
         if not list((app / "Contents/Resources").glob("*.pck")):

@@ -1,6 +1,6 @@
 # Release engineering
 
-## Tagged GitHub releases (0.2.48 onward)
+## Tagged GitHub releases (0.2.49 onward)
 
 The creator has accepted unsigned, unnotarized distribution for this personal
 project. Developer ID certificates and notarization are not release requirements.
@@ -23,21 +23,20 @@ published tag. Headless runner checks do not prove ordinary GPU/audio compatibil
 `docs/release_page.md` owns the player-facing release page: pitch, screenshots,
 direct installer links, features, installation and feedback. `tools/package_ci.py`
 fills its version and appends the matching `CHANGELOG.md` entry in a collapsed
-details panel. For 0.2.48 the marketing page was added after the build tag and is
-applied to the published release separately; subsequent tags render it in CI.
+details panel. 0.2.49 and subsequent tags render it directly in CI.
 
 These builds are work-in-progress playtests for feedback during active development.
 The page states that prominently and the workflow marks them as GitHub prereleases.
 Player download links use `/releases`, since `/releases/latest` excludes prereleases.
 
 For the next release, update `config/version` in `project.godot`, all version/path
-fields in `export_presets.cfg`, `VERSION` in `tools/release.py`, the README version,
+fields in `export_presets.cfg`, `VERSION` in `tools/release.py`, any displayed README version,
 and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:
 
 ```sh
 git push origin main
-git tag -a v0.2.49 -m "SEV-1 0.2.49"
-git push origin v0.2.49
+git tag -a v0.2.50 -m "SEV-1 0.2.50"
+git push origin v0.2.50
 ```
 
 Tag and changelog/project/preset versions must agree. The pipeline requires no
@@ -45,8 +44,10 @@ signing secrets. Only its publication job has `contents: write` permission.
 [Install and unsigned-app instructions](install.md) own user-facing setup.
 
 The existing `sh tools/release.sh` remains a separate local universal Mac tester
-gate with an ad-hoc integrity signature. CI temporarily overrides its preset to
-Intel and disables signing in its isolated checkout, restoring it after export.
+gate with an ad-hoc integrity signature. CI disables signing in its isolated
+checkout, exports the official universal template, then uses `lipo` to retain
+only Intel x86-64 in the executable and bundled dylibs before smoke testing.
+The original preset is restored after export.
 No paid identity or notarization is used by either path.
 
 ## Historical local tester evidence

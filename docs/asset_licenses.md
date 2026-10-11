@@ -1,6 +1,6 @@
 # Release asset and license inventory
 
-The current 0.2.48 release includes the outside assets and speech listed in the
+The current 0.2.49 release includes the outside assets and speech listed in the
 later sections. The 0.1.0 inventory below is historical, preceding those imports.
 Each source/license record stays with its owning asset directory. Making the
 repository public does not assign an open-source license to original game code

@@ -3,7 +3,7 @@
 Changes describe the implemented playable prototype. Creative acceptance and
 ordinary hardware playtesting remain separate from automated checks.
 
-## [0.2.48] — 2026-10-11
+## [0.2.49] — 2026-10-11
 
 First tagged GitHub release of **SEV-1: Friday Deployment**, a personal project.
 
@@ -25,6 +25,7 @@ First tagged GitHub release of **SEV-1: Friday Deployment**, a personal project.
   departure and a To Be Continued screen.
 - Settings, pause/menu/retry flow, Stage One completion saves, preserved replay
   progress and a completion unlock for earlier testers. Stage Two is unavailable.
+- Polished starting workstation with CC0 desk props and locally authored screen/light staging.
 - Camera obstruction, seating/floor support, HUD updates and idle/background
   rendering refinements.
 
@@ -57,10 +58,17 @@ for unsigned-app prompts, requirements and controls.
 - First-use hitches, combat balance, pacing, comedy, voices and music still need
   creator playtest acceptance. Automated checks do not prove those outcomes.
 
+## [0.2.48] — 2026-10-11
+
+Both native source validators and the Windows installer checks passed. Mac packaging
+was blocked because the official template contains only a universal executable.
+No complete cross-platform release was published; 0.2.49 exports and thins that
+executable to Intel before testing and packaging.
+
 ## [0.2.47] — 2026-10-11
 
 Initial CI tag. Cold-checkout font import failed before packaging, so no installers
-or GitHub release were published. Superseded by 0.2.48.
+or GitHub release were published. Superseded by 0.2.49.
 
 ## Earlier untagged development — 2026-10-10 to 2026-10-11
 
