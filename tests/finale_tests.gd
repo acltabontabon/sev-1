@@ -22,6 +22,14 @@ func _run() -> void:
 	var dialogue: GDScript = load("res://game/incidents/dialogues.gd")
 	var heard: Dictionary = dialogue.line(dialogue.tree("Intern"), "good_days")
 	check(dialogue.memory("Intern") == heard, "the ending recalls the actual conversation heard, with the matching voice clip")
+	var intern_talk: Dictionary = dialogue.tree("Intern")
+	var expected_takes: int = intern_talk.nodes.good_days.text_variants.size() + 1
+	var takes: Array[String] = [heard.clip]
+	for take in range(expected_takes - 1):
+		var another: Dictionary = dialogue.line(intern_talk, "good_days")
+		if not takes.has(another.clip):
+			takes.append(another.clip)
+	check(takes.size() == expected_takes, "ordinary memories exhaust their varied recorded takes before repeating")
 	var scene: Node = load("res://game/incidents/missing_transaction.tscn").instantiate()
 	root.add_child(scene)
 	current_scene = scene
@@ -95,6 +103,13 @@ func _run() -> void:
 	var sword: Node = finale.parked_sword
 	check(sword.visible and sword.global_position.distance_to(finale.sword_rest.origin) < .01 and not character.weapon.visible,
 		"his sword stays at the workstation while he walks away unarmed")
+	var standing: AABB = finale.sword_bounds()
+	var monitor: MeshInstance3D = incident.room.get_node("YourWorkstation/Monitor")
+	var top: MeshInstance3D = incident.room.get_node("YourWorkstation/Top/Mesh")
+	check(absf(standing.position.y - .02) < .01 and standing.size.y > 2.0,
+		"the actual sword tip rests on the floor with the blade standing upright")
+	check(not standing.intersects(monitor.global_transform * monitor.get_aabb()) and not standing.intersects(top.global_transform * top.get_aabb()),
+		"the parked sword stays entirely clear of the tabletop and monitor")
 	story.set_process(true)
 	story.skip()
 	await process_frame
@@ -137,19 +152,19 @@ func _run() -> void:
 	check(character.story_pose == character.Pose.TYPING and character.story_sit_progress > 0 and character.story_sit_progress < 1,
 		"the return plays a gradual sit-down before starting the day")
 	closing.tick(4.1)
-	check(closing.beat == "next" and "END OF INCIDENT 001" in closing.titles.text and "INCIDENT 002" not in closing.titles.text,
-		"this episode closes at his desk without promising another incident")
+	check(closing.beat == "next" and closing.titles.text == "TO BE CONTINUED",
+		"the episode closes at his desk with TO BE CONTINUED")
 	var obsolete_lines: Array[String] = ["victory_thanks", "victory"]
 	story.say_sequence(obsolete_lines)
 	story.say("victory_thanks")
 	closing.tick(3.6)
 	await process_frame
 	await process_frame
-	check(story.voice.current_line.is_empty() and story.voice.queue.is_empty() and story.sequence.is_empty(), "the ending clears stale speech instead of replaying teamwork congratulations")
+	check(story.voice.current_line.is_empty() and story.voice.queue.is_empty() and story.sequence.is_empty() and story.finale_completed, "the ending clears stale speech instead of replaying teamwork congratulations")
 	story.set_process(true)
 	scene.reset_encounter()
 	await process_frame
-	check(character.story_sit_progress == -1.0, "retry clears the closing sit-down override")
+	check(character.story_sit_progress == -1.0 and not story.finale_completed, "retry clears the closing sit-down and completion flag")
 	scene.queue_free()
 	await process_frame
 	quit(1 if failures else 0)

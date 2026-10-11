@@ -303,8 +303,8 @@ runtime gates remain open. This milestone does not establish a new performance c
 
 ### Ordinary memories (11 October 2026 source refinement)
 
-MORGAN, NADIA, JUN, JO and VAL each gain three authored “good_days” takes about
-coffee, lunch or gossip, plus three shared engineer reply clips (18 new assets). They
+MORGAN, NADIA, JUN, JO and VAL each have five authored “good_days” takes about
+coffee, lunch or gossip, plus three shared engineer reply clips (28 ordinary-conversation assets, including ten additional gossip takes). They
 use the existing locked stock voice blends and local generator, with license, source
 hash and generation metadata in `assets/audio/voices/talk/provenance.json`. No outside
 reference recordings or runtime synthesis. The ending recalls the take heard this run,
@@ -318,3 +318,9 @@ with JO retaining Kevin the ancient fridge yogurt. The four revised gossip clips
 and the final reply were regenerated locally with the existing profiles and
 provenance; human listening acceptance remains pending. The resolved ending and
 report no longer trigger the legacy victory or repeated postmortem sequence.
+
+Ten more locally prerecorded gossip takes introduce Wei, Dexter, Bane, Juviline and
+Pau. Each coworker now has coffee, lunch and three distinct gossip stories in the
+existing session-local shuffled bag. Repeated visits and retries exhaust all five
+takes before repeating; the ending recalls the exact last take heard this run.
+Matching clips/captions and source/model/license hashes remain in talk provenance.

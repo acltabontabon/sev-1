@@ -1,4 +1,5 @@
 extends CanvasLayer
+signal finale_finished
 ## Authored Incident 001 beats only. Gameplay owns stages, damage and choices.
 const DESK_SCREEN: Script = preload("res://game/ui/desk_screen.gd")
 const FEED: Script = preload("res://game/ui/notification_feed.gd")
@@ -188,6 +189,7 @@ var powerup: AudioStreamPlayer
 ## The victory ending (see all_hands.gd), while it plays.
 var all_hands: Node3D
 var all_hands_played: bool = false
+var finale_completed: bool = false
 ## The final blow's cutscene (see duel.gd), while it plays.
 var duel_scene: Node3D
 ## The limbs the duel cut off, lying where they landed until the next run.
@@ -575,6 +577,7 @@ func reset_story() -> void:
 	if demon != null:
 		DUEL.restore(demon)
 	all_hands_played = false
+	finale_completed = false
 	if incident != null and is_instance_valid(incident.player):
 		incident.player.get_node("Visual/Character").overtime(false)
 	if boss_move_strip != null:

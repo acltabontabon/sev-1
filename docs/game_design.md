@@ -177,13 +177,14 @@ The creator still needs to accept the emotional buildup, voice and hair silhouet
 After the duel and the five memorial shots, the engineer looks down at JO and the
 camera moves to his face as one tear rolls down his cheek. The original mourning
 theme begins during the memorial and continues through the rainy departure. Back at
-his workstation he sets down the Legacy Monolith, stands, and collects a small box
-with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays on the desk;
+his workstation he stands the Legacy Monolith blade-down beside the desk, then
+stands and collects a small box
+with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays beside the desk, with its tip on the floor and clear of the monitor;
 he leaves the office unarmed with his personal effects.
 
 Faint, warm memories recall the five as people: coffee invitations, lunch plans and
 ridiculous gossip. “Tell me something normal” in their living conversations cycles
-three locally prerecorded takes per coworker. The walk recalls the exact take heard
+five locally prerecorded takes per coworker (coffee, lunch and three gossip stories). The walk recalls the exact take heard
 this run; an unvisited coworker supplies a shuffled take. Memory audio is sequential,
 with captions that respect the subtitle preference. The walk accommodates complete
 clips; TAB skips and R clears the props and this run's recalled lines. Hand contacts,
@@ -192,13 +193,18 @@ Explicit cinematic gait matches the eased travel pace, including slow movement b
 the gameplay idle threshold and street shots without a physics floor update.
 Monday's postmortem follows the night. The engineer's last reply is “Fucking great.”
 He leaves the call, walks back across the office, gradually sits at his workstation
-and begins typing. A quiet “END OF INCIDENT 001 — MONDAY, 9:05 AM” card closes this
-slice; the report queues no victory congratulations or repeated postmortem dialogue.
+and begins typing. “TO BE CONTINUED” fades in over black, then fades out into the
+main menu. Completing or skipping the finale unloads the run without a victory
+report or extra dialogue; a new incident can be started from the title desk.
 The night walk covers a longer stretch at about 60% greater travel speed, with its
 animation pace matched to the movement. Gossip varies across the office: Migs protects his nacho break with a fake dentist
 appointment and borrows the CEO’s parking space; Gab’s holiday reply starts a small
 rebellion; Bea argues with the printer. JO keeps Kevin, the ancient fridge yogurt
-who somehow receives a retention bonus.
+who somehow receives a retention bonus. Ten additional gossip takes bring in Wei,
+Dexter, Bane, Juviline and Pau, covering stress-ball expenses, protected naps,
+resignations hidden in slide decks, sandwich confidentiality and empty-folder theatre.
+Each coworker exhausts all five shuffled takes before repeating, across retries
+within the same application session.
 
 Human checkpoint: judge the tear's visibility, smooth hand/prop contacts, stand-up and
 walk transitions, voice/music balance, and whether ordinary memories make the loss

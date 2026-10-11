@@ -1,5 +1,24 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — To be continued (11 October 2026)
+
+After the engineer starts Monday at his desk, “TO BE CONTINUED” fades in over black,
+holds, then fades out. The normal application returns directly to the main menu,
+unloads the run and audio owners, restores the title desk and visible mouse, and can
+start another incident. There is no victory report between the ending and menu.
+Skipping the finale also returns to the menu; reset cleanup does not trigger it.
+`tests/release_tests.gd` checks card order, menu return, actor cleanup and a new run.
+`tests/ending_preview.gd` plays the full duel/ending in the actual application and
+leaves the menu open; `-- --closing --capture` captures its final card and menu.
+The sword now stands blade-down beside the workstation, with its actual mesh tip
+resting on the floor. It stays clear of the monitor and tabletop; contact targets
+and regression bounds checks match the upright placement.
+Ten new locally prerecorded gossip takes add Wei, Dexter, Bane, Juviline and Pau.
+Each coworker now cycles five ordinary takes—coffee, lunch and three gossip stories—
+before repeating, including across retries in the same session. The ending recalls
+the last take actually heard.
+The existing packaged build predates this source refinement.
+
 ## Source update — Gossip has a whole office (11 October 2026)
 
 Four gossip performances now cover Migs’ fake dentist appointment and CEO parking

@@ -737,12 +737,19 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   memorial, tear close-up, desk sword placement and belongings pickup, the walk out
   with recalled coffee/lunch/gossip conversations, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
-  SubViewport, its tiles fed by small cameras on off-map sets) on real time before a silent report. After Monday’s final reply,
+  SubViewport, its tiles fed by small cameras on off-map sets) on real time before returning to the main menu. After Monday’s final reply,
   three staged shots return the engineer to his desk and an authored sit-down
-  ends in typing; the end card closes Incident 001. Each
+  ends in typing; the “TO BE CONTINUED” card closes Incident 001.
+  Presentation emits `finale_finished` after cleanup; the front end defers its menu
+  transition until the current callback ends, unloads the session, and restores the
+  title backdrop and visible cursor. `finale_completed` also guards the normal
+  terminal-screen path and resets on retry. Standalone/headless runs without the
+  finale retain their report path. Each
   cutscene restores what it touched and TAB ends it. The aftermath uses temporary
   bone attachments for the tear and carried box, local cinematic hand targets for
-  prop contacts, and a parked copy of the sword. `Dialogues.remembered_lines` stores
+  prop contacts, and an upright parked copy of the sword beside the desk. Its full child-mesh
+  bounds, including the rotated tip, determine floor contact; regression checks
+  reject any tabletop or monitor intersection. `Dialogues.remembered_lines` stores
   the exact ordinary take heard this run; reset clears it while shuffled take bags
   continue across retries. Memory clips play sequentially with matching captions;
   the mourning WAV loops locally through the departure. `tests/finale_tests.gd`

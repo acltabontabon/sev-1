@@ -530,6 +530,7 @@ func start_incident() -> void:
 	_close_backdrop()
 	session = INCIDENT.instantiate()
 	add_child(session)
+	session.get_node("Incident").presentation.finale_finished.connect(func() -> void: main_menu.call_deferred())
 	session.get_node("HUD").configure_release_ui()
 	preferences.apply(session)
 	# The opening may be skipped only once this device has seen it in full.
@@ -597,6 +598,9 @@ func _process(_delta: float) -> void:
 		if story.opening_seen and not preferences.values.opening_seen:
 			preferences.values.opening_seen = true
 			preferences.save_settings()
+		if session.get_node("Incident").stage == session.get_node("Incident").Stage.RESOLVED and story.finale_completed:
+			main_menu()
+			return
 	if session != null and page.is_empty():
 		var incident: Node = session.get_node("Incident")
 		if incident.terminal():

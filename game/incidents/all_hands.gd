@@ -227,7 +227,7 @@ func _beat(next: String) -> void:
 			add_child(meeting)
 			meeting.start()
 		"next":
-			titles.text = "END OF INCIDENT 001\nMONDAY, 9:05 AM"
+			titles.text = "TO BE CONTINUED"
 		"return_meeting":
 			meeting.ended.show()
 			character.story_pose = 0
@@ -341,7 +341,7 @@ func tick(delta: float) -> bool:
 			belongings.global_position = belongings_from.lerp(carried.origin, smoothstep(3.4, 5.2, t))
 			belongings.global_basis = Basis.IDENTITY.slerp(carried.basis, smoothstep(3.4, 5.2, t))
 			var left: Vector3 = character.to_local(belongings.global_position + Vector3.UP * .22)
-			var right: Vector3 = character.to_local(parked_sword.global_position)
+			var right: Vector3 = character.to_local(parked_sword.global_transform * Vector3(0, 0, -.65))
 			character.story_hand_targets.assign([
 				Vector3(-.28, .55, .08).lerp(left, smoothstep(2.6, 3.4, t)),
 				right.lerp(Vector3(.32, .7, .03), smoothstep(1.7, 2.6, t))])
@@ -429,9 +429,9 @@ func tick(delta: float) -> bool:
 				character.story_walk_speed = 0.0
 				character.story_pose = character.Pose.TYPING
 				character.story_sit_progress = smoothstep(3.0, 4.8, t)
-			camera.global_position = story.SEAT + Vector3(1.7, 2.0, 1.5)
-			camera.look_at(story.SEAT + Vector3(0, .95, -.5))
-			camera.fov = 48.0
+			camera.global_position = story.SEAT + Vector3(-1.9, 2.25, 2.1)
+			camera.look_at(story.SEAT + Vector3(0, 1.15, -.5))
+			camera.fov = 54.0
 			if t >= 8.0:
 				_beat("next")
 		"next":
@@ -448,10 +448,11 @@ func tick(delta: float) -> bool:
 
 ## Skipped or over: everything it made goes, and the world is left as the ending found it.
 ## The report is silent: Monday already delivered the final word.
-func finish(_epilogue: bool = true) -> void:
+func finish(completed: bool = true) -> void:
 	if done:
 		return
 	done = true
+	story.finale_completed = completed
 	story.sequence.clear()
 	story.voice.clear()
 	ElementFx.slow_motion(&"photo", 1.0)
@@ -494,6 +495,8 @@ func finish(_epilogue: bool = true) -> void:
 			node.queue_free()
 	props.clear()
 	queue_free()
+	if completed:
+		story.finale_finished.emit()
 
 
 func _exit_tree() -> void:
@@ -503,13 +506,9 @@ func _exit_tree() -> void:
 
 ## Wrecked: his clothes dark and wet with it, from the vault to the street.
 func _bloody() -> void:
-	var gore: StandardMaterial3D = StandardMaterial3D.new()
-	gore.albedo_color = Color(.32, .015, .02, .55)
-	gore.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	gore.roughness = .25
 	for mesh: Node in player.visual.find_children("*", "MeshInstance3D", true, false):
 		if (mesh as MeshInstance3D).material_overlay == null:
-			(mesh as MeshInstance3D).material_overlay = gore
+			(mesh as MeshInstance3D).material_overlay = Blood.coating(mesh as MeshInstance3D)
 			bloodied.append(mesh)
 
 
@@ -625,15 +624,33 @@ func _walk_speed(time: float, length: float, distance: float) -> float:
 	return maxf(.001, distance / (length - .6) * smoothstep(0.0, .6, time) * (1.0 - smoothstep(length - .6, length, time)))
 
 
-## A real copy remains on the workstation; the carried blade stays hidden outside.
+## Blade down beside the workstation, clear of its tabletop, keyboard and monitor.
 func _park_sword() -> void:
 	parked_sword = character.weapon.duplicate()
 	incident.add_child(parked_sword)
 	props.append(parked_sword)
 	parked_sword.show()
-	sword_rest = Transform3D(Basis.from_euler(Vector3(0, -PI * .5, 0)), story.SEAT + Vector3(-.65, .86, -.95))
+	parked_sword.global_transform = Transform3D(Basis.from_euler(Vector3(-PI * .5, 0, 0)), Vector3(story.SEAT.x - 1.5, 0, story.SEAT.z - .87))
+	# Include the rotated tip and every child mesh so the actual blade touches the floor.
+	parked_sword.global_position.y += .02 - sword_bounds().position.y
+	sword_rest = parked_sword.global_transform
 	sword_from = Transform3D(sword_rest.basis, sword_rest.origin + Vector3(0, .22, .28))
 	parked_sword.global_transform = sword_from
+
+
+func sword_bounds() -> AABB:
+	var bounds: AABB
+	var began: bool = false
+	for mesh: Node in parked_sword.find_children("*", "MeshInstance3D", true, false):
+		var local: AABB = (mesh as MeshInstance3D).get_aabb()
+		for corner in range(8):
+			var point: Vector3 = mesh.global_transform * local.get_endpoint(corner)
+			if not began:
+				bounds = AABB(point, Vector3.ZERO)
+				began = true
+			else:
+				bounds = bounds.expand(point)
+	return bounds
 
 
 func _box_part(size: Vector3, at: Vector3, material: Material) -> void:

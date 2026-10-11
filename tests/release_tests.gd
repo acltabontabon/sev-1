@@ -101,6 +101,41 @@ func _run() -> void:
 		await click_control(menu_button("Back to Desk"))
 		await frames(4)
 		check(app.session == null and get_nodes_in_group("enemies").is_empty() and get_nodes_in_group("players").is_empty(), "cycle %d: main menu unloads all actors and audio owners" % cycle)
+	# Real finale completion returns directly to a usable menu after its closing card.
+	app.start_incident()
+	scene = app.session
+	player = scene.get_node("Player")
+	incident = scene.get_node("Incident")
+	incident.presentation.skip()
+	incident._cleanup()
+	for next in [incident.Stage.INVESTIGATION, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
+		incident._enter(next)
+	var story: Node = incident.presentation
+	story.reset_story()
+	story.killcam_in_headless = true
+	incident.hold_ending = true
+	player.camera_rig.controls_active = true
+	incident._enter(incident.Stage.RESOLVED)
+	await frames(3)
+	story.set_process(false)
+	var finale: Node = story.all_hands
+	check(is_instance_valid(finale), "release victory owns a finale before leaving the run")
+	if is_instance_valid(finale):
+		finale._beat("receipts")
+		finale._beat("next")
+		check(finale.titles.text == "TO BE CONTINUED" and app.page.is_empty(), "the closing card appears before menu navigation")
+		finale.tick(3.6)
+		await frames(4)
+		check(app.page == "main" and app.session == null and app.backdrop != null and paused and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+			"the finished ending returns directly to the main menu with visible mouse and live backdrop")
+		check(get_nodes_in_group("players").is_empty() and get_nodes_in_group("enemies").is_empty(), "return to menu unloads all run actors and their audio")
+		app.start_incident()
+		await frames(3)
+		var restarted: Node = app.session.get_node("Incident")
+		check(app.page.is_empty() and restarted.stage == restarted.Stage.ALERT and not paused,
+			"a new run starts normally after the completed ending")
+		app.main_menu()
+		await frames(3)
 	# Corrupt persisted data must not create unusable settings on next launch.
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("preferences", "sensitivity", -100)

@@ -93,13 +93,14 @@ TAB skips the cinematic and R retries the episode. Review the pacing, shout and 
 silhouette; visual inspection and automated checks do not establish the emotional payoff.
 
 For the revised ending (duel through departure and Monday), run
-`sh tools/godot.sh --path . --script tests/cutscene_preview.gd -- --finale`.
+`sh tools/godot.sh --path . --script tests/ending_preview.gd`.
+It finishes with “TO BE CONTINUED” and leaves the main menu open.
 For rendered grief, sword placement, pickup and memory checkpoints, run
 `sh tools/godot.sh --path . --script tests/finale_preview.gd`. In a normal run, use E
 with MORGAN, NADIA, JUN, JO or VAL and choose “Tell me something normal”; win the
 boss fight to hear that conversation recalled. The finale now closes with
-“Fucking great,” his return to the desk, and the start of Monday; no extra victory
-speech plays afterward. Use `tests/finale_preview.gd -- --closing` to inspect
+“Fucking great,” his return to the desk, and the start of Monday, followed by
+“TO BE CONTINUED” and the main menu; no extra victory speech plays afterward. Use `tests/finale_preview.gd -- --closing` to inspect
 just the final reply and return-to-work shots. Review the tear, animation transitions
 and sad-theme mix. TAB skips; R retries. These source changes are not in the existing ZIP.
 
