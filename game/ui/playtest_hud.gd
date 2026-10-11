@@ -174,11 +174,13 @@ func _build_incident_hud() -> void:
 	buff.add_theme_color_override("font_color", Color(.55, 1, .7))
 	column.add_child(buff)
 	guide = HBoxContainer.new()
-	guide.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	guide.offset_left = -360
-	guide.offset_right = 360
+	# Keep NEXT beside the ticket and out of the right-hand chat-card lane.
+	guide.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	guide.offset_left = 32
+	guide.offset_right = -500
 	guide.offset_top = 112
-	guide.alignment = BoxContainer.ALIGNMENT_CENTER
+	guide.offset_bottom = 140
+	guide.alignment = BoxContainer.ALIGNMENT_BEGIN
 	guide.add_theme_constant_override("separation", 10)
 	guide.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(guide)
@@ -192,6 +194,8 @@ func _build_incident_hud() -> void:
 	guide_arrow.pivot_offset = Vector2(14, 14)
 	guide.add_child(guide_arrow)
 	guide_text = Label.new()
+	guide_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	guide_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	guide_text.theme_type_variation = "Subhead"
 	guide_text.add_theme_font_size_override("font_size", 17)
 	guide_text.add_theme_color_override("font_outline_color", Color(0, 0, 0, .85))

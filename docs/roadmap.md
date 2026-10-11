@@ -43,6 +43,11 @@ Human space, challenge, comedy and readability acceptance remain pending.
 
 ## Next acceptance increment
 
+The 11 October [scene-flow pass](scene_flow.md) connects outbreak guidance, the
+optional investigation detours and the corridor/vault route. Its checkpoint verifies
+nearby E prompts and reaching the actual boss trigger. Human run time, clarity and
+cinematic pacing acceptance remain open; it adds no compulsory encounter.
+
 The 11 October [pantry refinement](pantry.md) expands the recovery room and doorway,
 moves dining furniture out of the central lane, and adds repeat appliance hauntings:
 Sam's mug tribunal, Casey's organised leftovers, a vending receipt and mandatory

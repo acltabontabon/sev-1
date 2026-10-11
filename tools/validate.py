@@ -43,6 +43,7 @@ if __name__ == "__main__":
     run("office", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/office_tests.gd"])
     run("incident", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/incident_tests.gd"])
     run("operations", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/operations_tests.gd"])
+    run("scene_flow", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/scene_flow_tests.gd"])
     run("presentation", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/presentation_tests.gd"])
     run("progression", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/progression_tests.gd"])
     run("burnout", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/burnout_tests.gd"])

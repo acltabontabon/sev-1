@@ -166,9 +166,9 @@ func _run() -> void:
 	check(investigate.get("tag", "") == "" and "answer Management" in investigate.text, "after the first encounter the call can be answered without backtracking")
 	await frames(2)
 	var hud: CanvasLayer = scene.get_node("HUD")
-	check(hud.guide.visible and "NEXT  ·  Delivery failed. E to answer Management." in hud.guide_text.text and not hud.guide_arrow.visible, "the HUD offers the management call without a false destination arrow")
+	check(hud.guide.visible and "NEXT  ·  E answer Management · detours optional." in hud.guide_text.text and not hud.guide_arrow.visible, "the HUD offers the management call without a false destination arrow")
 	await fresh_stage(incident.Stage.BOSS)
-	check(incident.next_step().get("tag", "") == "VAULT", "before the boss the next step points to the vault")
+	check(incident.next_step().get("tag", "") == "CORRIDOR", "before the boss the next step points through the server corridor")
 	await frames(2)
 	check(hud.guide.visible and hud.guide_arrow.visible and " m" in hud.guide_text.text, "the vault destination keeps its compass arrow and distance")
 	# Every outbreak site, and every spawn slot around it, is reachable on foot.

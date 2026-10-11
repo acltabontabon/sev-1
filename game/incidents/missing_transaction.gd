@@ -365,20 +365,20 @@ func _enter(next: Stage) -> void:
 		Stage.ENCOUNTER_ONE:
 			wave_index = 0
 			remaining = stage_total()
-			objective = "1/3 · The Discrepancy"
+			objective = "1/3 · Find the discrepancy"
 			_plant(0)
 			message = "The night shift is not okay.  •  Hit first: double damage."
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Delivery failed · E to answer Management"
-			message = "DISCREPANCY CONFIRMED  •  The pantry still has coffee."
+			message = "Take a breather: coffee, crew talk or an optional Quick Sync."
 			console_marker.text = ""
 			_plant_sync()
 			_dashboard("RECONCILIATION\nFAILED", "MANAGEMENT IS CALLING")
 		Stage.ENCOUNTER_TWO:
 			wave_index = 0
 			remaining = stage_total()
-			objective = "2/3 · Contain the delivery"
+			objective = "2/3 · Stop the delivery outbreak"
 			# A meeting nobody attended adjourns; its attendees go home instead of
 			# twitching through containment like a due wave.
 			for host: Node3D in sync_hosts:
@@ -395,8 +395,8 @@ func _enter(next: Stage) -> void:
 			room.get_node("VaultGate").collision_layer = 0
 			spawn_delay = 9999.0
 			boss_triggered = false
-			objective = "3/3 · The Variance"
-			message = "The original carries a solid ◆. Copies are hollow ◇."
+			objective = "3/3 · Reach the production vault"
+			message = "Containment cleared. The crew went ahead. Follow them into the vault."
 			_dashboard("FALSE\nPOSITIVES", "VERIFY BEFORE RESOLVING")
 		Stage.RESOLVED, Stage.FAILED:
 			_finish()
@@ -549,6 +549,7 @@ func _spawn() -> void:
 		actors.append(actor)
 		boss = actor
 		boss_encountered = true
+		objective = "3/3 · Defeat The Variance"
 		actor.died.connect(_on_record_died.bind(actor), CONNECT_ONE_SHOT)
 		actor.false_positives.connect(_make_copies, CONNECT_ONE_SHOT)
 		actor.show_impact(Color(.4, 1, 1))
@@ -892,19 +893,38 @@ func next_step() -> Dictionary:
 			if not alive.is_empty() or not pending.is_empty():
 				return {"text": "Dodge the orange arcs, strike after.", "point": none, "tag": ""}
 			if armed and _strangest() != null:
-				return {"text": "Talk to the strange coworker, or hit first.", "point": _strangest().global_position, "tag": "???"}
+				var host: Node3D = _strangest()
+				var area: String = str(host.get_meta("area", "the office"))
+				return {"text": "Wave %d/%d · %s · E talk or hit first." % [wave_index + 1, waves().size(), area], "point": host.global_position, "tag": "???"}
 			if wave_index >= waves().size():
-				return {"text": "Area clear.", "point": none, "tag": ""}
-			return {"text": "Catch your breath.", "point": none, "tag": ""}
+				return {"text": "Area clear · choose your upgrade next.", "point": none, "tag": ""}
+			return {"text": "Next wave in %ds · catch your breath." % maxi(1, ceili(spawn_delay)), "point": none, "tag": ""}
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
-				return {"text": "Survive the Quick Sync.", "point": none, "tag": ""}
+				return {"text": "Dismiss the attendees · dodge floor circles.", "point": none, "tag": ""}
 			if management_call.active:
 				return {"text": "Requesting containment.", "point": none, "tag": ""}
-			return {"text": "Delivery failed. E to answer Management.", "point": none, "tag": ""}
+			var nearest: String = nearest_interaction()
+			var someone: Dictionary = talk_target()
+			if not someone.is_empty() and (nearest.is_empty() or _flat(someone.body.global_position) < _flat(interactions[nearest].global_position)):
+				return {"text": "E talk to %s · the call can wait." % someone.tree.who, "point": none, "tag": ""}
+			if not nearest.is_empty():
+				return {"text": "%s · the call can wait." % interactions[nearest].prompt, "point": none, "tag": ""}
+			var at: Vector3 = player.global_position
+			if quick_sync == "idle" and not sync_hosts.is_empty() and at.x > 14.0 and at.x < 18.8 and absf(at.z + 8.0) < 2.5:
+				return {"text": "Optional Quick Sync · walk in for +30 health / Burnout −20.", "point": none, "tag": ""}
+			return {"text": "E answer Management · detours optional.", "point": none, "tag": ""}
 		Stage.BOSS:
 			if not boss_triggered:
-				return {"text": "North, through the corridor, to the vault.", "point": room.get_node("SpawnPoints/VaultEntry").global_position, "tag": "VAULT"}
+				# Route through the corridor mouth, then past the real arrival line.
+				# The former VaultEntry marker is before that line and could strand
+				# a player who stopped exactly where NEXT told them to go.
+				if player.global_position.z > room.get_node("VaultGate").global_position.z - 1.0:
+					var gate: Vector3 = room.get_node("VaultGate").global_position
+					return {"text": "Follow the crew · enter the server corridor.", "point": Vector3(gate.x, .05, gate.z - 2.0), "tag": "CORRIDOR"}
+				var entry: Vector3 = room.get_node("SpawnPoints/VaultEntry").global_position
+				entry.z = VAULT_LINE - 1.0
+				return {"text": "Keep going · enter the vault.", "point": entry, "tag": "VAULT"}
 			if is_instance_valid(boss) and boss.health > 0:
 				return {"text": "Strike The Variance only while OPEN.", "point": none, "tag": ""}
 	return {}
@@ -1258,7 +1278,7 @@ func _sync_screen(active: bool) -> void:
 	elif quick_sync == "done":
 		detail.text = "Minutes: nobody listened.\nAction items: go home.\nThis could have been an email."
 	else:
-		detail.text = "Production is down.\nFirst: align on alignment.\nThen: discuss going home."
+		detail.text = "Optional · before the call\nWin: +30 health / Burnout −20\nThis could have been an email."
 
 
 func _end_quick_sync() -> void:
@@ -1372,13 +1392,18 @@ func inspect_console() -> void:
 	management_call.start()
 
 
-func interact() -> void:
-	if terminal() or modal_pending() or stage == Stage.ALERT:
-		return
+func nearest_interaction() -> String:
 	var nearest: String = ""
 	for key: String in interactions:
 		if interactions[key].in_range(player) and (nearest.is_empty() or _flat(interactions[key].global_position) < _flat(interactions[nearest].global_position)):
 			nearest = key
+	return nearest
+
+
+func interact() -> void:
+	if terminal() or modal_pending() or stage == Stage.ALERT:
+		return
+	var nearest: String = nearest_interaction()
 	var someone: Dictionary = talk_target()
 	if not someone.is_empty() and (nearest.is_empty() or _flat(someone.body.global_position) < _flat(interactions[nearest].global_position)):
 		talk(someone)
