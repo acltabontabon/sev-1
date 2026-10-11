@@ -72,11 +72,40 @@ func _run() -> void:
 	scene.reset_encounter()
 	check(view.crouch == 0 and view.animator.current_animation != "rig/death", "retry clears death pose")
 	check(_effects(view) == 0, "retry clears element effects")
+	await _desk_contacts()
 	print("RESULT: ", failures, " failure(s)")
 	scene.queue_free()
 	paused = false
 	await frames(2)
 	quit(0 if failures == 0 else 1)
+
+
+func _desk_contacts() -> void:
+	var backdrop: Node3D = load("res://game/release/menu_backdrop.tscn").instantiate()
+	root.add_child(backdrop)
+	backdrop.set_process(false)
+	var rig: Node3D = backdrop.character
+	var desk: Node3D = backdrop.room.get_node("YourWorkstation")
+	await frames(120)
+	var blade: MeshInstance3D = rig.weapon.get_node("EscalationBlade/HeavyGreatsword")
+	var box: AABB = desk.global_transform.affine_inverse() * blade.global_transform * blade.get_aabb()
+	check(box.position.x > 1.125 and box.position.y >= .015 and box.position.y < .03,
+		"title sword stands beside the desk with its actual tip on the floor")
+	var planted: Transform3D = rig.weapon.global_transform
+	for pose: int in [rig.Pose.GLANCE, rig.Pose.SLUMP, rig.Pose.TYPING, rig.Pose.SIP, rig.Pose.RELAX, rig.Pose.TYPING]:
+		rig.story_pose = pose
+		var clear: bool = true
+		for sample in range(90):
+			await frames(1)
+			for side: String in ["L", "R"]:
+				var fist: Vector3 = desk.to_local(rig.skeleton.global_transform * rig.skeleton.get_bone_global_pose(rig.skeleton.find_bone("Fist." + side)).origin)
+				# Observe the solved bones, including each transition; allow hand thickness.
+				if absf(fist.x) < 1.125 and absf(fist.z) < .475:
+					clear = clear and fist.y >= .875
+		check(clear, "seated pose %d and its transition keep both hands above the tabletop" % pose)
+		check(rig.weapon.global_transform.is_equal_approx(planted), "desk reactions leave the sword planted")
+	backdrop.queue_free()
+	await frames(2)
 
 
 func _effects(view: Node) -> int:

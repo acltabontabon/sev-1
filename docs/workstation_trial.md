@@ -40,6 +40,13 @@ the solid chair, with capsule clearance checked on skip and retry. Judge the uph
 proportions, character fit and camera readability
 by starting a normal run and walking around the desk bays. R retries the incident.
 
+The seated engineer now parks the greatsword blade-down on the floor beside the
+desk's right pedestal. Typing and notification hand contacts clear the tabletop;
+slumped hands rest in his lap, and transitions lift the hands before crossing the
+desk edge. `tests/presentation_tests.gd` checks the actual sword bounds and solved
+fist bones through the title reactions. Inspect the title screen for a full reaction
+cycle to judge the placement and motion; human visual acceptance remains pending.
+
 [Source, license and retrieval records](../assets/environment/poly_haven_workstation/README.md).
 `tools/build_office.py` owns the generated scenes. Generated scenes preserve existing story node paths. No purchased assets or new dependencies are required.
 

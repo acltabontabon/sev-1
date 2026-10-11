@@ -26,7 +26,10 @@ const ELEMENTS: Array[Dictionary] = [
 	{"call": "HOT RELOAD", "color": Color(.72, .52, 1)},
 	{"call": "HOTFIX", "color": Color(1, .52, .14)},
 ]
-const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .8, -.5), Vector3(.13, .8, -.5)]
+## Fist centres clear the .8225 m tabletop and the keyboard, including hand thickness.
+const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .9, -.5), Vector3(.13, .9, -.5)]
+## Blade down on the floor beside the desk's right pedestal, outside its footprint.
+const SEATED_SWORD: Transform3D = Transform3D(Basis(Vector3.RIGHT, -PI * .5), Vector3(1.45, 2.34, -.87))
 ## The sitting clip was authored for a lower stool set further back: seated, the body
 ## shifts up onto the cushion and forward off the backrest so the chair never cuts it.
 const SEATED_OFFSET: Vector3 = Vector3(0, .17, -.3)
@@ -669,7 +672,7 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.04, 0)
 			target_lean = .02
 		Pose.SLUMP:
-			targets = [Vector3(-.22, .62, -.25), Vector3(.22, .62, -.25)]
+			targets = [Vector3(-.22, .62, .25), Vector3(.22, .62, .25)]
 			look = Vector2(.55, .05)
 			target_lean = -.32
 		Pose.SIP:
@@ -681,7 +684,7 @@ func _staged(delta: float) -> void:
 			look = Vector2(-.22, 0)
 			target_lean = .25
 		Pose.GLANCE:
-			targets = [Vector3(-.2, .84, -.46), Vector3(.16, .84, -.46)]
+			targets = [Vector3(-.2, .9, -.46), Vector3(.16, .9, -.46)]
 			look = Vector2(.02, -.4)
 			target_lean = -.05
 		Pose.ARMED:
@@ -700,6 +703,9 @@ func _staged(delta: float) -> void:
 	var on_desk: Array[bool] = [story_pose != Pose.SLUMP and story_pose != Pose.RELAX, story_pose in [Pose.TYPING, Pose.ALERT, Pose.GLANCE]]
 	for side in [0, 1]:
 		hands[side] = hands[side].lerp(targets[side] - (SEATED_OFFSET * sit if on_desk[side] else Vector3.ZERO), blend)
+		# Lift before crossing the desk edge, including transitions to/from the lap.
+		if seated and hands[side].z + SEATED_OFFSET.z * sit < -.32:
+			hands[side].y = maxf(hands[side].y, .9 - SEATED_OFFSET.y * sit)
 	head_turn = head_turn.lerp(look, blend)
 	lean = lerpf(lean, target_lean, blend)
 	position = SEATED_OFFSET * sit
@@ -725,10 +731,11 @@ func _staged(delta: float) -> void:
 	_turn("Abdomen", Vector3.RIGHT, -lean)
 	_turn("Head", Vector3.RIGHT, head_turn.x)
 	_turn("Head", Vector3.UP, head_turn.y)
-	# The improvised weapon lies across the desk until the engineer reaches for it.
+	# Keep the sword planted beside the desk while the body settles onto its cushion.
 	held = move_toward(held, 0.0 if seated else 1.0, delta * 3.0)
 	if seated:
-		weapon.transform = Transform3D(Basis.from_euler(Vector3(0, -1.2, 0)), Vector3(.3, .8, -.62) - SEATED_OFFSET * sit)
+		weapon.transform = SEATED_SWORD
+		weapon.position -= SEATED_OFFSET * sit
 	if story_pose == Pose.FINISH:
 		# The finisher is a cut: blade in hand at once, then one authored strike played
 		# out across the kill cam in slow motion.
