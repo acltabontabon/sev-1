@@ -120,3 +120,9 @@ export presets exclude the source FBX. No published release has been rebuilt wit
 this trial. A checkout without the optional library uses Quaternius CC0 motion.
 See [source, archive checksum and installation](../assets/characters/kevin_trial/README.md)
 and the [motion/playtest details](sword_motion_trial.md).
+
+The isolated [Skeleton Warrior vault trial](../assets/enemies/warrior_trial/README.md)
+uses Kay Lousberg's CC0 Skeleton Warrior, axe, shield and atlas from the same official
+Skeletons pack as the regular skeleton. Source revision and hashes are recorded in
+[provenance](../assets/enemies/warrior_trial/provenance.json). Runtime scale and dark
+armor presentation are local changes; attribution is optional. No paid assets are used.

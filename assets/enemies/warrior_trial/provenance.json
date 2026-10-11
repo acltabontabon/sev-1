@@ -1,0 +1,44 @@
+{
+  "creator": "Kay Lousberg",
+  "license": "CC0-1.0",
+  "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+  "revision": "15b62b9bad122f72926c10fb14d622c73819fa54",
+  "source_path": "addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Warrior.glb",
+  "retrieved": "2026-10-11",
+  "sha256": "178b6fda810b814c250d8a2010c24dfd9b458b9006dd323353e620b7ff118bbe",
+  "modifications": "Original GLB unchanged. Runtime scale and armor color shader only.",
+  "accessories": [
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Axe.bin",
+      "file": "skeleton_axe.bin",
+      "sha256": "f994f9e1b3297961a2b27120adb81ccc61ef7a901586b584fa53fdba8b962cc7"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/skeleton_texture.png",
+      "file": "skeleton_texture.png",
+      "sha256": "15741a25c53e04fa9bf3beac3bc0de442359404b1ff9be863b892cb551ad3657"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Axe.gltf",
+      "file": "skeleton_axe.gltf",
+      "source_sha256": "44c8b65942cbb573c99dc14c2a188fad8c47e29ad9764d27b47e6f57bb7e4ebd",
+      "modification": "Sidecar URI filenames lowercased; asset geometry unchanged"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Shield_Large_A.bin",
+      "file": "skeleton_shield_large_a.bin",
+      "sha256": "06d975dbf7058088c0ad2cde1932e15435b5d374de3be21199a97d3be25d776d"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/skeleton_texture.png",
+      "file": "skeleton_texture.png",
+      "sha256": "15741a25c53e04fa9bf3beac3bc0de442359404b1ff9be863b892cb551ad3657"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0/15b62b9bad122f72926c10fb14d622c73819fa54/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Shield_Large_A.gltf",
+      "file": "skeleton_shield_large_a.gltf",
+      "source_sha256": "7844df0f1607259c45d01fd4f9d7bad03b5bfe50897a136831915fecff240a92",
+      "modification": "Sidecar URI filenames lowercased; asset geometry unchanged"
+    }
+  ]
+}

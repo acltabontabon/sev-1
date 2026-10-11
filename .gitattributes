@@ -43,3 +43,6 @@ assets/characters/makehuman_trial/*.res filter=lfs diff=lfs merge=lfs -text
 
 # Licensed combat particle textures.
 assets/effects/**/*.png filter=lfs diff=lfs merge=lfs -text
+
+# CC0 matching Warrior props for the isolated boss art trial.
+assets/enemies/warrior_trial/*.bin filter=lfs diff=lfs merge=lfs -text

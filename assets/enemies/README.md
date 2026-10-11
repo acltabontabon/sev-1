@@ -60,3 +60,10 @@ headbutts, so limbs do not trace the telegraph arc exactly.
 The stand-up facilitator was retrieved from the same public pack mirror on 11 October
 2026. The embedded-buffer glTF is unchanged; its material palette and scale are applied
 in `MonsterRig` at runtime. The existing CC0 license and voluntary credit cover it.
+
+## Skeleton Warrior vault comparison
+
+The creator-authorized [Warrior trial](warrior_trial/README.md) stages KayKit's free
+CC0 Skeleton Warrior at 3.6 m with dark armor, axe and shield beside the current
+engineer in the server vault. It is an isolated art comparison; The Variance's
+normal body and gameplay remain unchanged. Launch `warrior_vault_trial.command`.
