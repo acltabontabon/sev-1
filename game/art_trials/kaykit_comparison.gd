@@ -9,7 +9,7 @@ var camera: Camera3D
 var status: Label
 var original_bounds: AABB
 var matched_scale: float = 1.0
-var matched_size: bool = true
+var matched_size: bool = false
 var capture: bool = false
 
 
@@ -43,7 +43,7 @@ func _ready() -> void:
 	for clip: String in CLIPS:
 		assert(animator.has_animation(clip), "Missing original KayKit animation: " + clip)
 	skeleton_body.rotation.y = PI
-	_set_size(true)
+	_set_size(false)
 	_pose(0)
 	camera = Camera3D.new()
 	camera.fov = 43.0

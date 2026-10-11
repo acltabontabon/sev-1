@@ -583,10 +583,11 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   before `super._ready()`) and hides the native boxes, keeping the record's loading halo
   and each archetype's prop (BLOCKED sign, invite card, sticky notes, status crown). The
   rig (KayKit Skeleton Minion for records; Quaternius "Ultimate Monsters" for
-  the other archetypes, with a shared 10% presentation size increase) plays supplied
+  the other archetypes) plays supplied
   motion clips from AI state with a manually advanced AnimationPlayer (spawn,
   locomotion, attack scrubbed to melee windows, hit, cast, death, sink). The record
-  preserves its original atlas and emissive eyes with `corruption.gdshader` as an
+  retains its original imported size (scale 1.0), bypassing height matching and the
+  10% presentation increase used by other archetypes. It preserves its original atlas and emissive eyes with `corruption.gdshader` as an
   additive next pass; it bypasses the procedural flesh material. Its punch reaches
   contact at 37% of the source clip, pinned to the existing melee windup. KayKit's
   `spine` and `upperleg.l/r` support the existing waist-slice death. Record AI,

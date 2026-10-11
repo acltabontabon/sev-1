@@ -20,6 +20,7 @@ func _run() -> void:
 		seen.append(foe.rig_kind)
 		check(foe.bark_kind == "record", "skeleton retains Corrupted Record voice")
 		var rig: MonsterRig = foe.rig
+		check(rig.model.scale.is_equal_approx(Vector3.ONE), "spawn preserves original KayKit model size")
 		var skeleton: Skeleton3D = rig.model.find_child("Skeleton3D", true, false)
 		check(skeleton != null and skeleton.get_bone_count() > 20, "record wears the imported KayKit skeleton")
 		for role: String in ["idle", "walk", "run", "attack", "hit", "death"]:
@@ -78,6 +79,7 @@ func _run() -> void:
 		check(rig.death_style == "slice" and rig.pieces.size() == 1, "hard kill produces physical waist-slice death")
 		foe.reset_enemy()
 		check(foe.health == foe.max_health and rig.death_style.is_empty() and rig.collapsed.is_empty(), "retry restores health and full rig")
+		check(rig.model.scale.is_equal_approx(Vector3.ONE), "retry preserves original KayKit model size")
 		check(rig.model.get_parent() == rig and rig.pieces.is_empty(), "retry removes detached corpse pieces")
 	check(seen == ["record", "record"], "consecutive records use the skeleton instead of realistic demons")
 	MonsterRig.gore_in_headless = false

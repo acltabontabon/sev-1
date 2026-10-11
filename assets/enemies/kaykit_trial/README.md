@@ -23,8 +23,8 @@ sh tools/godot.sh --path . game/art_trials/kaykit_comparison.tscn
 ```
 
 The trial shows the actual engineer and one Skeleton Minion in the office lounge,
-using the existing office environment and lights. It starts with both bodies at
-matching bind-pose height; toggle **Original size** to see the author’s model scale.
+using the existing office environment and lights. It starts at the author’s original
+model size; the optional height-matching toggle remains available for comparison.
 Use the buttons (or 1–3) for idle/walk/attack and F/S/B for front/side/back.
 Escape closes the viewer. Append `-- --capture` for an ignored 1080p screenshot.
 
@@ -39,8 +39,9 @@ The clean cartoon skin does not receive the old procedural flesh/blood staining.
 The punch, walk/run, hit and death clips are supplied by KayKit. Punch contact is
 sampled at approximately 0.54 seconds (37% of the source clip) and scrubbed to the
 existing melee windup/active/recovery windows. No damage, reach, movement, awareness,
-AI, dialogue, wave or input tuning changes. The record's 2.1 m target retains the
-existing shared 10% presentation increase, independently of collision dimensions.
+AI, dialogue, wave or input tuning changes. The record uses original imported scale
+1.0, without height matching or the shared 10% presentation increase. Its standing
+height metadata is 2.166 m; collision dimensions are unchanged.
 Waist cuts use the imported `spine` and `upperleg.l/r` hierarchy.
 
 The engineer retains the current body, sword and idle presentation, including the
@@ -54,7 +55,8 @@ beside the engineer; inspect the walk and punch in a normal encounter.
 Idle, side-view walk and punch were inspected in the actual office renderer on
 Apple M2 Pro, Godot 4.7.2, Metal Forward+, 1920×1080 with existing SSAO/glow/fog.
 Bind mesh bounds measure 2.128 m for the engineer and 2.166 m for the minion;
-matched-height mode uses uniform scale 0.982, retaining its original proportions.
+the optional matched-height mode uses uniform scale 0.982. The accepted default
+now retains the original imported size in both gameplay and this viewer.
 After 90 warm-up frames, 120 sampled staged frames averaged 8.34 ms with p95
 8.54 ms in the final gameplay-idle comparison (presentation/vsync included).
 This measures an isolated two-character review, not moving gameplay performance.
@@ -90,3 +92,10 @@ itself by clearing its last enemy; retaining a spare enemy corrected that fixtur
 without changing runtime behavior. Contact and physical cut captures were reviewed
 on Apple M2 Pro, Godot 4.7.2, Metal Forward+, 1920×1080 with the existing office
 SSAO/glow/fog. These renders do not measure ordinary moving-combat performance.
+
+Original-size follow-up: rendered the runtime punch beside the engineer at scale
+1.0 and passed all 54 focused skeleton assertions, including spawn/retry size.
+The full validation run passed `skeleton_bodies`, then failed `sword_motion` with
+player sword-trail errors (`emitting`/`sample` on MeshInstance3D) during concurrent
+weapon-trail work. The separate focused run also logged those player errors; its
+skeleton assertions passed, but the current whole-game suite is not clean.

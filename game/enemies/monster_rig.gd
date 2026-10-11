@@ -52,7 +52,7 @@ const KINDS: Dictionary = {
 		"slice": {"upper": ["Spine2"], "lower": ["Hip.L", "Hips.R"], "center": "Spine2"},
 		"idle": "Idle", "walk": "Walk", "run": "Run", "attack": "Attack", "impact": .5,
 		"hit": "HitReact", "death": "Death", "cast": ""},
-	"record": {"model": "res://assets/enemies/kaykit_trial/skeleton_minion.glb", "height": 2.1, "stylized": true,
+	"record": {"model": "res://assets/enemies/kaykit_trial/skeleton_minion.glb", "height": 2.166, "scale": 1.0, "size_multiplier": 1.0, "stylized": true,
 		"slice": {"upper": ["spine"], "lower": ["upperleg.l", "upperleg.r"], "center": "spine"},
 		"idle": "Idle", "walk": "Walking_D_Skeletons", "run": "Running_A",
 		"attack": "Unarmed_Melee_Attack_Punch_A", "impact": .37,
@@ -124,11 +124,12 @@ static func create(kind_: String, owner_actor: CharacterBody3D) -> MonsterRig:
 func _ready() -> void:
 	process_physics_priority = 10
 	spec = KINDS[kind].duplicate()
-	spec.height *= SIZE_MULTIPLIER
+	var size_multiplier: float = spec.get("size_multiplier", SIZE_MULTIPLIER)
+	spec.height *= size_multiplier
 	if spec.has("scale"):
-		spec.scale *= SIZE_MULTIPLIER
+		spec.scale *= size_multiplier
 	if spec.has("lift"):
-		spec.lift *= SIZE_MULTIPLIER
+		spec.lift *= size_multiplier
 	model = load(spec.model).instantiate()
 	add_child(model)
 	model.rotation.y = PI
