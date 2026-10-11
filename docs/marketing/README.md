@@ -18,3 +18,24 @@ Original game visuals and writing retain the creator's rights. Depicted models,
 fonts, materials, and other third-party assets retain their existing licenses;
 see the [asset inventory](../asset_licenses.md) and its source records.
 No outside promotional art or new font was introduced.
+
+## Ending PR captures — 11 October 2026
+
+Unmodified staged in-engine captures of the completed ending changes. The check
+shot shows the engineer kneeling beside Morgan; the five memory captures show the
+selected sketch art with the actual narrator captions. Captured in Godot 4.7.2
+Forward+ / Metal on Apple M2 Pro. These establish framing and subtitle layout,
+not measured performance, ordinary gameplay duration or listening acceptance.
+
+| File | Local source | Resolution |
+| --- | --- | --- |
+| `ending_check_morgan.png` | `logs/finale_remember_1.png` | 1280 × 720 |
+| `ending_memory_morgan.png` | `logs/finale_memory_0_5.png` | 1280 × 720 |
+| `ending_memory_nadia.png` | `logs/finale_memory_1_5.png` | 1280 × 720 |
+| `ending_memory_jun.png` | `logs/finale_memory_2_5.png` | 1280 × 720 |
+| `ending_memory_jo.png` | `logs/finale_memory_3_5.png` | 1744 × 981 |
+| `ending_memory_val.png` | `logs/finale_memory_4_5.png` | 1824 × 1026 |
+
+Memory artwork is AI-generated from authored prompts; its source files, exact
+prompts and review record are in [illustration provenance](../../assets/environment/memorial_illustrations/README.md).
+Git LFS tracks these screenshots; this directory remains excluded from game imports.
