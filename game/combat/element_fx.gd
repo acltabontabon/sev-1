@@ -6,12 +6,13 @@ extends Node3D
 
 const CIRCLE_SHADER: Shader = preload("res://game/combat/magic_circle.gdshader")
 const SMOKE_TEXTURE: Texture2D = preload("res://assets/effects/kenney_smoke/smoke_puff.png")
+const GLOW_TEXTURE: Texture2D = preload("res://assets/effects/kenney_particles/soft_glow.png")
+const TRACE_TEXTURE: Texture2D = preload("res://assets/effects/kenney_particles/soft_trace.png")
 const DISTORTION: Script = preload("res://game/combat/shockwave_distortion.gd")
 static var circle_material: ShaderMaterial
 static var glow_material: StandardMaterial3D
 static var ribbon_material: StandardMaterial3D
 static var paper_material: StandardMaterial3D
-static var soft_dot: GradientTexture2D
 static var dust_material: StandardMaterial3D
 ## The latest freeze-frame; only its own timer restores speed, so nested freezes extend.
 static var freeze_token: int = 0
@@ -61,7 +62,7 @@ static func sigil(emitter: Node, at: Vector3, color: Color, radius: float, durat
 	disc.set_instance_shader_parameter("seed", randf() * 100.0)
 	effect.on_tick = func(t: float) -> void:
 		disc.set_instance_shader_parameter("spin", t * duration * spin_rate)
-		disc.set_instance_shader_parameter("fade", minf(1.0, t * 6.0) * minf(1.0, (1.0 - t) * 4.0))
+		disc.set_instance_shader_parameter("fade", smoothstep(0.0, .16, t) * (1.0 - smoothstep(.7, 1.0, t)))
 		disc.scale = Vector3.ONE * lerpf(.55, 1.0, ease(minf(1.0, t * 5.0), .4))
 	return effect
 
@@ -76,7 +77,7 @@ static func shockwave(emitter: Node, at: Vector3, color: Color, radius: float, d
 	DISTORTION.emit(effect, radius)
 	effect.on_tick = func(t: float) -> void:
 		disc.scale = Vector3.ONE * lerpf(.1, 1.0, ease(t, .35))
-		disc.set_instance_shader_parameter("fade", 1.0 - t)
+		disc.set_instance_shader_parameter("fade", 1.0 - smoothstep(0.0, 1.0, t))
 	return effect
 
 
@@ -176,10 +177,12 @@ static func gust(emitter: Node, at: Vector3, basis: Basis, color: Color, distanc
 	for step in range(17):
 		var angle: float = lerpf(-1.25, 1.25, step / 16.0)
 		var width: float = sin(step / 16.0 * PI) * .32
-		var edge: Color = Color(color.r, color.g, color.b, 0.0)
+		var edge: Color = Color(color.r, color.g, color.b, .65)
+		mesh.surface_set_uv(Vector2(.32, step / 16.0))
 		mesh.surface_set_color(edge)
 		mesh.surface_add_vertex(Vector3(sin(angle) * 1.25, 0, -cos(angle) * 1.25 + .9))
-		mesh.surface_set_color(Color(color.r, color.g, color.b, .9))
+		mesh.surface_set_uv(Vector2(.68, step / 16.0))
+		mesh.surface_set_color(edge)
 		mesh.surface_add_vertex(Vector3(sin(angle) * (1.25 - width), 0, -cos(angle) * (1.25 - width) + .9))
 	mesh.surface_end()
 	crescent.mesh = mesh
@@ -247,8 +250,10 @@ static func bolt(emitter: Node, from: Vector3, to: Vector3, color: Color, durati
 					for index in range(points.size()):
 						var half: float = layer[0] * taper[index]
 						var tone: Color = layer[1]
+						mesh.surface_set_uv(Vector2(.5, float(index) / (points.size() - 1)))
 						mesh.surface_set_color(Color(tone.r, tone.g, tone.b, tone.a * fade))
 						mesh.surface_add_vertex(points[index])
+						mesh.surface_set_uv(Vector2(.68 if edge > 0.0 else .32, float(index) / (points.size() - 1)))
 						mesh.surface_set_color(Color(tone.r, tone.g, tone.b, 0.0))
 						mesh.surface_add_vertex(points[index] + plane * half * edge)
 					mesh.surface_end()
@@ -372,8 +377,10 @@ static func cracks(emitter: Node, at: Vector3, color: Color, radius: float, coun
 				var point: Vector3 = points[index]
 				var across: Vector3 = point.normalized().cross(Vector3.UP) if point.length() > .01 else Vector3.RIGHT
 				var width: float = .09 * (1.0 - float(index) / points.size()) + .015
+				mesh.surface_set_uv(Vector2(.32, float(index) / (points.size() - 1)))
 				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
 				mesh.surface_add_vertex(point + across * width)
+				mesh.surface_set_uv(Vector2(.68, float(index) / (points.size() - 1)))
 				mesh.surface_set_color(Color(color.r, color.g, color.b, alpha).lerp(Color(1, 1, 1, alpha), highlight))
 				mesh.surface_add_vertex(point - across * width)
 			mesh.surface_end()
@@ -491,8 +498,10 @@ static func fissure(emitter: Node, from: Vector3, to: Vector3, color: Color, dur
 		mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, _ribbon())
 		for index in range(front):
 			var width: float = .12 * sin(PI * (index + .5) / points.size()) + .02
+			mesh.surface_set_uv(Vector2(.32, float(index) / (points.size() - 1)))
 			mesh.surface_set_color(Color(color.r, color.g, color.b, alpha))
 			mesh.surface_add_vertex(points[index] + across * width)
+			mesh.surface_set_uv(Vector2(.68, float(index) / (points.size() - 1)))
 			mesh.surface_set_color(Color(1, 1, 1, alpha * .7))
 			mesh.surface_add_vertex(points[index] - across * width)
 		mesh.surface_end()
@@ -541,6 +550,7 @@ static func _disc(effect: ElementFx, radius: float, color: Color, mode: float) -
 	if circle_material == null:
 		circle_material = ShaderMaterial.new()
 		circle_material.shader = CIRCLE_SHADER
+		circle_material.set_shader_parameter("soft_ring", preload("res://assets/effects/kenney_particles/soft_ring.png"))
 	var plane: PlaneMesh = PlaneMesh.new()
 	plane.size = Vector2.ONE * radius * 2.0
 	var disc: MeshInstance3D = MeshInstance3D.new()
@@ -570,23 +580,15 @@ static func _particles(amount: int, lifetime: float, mesh: Mesh) -> CPUParticles
 
 static func _dot_mesh(size: float) -> QuadMesh:
 	if glow_material == null:
-		soft_dot = GradientTexture2D.new()
-		soft_dot.fill = GradientTexture2D.FILL_RADIAL
-		soft_dot.fill_from = Vector2(.5, .5)
-		soft_dot.fill_to = Vector2(1, .5)
-		soft_dot.width = 64
-		soft_dot.height = 64
-		var falloff: Gradient = Gradient.new()
-		falloff.set_color(0, Color(1, 1, 1, 1))
-		falloff.set_color(1, Color(1, 1, 1, 0))
-		soft_dot.gradient = falloff
 		glow_material = StandardMaterial3D.new()
 		glow_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		glow_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		glow_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 		glow_material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 		glow_material.vertex_color_use_as_albedo = true
-		glow_material.albedo_texture = soft_dot
+		glow_material.albedo_texture = GLOW_TEXTURE
+		glow_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		glow_material.texture_repeat = false
 		glow_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	var quad: QuadMesh = QuadMesh.new()
 	quad.size = Vector2.ONE * size
@@ -602,6 +604,9 @@ static func _ribbon() -> StandardMaterial3D:
 		ribbon_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 		ribbon_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		ribbon_material.vertex_color_use_as_albedo = true
+		ribbon_material.albedo_texture = TRACE_TEXTURE
+		ribbon_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		ribbon_material.texture_repeat = false
 		ribbon_material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 	return ribbon_material
 
@@ -610,7 +615,8 @@ static func _fade_ramp(start: Color, end: Color) -> Gradient:
 	var ramp: Gradient = Gradient.new()
 	ramp.set_color(0, Color(end.r, end.g, end.b, 1))
 	ramp.set_color(1, Color(start.r, start.g, start.b, 0))
-	ramp.add_point(.3, Color(start.r, start.g, start.b, .9))
+	ramp.add_point(.2, Color(start.r, start.g, start.b, .75))
+	ramp.add_point(.6, Color(start.r, start.g, start.b, .35))
 	return ramp
 
 

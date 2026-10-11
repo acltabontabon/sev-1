@@ -66,3 +66,36 @@ captures were visually reviewed, including the dust after the impact flash fades
 On an Apple M2 Pro using Metal/Forward+ at 1920×1080 with SSAO, glow, and MSAA 2×,
 the repeated-quake preview measured **9.15 ms median / 10.42 ms p95** across 240
 frames. This does not establish performance in a full combat encounter.
+
+## Soft sword and magic effects (11 October 2026)
+
+Implemented by creator request using three selected, unmodified textures from the
+[Kenney Particle Pack, CC0](../assets/effects/kenney_particles/README.md).
+Sword trails, wind crescents, lightning, cracks and fissure ribbons use the soft
+trace with linear mipmap filtering and clamped UVs. The UVs exclude the texture's
+empty side margins so the trail remains visible. Sword samples fade with elapsed
+time, including after emission stops, and clear immediately on reset. Motes and
+flames use the soft glow; shockwaves use the soft ring. Spell-circle marks have
+feathered boundaries, quieter brightness and smooth entrance/exit fades.
+Combat damage, reach, hit windows, cooldowns and movement are unchanged.
+
+In the same office preview above, press **4** for a sword ribbon and **5** for a
+combined magic example; **0** clears both. `--capture` also writes
+`builds/effect_sword.png` and `builds/effect_magic.png`. The ribbon preview uses the
+actual trail component with a staged swing; ordinary combat remains the final
+checkpoint for animation alignment and readability.
+
+The graphical regression `tests/soft_effect_render_tests.gd` checks rendered edge
+shades, dimming after emission, expiration and immediate reset, plus visibility
+and full fade-out of spell circles and textured shockwaves. Review the moving
+three-hit combo and special moves in normal play: judge whether the trails are
+visible enough, whether spell edges feel soft, and whether nearby enemies remain
+readable. Human acceptance and Windows runtime verification remain open.
+
+Verified on 11 October 2026: full `python3 tools/validate.py` passed; eight soft-effect
+render checks, four existing distortion pixel checks and eight focused lifecycle
+checks passed. Office captures were inspected using Godot 4.7.2 on Apple M2 Pro,
+Metal/Forward+, 1920×1080, SSAO, glow and MSAA 2×. The `--soft-benchmark` office fixture repeated magic and sword effects every
+30 frames across 240 measured frames after warmup: **11.00 ms median / 13.63 ms
+p95** at those settings. This is a small effect fixture, not a full-combat
+performance guarantee.
