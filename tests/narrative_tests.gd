@@ -50,7 +50,7 @@ func _run() -> void:
 	await frames(2)
 	check(not story.panel.visible and not story.title.visible, "choice modal suppresses narrative overlays")
 	incident.choose_upgrade(0)
-	check("Power-up active: More damage" in incident.message and "this run only" in incident.message and not story.seen.has("debt"), "paid upgrade confirms its effect and duration without redundant speech")
+	check("Power-up active: Violence Budget" in incident.message and "this run only" in incident.message and not story.seen.has("debt"), "paid upgrade confirms its effect and duration without redundant speech")
 	incident.run.change_burnout(90, "test pressure")
 	incident.run.change_burnout(-40, "test relief")
 	check(incident.run.peak_burnout == 90 and incident.run.burnout == 50, "peak records pressure before relief")

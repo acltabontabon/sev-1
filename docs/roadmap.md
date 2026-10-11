@@ -152,8 +152,9 @@ sound, including TAB skip and retry. It uses existing CC0 motion and adds no bos
 mechanic, new episode or release build.
 
 
-The 11 October Operations clarity pass frames the live status screens with existing
-materials and adds server-corridor wayfinding. Power-up cards lead with combat effects,
-cost and run duration; radio captions show one message at a time and distinguish
-passive speech from dialogue choices. [Implementation and playtest checkpoint](architecture.md#operations-and-choice-clarity-11-october-2026).
+The revised 11 October Operations pass replaces the first wall framing with an incident
+command console, detailed racks and CC0 industrial pendants. The creator rejected the
+previous presentation and requested a bolder redesign. Power-ups are now free, funny
+single-effect rewards; normal upgrade debt costs and pursuit penalties are retired.
+[Implementation and playtest checkpoint](architecture.md#operations-and-choice-clarity-11-october-2026).
 Creator visual and comprehension acceptance remains open.

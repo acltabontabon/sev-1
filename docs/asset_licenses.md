@@ -129,3 +129,11 @@ armor presentation are local changes; attribution is optional. No paid assets ar
 Original skirt/blouse and earring mesh edits to the existing Quaternius CC0 female
 models. The unchanged source rigs and animation libraries are reused; generated
 ArrayMeshes use Git LFS. [Source, modifications and hashes](../assets/characters/office_outfits/README.md).
+
+
+## Operations command station — 11 October 2026
+
+Two instances of Poly Haven **Caged Hanging Light** by Ulan Cabanilla, CC0 1.0.
+The official 1K glTF buffers and JPEG maps were verified and embedded into a GLB;
+[source URLs, hashes and license](../assets/environment/operations/README.md).
+Original console/rack geometry and power-up SVG icons add no outside rights.

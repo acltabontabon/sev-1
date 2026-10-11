@@ -4,7 +4,7 @@ extends CanvasLayer
 ## Each card keeps its
 ## full plain-text summary in meta "summary" for accessibility and tests.
 signal selected(index: int)
-const FLAVOR: Array[String] = ["Hit harder with every attack.", "Take less damage from enemy hits.", "Dodge again sooner."]
+const FLAVOR: Array[String] = ["Finance approved ONE violence.", "Your skeleton ships as fragile.", "Your blood type is now espresso."]
 const REPLIES: Array[String] = ["“Five minutes.”", "“I'll have a realistic estimate shortly.”", "“It's blocked on another team.”"]
 const RISK: Array = [["RISK: HIGH", Color(1, .38, .25)], ["RISK: LOW", Color(.35, .9, .6)], ["RISK: MEDIUM", Color(1, .72, .3)]]
 var panel: CenterContainer
@@ -256,33 +256,48 @@ var guard_left: float = 0.0
 func open(run: Node) -> void:
 	window_bar.hide()
 	eyebrow.text = "AREA CLEARED  ·  COMBAT PAUSED"
-	heading.text = "Choose a power-up"
-	subhead.text = "Pick one. Bonuses stack and last until this run ends. Debt makes enemies chase faster."
-	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   CHOOSE TO CONTINUE"
-	var titles: Array[String] = ["More damage", "Less damage taken", "Faster dodge"]
-	var benefits: Array[String] = [
-		"+%d%% attack damage" % roundi(run.damage_bonus * 100),
-		"−%d%% damage taken" % roundi(run.defense_bonus * 100),
-		"−%d%% dodge recovery" % roundi(run.recovery_bonus * 100)]
+	heading.text = "FREE POWER-UP. TAKE ONE."
+	subhead.text = "Lasts until this run ends. Pick the same one again to make it stronger."
+	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   TAKE IT AND GET BACK TO WORK"
+	var effects: Array[String] = [
+		"HIT %d%% HARDER" % roundi(run.damage_bonus * 100),
+		"TAKE %d%% LESS DAMAGE" % roundi(run.defense_bonus * 100),
+		"DODGE %d%% SOONER" % roundi(run.recovery_bonus * 100)]
+	var icons: Array[Texture2D] = [
+		preload("res://game/ui/icons/violence_budget.svg"),
+		preload("res://game/ui/icons/bubble_bones.svg"),
+		preload("res://game/ui/icons/illegal_espresso.svg")]
 	for index in range(3):
 		var button: Button = buttons[index]
-		var risk: Array = RISK[index]
+		var accent: Color = RISK[index][1]
+		button.custom_minimum_size = Vector2(336, 360)
 		button.text = ""
 		button.rotation = 0.0
-		_card_style(button, Color(.075, .085, .095, .98), risk[1], 12)
+		button.scale = Vector2.ONE
+		_card_style(button, Color(.075, .085, .095, .98), accent, 12)
 		var column: VBoxContainer = _clear(button)
-		_badge(column, index + 1, risk[1])
-		_text(column, titles[index], "Headline", 32)
-		_text(column, run.TITLES[index], "Caption", 15, Color(.65, .7, .74))
-		column.add_child(HSeparator.new())
-		_text(column, benefits[index], "Headline", 27, Color(.55, 1, .8))
-		_text(column, FLAVOR[index], "Caption", 17)
-		var after: int = clampi(run.debt + run.cost(index), 0, run.debt_limit)
-		_text(column, ("Cost: +%d debt" % run.cost(index)) if run.cost(index) > 0 else "No added debt", "Subhead", 18, risk[1])
-		_text(column, "Enemy chase speed: +%d%% → +%d%%" % [roundi((run.pressure() - 1) * 100), roundi((run.pressure(after) - 1) * 100)], "Caption", 16)
-		_text(column, "Debt: %d → %d" % [run.debt, after], "Caption", 15, Color(.65, .7, .74))
-		_text(column, "THIS RUN ONLY", "Eyebrow")
-		button.set_meta("summary", "%s\n%s\n%s" % [titles[index], FLAVOR[index], run.option_text(index)])
+		var top: HBoxContainer = HBoxContainer.new()
+		top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(top)
+		_badge(top, index + 1, accent)
+		var gap: Control = Control.new()
+		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(gap)
+		var free_label: Label = _text(top, "FREE", "Eyebrow", 16, accent)
+		free_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		free_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		top.get_child(0).size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var icon: TextureRect = TextureRect.new()
+		icon.texture = icons[index]
+		icon.custom_minimum_size = Vector2(0, 100)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.modulate = accent
+		column.add_child(icon)
+		_text(column, run.TITLES[index].to_upper(), "Headline", 29)
+		_text(column, effects[index], "Subhead", 22, Color(.55, 1, .8))
+		_text(column, FLAVOR[index], "Caption", 17, Color(.72, .76, .8))
+		button.set_meta("summary", "%s\n%s\n%s\nFREE · LASTS THIS RUN" % [run.TITLES[index], effects[index], FLAVOR[index]])
 	_show_choices()
 
 
@@ -336,6 +351,8 @@ func _input(event: InputEvent) -> void:
 
 
 func open_corporate(run: Node, seconds: float) -> void:
+	for button in buttons:
+		button.custom_minimum_size = Vector2(336, 392)
 	window_bar.show()
 	eyebrow.text = "CONTAINMENT REQUEST  ·  MANAGEMENT CALL  ·  ETA REQUIRED"
 	heading.text = "Management asks: how long?"

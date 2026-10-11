@@ -80,8 +80,8 @@ func _run() -> void:
 	await frames(3)
 	var buttons: Array[Button] = incident.upgrade_ui.buttons
 	check(buttons[0].has_focus() and flavor_ok(buttons), "power-ups open focused with plain combat descriptions")
-	check(incident.upgrade_ui.heading.text == "Choose a power-up" and "run ends" in incident.upgrade_ui.subhead.text, "power-up purpose and duration are explicit")
-	check("More damage" in incident.upgrade_ui.summary(0) and "+35%" in incident.upgrade_ui.summary(0), "power-up summary ties the benefit to its actual value")
+	check(incident.upgrade_ui.heading.text == "FREE POWER-UP. TAKE ONE." and "run ends" in incident.upgrade_ui.subhead.text, "free reward and duration are explicit")
+	check("Violence Budget" in incident.upgrade_ui.summary(0) and "35%" in incident.upgrade_ui.summary(0), "ridiculous name is paired with its actual combat effect")
 	check(feed.LIMIT == 1, "only one radio caption may occupy combat space")
 	await key(KEY_RIGHT)
 	check(buttons[1].has_focus(), "right arrow walks to the next change request")

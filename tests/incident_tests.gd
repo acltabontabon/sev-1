@@ -96,7 +96,7 @@ func _run() -> void:
 	await defeat_wave()
 	check(incident.upgrade_pending and paused, "second wave opens second upgrade")
 	incident.upgrade_ui.buttons[0].pressed.emit()
-	check(incident.run.debt == 30 and incident.run.choices.size() == 2, "button upgrade persists both run decisions")
+	check(incident.run.debt == 0 and incident.run.choices.size() == 2, "button upgrade persists both run decisions")
 	check(incident.stage == incident.Stage.BOSS, "second wave completion starts boss")
 	await frames(120)
 	check(not is_instance_valid(incident.active_enemy) and incident.room.get_node("VaultGate").collision_layer == 0, "boss stage opens the gate and waits for the engineer")

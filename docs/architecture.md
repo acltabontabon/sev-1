@@ -257,6 +257,10 @@ the existing boss/copies measurement. See README for measured results and human 
 
 ## Technical Debt run progression
 
+Historical tuning experiment: live power-ups now have zero debt cost and no pursuit
+penalty. The implementation below describes retained opt-in pressure arithmetic;
+[the current presentation and defaults](#operations-and-choice-clarity-11-october-2026) supersede it.
+
 Incident owns one `run_progression.gd` Node and one `upgrade_selection.gd` CanvasLayer,
 created once in `_ready`. No autoload, new global signal bus, save data, or dependency
 was added. `_on_record_died` opens a choice when a record wave reaches zero, retaining
@@ -557,7 +561,7 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   film subtitles instead.
 - **HUD and dialogs.** `playtest_hud.gd` restyles its labels into a ticket header and adds
   a vitals card, boss bar and notice. `upgrade_selection.gd` builds
-  plain combat power-ups or an incident-call response inside its three buttons and stores each
+  free illustrated combat power-ups or an incident-call response inside its three buttons and stores each
   card's plain summary in meta `summary`; closing clears card contents.
 - **Office.** `tools/build_office.py` adds the meeting wing, pantry, gate, corridor, vault,
   `SpawnPoints` markers, PBR materials (triplanar), Kenney props (tinted by
@@ -937,21 +941,38 @@ acceptance remain open; no release was rebuilt.
 
 ## Operations and choice clarity (11 October 2026)
 
-Operations uses the existing wood/material palette with vertical battens behind the racks,
-a shallow wall shelf, warm edge strips and a server-corridor arrow. The two live screens
-remain the focal point; the lower label stays short rather than cycling a long uptime joke.
-These are wall details without world collision; floor routes and baked navigation stay valid.
-No outside assets were added for this pass.
+The creator rejected the first wall/power-up presentation and authorized a larger rethink.
+Operations now has a steel equipment surround, a dominant incident screen with a secondary
+clock/detail panel, a solid operator console with angled terminals, keyboards and a covered
+emergency stop, detailed glazed rack casings, cable looms and a high server-core arrow.
+The old cyan MOVE FAST sign moves to the side wall. The root labels used by incident
+state and ending scenes remain available. `tools/operations_layout.py` owns the station;
+`operations_rack.tscn` is local to this area. Console collision is included in the rebaked
+navigation. Existing employee and outbreak sites stay in place.
 
-Power-ups now say “Choose a power-up” after an area clear. Each card leads with its combat
-benefit, reads tuning from the run exports, shows debt and enemy chase speed before/after,
-and states that it lasts this run. The existing corporate names remain secondary.
-Management's separate reply screen explains Burnout as stress. Selection, stacking,
-consequences and retry behavior are preserved. The upgrade confirmation is a short HUD
-notice; its redundant debt voice line and the timed visibility/RCA jokes are removed.
+Two 1K CC0 Poly Haven Caged Hanging Lights provide actual industrial fixtures.
+[Source, license and exact hashes](../assets/environment/operations/README.md).
+Console/rack geometry and three SVG power-up icons are original project work.
 
-Rendered office, power-up and radio views were inspected at 1280×720 with Forward+/Metal
+Power-ups now say “FREE POWER-UP. TAKE ONE.” Each card contains a ridiculous name,
+one numeric combat effect, an icon and one joke. No debt or pursuit arithmetic appears.
+Live debt costs default to zero; the HUD hides the zero-debt row, and reports list
+power-ups. Violence Budget adds 35% base damage; Bubble-Wrap Bones reduces incoming
+damage by 20% of base; Illegal Espresso reduces dodge recovery by 25% of base. Existing
+additive stacking and reset remain. Legacy pressure tests explicitly set the retired
+30/15 debt tuning; new checks verify free defaults and applied combat multipliers.
+Management's existing Burnout decision remains separate.
+
+The earlier one-message radio captions and removed redundant upgrade speech remain.
+Rendered station, power-up and radio views are inspected at 1280×720 with Forward+/Metal
 on Apple M2 Pro. This is visual review, not a performance measurement or human acceptance.
-Playtest: clear the first outbreak, choose with 1/2/3, then follow NEXT and press E to
-answer Management. Check whether the power-up cost is clear and the wall reads as a
-monitoring area with a route to the server corridor. Human combat/audio acceptance remains open.
+Playtest: clear the first outbreak, choose with 1/2/3, inspect Operations and follow NEXT.
+Judge whether the station now feels like a place people operate, and whether a power-up
+can be chosen without deciphering a system. Human combat/audio acceptance remains open.
+
+
+The 25-second office combat sample (`tests/office_preview.gd -- --measure`, first five
+seconds excluded) measured 119.95 mean FPS, 8.325 ms median, 9.009 ms p95 and 17.210 ms
+maximum across 2,400 samples on Apple M2 Pro at 1280×720, Forward+/Metal, MSAA 2×,
+SSAO, glow and fog. Headless validation ran concurrently; this sample describes the
+lab combat view, not a worst-case Operations fight or a release performance guarantee.

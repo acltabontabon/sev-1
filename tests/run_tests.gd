@@ -89,10 +89,15 @@ func _run() -> void:
 	await frames(70)
 	check(player.is_on_floor() and absf(player.position.y) < 0.1, "jump lands back on floor")
 
-	await reset_at(Vector3(0, 0.05, -14))
+	await reset_at(Vector3(4.5, 0.05, -14))
 	Input.action_press("move_forward")
 	await frames(60)
 	check(player.position.z > -15.5 and player.position.z < -15.0, "solid wall blocks the player")
+
+	await reset_at(Vector3(0, 0.05, -12))
+	Input.action_press("move_forward")
+	await frames(60)
+	check(player.position.z > -13.8 and player.position.z < -13.4, "Operations console blocks walking before the visible cabinet")
 
 	await reset_at(Vector3(8, 0.05, 4))
 	Input.action_press("move_forward")

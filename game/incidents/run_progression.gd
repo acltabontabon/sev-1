@@ -5,8 +5,8 @@ extends Node
 @export_range(0, 1) var damage_bonus: float = .35
 @export_range(0, .4) var defense_bonus: float = .20
 @export_range(0, .4) var recovery_bonus: float = .25
-@export var ship_debt: int = 30
-@export var workaround_debt: int = 15
+@export var ship_debt: int = 0
+@export var workaround_debt: int = 0
 @export_range(0, .15) var pursuit_per_band: float = .05
 @export_range(70, 200) var burnout_limit: int = 100
 @export var meaningful_hit: int = 10
@@ -27,7 +27,7 @@ var debt: int = 0
 ## Temporary pantry bonus to outgoing damage; owned and timed by the incident.
 var motivation: float = 0.0
 var choices: Array[int] = []
-const TITLES: Array[String] = ["Ship It Friday", "Add More Tests", "Temporary Workaround"]
+const TITLES: Array[String] = ["Violence Budget", "Bubble-Wrap Bones", "Illegal Espresso"]
 
 
 func reset_run() -> void:
@@ -87,8 +87,8 @@ func option_text(index: int) -> String:
 		"+%d%% base attack damage" % roundi(damage_bonus * 100),
 		"−%d%% base incoming damage" % roundi(defense_bonus * 100),
 		"−%d%% base dodge recovery" % roundi(recovery_bonus * 100)]
-	var after: int = clampi(debt + cost(index), 0, debt_limit)
-	return "%d  ·  %s\n%s\n+%d tech debt\n\nAfter: %s\nNext enemies: +%d%% pursuit  ·  %d debt / %s" % [index + 1, TITLES[index].to_upper(), benefits[index], cost(index), modifier_summary(index), roundi((pressure(after) - 1) * 100), after, severity(after)]
+	return "%d · %s\n%s\nFREE · LASTS THIS RUN" % [index + 1, TITLES[index], benefits[index]]
+
 
 
 func summary() -> String:

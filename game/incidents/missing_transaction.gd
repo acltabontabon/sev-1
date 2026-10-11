@@ -288,7 +288,7 @@ func reset_incident() -> void:
 	room.get_node("IncidentSpill").light_energy = .6
 	_dashboard("PRODUCTION\nHEALTHY", "ALL SYSTEMS OPERATIONAL")
 	room.get_node("Impossible").text = "TRANSACTIONS: CONSISTENT"
-	room.get_node("ETA").text = "Happy Friday, team!\nEnjoy your well-deserved weekend!"
+	room.get_node("ETA").text = "SHIFT ENDS / 17:00"
 	room.get_node("Clock").text = "FRIDAY / 16:59"
 	presentation.reset_story()
 	battle_mode.reset()
@@ -1647,7 +1647,7 @@ func _finish() -> void:
 	_dashboard("PRODUCTION\nRECOVERED" if won else "INCIDENT\nUNRESOLVED", "FRIDAY / 17:00" if won else "OWNER: YOU")
 	objective = "R — return to Friday, 4:59 PM"
 	report = "INCIDENT 001 — RESOLVED\n\nRoot cause: downstream transaction delivery failed.\nResolution: missing record identified; discrepancy eliminated.\n\nManagement: Great collaborative effort.\nSpecial thanks to leadership for driving the resolution.\nActual engineering contributors: 1" if won else "INCIDENT 001 — UNRESOLVED\n\nRoot cause: engineer failed to anticipate undocumented behavior.\nCorrective action: Improve anticipation.\nAssigned owner: You.    Due date: Yesterday.\n\nField note: evade the orange arc; counter during recovery.\nThe Variance takes damage only while marked OPEN."
-	report += "\n\nDebt: %d — %s\nUpgrades: %s" % [run.debt, run.severity(), run.summary()]
+	report += "\n\nPower-ups: %s" % run.summary()
 	report += "\nBurnout: %d — %s\nManagement: %s\nCommitment: %s" % [run.burnout, run.burnout_title(), corporate_title(), challenge_result]
 	report += "\nPeak Burnout: %d • Enemies defeated: %d\nBoss: %s" % [run.peak_burnout, enemies_defeated, "Eliminated" if won else ("Encountered — unresolved" if boss_encountered else "Not encountered")]
 	report += "\n\nTime: %d:%02d    Containment briefing: %s\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, "Completed" if management_call.completed else "Not completed"]
@@ -1696,7 +1696,7 @@ func choose_upgrade(index: int) -> void:
 	upgrade_pending = false
 	upgrade_ui.close()
 	_enter(upgrade_next)
-	message = "Power-up active: %s · this run only\n%s" % [["More damage", "Less damage taken", "Faster dodge"][index], message]
+	message = "Power-up active: %s · this run only\n%s" % [run.TITLES[index], message]
 	player.camera_rig.set_capture(true)
 
 

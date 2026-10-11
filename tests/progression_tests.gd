@@ -15,6 +15,15 @@ func _run() -> void:
 	player = scene.get_node("Player")
 	incident = scene.get_node("Incident")
 	var run: Node = incident.run
+	for index in range(3):
+		run.select(index)
+	run.apply_to(player)
+	check(run.debt == 0 and run.pressure() == 1.0, "all live power-ups are free with no pursuit penalty")
+	check(is_equal_approx(player.melee.damage_multiplier, 1.35) and is_equal_approx(player.incoming_damage_multiplier, .8) and is_equal_approx(player.dodge_recovery_multiplier, .75), "free rewards apply all three advertised combat benefits")
+	run.reset_run()
+	# Preserve the opt-in legacy pressure arithmetic checks separately from live tuning.
+	run.ship_debt = 30
+	run.workaround_debt = 15
 	check(run.debt == 0 and run.choices.is_empty(), "new run has zero debt and no upgrades")
 	var base_nodes: int = scene.find_children("*", "", true, false).size()
 	await fixture()
@@ -98,7 +107,7 @@ func _run() -> void:
 	await frames(2)
 	check(boss.exposed, "upgraded run preserves boss OPEN window")
 	boss.receive_damage(10000, player.position)
-	check(incident.terminal() and "Ship It Friday" in incident.report and "60" in incident.report, "victory report records choices and debt")
+	check(incident.terminal() and "Violence Budget" in incident.report and run.debt == 60, "victory report records choices and debt")
 	for index in range(3):
 		await key(KEY_R)
 		await frames(3)
@@ -109,7 +118,7 @@ func _run() -> void:
 		await key(KEY_3)
 		player.invulnerable_left = 0
 		player.receive_damage(10000, Vector3.ZERO)
-		check(incident.stage == incident.Stage.FAILED and "Temporary Workaround" in incident.report, "defeat retains truthful run summary")
+		check(incident.stage == incident.Stage.FAILED and "Illegal Espresso" in incident.report, "defeat retains truthful run summary")
 	await fixture()
 	await key(KEY_R)
 	check(not incident.upgrade_pending and not incident.upgrade_ui.panel.visible and run.choices.is_empty(), "R during choice closes modal and clears run")

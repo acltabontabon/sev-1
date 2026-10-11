@@ -4,7 +4,7 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, the containment handoff, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. Stage One completion now autosaves as a chapter boundary; replay preserves it. Stage Two remains unavailable. See [chapter saves](chapter_saves.md).
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, the containment handoff, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two free temporary power-up choices now follow the record encounters. Stage One completion now autosaves as a chapter boundary; replay preserves it. Stage Two remains unavailable. See [chapter saves](chapter_saves.md).
 
 **Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence beyond chapter completion remains unsettled.
 
@@ -108,11 +108,19 @@ These are proposed experiments, not a committed loadout or implementation queue.
 
 **Burnout — implemented Milestone 7 experiment:** accepted meaningful hits add 8 pressure; time alone adds none. Composed (0–29) is neutral, Pressured (30–69) adds 10% base outgoing and incoming damage, and Overloaded (70–100) adds 25% to each. The value is bounded 0–100 and resets with the run. These bonuses add to upgrades, rather than multiplying them. Containment grants one 15-point recovery; corporate choices can grant additional relief. Input, movement, dodge, and hit timing stay reliable. Human testing must establish whether the tradeoff is worth the immediate risk.
 
-**Technical Debt — implemented Milestone 6 experiment:** choose one of three power-ups after each record encounter. The simplified choice screen leads with More damage, Less damage taken or Faster dodge, the numeric benefit, debt cost and resulting enemy chase speed. Bonuses last this run; corporate names are secondary. Ship It Friday adds 35% base damage and 30 debt; Add More Tests reduces incoming damage by 20% of base with no debt; Temporary Workaround reduces dodge recovery by 25% of base and adds 15 debt. Choices last only this run and stack additively. Debt bands at 25/50/75 increase upcoming enemy pursuit by 5/10/15%, including shielded boss pursuit, with unchanged tells and damage windows. Office warnings escalate alongside the HUD. The normal two-choice episode reaches at most 60 debt. Critical is implemented and tested for tuning, not naturally reachable. No healing, unavoidable punishment, or permanent progression is introduced. Balance and the meaningfulness of these tradeoffs require creator playtesting. See [architecture](architecture.md#technical-debt-run-progression) for integration and limits.
+**Power-ups — implemented simplification, 11 October 2026:** each cleared record encounter
+awards one free choice: **Violence Budget** (hit 35% harder), **Bubble-Wrap Bones**
+(take 20% less damage), or **Illegal Espresso** (dodge recovery 25% shorter).
+Each card shows one combat effect, an original icon and a stupid workplace joke.
+Bonuses stack against base values and last this run; restart clears them. There is no
+purchase, debt cost or enemy pursuit penalty. This supersedes the Technical Debt
+upgrade experiment; its pressure arithmetic remains available only for explicit legacy
+tuning tests. Management and Burnout remain separate existing systems.
+
 
 **Corporate Reputation:** choices might affect dialogue, assistance, events, or upgrades. Technical correctness and organizational approval need not align. Prefer competing relationships or situational reactions over a good/evil meter; the representation remains undecided.
 
-Burnout and Technical Debt are now implemented; do not add Reputation alongside their balance work. The [roadmap](roadmap.md) puts progression after enjoyable combat and the first narrative incident.
+Burnout and free combat power-ups are implemented; do not add Reputation alongside their balance work. The [roadmap](roadmap.md) puts progression after enjoyable combat and the first narrative incident.
 
 ### Corporate decisions
 

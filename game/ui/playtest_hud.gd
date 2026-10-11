@@ -547,6 +547,7 @@ func _refresh_incident(incident: Node) -> void:
 	burnout_bar.max_value = incident.run.burnout_limit
 	burnout_bar.value = incident.run.burnout
 	burnout_value.text = "%d  %s" % [incident.run.burnout, incident.run.burnout_title()]
+	debt_bar.get_parent().visible = incident.run.debt > 0
 	debt_bar.max_value = incident.run.debt_limit
 	debt_bar.value = incident.run.debt
 	debt_value.text = "%d  %s" % [incident.run.debt, incident.run.severity()]

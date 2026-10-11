@@ -32,7 +32,7 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 
 - **Make an impact.** Fast combos, spectacular attacks, bloody finishers.
 - **Meet the night shift.** Voiced conversations, haunted break rooms, deeply unhelpful meetings.
-- **Survive the consequences.** Risky upgrades, mounting burnout, and promises you'll regret.
+- **Get irresponsibly stronger.** Free power-ups, mounting burnout, and promises you'll regret.
 
 <table>
   <tr>

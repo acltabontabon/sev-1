@@ -68,7 +68,7 @@ func _run() -> void:
 	await key(KEY_F)
 	await frames(40)
 	check(hp - foe.health == 49, "two damage upgrades plus overload deal one additive 49-point slash")
-	check(run.debt == 60 and run.outgoing() <= 2 and run.incoming() <= 1.25, "combined systems remain bounded and independent")
+	check(run.debt == 0 and run.outgoing() <= 2 and run.incoming() <= 1.25, "combined systems remain bounded and independent")
 	scene.reset_encounter()
 	run.select(1)
 	run.select(1)

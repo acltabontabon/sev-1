@@ -25,8 +25,8 @@ Check the saved-progress message after quitting and reopening; Stage Two is comi
    late in recovery to chain up to three hits. Q/right mouse dodges. Space jumps;
    Shift sprints. Watch the orange warning arc, move aside, then counterattack.
 2. Clear two waves (Corrupted Records, then Scope Creep). Enemies start unaware; a hit
-   before they notice you deals double. Approve a change request with mouse,
-   arrows/Enter, or 1/2/3: read its benefit and Technical Debt cost.
+   before they notice you deals double. Take a free power-up with mouse,
+   arrows/Enter, or 1/2/3: read its one combat benefit; the power-up is free and lasts this run.
 3. After the first encounter, press E to answer Management from wherever you are
    (step away from nearby coworkers or appliances if E offers their interaction).
    Hear the call or skip it with Tab. Optional before that: the east wing. Press E at the pantry's
@@ -58,8 +58,8 @@ Answer briefly; use 1 (poor) to 5 (strong) where helpful.
 1. Did you understand what was happening and what to do next?
 2. Did movement, camera and combat respond as expected?
 3. Were enemy warnings and hits fair and readable?
-4. Could you explain the upgrade tradeoffs?
-5. Did Technical Debt and Burnout affect your choices?
+4. Could you immediately explain what your chosen power-up does?
+5. Were the free power-ups immediately understandable? Did Burnout affect your management reply?
 6. Did the corporate humor work? Which line landed or missed?
 7. Did the office, characters and UI look coherent?
 8. What confused or frustrated you? Any bug or uncomfortable effect?

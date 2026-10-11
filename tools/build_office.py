@@ -7,6 +7,7 @@ import math
 import copy
 from pantry_layout import build_pantry
 from office_details import build_office_details
+from operations_layout import build_operations
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'game/rooms/office'
@@ -226,6 +227,25 @@ for j in range(10):
     rack.box(f'LED{j}',(.26,.23+j*.205,.502),(.027,.017,.009),'alert' if j in (2,6,8) else 'mint')
 rack.save('server_rack')
 
+ops_rack=Scene('OperationsRack')
+ops_rack.box('Cabinet', (0, 1.2, 0), (.85, 2.4, .90), 'black', True)
+for side,x in [('Left', -.405), ('Right', .405)]:
+    ops_rack.box(side+'Rail', (x, 1.2, .47), (.055, 2.32, .045), 'metal')
+ops_rack.box('DoorFrame', (0, 1.2, .48), (.72, 2.26, .035), 'plastic')
+for unit in range(8):
+    y=.24+unit*.265
+    ops_rack.box(f'Unit{unit}', (0, y, .51), (.68, .225, .025), 'office_enamel')
+    ops_rack.box(f'UnitInset{unit}', (-.075, y, .529), (.43, .14, .008), 'black')
+    for vent in range(4):
+        ops_rack.box(f'Vent{unit}_{vent}', (-.075, y-.045+vent*.03, .536), (.40, .012, .009), 'metal')
+    ops_rack.box(f'LED{unit}', (.22, y+.055, .53), (.045, .025, .012), 'mint' if unit%3 else 'alert')
+    ops_rack.box(f'Latch{unit}', (.25, y-.045, .54), (.06, .022, .03), 'black')
+ops_rack.box('Door', (0, 1.2, .57), (.74, 2.27, .018), 'glass')
+ops_rack.box('DoorHandle', (.32, 1.15, .60), (.035, .30, .045), 'metal')
+ops_rack.box('Base', (0, .07, 0), (.89, .14, .94), 'black')
+ops_rack.save('operations_rack')
+
+
 lite=Scene('ServerRackLite')
 lite.box('Cabinet',(0,1.2,0),(.85,2.4,.90),'metal',True)
 lite.box('Front',(0,1.2,.46),(.76,2.23,.025),'plastic')
@@ -324,22 +344,7 @@ s.box('TaskLampBulb',(-3.35,1.31,9.53),(.26,.015,.16),'warm')
 s.light('TaskLight',(-3.35,1.30,9.36),(1,.76,.52),2.8,2.2,spot=True,shadow=True,rot=(-65,0,0))
 s.instance('CoworkerDesk','workstation',(-7,0,11),180)
 s.box('ForgottenBag',(-5,.22,9.6),(.36,.44,.25),'fabric')
-# Operations wall: large restrained information, hardware and ordered cable tray.
-for idx,x in enumerate([-9.8,-8.7,-7.6,-6.5]): s.instance(f'Rack{idx}','server_rack',(x,0,-13.8),0)
-s.box('OperationsPanel',(-1.7,2.5,-15.68),(7.8,3.8,.10),'walnut')
-s.text('OperationsTitle','PRODUCTION OPERATIONS',(-1.7,4.10,-15.60),.0048,62)
-for idx,x in enumerate([-4.1,.7]):
-    s.box(f'Dashboard{idx}',(x,2.6,-15.51),(3.5,2.0,.09),'plastic')
-    s.box(f'DashboardFace{idx}',(x,2.6,-15.45),(3.33,1.82,.008),'screen')
-s.text('Critical','PRODUCTION\nCRITICAL',(-4.1,2.92,-15.43),.007,56,(1,.39,.22,1))
-s.text('RootCause','ROOT CAUSE: UNKNOWN',(-4.1,2.02,-15.43),.004,40)
-s.text('Clock','FRIDAY  /  16:59',(.7,3.12,-15.43),.005,45)
-s.text('Impossible','UPTIME  −00:01',(.7,2.62,-15.43),.006,46)
-s.text('ETA','RESOLUTION: PENDING',(.7,2.08,-15.43),.004,40)
-s.box('IncidentStrip',(-1.7,1.38,-15.4),(7.4,.055,.03),'alert')
-s.light('IncidentSpill',(-2,2.6,-14.5),(1,.16,.065),2.3,6)
-s.box('CableTray',(-8,3.35,-14),(5,.12,.4),'metal')
-for i in range(6): s.box(f'Cable{i}',(-9.5+i*.09,1.8,-14.1),(.022,3.2,.022),'black')
+# Operations command station is authored after the established office resources.
 # A sealed service door frames an impossible repeated tunnel beyond the glass.
 # Security shutter: generated without collision so navigation bakes through the doorway;
 # the incident enables it until the boss stage and lifts it into the header.
@@ -348,7 +353,6 @@ for i in range(7): s.box(f'GateSlat{i}',(0,-1.6+i*.55,.12),(3.9,.05,.01),'black'
 s.text('GateSign','RESTRICTED  ·  PRODUCTION CORE',(0,.6,.13),.00453,44,(1,.62,.2,1),parent='VaultGate')
 s.text('GateSubsign','Authorized personnel and whoever is on call',(0,.18,.13),.0038,30,(1,.8,.5,1),parent='VaultGate')
 s.text('DoorNotice','B2  ·  SERVER CORRIDOR',(9,4.45,-15.72),.005,44,(1,.62,.2,1))
-s.text('Wayfinding','SERVER RACKS',(-8.3,3.4,-15.44),.0038,40)
 # Selective dry humor, not a wall of jokes.
 # A status-page printout, framed like an award: green dot and all.
 status=s.node('StatusPrint','Node3D',(13.70,2.4,7),props='rotation_degrees = Vector3(0, -90, 0)\n')
@@ -382,7 +386,6 @@ for idx,(y,text,mat,tilt,dx,size) in enumerate([(2.22,'WHO DEPLOYED\nON FRIDAY?'
     s.text(f'StickyText{idx}',text,(dx,y,.007),size,64,(.15,.15,.2,1),parent=stickies,rot=(0,0,tilt),face=SIGN_FONT)
 s.box('Whiteboard',(-12.0,2.2,-3.65),(1.7,1.1,.04),'paper')
 s.text('WhiteboardText','ON-CALL ROTATION\nMon  YOU\nTue  YOU\nWed  YOU (backup: you)',(-12.0,2.25,-3.62),.0028,40,(.15,.2,.3,1))
-s.text('Uptime','LIVE INCIDENT STATUS',(-1.7,1.05,-15.6),.0035,40,(.3,.95,.7,1))
 
 # ---------------------------------------------------------------- Area B/C wing
 # Meeting wing: corridor x 14..18.5; Quick Sync and the pantry open off it.
@@ -549,7 +552,7 @@ for name,pos,size in [
     s.collider(name,pos,size)
 # Neon: the company's three beliefs, lit in colour so the floor never reads grey.
 for name,text,pos,rot,mat,color in [
-    ('NeonMoveFast','MOVE FAST',(-8.8,4.3,-15.7),0,'neon_cyan',(.2,.88,1)),
+    ('NeonMoveFast','MOVE FAST',(-11.4,4.35,-11.7),90,'neon_cyan',(.2,.88,1)),
     ('NeonShipIt','SHIP IT',(9.4,3.6,15.7),180,'neon_pink',(1,.22,.62)),
     ('NeonDeploy','THINK DIFFERENT.\nDEPLOY THE SAME.',(14.3,3.1,-7.0),90,'neon_amber',(1,.7,.25))]:
     s.node(name,'Label3D',pos,props=f'text = {quote(text)}\nfont_size = 96\npixel_size = 0.006\nmodulate = {col((color[0]*2.4,color[1]*2.4,color[2]*2.4,1))}\noutline_size = 18\noutline_modulate = {col((color[0],color[1],color[2],.55))}\nshaded = false\nrotation_degrees = {vec((0,rot,0))}\n')
@@ -625,13 +628,6 @@ s.nodes = [node for node in s.nodes if not any(f'name="{name}"' in node for name
 lamp = s.external('res://assets/environment/poly_haven_workstation/desk_lamp_arm_01.glb', 'PackedScene')
 s.nodes.append(f'[node name="TaskLamp" parent="." instance={lamp}]\nposition = Vector3(-3.37, 0.8225, 9.12)\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(0.72, 0.72, 0.72)')
 build_office_details(s)
-# A quiet architectural surround frames the incident screens, off the combat floor.
-for idx,x in enumerate([-5.85,2.45]):
-    s.box(f'OpsEdge{idx}',(x,2.5,-15.55),(.07,3.8,.05),'warm')
-for idx in range(12):
-    s.box(f'OpsBatten{idx}',(-11.5+idx*.45,2.05,-15.6),(.09,3.8,.12),'walnut')
-s.box('OpsShelf',(-1.7,.86,-15.35),(7.8,.10,.55),'walnut')
-s.text('OpsRoute','SERVER CORRIDOR  →',(-1.7,.54,-15.59),.004,44,(1,.78,.48,1))
-s.text('OpsZone','01  /  MONITORING',(-8.4,3.9,-15.44),.0035,40,(.72,.85,.87,1))
+build_operations(s, SIGN_FONT)
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')
