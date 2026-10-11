@@ -143,11 +143,13 @@ render_mode unshaded, cull_front, blend_add, depth_draw_never, shadows_disabled;
 uniform float expansion = 0.02;
 uniform float opacity = 0.015;
 void vertex() {
-	VERTEX += NORMAL * expansion;
+	float unease = 1.0 + 0.16 * sin(VERTEX.y * 4.5 + TIME * 0.9) + 0.08 * sin(VERTEX.x * 7.0 - TIME * 1.3);
+	VERTEX += NORMAL * expansion * unease;
 }
 void fragment() {
-	ALBEDO = vec3(0.62, 0.20, 1.0);
-	ALPHA = opacity * (0.80 + 0.20 * sin(TIME * 1.6));
+	float pulse = 0.72 + 0.18 * sin(TIME * 0.85) + 0.10 * sin(TIME * 2.1 + 1.4);
+	ALBEDO = vec3(0.38, 0.012, 0.85) * pulse;
+	ALPHA = opacity * pulse;
 }
 """
 	# Layer faint expanded silhouettes: the inner edge is gentle, and the
@@ -158,8 +160,8 @@ void fragment() {
 		var fraction: float = float(index + 1) / 16.0
 		var layer: ShaderMaterial = ShaderMaterial.new()
 		layer.shader = shader
-		layer.set_shader_parameter("expansion", .006 + .09 * fraction)
-		layer.set_shader_parameter("opacity", .016 * pow(1.0 - fraction, 1.5))
+		layer.set_shader_parameter("expansion", .008 + .12 * fraction)
+		layer.set_shader_parameter("opacity", .024 * pow(1.0 - fraction, 1.5))
 		if previous != null:
 			previous.next_pass = layer
 		else:
@@ -184,12 +186,18 @@ func _add_wisps() -> void:
 shader_type spatial;
 render_mode unshaded, cull_disabled, blend_add, depth_draw_never, shadows_disabled;
 uniform sampler2D trace_texture : filter_linear_mipmap, repeat_disable;
+void vertex() {
+	float age = UV.y;
+	VERTEX.x += sin(TIME * 0.9 + age * 8.0) * 0.11 * age;
+	VERTEX.y += 0.16 * age;
+	VERTEX.z += cos(TIME * 0.7 + age * 5.0) * 0.06 * age;
+}
 void fragment() {
 	float texture_fade = texture(trace_texture, vec2(mix(0.32, 0.68, UV.x), UV.y)).a;
 	float edge = pow(max(sin(UV.x * 3.14159), 0.0), 1.5);
 	float fade = pow(1.0 - UV.y, 1.8);
-	ALBEDO = vec3(0.65, 0.25, 1.0);
-	ALPHA = edge * fade * texture_fade * 0.22;
+	ALBEDO = vec3(0.48, 0.012, 0.85);
+	ALPHA = edge * fade * texture_fade * 0.27;
 }
 """
 	for bone_name: String in ["LowerArm.L", "LowerArm.R", "Torso"]:
@@ -218,7 +226,7 @@ func _update_trails(delta: float) -> void:
 		var pose: Transform3D = trail_skeleton.global_transform * trail_skeleton.get_bone_global_pose(track.bone)
 		var points: Array = track.points
 		points.push_front({"position": pose.origin, "time": trail_clock})
-		while not points.is_empty() and trail_clock - points.back().time > .75:
+		while not points.is_empty() and trail_clock - points.back().time > .95:
 			points.pop_back()
 		if points.size() < 2:
 			continue
@@ -232,8 +240,8 @@ func _update_trails(delta: float) -> void:
 			var across: Vector3 = (to - from).cross(camera.global_position - from).normalized()
 			for corner: Vector2 in [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 0), Vector2(1, 1), Vector2(0, 1)]:
 				var point: Dictionary = points[index + int(corner.y)]
-				var age: float = clampf((trail_clock - point.time) / .75, 0.0, 1.0)
-				var width: float = lerpf(.18, .035, age)
+				var age: float = clampf((trail_clock - point.time) / .95, 0.0, 1.0)
+				var width: float = lerpf(.22, .025, age)
 				tool.set_uv(Vector2(corner.x, age))
 				tool.add_vertex(point.position + across * (corner.x - .5) * width)
 		track.mesh.mesh = tool.commit()
