@@ -54,6 +54,7 @@ if __name__ == "__main__":
     run("voice", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/voice_tests.gd"])
     run("environment", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/environment_tests.gd"])
     run("pantry", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/pantry_tests.gd"])
+    run("birthday", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/birthday_tests.gd"])
     run("encounter", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/encounter_tests.gd"])
     run("skeleton_bodies", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/skeleton_tests.gd"])
     run("skill_impact", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/skill_impact_tests.gd"])

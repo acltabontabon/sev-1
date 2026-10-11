@@ -92,6 +92,19 @@ var talk_with: Dictionary = {}
 var talk_line: int = 0
 ## The optional meeting: an invite holds the room while two records press in.
 const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
+## The optional birthday in the pantry: Kevin turns forty-one, then turns. His guests
+## (talk.json `party.cast`, same order) follow, and the cake was a backlog of bugs.
+const BIRTHDAY: Array = [["scope", "P1"], ["record", "P2"], ["record", "P3"]]
+const PARTY_CAST: Array[String] = ["kevin", "brenda", "marco"]
+## Idle and gesture clips per guest: Kevin endures it, Brenda cheers, Marco nods along.
+const PARTY_MOODS: Array = [["ual/fold_arms", "ual/no"], ["ual/idle_casual", "CharacterArmature|Victory"], ["ual/idle_casual", "ual/yes"]]
+const PARTY_BUGS: int = 4
+const BIRTHDAY_SCENE: Script = preload("res://game/incidents/birthday_party.gd")
+var party: String = "idle"
+var party_scene: Node3D
+var party_in_headless: bool = false
+var party_hosts: Array[Node3D] = []
+var party_bugs_waiting: bool = false
 @export_range(0, 6) var max_telegraphs: int = 2
 @export_range(0, 6) var wave_breather: float = 2.8
 const RUN: Script = preload("res://game/incidents/run_progression.gd")
@@ -139,12 +152,13 @@ var active_enemy: CharacterBody3D:
 	get:
 		if is_instance_valid(boss) and boss.health > 0:
 			return boss
-		for actor: CharacterBody3D in alive + sync_alive:
+		for actor: CharacterBody3D in alive + sync_alive + party_alive:
 			if is_instance_valid(actor) and actor.health > 0:
 				return actor
 		return null
 var alive: Array[CharacterBody3D] = []
 var sync_alive: Array[CharacterBody3D] = []
+var party_alive: Array[CharacterBody3D] = []
 var boss: CharacterBody3D
 var pending: Array = []
 var pop_left: float = 0.0
@@ -220,13 +234,15 @@ func _ready() -> void:
 	add_child(coworkers)
 	pantry = room.get_node("PantryAntics")
 	# Coffee helps once; the other appliances get stranger on repeat visits.
-	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"], ["fridge", "Fridge", "E — CHECK FRIDGE"]]:
+	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"], ["fridge", "Fridge", "E — CHECK FRIDGE"], ["party", "PartyJoin", "E — SING HAPPY BIRTHDAY"]]:
 		var point: Node3D = INTERACTION.new()
 		point.name = "Use_" + entry[0]
 		point.prompt = entry[2]
 		point.position = room.get_node("SpawnPoints/" + entry[1]).position
 		add_child(point)
 		interactions[entry[0]] = point
+	# The whole table end is the party: guests crowd the cake, so the reach is wider.
+	interactions.party.radius = 2.4
 	management_call = Node3D.new()
 	management_call.set_script(preload("res://game/incidents/management_call.gd"))
 	add_child(management_call)
@@ -260,6 +276,9 @@ func reset_incident() -> void:
 	player.zone_multiplier = 1.0
 	quick_sync = "idle"
 	standup_scene = null
+	party = "idle"
+	party_scene = null
+	_cake_intact(true)
 	sync_action_left = 6.0
 	sync_action_index = 0
 	_sync_screen(false)
@@ -315,8 +334,14 @@ func _cleanup() -> void:
 	if is_instance_valid(standup_scene):
 		standup_scene.cancel()
 		standup_scene = null
+	if is_instance_valid(party_scene):
+		party_scene.cancel()
+		party_scene = null
 	alive.clear()
 	sync_alive.clear()
+	party_alive.clear()
+	party_hosts.clear()
+	party_bugs_waiting = false
 	boss = null
 	pending.clear()
 	zones.clear()
@@ -371,9 +396,10 @@ func _enter(next: Stage) -> void:
 			light_target = 2.3
 		Stage.INVESTIGATION:
 			objective = "Delivery failed · E to answer Management"
-			message = "Take a breather: coffee, crew talk or an optional Quick Sync."
+			message = "Take a breather: coffee, crew talk, a birthday or an optional Quick Sync."
 			console_marker.text = ""
 			_plant_sync()
+			_plant_party()
 			_dashboard("RECONCILIATION\nFAILED", "MANAGEMENT IS CALLING")
 		Stage.ENCOUNTER_TWO:
 			wave_index = 0
@@ -381,10 +407,12 @@ func _enter(next: Stage) -> void:
 			objective = "2/3 · Stop the delivery outbreak"
 			# A meeting nobody attended adjourns; its attendees go home instead of
 			# twitching through containment like a due wave.
-			for host: Node3D in sync_hosts:
+			for host: Node3D in sync_hosts + party_hosts:
 				if is_instance_valid(host):
 					host.queue_free()
 			sync_hosts.clear()
+			# Nobody sang; the cake stays, uneaten, as a monument to the calendar.
+			party_hosts.clear()
 			_plant(0)
 			message = "Payment Processing lost the record.  •  These ones are faster."
 			console_marker.text = ""
@@ -415,6 +443,7 @@ func _process(delta: float) -> void:
 				player.camera_rig.set_capture(false)
 	if terminal() or get_tree().paused:
 		return
+	interactions.party.enabled = party == "idle" and not party_hosts.is_empty() and quick_sync != "active"
 	for point: Node3D in interactions.values():
 		point.refresh(player, not modal_pending() and stage != Stage.ALERT)
 	_refresh_talk_prompt()
@@ -467,7 +496,7 @@ func _process(delta: float) -> void:
 	_update_beacon()
 	_assign_slots(delta)
 	_complain_to_hr(delta)
-	if quick_sync == "idle" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
+	if quick_sync == "idle" and party != "active" and stage == Stage.INVESTIGATION and not modal_pending() and in_quick_sync():
 		_start_quick_sync()
 	_tick_quick_sync(delta)
 	var attending: bool = false
@@ -592,21 +621,25 @@ func _release_swarm(index: int, site: String) -> void:
 		return
 	var origin: Vector3 = wave_site if wave_area != "" else spawn_site(site)
 	for count in range(sizes[index]):
-		var bug: CharacterBody3D = RECORD.instantiate()
-		bug.set_script(ARCHETYPES["bug"])
-		bug.reveal_grace_left = outbreak_retreat_seconds if outbreaks() else 0.0
-		bug.starts_aware = false
-		bug.process_mode = Node.PROCESS_MODE_PAUSABLE
-		bug.position = _near_site(origin - wave_site + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2) if wave_area != "" else origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4
-		bug.detection_distance = 50
-		add_child(bug)
-		bug.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * bug.speed_scale * run.pressure()
-		actors.append(bug)
-		bugs.append(bug)
-		bug.died.connect(_on_bug_died.bind(bug), CONNECT_ONE_SHOT)
+		_spawn_bug(_near_site(origin - wave_site + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 2.2) if wave_area != "" else origin + Vector3(cos(count * 2.1), 0, sin(count * 2.1)) * 1.4)
+
+
+func _spawn_bug(at: Vector3) -> void:
+	var bug: CharacterBody3D = RECORD.instantiate()
+	bug.set_script(ARCHETYPES["bug"])
+	bug.reveal_grace_left = outbreak_retreat_seconds if outbreaks() else 0.0
+	bug.starts_aware = false
+	bug.process_mode = Node.PROCESS_MODE_PAUSABLE
+	bug.position = at
+	bug.detection_distance = 50
+	add_child(bug)
+	bug.move_speed = (3.4 if stage == Stage.ENCOUNTER_TWO else 2.4) * bug.speed_scale * run.pressure()
+	actors.append(bug)
+	bugs.append(bug)
+	bug.died.connect(_on_bug_died.bind(bug), CONNECT_ONE_SHOT)
 	if not seen_kinds.has("bug"):
 		seen_kinds["bug"] = true
-		presentation.introduce("bug", bugs.back())
+		presentation.introduce("bug", bug)
 
 
 func _on_bug_died(bug: CharacterBody3D) -> void:
@@ -684,9 +717,33 @@ func _plant_sync() -> void:
 		sync_hosts.append(host)
 
 
-func _make_host(kind: String, at: Vector3) -> Node3D:
+## Kevin's birthday is already underway in the pantry: three guests in party hats around
+## the cake, each turned toward it.
+func _plant_party() -> void:
+	if party != "idle" or not party_hosts.is_empty():
+		return
+	var cake: Vector3 = room.get_node("SpawnPoints/BirthdayCake").position
+	var cast: Dictionary = DIALOGUES.data().party.cast
+	for index in range(BIRTHDAY.size()):
+		var host: Node3D = _make_host(BIRTHDAY[index][0], spawn_site(BIRTHDAY[index][1]), cast[PARTY_CAST[index]])
+		host.set_meta("area", "the pantry")
+		host.idle_clip = PARTY_MOODS[index][0]
+		host.gesture_clip = PARTY_MOODS[index][1]
+		host.animator.play(host.idle_clip)
+		var toward: Vector3 = cake - host.position
+		host.rotation.y = atan2(toward.x, toward.z)
+		BIRTHDAY_SCENE.party_hat(host.body, BIRTHDAY_SCENE.HAT_COLORS[index])
+		party_hosts.append(host)
+
+
+## `identity` names a specific employee; otherwise the next of the archetype's crew.
+func _make_host(kind: String, at: Vector3, identity: Dictionary = {}) -> Node3D:
 	var host: Node3D = HOST.create(kind, crew_index.get(kind, 0))
-	crew_index[kind] = crew_index.get(kind, 0) + 1
+	if identity.is_empty():
+		crew_index[kind] = crew_index.get(kind, 0) + 1
+	else:
+		host.identity = identity
+		host.name = "Host_" + str(identity.name)
 	host.position = at
 	host.rotation.y = randf() * TAU
 	host.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -810,8 +867,8 @@ func _complain_to_hr(delta: float) -> void:
 	hr_cooldown = maxf(0.0, hr_cooldown - delta)
 	if hr_cooldown > 0 or not player.melee.is_active():
 		return
-	for host: Node3D in hosts + sync_hosts:
-		if is_instance_valid(host) and (not armed or sync_hosts.has(host)) and _swung_at(host):
+	for host: Node3D in hosts + sync_hosts + party_hosts:
+		if is_instance_valid(host) and (not armed or not hosts.has(host)) and _swung_at(host):
 			hr_cooldown = 1.5
 			ElementFx.glyphs(self, host.global_position + Vector3.UP * 2.0, Color(1, .8, .4), ["HR HAS BEEN NOTIFIED"], 1.2, 0.0)
 			host.say("hr")
@@ -822,12 +879,13 @@ func _complain_to_hr(delta: float) -> void:
 ## wave's bugs pour out of the first one.
 func end_outbreak() -> void:
 	outbreak_left = 0.0
-	for actor: CharacterBody3D in alive + sync_alive:
+	for actor: CharacterBody3D in alive + sync_alive + party_alive:
 		if is_instance_valid(actor) and actor.disguised():
 			actor.reveal()
 	if not swarm_waiting.is_empty():
 		_release_swarm(swarm_waiting[0], swarm_waiting[1])
 		swarm_waiting.clear()
+	_cake_burst()
 
 
 ## Pick where the next wave breaks out: the next site in rotation that is far enough
@@ -902,6 +960,8 @@ func next_step() -> Dictionary:
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
 				return {"text": "Dismiss the attendees · dodge floor circles.", "point": none, "tag": ""}
+			if party == "active":
+				return {"text": "End the party · hit Kevin often or he keeps growing.", "point": none, "tag": ""}
 			if management_call.active:
 				return {"text": "Requesting containment.", "point": none, "tag": ""}
 			var nearest: String = nearest_interaction()
@@ -913,6 +973,8 @@ func next_step() -> Dictionary:
 			var at: Vector3 = player.global_position
 			if quick_sync == "idle" and not sync_hosts.is_empty() and at.x > 14.0 and at.x < 18.8 and absf(at.z + 8.0) < 2.5:
 				return {"text": "Optional Quick Sync · walk in for +30 health / Burnout −20.", "point": none, "tag": ""}
+			if party == "idle" and not party_hosts.is_empty() and at.x > 14.0 and at.x < 18.8 and absf(at.z - 8.5) < 2.5:
+				return {"text": "Optional birthday · E at the cake for +30 health / Burnout −15.", "point": none, "tag": ""}
 			return {"text": "E answer Management · detours optional.", "point": none, "tag": ""}
 		Stage.BOSS:
 			if not boss_triggered:
@@ -1010,7 +1072,7 @@ func _assign_slots(delta: float) -> void:
 		return
 	slot_clock = .3
 	var squad: Array[CharacterBody3D] = []
-	for actor: CharacterBody3D in alive + sync_alive + bugs:
+	for actor: CharacterBody3D in alive + sync_alive + party_alive + bugs:
 		if is_instance_valid(actor) and actor.health > 0 and actor.awareness == actor.Awareness.ENGAGED:
 			squad.append(actor)
 	if squad.is_empty():
@@ -1066,7 +1128,7 @@ func _spawn_entry(entry: Array, group: Array[CharacterBody3D], host: Node3D = nu
 	# Waves arrive unaware and must find the engineer; the Quick Sync is an ambush.
 	if kind == "invite" and is_same(group, sync_alive):
 		actor.standup_facilitator = true
-	actor.starts_aware = is_same(group, sync_alive)
+	actor.starts_aware = is_same(group, sync_alive) or is_same(group, party_alive)
 	actor.process_mode = Node.PROCESS_MODE_PAUSABLE
 	if not is_instance_valid(host):
 		host = null
@@ -1157,7 +1219,7 @@ func request_attack(actor: Node) -> bool:
 	# Bugs nip freely and never queue the real threats behind them.
 	if bugs.has(actor):
 		return true
-	for other: CharacterBody3D in alive + sync_alive:
+	for other: CharacterBody3D in alive + sync_alive + party_alive:
 		if other != actor and is_instance_valid(other) and other.health > 0 and other.melee.attacking and other.melee.elapsed < other.melee.windup + other.melee.active_time:
 			busy += 1
 	return busy < max_telegraphs
@@ -1305,6 +1367,84 @@ func _end_quick_sync() -> void:
 	message = "MEETING ENDED • Action items: none • +30 health • Burnout −20"
 
 
+## Join in: the birthday plays out (Kevin's wish, the trick candles) before he turns.
+func _start_party() -> void:
+	if party != "idle" or party_hosts.is_empty() or stage != Stage.INVESTIGATION or quick_sync == "active":
+		return
+	log_event("Sang for Kevin's birthday (attendance tracked)")
+	if DisplayServer.get_name() == "headless" and not party_in_headless:
+		_begin_party()
+		return
+	party = "cake"
+	party_scene = BIRTHDAY_SCENE.new()
+	party_scene.incident = self
+	actors.append(party_scene)
+	add_child(party_scene)
+
+
+## The candles relit and the wish went to everyone else: the guests turn, and the cake
+## turns out to have been a backlog all along.
+func _begin_party() -> void:
+	party = "active"
+	set_candles(true)
+	message = "BIRTHDAY ESCALATED • Kevin is now Scope Creep. Keep hitting him or he keeps growing."
+	if outbreaks():
+		outbreak_left = OUTBREAK_BURST
+	for index in range(BIRTHDAY.size()):
+		_spawn_entry(BIRTHDAY[index], party_alive, party_hosts[index] if index < party_hosts.size() else null)
+	party_hosts.clear()
+	# Kevin keeps the hat. It grows with him.
+	var kevin: CharacterBody3D = party_alive[0]
+	if kevin.get("details") != null:
+		var dome: AABB = kevin.rig.bounds()
+		var hat: Node3D = BIRTHDAY_SCENE.party_hat(kevin.details, BIRTHDAY_SCENE.HAT_COLORS[0], 2.4)
+		hat.position = Vector3(dome.get_center().x, dome.end.y - .08, dome.get_center().z)
+		hat.rotation.z = .25
+	party_bugs_waiting = true
+	if outbreaks():
+		_make_reveal_space(kevin.global_position)
+		presentation.outbreak(kevin, "the pantry")
+	else:
+		_cake_burst()
+
+
+## Candles on or out. They are trick candles; they always come back.
+func set_candles(lit: bool) -> void:
+	room.get_node("BirthdayCake/Flames").visible = lit
+
+
+func _cake_intact(intact: bool) -> void:
+	room.get_node("BirthdayCake/Intact").visible = intact
+	room.get_node("BirthdayCake/Ruin").visible = not intact
+	set_candles(intact)
+
+
+## The cake goes off with the guests: frosting everywhere and bugs pouring out of it.
+func _cake_burst() -> void:
+	if not party_bugs_waiting:
+		return
+	party_bugs_waiting = false
+	_cake_intact(false)
+	var cake: Vector3 = room.get_node("SpawnPoints/BirthdayCake").global_position
+	ElementFx.shards(self, cake + Vector3.UP * .2, Color(1, .95, .9), 18, 5.0, .8)
+	ElementFx.glyphs(self, cake + Vector3.UP * 1.4, Color(1, .45, .7), ["THE CAKE WAS A BACKLOG"], 1.4, 0.0)
+	for count in range(PARTY_BUGS):
+		_spawn_bug(_on_floor(Vector3(cake.x - 1.2 + count * .8, 0, cake.z - 1.5 - (count % 2) * .6)))
+	log_event("The cake was a backlog: %d bugs" % PARTY_BUGS)
+
+
+## Surviving the party: cake salvaged from the ceiling, and the bugs closed with it.
+func _end_party() -> void:
+	party = "done"
+	_close_bugs()
+	player.health = mini(player.max_health, player.health + 30)
+	player.health_changed.emit(player.health)
+	run.change_burnout(-15, "Birthday cake")
+	run.apply_to(player)
+	log_event("Survived Kevin's birthday; card signed on your behalf")
+	message = "PARTY'S OVER • Cake salvaged off the ceiling: +30 health • Burnout −15"
+
+
 func _on_record_died(actor: CharacterBody3D) -> void:
 	if terminal():
 		return
@@ -1316,7 +1456,8 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 		_enter(Stage.RESOLVED)
 		return
 	var in_sync: bool = sync_alive.has(actor)
-	if not in_sync and not alive.has(actor):
+	var in_party: bool = party_alive.has(actor)
+	if not in_sync and not in_party and not alive.has(actor):
 		return
 	enemies_defeated += 1
 	corpses[actor] = 3.0
@@ -1332,6 +1473,13 @@ func _on_record_died(actor: CharacterBody3D) -> void:
 		if sync_alive.is_empty():
 			presentation.kill_cam(actor.global_position, player.global_position, true)
 			_end_quick_sync()
+		return
+	if in_party:
+		party_alive.erase(actor)
+		_kill_feedback(actor, false)
+		if party_alive.is_empty():
+			presentation.kill_cam(actor.global_position, player.global_position, true)
+			_end_party()
 		return
 	alive.erase(actor)
 	remaining -= 1
@@ -1375,6 +1523,8 @@ func encounter_status() -> String:
 		return "%d acting strange · %d m · snap in %ds" % [hosts.size(), roundi(_flat(_strangest().global_position)), maxi(0, ceili(armed_left))]
 	if quick_sync == "active":
 		return "Quick Sync · %d left" % sync_alive.size()
+	if party == "active":
+		return "Birthday · %d left" % party_alive.size()
 	if stage in [Stage.ENCOUNTER_ONE, Stage.ENCOUNTER_TWO] and nearest_threat() != null:
 		var near: CharacterBody3D = nearest_threat()
 		var distance: int = roundi(Vector2(near.global_position.x - player.global_position.x, near.global_position.z - player.global_position.z).length())
@@ -1391,7 +1541,7 @@ func encounter_status() -> String:
 
 
 func inspect_console() -> void:
-	if stage != Stage.INVESTIGATION or modal_pending() or not sync_alive.is_empty():
+	if stage != Stage.INVESTIGATION or modal_pending() or not sync_alive.is_empty() or not party_alive.is_empty():
 		return
 	management_call.start()
 
@@ -1548,6 +1698,8 @@ func use(key: String) -> void:
 			else:
 				presentation.say("coffee_water")
 				message = "The machine dispenses hot water. Motivation not included."
+		"party":
+			_start_party()
 		"vending", "microwave", "poster", "fridge":
 			message = pantry.react(key, coworkers)
 			# Existing recorded reactions play once; fresh punchlines remain text.
@@ -1713,7 +1865,7 @@ func _debt_dashboard() -> void:
 
 
 func modal_pending() -> bool:
-	return upgrade_pending or decision_pending or talking != null or quick_sync == "standup"
+	return upgrade_pending or decision_pending or talking != null or quick_sync == "standup" or party == "cake"
 
 
 func _choose_modal(index: int) -> void:

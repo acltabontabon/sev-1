@@ -412,6 +412,50 @@
       "loudness": -12,
       "processing": "rage",
       "direction": "The engineer losing it over his dead team: a held breath, then a roar. Distorted, doubled an octave down, crushed and echoing; every word readable."
+    },
+    "brenda": {
+      "blend": {
+        "af_heart": 0.6,
+        "af_kore": 0.4
+      },
+      "language": "a",
+      "speed": 1.12,
+      "pitch": 2,
+      "processing": "clean",
+      "direction": "Culture Committee: festive at gunpoint, cheer as a compliance metric."
+    },
+    "marco": {
+      "blend": {
+        "am_michael": 0.5,
+        "am_fenrir": 0.5
+      },
+      "language": "a",
+      "speed": 0.9,
+      "pitch": -1,
+      "processing": "clean",
+      "direction": "Flat, deadpan, ten dollars poorer and counting."
+    },
+    "kevin": {
+      "blend": {
+        "am_michael": 0.7,
+        "bm_george": 0.3
+      },
+      "language": "a",
+      "speed": 0.95,
+      "pitch": 0,
+      "processing": "clean",
+      "direction": "The birthday boy: tired, sincere, enduring it, quietly breaking."
+    },
+    "kevin_turning": {
+      "blend": {
+        "am_michael": 0.7,
+        "bm_george": 0.3
+      },
+      "language": "a",
+      "speed": 0.88,
+      "pitch": -1,
+      "processing": "double",
+      "direction": "The same voice, slowing, doubled: the incident speaking through him."
     }
   },
   "crew": {
@@ -1752,5 +1796,75 @@
         "AGH! That is NOT synergy!"
       ]
     }
+  },
+  "party": {
+    "about": "The pantry birthday (game/incidents/birthday_party.gd): who is celebrating, and the scene before the cake ambush. Cast entries are host identities; scene lines are voiced as talk/<id>.ogg.",
+    "cast": {
+      "kevin": {
+        "name": "KEVIN",
+        "kind": "scope",
+        "team": "Billing Integrations",
+        "quip": "Turning forty-one. Still turning.",
+        "line": "Please don't sing. Please don't sing.",
+        "body": "casual_male.fbx",
+        "profile": "kevin"
+      },
+      "brenda": {
+        "name": "BRENDA",
+        "kind": "record",
+        "team": "Culture Committee",
+        "quip": "Fun is mandatory. Attendance is tracked.",
+        "line": "Sign the card! Everyone signs the card!",
+        "body": "suit_female.fbx",
+        "profile": "brenda"
+      },
+      "marco": {
+        "name": "MARCO",
+        "kind": "record",
+        "team": "Accounts Payable",
+        "quip": "Paid ten dollars toward this.",
+        "line": "Who is Kelvin?",
+        "body": "casual2_male.fbx",
+        "profile": "marco"
+      }
+    },
+    "scene": [
+      {
+        "id": "party_surprise",
+        "who": "brenda",
+        "text": "Surprise! Happy birthday, Kevin! This cake was funded by everyone's annual raise."
+      },
+      {
+        "id": "party_kelvin",
+        "who": "marco",
+        "text": "The cake says Kelvin. I paid ten dollars for the card. I've never met him."
+      },
+      {
+        "id": "party_sing",
+        "who": "brenda",
+        "text": "Close enough! Now sing! With energy! Attendance counts toward calibration."
+      },
+      {
+        "id": "party_song",
+        "who": "marco",
+        "text": "Happy birthday, dear Kelvin. Happy birthday. To you."
+      },
+      {
+        "id": "party_engineer",
+        "who": "you",
+        "text": "Production is on fire, Kevin. Blow them out so we can all go home."
+      },
+      {
+        "id": "party_wish",
+        "who": "kevin",
+        "text": "I wish... for one weekend. Just one. Without the pager."
+      },
+      {
+        "id": "party_relit",
+        "who": "kevin",
+        "profile": "kevin_turning",
+        "text": "They relit. Reopened. Another year. Same sprint. More scope. MORE SCOPE!"
+      }
+    ]
   }
 }

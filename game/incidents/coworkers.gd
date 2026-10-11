@@ -106,7 +106,7 @@ const CAST: Array[Dictionary] = [
 		"line": "Is it normal to be on call on day one?", "hair": "curly", "palette": [Color(.95, .55, .2), Color(.18, .2, .3), Color(.55, .36, .25), Color(.12, .09, .07)]},
 	{"name": "Remote", "body": "casual2_male.fbx", "routine": "sit", "at": Vector3(9.4, 0, 13.55), "facing": PI,
 		"line": "I'm working from home. This is home now.", "hair": "shoulder", "palette": [Color(.85, .35, .55), Color(.25, .25, .3), Color(.88, .7, .58), Color(.55, .4, .18)]},
-	{"name": "Microwave", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(24.4, 0, 8.8), "facing": PI * .5, "gesture": "Idle",
+	{"name": "Microwave", "body": "casual3_male.fbx", "routine": "stand", "at": Vector3(28.4, 0, 8.8), "facing": PI * .5, "gesture": "Idle",
 		"line": "It said one minute. That was forty minutes ago.", "hair": "mohawk", "palette": [Color(.3, .4, .7), Color(.1, .1, .1), Color(.5, .33, .22), Color(.05, .05, .05)]},
 	{"name": "Recruiter", "body": "suit_male.fbx", "routine": "stand", "at": Vector3(7.0, 1.5, -4.9), "facing": PI * .15, "gesture": "Victory",
 		"line": "We're like a family here. A family with KPIs.", "hair": "pompadour", "palette": [Color(.55, .12, .18), Color(.1, .1, .12), Color(.62, .44, .32), Color(.08, .06, .05)]},

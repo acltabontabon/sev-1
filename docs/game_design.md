@@ -187,6 +187,16 @@ Finance interruption, quiz, or extra fight. The two new local lines last about t
 seconds together; Tab skips straight to the decision. Human acceptance of the joke,
 clarity and pacing remains pending.
 
+### Kevin's birthday (implemented prototype, 11 October 2026)
+
+An optional pantry detour mirrors the stand-up. The wider pantry hosts a loud Culture
+Committee birthday: the banner still reads `{FIRST_NAME}`, the cake says KELVIN, and
+the cake is "funded by everyone's annual raise". After a deadpan song, Kevin wishes for
+one weekend without the pager. The trick candles relight like reopened tickets, Kevin
+turns into a party-hatted Scope Creep, his guests become records, and the cake bursts
+into bugs. Satire aims at mandatory fun and pay incentives, not at the people. Details,
+reward and checkpoint: [pantry](pantry.md#kevins-birthday-implemented-prototype-11-october-2026).
+
 ### Emergency alignment meeting (implemented prototype, 11 October 2026)
 
 The optional Quick Sync now occupies a 12.5 m-wide room, with two short tables and

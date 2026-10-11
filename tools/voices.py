@@ -290,6 +290,13 @@ def talk_lines(talk):
                                         ('hover', talk['host_hover'], key), ('hr', talk['host_hr'], key),
                                         ('soon', talk['host_soon'], key + '_turning')]:
                 lines.append({'id': f'host_{key}_{node}', 'text': person.get(node, text), 'voice_profile': profile})
+    # The pantry birthday: the scene before the cake ambush, and the guests telling HR.
+    party = talk.get('party', {})
+    for line in party.get('scene', []):
+        profile = 'you' if line['who'] == 'you' else line.get('profile', party['cast'][line['who']]['profile'])
+        lines.append({'id': line['id'], 'text': line['text'], 'voice_profile': profile})
+    for key, person in party.get('cast', {}).items():
+        lines.append({'id': f'host_{key}_hr', 'text': talk['host_hr'], 'voice_profile': person['profile']})
     # The night shift charging into the boss fight, and what they scream on the way out.
     for name, moments in talk.get('cavalry', {}).items():
         for moment, text in moments.items():

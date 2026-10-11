@@ -36,14 +36,14 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute("res://builds")
 	for key: String in ["room", "microwave", "vending", "fridge", "poster"]:
 		if key == "microwave":
-			camera.position = Vector3(23.1, 2.4, 6.8)
-			camera.look_at(Vector3(26.0, 1.8, 8.8))
+			camera.position = Vector3(27.1, 2.4, 6.8)
+			camera.look_at(Vector3(30.0, 1.8, 8.8))
 		elif key == "vending":
 			camera.position = Vector3(23.6, 2.2, 12.5)
 			camera.look_at(Vector3(20.4, 1.6, 14.5))
 		elif key == "fridge":
-			camera.position = Vector3(22.5, 2.4, 12.7)
-			camera.look_at(Vector3(25.8, 1.8, 11.55))
+			camera.position = Vector3(26.8, 2.4, 9.6)
+			camera.look_at(Vector3(29.8, 1.8, 11.55))
 		elif key == "poster":
 			camera.position = Vector3(21.0, 2.4, 6.5)
 			camera.look_at(Vector3(23.4, 1.9, 2.1))
