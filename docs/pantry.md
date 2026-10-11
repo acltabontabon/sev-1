@@ -124,7 +124,8 @@ prompt, HR, the headless transformation, the bug swarm, ambush awareness, the
 Management and Quick Sync locks, the reward, no retrigger, the rendered scene's steps
 (candles out and relit), TAB, natural handoff, restart mid-scene, and an ignored party.
 `tests/birthday_preview.gd` renders the room, table, cake, door, every scene line, the
-outbreak and the fight into `builds/`. These renders were inspected at 1600×900 on an
+outbreak and the fight into `builds/`; five of them are kept as
+`docs/screenshots/pantry_birthday_*.jpg` for review. These renders were inspected at 1600×900 on an
 Apple M2 Pro, Forward+/Metal. They are layout evidence, not performance or fun
 measurements.
 
