@@ -3,7 +3,7 @@
 **Works on My Machine.** A cinematic third-person corporate-nightmare action game.
 The system is down. Management is watching. You're the only engineer online.
 
-**Playtest Build 0.2 / version 0.2.45** (Milestone 12, "Operation Corporate Hell") is a
+**Playtest Build 0.2 / version 0.2.46** (Milestone 12, "Operation Corporate Hell") is a
 local macOS tester build that answers the first external feedback on 0.1. It is not
 creator-accepted or notarized. No known P0 gameplay failure was reproduced; first-use
 hitches and human acceptance of fun, comedy, voice and music remain open. See the
@@ -11,8 +11,8 @@ hitches and human acceptance of fun, comedy, voice and music remain open. See th
 
 ## Play
 
-Unzip `SEV-1-Friday-Deployment-0.2.45-macOS.zip` and open **SEV-1 Friday Deployment.app**.
-No Godot installation is needed. Local outputs are under `builds/releases/0.2.45/`.
+Unzip `SEV-1-Friday-Deployment-0.2.46-macOS.zip` and open **SEV-1 Friday Deployment.app**.
+No Godot installation is needed. Local outputs are under `builds/releases/0.2.46/`.
 The build is ad-hoc signed; recipient Macs may require explicit approval. Keep the
 included license notices with the app. Apple Silicon/macOS is the initial test platform;
 Intel, Windows and the declared macOS 14 minimum are not runtime-validated.
@@ -77,7 +77,7 @@ and Attempt to Log Off. The window close action also exits cleanly.
 
 Human run length, difficulty and balance are unmeasured. Characters are original native
 models with procedural poses; speech is local TTS candidate audio; music is original
-synthesis. No later circles, permanent progression, online account, telemetry,
+synthesis. No later circles, permanent stat upgrades, online account, telemetry,
 multiplayer or runtime AI exists.
 
 ## Development
@@ -94,7 +94,7 @@ sh tools/release.sh
 For a quick preview of the revised boss transformation in the source checkout, run
 `sh tools/godot.sh --path . --script tests/rage_preview.gd`. It starts at the engineer's
 grief, plays the memories, shouted charge and spiked-hair form, then enters the fight.
-The packaged 0.2.45 build predates this refinement. In a normal run, reach the vault;
+The 0.2.46 Mac rebuild includes this refinement. In a normal run, reach the vault;
 TAB skips the cinematic and R retries the episode. Review the pacing, shout and hair
 silhouette; visual inspection and automated checks do not establish the emotional payoff.
 

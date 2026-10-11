@@ -45,11 +45,12 @@ Both are included in `python3 tools/validate.py`.
 Verification on 11 October 2026: 17 chapter-save checks and the release lifecycle
 suite passed. Fresh, unlock, and completed menus were rendered and inspected at
 1280×720, Forward+, Apple M2 Pro. This is menu layout evidence, not a performance
-measurement. Full validation was attempted: import/parsing and all other executed
-suites passed, but the concurrently revised Operations guidance left two unrelated
-HUD expectations failing (the encounter compass arrow and interface ticket header).
-Remaining suites were run separately after the encounter failure stopped the runner.
-These shared-workflow failures do not establish a green full-project release gate.
+measurement. The two stale Operations HUD assertions have since been corrected:
+the anywhere management call has no destination arrow, the vault keeps its arrow and
+distance, and the incident header reads UPDATE REQUESTED. Full validation passed for the frozen 0.2.46 build snapshot.
+The 0.2.46 Mac rebuild includes packaged smoke checks for tester unlock, victory save,
+the saved-progress title, and replay preserving completion on disk. Packaged headless
+combat and graphical menu checks passed; see [release evidence](release.md#0246--stage-one-saves-and-replay-11-october-2026).
 
 Human checkpoint: finish Stage One (or use the earlier tester unlock), quit and reopen,
 check the saved message and Replay Stage One, then replay/restart and reopen again.

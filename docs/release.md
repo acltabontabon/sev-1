@@ -136,3 +136,30 @@ On 10 October 2026, checkpoint `a7462ee` passed the complete gate, including all
 22 packaged voice resources, combat smoke, and ZIP signature verification. See
 [voice validation evidence](voices.md#recorded-evidence--10-october-2026).
 Human listening, notarization and Windows acceptance remain separate.
+
+## 0.2.46 — Stage One saves and Replay (11 October 2026)
+
+Built from a frozen source copy so concurrent scene-flow work could not change files
+between validation and export. Outputs are in `builds/releases/0.2.46/`: the Mac app,
+`SEV-1-Friday-Deployment-0.2.46-macOS.zip`, and `manifest.json`. The manifest records
+that exact copy's source commit, dirty state and digest, rather than claiming the
+live checkout is identical. Later HUD performance edits are outside this package.
+
+Full validation, export, bundle/ZIP signature verification, standalone launch and
+packaged headless real-melee smoke passed. The packaged probe verified earlier tester
+unlock, saving on victory, saved-progress title, Replay Stage One and disk completion
+surviving replay. Final graphical menu smoke passed at 1280×720, Forward+/Metal on
+Apple M2 Pro. The saved title was inspected from an engine capture; the tester unlock
+screen was also inspected in the actual app through native UI. The app was left on
+its title without changing the player's chapter save. These are layout/behavior
+checks, not a performance measurement or a human combat playthrough.
+
+The first frozen-copy import reported missing theme fonts before importing them;
+retrying after import completed passed the entire gate. A preliminary full graphical
+combat probe did not complete its staged route (six downstream assertions failed).
+Final verification covers headless packaged combat and rendered menus; full graphical
+combat/audio/fun acceptance remains a creator playtest checkpoint.
+
+Evidence: `logs/save_rebuild_final_validation.log`, `logs/save_rebuild_final_smoke.log`,
+and `logs/save_rebuild_final_menus.log`. Build output and captures are ignored. The app
+is ad-hoc signed, not notarized; Windows runtime acceptance remains open.

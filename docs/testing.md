@@ -12,9 +12,12 @@ Apple Silicon is the tested platform; Intel is included in the universal bundle 
 unverified. The app declares macOS 14+, but only macOS 27.0.1 on M2 Pro has been
 measured. Keyboard and mouse are required. No controller mapping is implemented.
 
-Choose **Controls** or **Settings**, then **Start Incident**. Aim for one ordinary
+Choose **Onboarding Docs** (controls) or **Corporate Policy** (settings), then **Acknowledge Incident**. Aim for one ordinary
 run; the 5–10-minute target has not yet been measured with human testers. Tab skips
-the opening and boss arrival. Nothing is saved except device preferences.
+the opening and boss arrival. Stage One completion saves separately from device preferences. After completion,
+**Replay Stage One** starts again without erasing it. Earlier testers can choose
+**I already finished Stage One** → **Unlock Stage One Completion** on the title.
+Check the saved-progress message after quitting and reopening; Stage Two is coming soon.
 
 ## Play the incident
 
@@ -24,9 +27,9 @@ the opening and boss arrival. Nothing is saved except device preferences.
 2. Clear two waves (Corrupted Records, then Scope Creep). Enemies start unaware; a hit
    before they notice you deals double. Approve a change request with mouse,
    arrows/Enter, or 1/2/3: read its benefit and Technical Debt cost.
-3. Follow OPERATIONS to the far wall. Press E nearby: the evidence board shows three
-   systems; press the number of the one that never received the payment (if stuck:
-   3, Payment Processing). Optional before that: the east wing. Press E at the pantry's
+3. After the first encounter, press E to answer Management from wherever you are
+   (step away from nearby coworkers or appliances if E offers their interaction).
+   Hear the call or skip it with Tab. Optional before that: the east wing. Press E at the pantry's
    coffee machine; walk into Meeting Room 3 if you want the Quick Sync ambush.
 4. Reply to Leadership's DM. Contain two waves: hit The Blocker mid-cast or kill it
    first; step out of Meeting Invite circles before they start; don't ignore Scope Creep.

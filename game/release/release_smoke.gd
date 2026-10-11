@@ -32,9 +32,51 @@ func capture(title: String) -> void:
 func _run() -> void:
 	check(not ResourceLoader.exists("res://tests/release_tests.gd"), "development tests excluded from package")
 	app = get_parent()
+	check(app.progress.path != "user://chapter_progress.json", "packaged smoke isolates chapter saves from player progress")
+	if app.progress.path == "user://chapter_progress.json":
+		get_tree().quit(1)
+		return
+	DirAccess.remove_absolute(app.progress.path)
+	app.progress.load_progress()
+	app.show_page("main")
 	await frames(10)
 	check(app.page == "main", "packaged main scene reaches title")
 	capture("title")
+	app.show_page("tester_unlock")
+	capture("tester_unlock")
+	var unlock: Button
+	for button: Node in app.box.find_children("*", "Button", true, false):
+		if button.text == "Unlock Stage One Completion":
+			unlock = button
+	check(unlock != null, "packaged earlier tester unlock is available")
+	if unlock != null:
+		unlock.pressed.emit()
+		await frames(3)
+		check(app.progress.stage_one_completed and app.page == "main", "packaged earlier tester unlock saves completion and returns to title")
+	if "--menus-only" in OS.get_cmdline_user_args():
+		capture("saved_title")
+		var replay_button: Button
+		for button: Node in app.box.find_children("*", "Button", true, false):
+			if button.text == "Replay Stage One":
+				replay_button = button
+		check(replay_button != null, "packaged completed title offers Replay Stage One")
+		if replay_button != null:
+			replay_button.pressed.emit()
+			await frames(3)
+			check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged menu replay starts Stage One and keeps completion")
+			app.main_menu()
+			await frames(3)
+		var menu_save: RefCounted = load("res://game/release/chapter_progress.gd").new()
+		menu_save.path = app.progress.path
+		menu_save.load_progress()
+		check(menu_save.stage_one_completed, "packaged menu replay keeps completion on disk")
+		DirAccess.remove_absolute(app.progress.path)
+		_finish_probe()
+		return
+	# Clear only this disposable fixture so victory tests a fresh completion write.
+	DirAccess.remove_absolute(app.progress.path)
+	app.progress.load_progress()
+	app.show_page("main")
 	app.start_incident()
 	var scene: Node = app.session
 	var player: CharacterBody3D = scene.get_node("Player")
@@ -67,6 +109,7 @@ func _run() -> void:
 			player.position = incident.CONSOLE_POSITION
 			await key(KEY_E)
 			await key(KEY_3)
+			await key(KEY_TAB)
 		elif incident.stage == incident.Stage.BOSS and not incident.boss_triggered:
 			player.position = Vector3(9, .05, -31.5)
 			await frames(3)
@@ -87,6 +130,10 @@ func _run() -> void:
 		await frames(1)
 	await frames(3)
 	check(incident.stage == incident.Stage.RESOLVED and app.page == "report", "packaged real-melee run reaches victory and report")
+	var saved: RefCounted = load("res://game/release/chapter_progress.gd").new()
+	saved.path = app.progress.path
+	saved.load_progress()
+	check(saved.stage_one_completed, "packaged victory persists Stage One completion")
 	check(incident.run.choices.size() == 2 and incident.corporate_choice == 1 and incident.enemies_defeated == 11, "packaged run traverses two upgrades, management, and every authored wave")
 	print("SIMULATED RUN WALL MS: ", Time.get_ticks_msec() - started)
 	for button: Node in app.box.find_children("*", "Button", true, false):
@@ -101,6 +148,28 @@ func _run() -> void:
 	app.main_menu()
 	await frames(3)
 	check(app.session == null and get_tree().get_nodes_in_group("players").is_empty(), "packaged return to title frees incident")
+	var replay: Button
+	var menu_text: String = ""
+	for button: Node in app.box.find_children("*", "Button", true, false):
+		if button.text == "Replay Stage One":
+			replay = button
+	for label: Node in app.box.find_children("*", "Label", true, false):
+		menu_text += label.text + "\n"
+	check(replay != null and "Progress saved. Stage Two coming soon." in menu_text, "packaged title offers replay and the saved-progress message")
+	capture("saved_title")
+	if replay != null:
+		replay.pressed.emit()
+		await frames(3)
+		check(app.session != null and app.session.get_node("Incident").stage == app.session.get_node("Incident").Stage.ALERT and app.progress.stage_one_completed, "packaged Replay Stage One keeps completion and starts a fresh incident")
+		app.main_menu()
+		await frames(3)
+	saved.load_progress()
+	check(saved.stage_one_completed, "packaged replay preserves completion on disk")
+	DirAccess.remove_absolute(app.progress.path)
+	_finish_probe()
+
+
+func _finish_probe() -> void:
 	var result: FileAccess = FileAccess.open("user://release_smoke.json", FileAccess.WRITE)
 	result.store_string(JSON.stringify({"failures": failures, "version": ProjectSettings.get_setting("application/config/version"), "graphical": DisplayServer.get_name() != "headless"}))
 	result.close()

@@ -1,5 +1,26 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## 0.2.46 — Chapter completion saves (11 October 2026)
+
+Stage One completion now saves automatically. The completed title shows “Progress
+saved. Stage Two coming soon.” Replay Stage One preserves completion through death,
+restart and a fresh launch. Earlier testers can use “I already finished Stage One”
+then “Unlock Stage One Completion.” Stage Two remains unavailable; mid-incident state
+and temporary upgrades are not saved. See [chapter saves](chapter_saves.md).
+
+Corrected the two outdated Operations HUD checks: the anywhere management call has
+no false destination arrow, the vault still shows its arrow/distance, and the ticket
+header names the management update. Full validation passed for the packaged snapshot. Version metadata is
+aligned across the game, export presets and release helper. The Mac rebuild includes
+the current source refinements described below; their older packaged-build comments
+refer to earlier packages.
+
+The opt-in packaged smoke probe now checks tester unlock, victory saving, the saved
+progress message, Replay Stage One and preserved disk completion with disposable
+save data. Build/signature/smoke evidence is recorded in the package's manifest.
+This remains an ad-hoc signed local tester build; human gameplay/audio acceptance,
+notarization and Windows runtime checks remain separate.
+
 ## Source update — Clear the lounge doorway (11 October 2026)
 
 Tidied the SHIP IT lounge into a compact seating group. The east armchair and

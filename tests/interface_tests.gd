@@ -50,7 +50,7 @@ func _run() -> void:
 	await frames(2)
 	check(hud.debt_bar.value == 45 and "FRAGILE" in hud.debt_value.text, "the debt bar tracks Technical Debt and its band")
 	check(hud.health_bar.value == 40 and hud.burnout_bar.value == 75 and "OVERLOADED" in hud.burnout_value.text, "vitals bars track health and Burnout")
-	check("INVESTIGATING" in scene.get_node("HUD/Margin/VBox/Title").text, "the ticket header names the incident's status")
+	check("INC-001  ·  UPDATE REQUESTED  ·" in scene.get_node("HUD/Margin/VBox/Title").text, "the ticket header names the requested management update")
 	check(not hud.boss_box.visible, "no boss bar without a boss")
 	# Special moves read as icons with cooldowns, not a line of text.
 	player.specials.wave_cooldown = 0.0
