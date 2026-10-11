@@ -36,14 +36,15 @@ const MEMORIAL: Array = [
 	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Nobody left to laugh at his terrible first band."]]
 const MEMORIAL_EACH: float = 2.4
 const RECOLLECTION: Script = preload("res://game/incidents/memorial_memory.gd")
-const MEMORIAL_VOICES: Array[String] = ["doc_morgan", "doc_nadia", "doc_jun", "doc_jo", "doc_val"]
+const MEMORIAL_VOICES: Dictionary = {"Manager": "doc_morgan", "SRE": "doc_nadia",
+	"Designer": "doc_jun", "Intern": "doc_jo", "Director": "doc_val"}
 ## The way out: each memory recalls an ordinary conversation beside the clear route.
 const MEMORIES: Array = [
-	["Manager", "ual/phone"],
+	["Manager", "ual/talking"],
 	["SRE", "ual/interact"],
 	["Designer", "ual/talking"],
 	["Intern", "ual/yes"],
-	["Director", "ual/phone"]]
+	["Director", "ual/talking"]]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
 const DEPARTURE: PackedScene = preload("res://game/incidents/departure_corridor.tscn")
@@ -106,6 +107,8 @@ var bridge_seconds: float = 0.0
 var check_from: Vector3
 var check_at: Vector3
 var nightlife: Node3D
+var window_hidden: Array[Node3D] = []
+var window_memories: Array[Node3D] = []
 
 
 func _init(presentation: Node) -> void:
@@ -222,6 +225,8 @@ func _beat(next: String) -> void:
 			story.desk.alarm(true)
 			story.sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -4)
 		"exit":
+			_exposure(.42)
+			story.voice.clear()
 			character.story_hand_targets.clear()
 			character.story_pose = 0
 			character.sit = 0.0
@@ -257,6 +262,10 @@ func _beat(next: String) -> void:
 			story.sting(preload("res://assets/audio/sfx/door_open.ogg"), -14)
 			story.say("doc_end")
 		"window":
+			for actor: Variant in [incident.coworkers] + incident.actors:
+				if is_instance_valid(actor) and actor is Node3D and actor.visible:
+					window_hidden.append(actor)
+					actor.hide()
 			if is_instance_valid(nightlife):
 				nightlife.hide()
 			_stage_window()
@@ -265,6 +274,9 @@ func _beat(next: String) -> void:
 			titles.show()
 			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did."
 		"card":
+			_restore_window_actors()
+			for figure: Node3D in window_memories:
+				figure.hide()
 			incident.room.get_node("Clock").text = "MONDAY / 09:00"
 			titles.text = "MONDAY, 9:00 AM\nBLAMELESS POSTMORTEM  ·  ATTENDANCE MANDATORY"
 			if mourn.playing:
@@ -502,7 +514,7 @@ func tick(delta: float) -> bool:
 			# Long lens from across the city, up to the one lit window: the night shift.
 			camera.global_position = Vector3(-74.0, 13.0, 28.0)
 			camera.look_at(WINDOW + Vector3.UP * .9)
-			camera.fov = lerpf(3.2, 2.6, minf(1.0, t / 5.0))
+			camera.fov = lerpf(6.2, 5.4, minf(1.0, t / 5.0))
 			if t >= 4.5 and quiet:
 				_beat("resolved")
 		"resolved":
@@ -567,6 +579,7 @@ func finish(completed: bool = true) -> void:
 	if done:
 		return
 	done = true
+	_restore_window_actors()
 	story.finale_completed = completed
 	story.sequence.clear()
 	story.voice.clear()
@@ -794,13 +807,16 @@ func _summon_memories() -> void:
 		var ghost: StandardMaterial3D = StandardMaterial3D.new()
 		ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		ghost.albedo_color = Color(.84, .79, .69, 0.0)
-		for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
-			(mesh as MeshInstance3D).material_override = ghost
+		ghost.albedo_color = Color(.64, .72, .78, 0.0)
+		for mesh: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+			_memory_outfit(mesh, cast)
+			mesh.material_override = ghost
 			(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		animator.add_animation_library("ual", MOTION)
+		animator.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 		animator.play(entry[1])
+		animator.advance(0.0)
 		var remembered: Dictionary = DIALOGUES.memory(entry[0])
 		var whisper: AudioStreamPlayer = AudioStreamPlayer.new()
 		whisper.bus = &"Voice"
@@ -808,11 +824,17 @@ func _summon_memories() -> void:
 		whisper.volume_db = -10.0
 		body.add_child(whisper)
 		var length: float = whisper.stream.get_length()
-		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false,
+		memories.append({"body": body, "animator": animator, "ghost": ghost, "whisper": whisper, "seen": false,
 			"cue": cue, "length": length, "text": remembered.text, "who": DIALOGUES.tree(entry[0]).who})
 		cue += length + .9
 	departure.configure(memories, EXIT_PATH[0], EXIT_PATH[1])
 	exit_duration = departure.duration
+
+
+## These single-material apparitions need the outfit mesh, not discarded palette overrides.
+func _memory_outfit(mesh: MeshInstance3D, cast: Dictionary) -> void:
+	if mesh.skin != null and CREW.FEMALE_OUTFITS.has(cast.body):
+		mesh.mesh = CREW.DIRECTOR_OUTFIT if cast.get("outfit", "office") == "low_cut" else CREW.FEMALE_OUTFITS[cast.body]
 
 
 ## One intelligible fragment at a time. A memory vanishes after its line, not mid-word.
@@ -822,7 +844,10 @@ func _haunt(time: float) -> void:
 		var within: float = time - float(memory.cue)
 		var length: float = memory.length
 		var alpha: float = smoothstep(-.4, .4, within) * (1.0 - smoothstep(length, length + .7, within))
-		memory.ghost.albedo_color.a = alpha * .14
+		memory.ghost.albedo_color.a = alpha * .2
+		var animator: AnimationPlayer = memory.animator
+		animator.seek(fposmod(maxf(within, 0.0) * .65, maxf(animator.current_animation_length, .001)), true)
+		animator.advance(0.0)
 		if within >= 0.0 and not memory.seen:
 			memory.seen = true
 			if DisplayServer.get_name() != "headless":
@@ -846,7 +871,7 @@ func _recall_next() -> void:
 	memorial_name.hide()
 	memorial_line.hide()
 	recollection.recall(MEMORIAL[memorial_index][0])
-	var id: String = MEMORIAL_VOICES[memorial_index]
+	var id: String = MEMORIAL_VOICES[MEMORIAL[memorial_index][0]]
 	var entry: Dictionary = story.voice.lines[id]
 	var stream: AudioStream = load(entry.audio)
 	# Audio starts on the next process frame; leave breathing room before the loss cut.
@@ -1019,32 +1044,38 @@ func _stage_street() -> void:
 	props.append(cold)
 
 
+func _restore_window_actors() -> void:
+	for actor: Variant in window_hidden:
+		if is_instance_valid(actor):
+			actor.show()
+	window_hidden.clear()
+
+
 ## Five of them in the lit window, black against the light, watching him go.
 func _stage_window() -> void:
 	var black: StandardMaterial3D = StandardMaterial3D.new()
 	black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	black.albedo_color = Color(.01, .01, .012)
-	for index in range(5):
-		var figure: Node3D = Node3D.new()
-		var body: MeshInstance3D = MeshInstance3D.new()
-		var torso: CapsuleMesh = CapsuleMesh.new()
-		torso.radius = .2
-		torso.height = 1.15
-		body.mesh = torso
-		body.material_override = black
-		body.position.y = .58
-		figure.add_child(body)
-		var head: MeshInstance3D = MeshInstance3D.new()
-		var ball: SphereMesh = SphereMesh.new()
-		ball.radius = .14
-		ball.height = .28
-		head.mesh = ball
-		head.material_override = black
-		head.position.y = 1.32
-		figure.add_child(head)
+	for index in range(MEMORIES.size()):
+		var cast: Dictionary = {}
+		for member: Dictionary in CREW.CAST:
+			if member.name == MEMORIES[index][0]:
+				cast = member
+		var figure: Node3D = load(ROOT + cast.body).instantiate()
+		figure.name = "WindowMemory" + str(index)
 		incident.add_child(figure)
-		figure.global_position = WINDOW + Vector3(0, 0, (index - 2) * .62)
+		figure.scale = Vector3.ONE * .52
+		for mesh: MeshInstance3D in figure.find_children("*", "MeshInstance3D", true, false):
+			_memory_outfit(mesh, cast)
+			mesh.material_override = black
+		figure.global_position = WINDOW + Vector3(0, 0, (index - 2) * .78)
+		figure.rotation.y = -PI * .5
+		var animator: AnimationPlayer = figure.find_child("AnimationPlayer", true, false)
+		animator.add_animation_library("ual", MOTION)
+		animator.play("ual/idle")
+		animator.advance(float(index) * .23)
 		props.append(figure)
+		window_memories.append(figure)
 	var warm: OmniLight3D = OmniLight3D.new()
 	warm.light_color = Color(1, .8, .55)
 	warm.light_energy = 6.0
@@ -1052,6 +1083,7 @@ func _stage_window() -> void:
 	incident.add_child(warm)
 	warm.global_position = WINDOW + Vector3(2.6, 1.4, 0)
 	props.append(warm)
+	window_memories.append(warm)
 
 
 

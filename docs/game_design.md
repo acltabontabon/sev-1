@@ -270,8 +270,9 @@ warmth and dark office humor. Background activity belongs to the drawing's momen
 there are no wandering extra actors. The illustration style is intentionally distinct
 from the playable 3D models, as authorized by the creator. These are animated
 illustrated stills with recorded local narration, not generated video.
-The 54.52 seconds of recorded narration are delivered sincerely, including the
-creator-requested profanity and absurd office details. Each line finishes before a
+The 53.28 seconds of recorded narration are delivered sincerely. The revised comedy
+comes from absurd specifics: a pager escalating to a sweater, a pigeon promoting
+itself, and a printer band receiving a performance plan. Each line finishes before a
 clear, silent 2.4-second shot of that colleague where they fell. The memorial takes
 about 70 seconds in total, extending the previous five loss shots by about 58 seconds. TAB still skips the finale. Art prompts, source files, checksums and visual
 review are recorded in [illustration provenance](../assets/environment/memorial_illustrations/README.md).
@@ -296,13 +297,22 @@ The temporary corridor disappears at the street cut and is removed on skip or re
 Faint, warm memories recall the five as people: coffee invitations, lunch plans and
 ridiculous gossip. “Tell me something normal” in their living conversations cycles
 five locally prerecorded takes per coworker (coffee, lunch and three gossip stories). The walk recalls the exact take heard
-this run; an unvisited coworker supplies a shuffled take. Memory audio is sequential,
+this run; an unvisited coworker supplies a dedicated after-hours recollection.
+These five locally recorded fallback lines pair small kindnesses with absurd policy:
+bereavement renamed availability, sleep facing disciplinary action, a timed grief
+survey, lunch approved as a critical dependency, and a cactus sold as a resilience consultant. Memory audio is sequential,
 with captions that respect the subtitle preference. Their positions beside the lane
 match the timing of each recorded line. The walk accommodates complete
 clips; TAB skips and R clears the props and this run's recalled lines. Hand contacts,
 stand-up motion and prop movement are blended; the box stays upright as he walks.
 Explicit cinematic gait matches the eased travel pace, including slow movement below
 the gameplay idle threshold and street shots without a physics floor update.
+The ghosts face the passing engineer, retain their established outfits, and gesture
+slowly on cinematic time. The rainy exterior is colder and sparsely populated:
+four late-night stragglers, subdued venue lights, shuttered noodles, wet textured
+stone, drains and an empty bench. Pedestrians face their actual direction of travel.
+Five recognizable crew models replace the placeholder shapes in the final window.
+This is a bleak departure; the comic recollections do not erase the loss.
 Monday's postmortem follows the night. The engineer's last reply is “So I’m the emotional support human for five fucking chatbots.”
 He leaves the call, walks back across the office, gradually sits at his workstation
 and begins typing. “TO BE CONTINUED” fades in over black, then fades out into the

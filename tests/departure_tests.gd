@@ -63,6 +63,17 @@ func _run() -> void:
 		spaced = spaced and float(memory.cue) > previous_end
 		previous_end = float(memory.cue) + float(memory.length)
 	check(spaced and finale.exit_duration > previous_end, "complete remembered lines stay sequential through the continuous walk")
+	var facing_lane: bool = true
+	for memory: Dictionary in finale.memories:
+		var sample: Vector4 = corridor.travel(float(memory.cue) + float(memory.length) * .4)
+		var toward: Vector3 = Vector3(sample.x, memory.body.global_position.y, sample.z) - memory.body.global_position
+		facing_lane = facing_lane and memory.body.global_basis.z.normalized().dot(toward.normalized()) > .95
+	check(facing_lane, "all five raw-body memories face the passing engineer, not the corridor wall")
+	var ghost_animator: AnimationPlayer = finale.memories[0].animator
+	finale._haunt(float(finale.memories[0].cue) + .5)
+	var ghost_phase: float = ghost_animator.current_animation_position
+	finale._haunt(float(finale.memories[0].cue) + .8)
+	check(ghost_animator.current_animation_position != ghost_phase, "memory gestures advance from cinematic time")
 	var covered: bool = true
 	for sample in range(101):
 		var travel: Vector4 = corridor.travel(finale.exit_duration * float(sample) / 101.0)

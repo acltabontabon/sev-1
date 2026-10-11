@@ -20,6 +20,10 @@ func check(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	var dialogue: GDScript = load("res://game/incidents/dialogues.gd")
+	dialogue.remembered_lines.clear()
+	var fallback: Dictionary = dialogue.memory("Manager")
+	check(fallback.clip == "talk_manager_after_hours" and "bereavement" in fallback.text,
+		"unvisited crew supply an authored late-night recollection with matching speech")
 	var heard: Dictionary = dialogue.line(dialogue.tree("Intern"), "good_days")
 	check(dialogue.memory("Intern") == heard, "the ending recalls the actual conversation heard, with the matching voice clip")
 	var intern_talk: Dictionary = dialogue.tree("Intern")
@@ -105,7 +109,7 @@ func _run() -> void:
 			"gentle framing drift gives the remembered moment its own motion")
 		recalled.append(finale.MEMORIAL[finale.memorial_index][0])
 		story.voice._process(.1)
-		check(story.voice.current_line == finale.MEMORIAL_VOICES[index] and not story.voice.subtitle.is_empty(),
+		check(story.voice.current_line == ["doc_morgan", "doc_nadia", "doc_jun", "doc_jo", "doc_val"][index] and not story.voice.subtitle.is_empty(),
 			"each teammate has synchronized narrator speech and subtitles")
 		finale.clock = finale.memorial_at + finale.memorial_duration + 1.0
 		finale.tick(.001)

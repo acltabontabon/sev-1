@@ -63,7 +63,7 @@ func _run() -> void:
 		await process_frame
 		quit()
 		return
-	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
+	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
 	if "--memorial" in OS.get_cmdline_user_args():
 		samples = []
 		for index in range(5):
@@ -73,10 +73,15 @@ func _run() -> void:
 		story.voice.clear()
 		finale.character.overtime(false)
 		samples = [["casualties", 1.8], ["remember", 1.5], ["remember", 7.0], ["memorial", .8]]
-	if "--departure" in OS.get_cmdline_user_args():
+	if "--departure" in OS.get_cmdline_user_args() or "--street" in OS.get_cmdline_user_args():
+		story.voice.clear()
+		finale.recollection.conceal()
+		finale.character.overtime(false)
 		finale._beat("grief")
 		finale._beat("desk")
-		samples = [["exit", 3.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
+		samples = [["exit", 3.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
+	if "--street" in OS.get_cmdline_user_args():
+		samples = [["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
 	if "--closing" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")

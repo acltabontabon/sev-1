@@ -42,8 +42,8 @@ to return directly to its scene. Tab skips supported cinematics.
 | Operations handoff | `sh tools/godot.sh --path . --script tests/operations_preview.gd -- --play` | Answer with E; judge containment purpose and deadline consequence |
 | Quick Sync | `sh tools/godot.sh --path . --script tests/quick_sync_preview.gd -- --play` | Walk into Meeting Room 3; judge retreat space, transformations, floor hazards, comedy |
 | Boss duel | Double-click `duel_preview.command`, or `sh duel_preview.command` | Sword/trident lock, duck, reciprocal attacks, knockback, recovery and finish; TAB skips, window closes at the aftermath |
-| Ending | `sh tools/godot.sh --path . --script tests/ending_preview.gd` | Duel, departure, Monday, and return to menu |
-| Office departure | `sh tools/godot.sh --path . --script tests/ending_preview.gd -- --departure` | Continuous natural strides through the memories, opening door, complete crossing and readable SYNERGEX mark |
+| Ending | Double-click `ending_preview.command` | Aftermath, five memories, departure, and Monday; TAB skips and the preview closes |
+| Office departure | `sh tools/godot.sh --path . --script tests/ending_preview.gd -- --departure` | Forward-facing pedestrians and ghosts, bleak street, remembered dialogue, complete doorway crossing |
 | Finale | `sh tools/godot.sh --path . --script tests/finale_preview.gd` | Grief, sword placement, pickup, memories, animation, and music mix |
 | Closing shots | `sh tools/godot.sh --path . --script tests/finale_preview.gd -- --closing` | Final reply and return to work |
 
