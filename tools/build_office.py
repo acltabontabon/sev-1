@@ -44,6 +44,12 @@ materials = {
  'wellness_purple': ((.36,.24,.6,1), .8, 0),
  'office_enamel': ((.63,.66,.65,1), .48, .15),
  'frosted_glass': ((.72,.8,.8,.28), .8, 0),
+ # The birthday: glossy latex, crepe paper, icing and a feature wall someone was allowed to paint.
+ 'balloon_pink': ((1,.32,.62,1), .22, 0), 'balloon_cyan': ((.22,.78,.98,1), .22, 0),
+ 'balloon_gold': ((1,.76,.22,1), .22, .35), 'balloon_lime': ((.55,.9,.3,1), .22, 0),
+ 'balloon_violet': ((.58,.36,.95,1), .22, 0), 'party_wall': ((.86,.46,.38,1), .9, 0),
+ 'party_cloth': ((.98,.42,.66,1), .85, 0), 'frosting': ((.98,.95,.9,1), .6, 0),
+ 'flame': ((1,.62,.2,1), .5, 0), 'fairy': ((1,.86,.6,1), .5, 0),
 }
 # CC0 photographs for the culture-deck prints (assets/environment/posters, see its README).
 photos = ['family', 'fail_fast', 'wellbeing', 'machine', 'wellness']
@@ -80,8 +86,8 @@ color_ramp = SubResource("Grain")
         extra+='albedo_texture = SubResource("Texture")\nuv1_triplanar = true\nuv1_scale = Vector3(3, 3, 3)\n'
     if name in ('screen','warm','cool','alert','mint','green','amber','purple'):
         extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = {0.65 if name=="screen" else 1.3}\n'
-    if name.startswith('neon_'):
-        extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = 3.2\n'
+    if name.startswith('neon_') or name in ('flame','fairy'):
+        extra+=f'emission_enabled = true\nemission = {col(color)}\nemission_energy_multiplier = {2.4 if name=="fairy" else 3.2}\n'
     if name=='glass': extra+='transparency = 1\ncull_mode = 2\n'
     if name in ('poster_glass','tape','frosted_glass'): extra+='transparency = 1\n'
     if name=='poster_glass': extra+='metallic_specular = 1.0\n'
@@ -124,15 +130,24 @@ class Scene:
         path=self.node(name,'StaticBody3D',pos,parent)
         shape=self.resource('BoxShape3D',f'size = {vec(size)}')
         self.node('Collision','CollisionShape3D',parent=path,props=f'shape = {shape}')
-    def glb(self,name,file,pos,rot=0,scale=1.0,parent='.'):
-        ref=self.external(f'res://assets/environment/kenney_furniture/{file}.glb','PackedScene')
+    def glb(self,name,file,pos,rot=0,scale=1.0,parent='.',kit='kenney_furniture'):
+        ref=self.external(f'res://assets/environment/{kit}/{file}.glb','PackedScene')
         self.nodes.append(f'[node name="{name}" parent="{parent}" instance={ref}]\nposition = {vec(pos)}\nrotation_degrees = Vector3(0, {rot}, 0)\nscale = Vector3({scale}, {scale}, {scale})')
     def marker(self,name,pos,parent='SpawnPoints'):
         self.node(name,'Marker3D',pos,parent)
-    def cylinder(self,name,pos,radius,height,mat,parent='.',rot=None):
+    def cylinder(self,name,pos,radius,height,mat,parent='.',rot=None,segments=12):
         m=self.external(f'res://game/rooms/office/{mat}.tres','Material')
-        mesh=self.resource('CylinderMesh',f'top_radius = {radius}\nbottom_radius = {radius}\nheight = {height}\nradial_segments = 12\nmaterial = {m}')
+        mesh=self.resource('CylinderMesh',f'top_radius = {radius}\nbottom_radius = {radius}\nheight = {height}\nradial_segments = {segments}\nmaterial = {m}')
         self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\n'+('' if rot is None else f'rotation_degrees = {vec(rot)}'))
+    def sphere(self,name,pos,radius,mat,parent='.',scale=(1,1,1)):
+        m=self.external(f'res://game/rooms/office/{mat}.tres','Material')
+        mesh=self.resource('SphereMesh',f'radius = {radius}\nheight = {radius*2}\nradial_segments = 16\nrings = 8\nmaterial = {m}')
+        self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\nscale = {vec(scale)}\n')
+    def prism(self,name,pos,size,mat,parent='.',rot=None):
+        # Triangular face in XY, apex up before rotation: pennants hang it apex down.
+        m=self.external(f'res://game/rooms/office/{mat}.tres','Material')
+        mesh=self.resource('PrismMesh',f'size = {vec(size)}\nmaterial = {m}')
+        self.node(name,'MeshInstance3D',pos,parent,f'mesh = {mesh}\n'+('' if rot is None else f'rotation_degrees = {vec(rot)}\n'))
     def text(self,name,text,pos,size=.008,font=40,color=(.65,.77,.77,1),rot=(0,0,0),parent='.',face=None):
         typeface='' if face is None else 'font = '+self.external(face,'FontFile' if face.endswith('.ttf') else 'FontVariation')+'\n'
         self.node(name,'Label3D',pos,parent,f'text = {quote(text)}\n{typeface}font_size = {font}\npixel_size = {size}\nmodulate = {col(color)}\noutline_size = 0\nrotation_degrees = {vec(rot)}\n')
@@ -396,7 +411,12 @@ s.text('WhiteboardText','ON-CALL ROTATION\nMon  YOU\nTue  YOU\nWed  YOU (backup:
 s.box('WingFloor',(20.75,-.25,0),(13,.5,32),'carpet',True)
 s.box('WingCeiling',(20.75,3.9,0),(13,.2,32),'ceiling_tile',True)
 # Quick Sync annex adds four metres of width without enlarging the pantry.
-s.box('WingEastWall',(27.25,2,7),(.5,4,18.5),'plaster',True)
+s.box('WingEastWall',(27.25,2,0),(.5,4,4.4),'plaster',True)
+# The pantry annex pushes the kitchen four metres east for the birthday crowd.
+s.box('PantryAnnexFloor',(29.25,-.25,9),(4,.5,14.5),'carpet',True)
+s.box('PantryAnnexCeiling',(29.25,3.9,9),(4,.2,14.5),'ceiling_tile',True)
+s.box('PantryEastWall',(31.25,2,9),(.5,4,14.5),'plaster',True)
+s.box('PantryAnnexEnd',(29.25,2,16),(4,4,.5),'plaster',True)
 s.box('SyncAnnexFloor',(29.25,-.25,-9),(4,.5,14),'carpet',True)
 s.box('SyncAnnexCeiling',(29.25,3.9,-9),(4,.2,14),'ceiling_tile',True)
 s.box('SyncEastWall',(31.25,2,-9),(.5,4,14.5),'plaster',True)
@@ -408,8 +428,8 @@ for z in [-15.75,-9.5,-6.5,-2]: s.box(f'QuickSyncMullion{z}',(18.5,1.9,z),(.12,3
 s.box('QuickSyncHeader',(18.5,3.45,-8),(.15,.7,3),'plaster')
 s.box('PantryHeader',(18.5,3.45,8.5),(.15,.7,4.5),'plaster')
 s.box('QuickSyncSouthWall',(24.75,1.9,-2),(12.5,3.8,.2),'plaster',True)
-s.box('PantryNorthWall',(22.75,1.9,2.0),(8.5,3.8,.2),'plaster',True)
-s.box('PantryBackWall',(22.75,1.9,15.5),(8.5,3.8,.2),'plaster',True)
+s.box('PantryNorthWall',(24.875,1.9,2.0),(12.75,3.8,.2),'plaster',True)
+s.box('PantryBackWall',(24.875,1.9,15.5),(12.75,3.8,.2),'plaster',True)
 # Sliding meeting doors: parked inside the glass; the trap moves them shut and solid.
 for name,z in [('QuickSyncDoorA',-10.25),('QuickSyncDoorB',-5.75)]:
     s.box(name,(18.42,1.6,z),(.08,3.2,1.5),'glass',True,body='collision_layer = 0\n')
@@ -462,11 +482,16 @@ for name,pos in [('A1',(-2,-8)),('A2',(2,1)),('A3',(-2,5)),('A4',(3,-4)),('D1',(
 s.marker('VaultArrival',(9,.05,-38))
 s.marker('VaultEntry',(9,.05,-29))
 s.marker('QuickSyncCenter',(24.75,.05,-8.75))
-s.marker('CoffeeMachine',(25.4,.05,5.2))
+s.marker('CoffeeMachine',(29.4,.05,5.2))
 s.marker('VendingMachine',(20.4,.05,13.65))
-s.marker('Microwave',(25.4,.05,8.8))
+s.marker('Microwave',(29.4,.05,8.8))
 s.marker('WellnessPoster',(23.4,.05,3.2))
-s.marker('Fridge',(25.3,.05,11.55))
+s.marker('Fridge',(29.3,.05,11.55))
+# The birthday: E in front of the table; the cake; where each guest stands.
+s.marker('PartyJoin',(26.5,.05,11.7))
+s.marker('BirthdayCake',(26.5,.86,13.35))
+for name,pos in [('P1',(26.5,14.5)),('P2',(24.55,13.3)),('P3',(28.45,13.1))]:
+    s.marker('Spawn_'+name,(pos[0],.05,pos[1]))
 nav=s.external('res://game/rooms/office/navigation.tres','NavigationMesh')
 s.node('Navigation','NavigationRegion3D',props=f'navigation_mesh = {nav}')
 # Quiet lounge edge fills the right foreground without narrowing the combat lane.

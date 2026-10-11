@@ -28,6 +28,7 @@ Stored with Git LFS. Listening and mix acceptance is pending creator review.
 | File | Source | Use |
 | --- | --- | --- |
 | `sleeper_snore.wav` | Original oscillator/noise synthesis by `tools/build_snoring.py`; no outside samples or recordings; project original-content rights | GARY's nearby snoring; [behavior and playtest](../../../docs/snoring.md) |
+| `party_horn.wav`, `party_horn_sad.wav` | Original pulse-wave reed synthesis by `tools/build_party_horn.py` (fixed seed); no outside samples or recordings | The pantry birthday's surprise toot and the deflating horn as the candles relight; [pantry](../../../docs/pantry.md) |
 | `whoosh_slice.ogg`, `whoosh_dash.ogg`, `whoosh_spin.ogg`, `whoosh_rise.ogg` | Synthesized for SEV-1 by `tools/build_whoosh.py` (filtered noise sweeps, fixed seeds); original work, no third-party material | Under the move calls: Reply All, Blame Shift, Circle Back, Force Rollback |
 
 "Reserved" files are imported for later Milestone 12 phases and are not yet triggered.

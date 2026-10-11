@@ -122,6 +122,10 @@ func unreadable_texts(room: Node3D, minimum_px: float) -> Array[String]:
 			continue
 		var line: float = label.get_aabb().size.y / (label.text.count("\n") + 1) * label.global_basis.get_scale().y
 		var normal: Vector3 = label.global_basis.z.normalized()
+		# Tabletop lettering (the cake's icing faces the ceiling) and the birthday table's
+		# gift tag and card are close-up details for its scene, not wall jokes.
+		if absf(normal.y) > .7 or path in ["GiftTagText", "BirthdayCardText"]:
+			continue
 		var nearest: float = INF
 		for step in range(1, 40):
 			var probe: Vector3 = label.global_position + normal * step * .25
@@ -145,7 +149,7 @@ func _run() -> void:
 	for index in range(6):
 		for part in room.get_node("Cabinet%d" % index).find_children("*", "MeshInstance3D", true, false):
 			var mesh_part: MeshInstance3D = part
-			if (mesh_part.global_transform * mesh_part.get_aabb()).end.x > 26.99:
+			if (mesh_part.global_transform * mesh_part.get_aabb()).end.x > 30.99:
 				cabinets_inside = false
 	check(cabinets_inside, "pantry cabinets remain inside the east wall instead of intersecting it")
 	player.camera_rig.set_capture(true)
