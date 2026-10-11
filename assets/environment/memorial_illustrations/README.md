@@ -8,7 +8,7 @@ The final prompts, generated source paths, selected image checksums and review n
 are recorded in [provenance.json](provenance.json). These are candidate cinematic illustrations,
 with creator acceptance still pending. PNGs are tracked with Git LFS.
 
-- [Morgan](morgan_sketch.png): a conspiratorial coffee escape through the elevator doors.
+- [Morgan](morgan_sketch.png): she engineers a conspiratorial coffee escape through the elevator doors.
 - [Nadia](nadia_sketch.png): the saved mug and a smothered pager during a long operations shift.
 - [Jun](jun_sketch.png): rooftop lunch, a closed laptop, and a surrendered phone.
 - [Jo](jo_sketch.png): the cheap-noodle route and a pinky promise that never becomes Monday lunch.
@@ -38,3 +38,6 @@ The selected sources and ten in-game framing checkpoints were visually inspected
 with Godot 4.7.2 Forward+ / Metal on Apple M2 Pro. This is layout evidence, not a
 frame-time measurement or proof of acting, sound mix, comedic timing or emotional impact.
 The director's listening and pacing review remains open.
+
+To replay the full aftermath through departure and Monday, use `--play-ending`
+in place of `--play-memorial`.

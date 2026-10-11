@@ -245,7 +245,9 @@ The recovered cent leads into a compulsory memorial sequence of five original
 illustrated memories. Loose graphite, ink and sparse watercolor interpretations of the
 same engineer and crew capture shared actions, rather than repeated staged dialogue:
 
-- Morgan holds the elevator with his shoe while handing the engineer a coffee.
+- Morgan holds the elevator with her shoe while handing the engineer a coffee.
+  Morgan is a woman; her in-game body and the memory sketch match her existing
+  female voice, and the narrator explicitly refers to her as “she.”
 - Nadia offers the saved mug while smothering his pager during a long operations shift.
 - Jun closes the laptop, offers bread, and gets the engineer to surrender his phone
   during a rooftop lunch; pigeons squabble over their crumbs.
@@ -261,7 +263,7 @@ warmth and dark office humor. Background activity belongs to the drawing's momen
 there are no wandering extra actors. The illustration style is intentionally distinct
 from the playable 3D models, as authorized by the creator. These are animated
 illustrated stills with recorded local narration, not generated video.
-The 54.37 seconds of recorded narration are delivered sincerely, including the
+The 54.52 seconds of recorded narration are delivered sincerely, including the
 creator-requested profanity and absurd office details. Each line finishes before a
 clear, silent 2.4-second shot of that colleague where they fell. The memorial takes
 about 70 seconds in total, extending the previous five loss shots by about 58 seconds. TAB still skips the finale. Art prompts, source files, checksums and visual

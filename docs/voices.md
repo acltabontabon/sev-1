@@ -38,7 +38,7 @@ These remain candidate performances awaiting human listening and comedic timing 
 Memorial update (11 October 2026): five new `doc_morgan`, `doc_nadia`, `doc_jun`,
 `doc_jo` and `doc_val` clips use the existing `documentary` stock profile (`bm_george`,
 0.88 speed). They narrate five distinct illustrated shared moments after the golden form fades,
-then leave each casualty shot silent. The five takes total 54.37 seconds and are
+then leave each casualty shot silent. The five takes total 54.52 seconds and are
 measured by the cinematic rather than cut to a fixed budget;
 fingerprints, checksums and rights are in `voices/provenance.json`. Timing waits for
 actual playback completion. No real-person voice reference or impersonation was used.
