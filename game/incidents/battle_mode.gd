@@ -94,13 +94,13 @@ func _process(delta: float) -> void:
 func _apply() -> void:
 	overlay.visible = level > .001 or onset > .001
 	material.set_shader_parameter("vignette", .55 * level + .35 * onset)
-	material.set_shader_parameter("aberration", .006 * onset + .0015 * level)
+	material.set_shader_parameter("aberration", .003 * onset)
 	material.set_shader_parameter("lines", onset * onset)
-	material.set_shader_parameter("flash", .3 * onset * onset * onset)
+	material.set_shader_parameter("flash", .18 * onset * onset * onset)
 	if environment != null:
-		environment.glow_intensity = base_glow * (1.0 + .5 * level)
-		environment.adjustment_saturation = base_saturation * (1.0 + .18 * level)
-		environment.adjustment_contrast = base_contrast * (1.0 + .08 * level)
+		environment.glow_intensity = base_glow * (1.0 + .25 * level)
+		environment.adjustment_saturation = base_saturation * (1.0 + .04 * level)
+		environment.adjustment_contrast = base_contrast * (1.0 + .04 * level)
 	if player != null and "battle" in player.presentation:
 		player.presentation.battle = level
 	if player != null:

@@ -95,6 +95,7 @@ func _run() -> void:
 	var living_set: Node = finale.recollection
 	var memory_images: Array[Texture2D] = []
 	var memory_canvas: Control = finale.recollection.canvas
+	dialogue.promises["talk_manager_"] = "After this, lunch is on me."
 	for index in range(5):
 		await process_frame
 		finale.tick(.2)
@@ -118,6 +119,13 @@ func _run() -> void:
 		finale.tick(.001)
 		check(not finale.recollection.visible and finale.memorial_name.visible and not story.panel.visible,
 			"narrated memory cuts to a silent named casualty shot")
+		finale.tick(.2)
+		if index == 0:
+			check("You said: “After this, lunch is on me.”" in finale.memorial_line.text,
+				"Morgan's silent casualty shot recalls the player's actual promise")
+		else:
+			check(not "You said:" in finale.memorial_line.text,
+				"a coworker without an accepted invitation keeps the authored epitaph")
 		check(not story.crew_freeze.visible and not finale.recollection.canvas.visible,
 			"the present-day casualty restores the clear picture and original screen effect")
 		finale.clock = finale.memorial_loss_at + finale.MEMORIAL_EACH

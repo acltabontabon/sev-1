@@ -68,6 +68,15 @@ Human space, challenge, comedy and readability acceptance remain pending.
 
 ## Next acceptance increment
 
+The 12 October isolated direction pass adds
+[combat-driven corporate comedy and player-authored promises](game_design.md#comedy-through-consequences-implemented-candidate-12-october-2026),
+with a restrained office/combat grade and speech-safe dialogue choices. Use the
+[direct playtest checkpoint](scene_flow.md#acceptance-checkpoint) to judge the
+rollback survey's timing and visibility, then a full run to judge the promises'
+memorial payoff. No new circle, boss, permanent progression or release build is
+implied. Opening staging remains at the committed baseline while a separate
+workflow's uncommitted opening work is preserved. Human acceptance remains open.
+
 The 11 October [scene-flow pass](scene_flow.md) connects outbreak guidance, the
 optional investigation detours and the corridor/vault route. Its checkpoint verifies
 nearby E prompts and reaching the actual boss trigger. Human run time, clarity and

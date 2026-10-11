@@ -85,11 +85,14 @@ var closing_bugs: bool = false
 const DIALOGUES: Script = preload("res://game/incidents/dialogues.gd")
 const TALK_RANGE: float = 2.4
 var dialogue: CanvasLayer
+var rollback_survey: CanvasLayer
 var talk_prompt: CanvasLayer
 var talking: Node3D
 var talked: Dictionary = {}
 var talk_with: Dictionary = {}
 var talk_line: int = 0
+## A crowded wall shot switches once to a stable wide view for the rest of this talk.
+var talk_wide_offset: Vector3 = Vector3.ZERO
 ## The optional meeting: an invite holds the room while two records press in.
 const QUICK_SYNC: Array = [["invite", "B1"], ["record", "B3"], ["record", "B4"]]
 ## The optional birthday in the pantry: Kevin turns forty-one, then turns. His guests
@@ -232,6 +235,9 @@ func _ready() -> void:
 	# The incident runs always (menus, voice); the night shift stops when play does.
 	coworkers.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(coworkers)
+	rollback_survey = preload("res://game/ui/rollback_survey.gd").new()
+	rollback_survey.name = "RollbackSurvey"
+	add_child(rollback_survey)
 	pantry = room.get_node("PantryAntics")
 	# Coffee helps once; the other appliances get stranger on repeat visits.
 	for entry: Array in [["coffee", "CoffeeMachine", "E — COFFEE"], ["vending", "VendingMachine", "E — SNACK"], ["microwave", "Microwave", "E — MICROWAVE"], ["poster", "WellnessPoster", "E — READ"], ["fridge", "Fridge", "E — CHECK FRIDGE"], ["party", "PartyJoin", "E — SING HAPPY BIRTHDAY"]]:
@@ -250,12 +256,15 @@ func _ready() -> void:
 
 
 func reset_incident() -> void:
+	if rollback_survey != null:
+		rollback_survey.reset()
 	if dialogue.is_open():
 		# Restarting mid-conversation must not set the wave off on the way out.
 		armed = false
 		dialogue.close()
 	talked.clear()
 	preload("res://game/incidents/dialogues.gd").remembered_lines.clear()
+	DIALOGUES.promises.clear()
 	_cleanup()
 	decision_pending = false
 	corporate_choice = -1
@@ -1626,6 +1635,7 @@ func talk(someone: Dictionary) -> void:
 		talking.talking = true
 	talk_with = someone
 	talk_line = 0
+	talk_wide_offset = Vector3.ZERO
 	if someone.standing and someone.animator != null:
 		(someone.animator as AnimationPlayer).play("CharacterArmature|Idle", .2)
 	presentation.begin_dialogue(talking, someone.standing)
@@ -1645,6 +1655,7 @@ func _talk_effect(effect: Dictionary) -> void:
 ## the line out (an emphatic line gets arms up, a question gets a point).
 func _talk_frame(who: String, time: float, line: int, text: String) -> void:
 	presentation.dialogue_camera(who, time, line)
+	_keep_talk_camera_clear()
 	var animator: AnimationPlayer = talk_with.get("animator")
 	if animator == null or not talk_with.get("standing", false):
 		return
@@ -1658,6 +1669,36 @@ func _talk_frame(who: String, time: float, line: int, text: String) -> void:
 		animator.speed_scale = 1.0
 	elif not animator.is_playing() or (animator.current_animation.ends_with("Victory") and time > 2.4):
 		animator.play("CharacterArmature|Idle", .3)
+
+
+## Preserve a readable two-shot when the authored camera is squeezed against a desk
+## or wall. Select the clearer side once, so replies cannot flip the conversation axis.
+func _keep_talk_camera_clear() -> void:
+	if not is_instance_valid(talking):
+		return
+	var camera: Camera3D = presentation.camera
+	var theirs: Vector3 = talking.global_position + Vector3.UP * (1.5 if talk_with.get("standing", true) else 1.15)
+	var mine: Vector3 = player.global_position + Vector3.UP * 1.5
+	var middle: Vector3 = (mine + theirs) * .5
+	var personal: bool = dialogue.node_id == "good_days"
+	if talk_wide_offset == Vector3.ZERO and (personal or minf(camera.global_position.distance_to(theirs), camera.global_position.distance_to(mine)) < 1.8):
+		var axis: Vector3 = theirs - mine
+		axis.y = 0
+		var side: Vector3 = axis.normalized().cross(Vector3.UP) if axis.length() > .1 else Vector3.RIGHT
+		var best: float = 0.0
+		for direction: Vector3 in [side, -side, side.rotated(Vector3.UP, .65), -side.rotated(Vector3.UP, -.65)]:
+			var offset: Vector3 = direction * 3.0 + Vector3.UP * .25
+			var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(middle, middle + offset, 1, [player.get_rid()])
+			var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+			if not hit.is_empty():
+				offset = (hit.position - middle) * .85
+			if offset.length() > best:
+				best = offset.length()
+				talk_wide_offset = offset
+	if talk_wide_offset != Vector3.ZERO:
+		camera.global_position = middle + talk_wide_offset
+		camera.look_at(middle - Vector3.UP * .15)
+		camera.fov = 52.0
 
 
 func _end_talk() -> void:

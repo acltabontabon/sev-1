@@ -19,6 +19,8 @@ static var variation_bags: Dictionary = {}
 static var last_variations: Dictionary = {}
 ## The ending recalls the exact ordinary conversation heard during this run.
 static var remembered_lines: Dictionary = {}
+## Actual invitations accepted in this run, echoed quietly at the casualty shot.
+static var promises: Dictionary = {}
 
 
 ## Choose text and its matching clip only when a line is actually shown.
@@ -67,6 +69,15 @@ static func has_tree(name: String) -> bool:
 static func tree(name: String) -> Dictionary:
 	var talk: Dictionary = (data().trees[name] as Dictionary).duplicate(true)
 	talk.voice = "talk_%s_" % name.to_lower()
+	# Put the human connection in reach, without changing the first response or its
+	# established shortcut. Some trees used to bury this behind an unsupported key 4.
+	for node: Dictionary in talk.nodes.values():
+		var replies: Array = node.get("replies", [])
+		for index in range(2, replies.size()):
+			if replies[index][1] == "good_days":
+				var personal: Array = replies.pop_at(index)
+				replies.insert(1, personal)
+				break
 	return talk
 
 

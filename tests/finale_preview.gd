@@ -39,6 +39,9 @@ func _run() -> void:
 	await process_frame
 	story.set_process(false)
 	var finale: Node = story.all_hands
+	if "--promise" in OS.get_cmdline_user_args():
+		# Review fixture only. Normal play records this through an actual chosen reply.
+		preload("res://game/incidents/dialogues.gd").promises["talk_manager_"] = "After this, lunch is on me."
 	# Replay begins after the final blow, when the normal death beat has reconciled these.
 	for index in range(3):
 		var ledger: Label3D = incident.room.get_node("LedgerText%d" % index)
@@ -54,6 +57,18 @@ func _run() -> void:
 	finale._beat("receipts")
 	if "--transition" not in OS.get_cmdline_user_args():
 		finale._beat("memorial")
+	if "--capture-promise" in OS.get_cmdline_user_args():
+		story.voice.clear()
+		finale.tick(finale.memorial_duration + .1)
+		finale.tick(.7)
+		await process_frame
+		RenderingServer.force_draw()
+		DirAccess.make_dir_recursive_absolute("res://builds")
+		root.get_texture().get_image().save_png("res://builds/heart_promise.png")
+		finale.finish(false)
+		await process_frame
+		quit()
+		return
 	if "--play-memorial" in OS.get_cmdline_user_args():
 		story.set_process(true)
 		while is_instance_valid(finale) and finale.beat in ["memorial", "grief"]:

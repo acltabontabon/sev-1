@@ -416,7 +416,8 @@ func tick(delta: float) -> bool:
 				camera.fov = 40.0
 				_focus_far(3.2)
 				memorial_name.text = entry[1]
-				memorial_line.text = "%s\n%s" % [entry[2], entry[3]]
+				var promise: String = DIALOGUES.promises.get("talk_%s_" % str(entry[0]).to_lower(), "")
+				memorial_line.text = "%s\n%s" % [entry[2], entry[3] if promise.is_empty() else "You said: “%s”" % promise]
 				var alpha: float = smoothstep(0.0, .4, loss_time) * (1.0 - smoothstep(MEMORIAL_EACH - .45, MEMORIAL_EACH, loss_time))
 				memorial_name.modulate.a = alpha
 				memorial_line.modulate.a = alpha

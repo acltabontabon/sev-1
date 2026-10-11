@@ -22,6 +22,8 @@ extends Node
 ## vulnerable recovery and the full 3 s cooldown.
 
 signal focus_changed(value: float)
+## Fired after the final impact, never on request, cancellation or individual blinks.
+signal rollback_completed
 ## A move was called out loud (anime style): its name, and whether it is the ultimate.
 signal called(title: String, ultimate: bool)
 ## Each blink of the Force Rollback omnislash: where the engineer appeared, the target,
@@ -762,6 +764,7 @@ func _slam() -> void:
 			target.drop_shield()
 		if _strike(target, ROLLBACK_DAMAGE, at, "launch"):
 			_impact(target, ROLLBACK_COLOR, .08, .2, true, false)
+	rollback_completed.emit()
 
 
 ## An upright crescent facing back at the thrower (so it reads from the camera), in

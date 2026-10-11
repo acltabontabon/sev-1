@@ -142,6 +142,48 @@ Cold fluorescents, red incident alarms, industrial shadows, restrained atmospher
 
 Keep writing dry, absurd, occasionally dark, and capable of unexpected empathy. Do not make every line a programming joke or explain the punchline. “Let's take this offline” can precede lights going out; the blackout must still communicate combat threats. “Blameless postmortem” can assign every corrective action to the protagonist. Satirize incentives and consequences without portraying entire professions as malicious or incompetent.
 
+### Comedy through consequences (implemented candidate, 12 October 2026)
+
+The creator's direction is that the joke should happen to the player. Incident 001's
+first additional example is a rigged **Force Rollback satisfaction survey**. The final
+slam succeeds; after the camera beat, a cream corporate receipt asks for feedback.
+Continued successful hits physically stamp its five stars. Whiffs do not vote.
+Five stamps produce “100% SATISFACTION” and leadership takes credit. Ignoring it for
+ten playable real-time seconds produces the same score: “No response recorded.
+Consent assumed.” The form expires by itself. It never owns input, pauses combat,
+alters damage or grants rewards; it hides during dialogue/camera holds and clears
+on death, victory or retry. Its quiet office chime uses the existing Effects bus.
+
+The future Change Advisory Board fighting over approval authority and Shared
+Environment changing under conflicting deployments are **design opportunities**,
+not implemented encounters or authorization to build later circles in this pass.
+The principle to carry forward is a visible rule with a comic consequence, while
+keeping threat cues and player controls trustworthy.
+
+The same pass restrains the shared office grade (neutral cold fill, 0.9 base
+saturation) and the battle saturation/glow boost. Chromatic separation now belongs
+only to the short combat onset. It preserves the existing character palettes,
+monster silhouettes, red blood and elemental identifiers. This is a cohesion
+candidate, not a replacement asset style or accepted final art direction.
+
+### A promise before the aftermath (implemented candidate, 12 October 2026)
+
+“Tell me something normal” now occupies the second reply when previously buried
+lower in a coworker's greeting. Existing first choices stay put, all other choices
+remain available, and number keys reach all displayed replies (including the former
+fourth-choice dead end). An “OFF THE CLOCK · JUST US” warm nameplate identifies the
+personal conversation. Reply buttons wait for speech to finish; E first reveals
+the text, then skips the voice, retaining an explicit fast path.
+Personal conversations hold a wider two-shot; crowded ordinary conversation shots
+also select a clear side once instead of pushing into a face against nearby walls.
+
+Accepting an invitation stores the player's exact chosen reply for this run. The
+matching silent casualty shot echoes “You said: …” in place of its generic epitaph.
+Unvisited coworkers retain their existing epitaph; retry clears the promises.
+No compulsory talk, relationship score, new recorded lines or longer cinematic
+has been added. The player has participated in a small future that will not happen.
+The existing illustrated memories and actual recalled speech remain intact.
+
 ## Incident 001: The Missing Transaction
 
 **Established slice target:** a compact, replayable 5–10-minute episode combining satisfying combat, a representative corporate environment, reconciliation horror, and an incident review. A first implementation now exists; the duration, feel, and creative acceptance remain unverified playtest targets. The following beat structure remains the creative direction; [architecture](architecture.md#incident-001-orchestration) records the narrower implemented rules, including two harmless false copies and no wrong-strike multiplication penalty.

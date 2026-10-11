@@ -1,7 +1,7 @@
 extends CanvasLayer
-## RPG-style talk: a name plate, the line typing out, then up to three replies.
+## RPG-style talk: a name plate, the line typing out, then numbered replies.
 ## Runs while the incident is paused (talking releases the camera capture like any modal).
-## 1 · 2 · 3 or a click picks a reply; E / Space finishes the line or continues; Esc leaves.
+## Number keys or a click pick replies; E reveals text, then skips speech; Esc leaves.
 
 signal finished
 
@@ -90,7 +90,7 @@ func _ready() -> void:
 	var bottom: HBoxContainer = HBoxContainer.new()
 	column.add_child(bottom)
 	footer = _label(bottom, "MonoLabel", 10, Color(.55, .62, .66))
-	footer.text = "1 · 2 · 3  REPLY     E  CONTINUE     ESC  LEAVE"
+	footer.text = "E  REVEAL LINE     ESC  LEAVE"
 	footer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	toast = _label(bottom, "MonoLabel", 10, Color(1, .72, .4))
 	speaker = AudioStreamPlayer.new()
@@ -133,6 +133,11 @@ func _say(who: String, text: String, clip: String) -> void:
 	line_count += 1
 	name_label.text = "YOU" if who == "you" else tree.get("who", "")
 	role_label.text = "ON CALL  ·  ENGINEER" if who == "you" else str(tree.get("role", "")).to_upper()
+	if node_id == "good_days":
+		role_label.text = "OFF THE CLOCK  ·  JUST US"
+		role_label.add_theme_color_override("font_color", Color(.95, .76, .48))
+	else:
+		role_label.add_theme_color_override("font_color", ACCENT)
 	name_label.add_theme_color_override("font_color", ACCENT if who == "you" else Color(.95, .97, 1))
 	text_label.text = text
 	text_label.visible_characters = 0
@@ -180,6 +185,10 @@ func typed() -> bool:
 	return shown >= text_label.get_total_character_count()
 
 
+func reply_ready() -> bool:
+	return typed() and not speaker.playing
+
+
 func _process(delta: float) -> void:
 	if not visible:
 		return
@@ -190,12 +199,14 @@ func _process(delta: float) -> void:
 		on_frame.call(speaking, line_time, line_count, text_label.text)
 	# The engineer's answer plays out, then the other person responds.
 	if speaking == "you":
+		footer.text = "E  REVEAL LINE     ESC  LEAVE" if not typed() else "E  CONTINUE     ESC  LEAVE"
 		if typed() and not speaker.playing:
 			hold_left -= delta
 			if hold_left <= 0:
 				advance()
 		return
-	var ready: bool = typed()
+	var ready: bool = reply_ready()
+	footer.text = "E  REVEAL LINE     ESC  LEAVE" if not typed() else ("E  SKIP VOICE     ESC  LEAVE" if speaker.playing else "1–%d  REPLY     E  CONTINUE     ESC  LEAVE" % options().size())
 	replies.modulate.a = move_toward(replies.modulate.a, 1.0 if ready else 0.0, delta * 8.0)
 	for button: Button in replies.get_children():
 		button.disabled = not ready
@@ -209,12 +220,14 @@ func options() -> Array:
 
 
 func choose(index: int) -> void:
-	if not visible or not typed() or speaking == "you":
+	if not visible or not reply_ready() or speaking == "you":
 		return
 	var list: Array = options()
 	if index < 0 or index >= list.size():
 		return
 	var reply: Array = list[index]
+	if node_id == "good_days" and tree.has("voice") and not reply[1]:
+		DIALOGUES.promises[str(tree.voice)] = str(reply[0])
 	var effect: Dictionary = reply[2]
 	if not effect.is_empty() and on_effect.is_valid():
 		on_effect.call(effect)
@@ -232,6 +245,8 @@ func choose(index: int) -> void:
 func advance() -> void:
 	if not typed():
 		shown = 9999.0
+	elif speaker.playing:
+		speaker.stop()
 	elif speaking == "you":
 		speaking = "them"
 		_go(answer_next)
@@ -258,7 +273,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("release_mouse"):
 		close()
 	elif event.is_action_pressed("inspect_record") or (event is InputEventKey and event.physical_keycode in [KEY_SPACE, KEY_ENTER]):
-		if not typed() or speaking == "you":
+		if not reply_ready() or speaking == "you":
 			advance()
 		elif options().size() == 1:
 			choose(0)
@@ -267,8 +282,8 @@ func _input(event: InputEvent) -> void:
 			handled = false
 	else:
 		handled = false
-		for index in range(3):
-			if event.is_action_pressed("choose_record_%d" % (index + 1)):
+		for index in range(mini(9, options().size())):
+			if event is InputEventKey and (event.physical_keycode == KEY_1 + index or event.physical_keycode == KEY_KP_1 + index):
 				choose(index)
 				handled = true
 	if handled:
