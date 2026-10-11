@@ -161,5 +161,21 @@ scene and build tools are removed. [Restoration checkpoint](../../docs/drew_rest
 
 The existing female bodies now use original fitted skirts, blouses/skirt suits and
 small earrings. Marie alone has a shorter skirt and lower-cut blouse; Nadia and the
-female planted employees retain ordinary office outfits. Original FBX rigs and
-hairstyles are preserved. [Source, edits and review](office_outfits/README.md).
+female planted employees retain ordinary office outfits. Original FBX rigs are
+preserved; haircuts are now per character (below). [Source, edits and review](office_outfits/README.md).
+
+## Office haircuts (11 October 2026)
+
+Every overtime coworker and planted employee now wears their own original haircut
+instead of the pack's three shared ones; Nadia (SRE) keeps the pack's tied-back hair.
+`game/incidents/hairstyles.gd` strips the body's stock Hair surface and attaches a
+procedural cut to the animated Head bone, fitted to the shared head's measured scalp
+(`tools/measure_scalp.gd`). No outside art or new downloads; the source FBXs are untouched.
+Cast choices live in `coworkers.gd` `CAST` and the `talk.json` crew (`"hair"`); street
+strangers draw a stable cut from `POOL`.
+
+`tests/hairstyle_tests.gd` checks distinct cuts, crown coverage, head-following animation,
+the planted-employee overlay, the waist slice and retry. `tests/hairstyle_preview.gd`
+renders every cut front/back/side (`builds/hair_sheet_*.png`) and
+`tests/hairstyle_office_preview.gd` frames the cast in the office (`builds/hair_office.png`).
+Human visual acceptance remains open.

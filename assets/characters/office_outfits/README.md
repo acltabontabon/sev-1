@@ -7,7 +7,8 @@ The original source FBXs remain intact; the generated ArrayMeshes use their exis
 skins, named skeleton binds and coworker animation libraries.
 
 Nadia wears a blouse and longer pleated skirt, with the pack's long tied-back hairstyle. Other
-female office employees wear skirts or skirt suits with their original hairstyles.
+female office employees wear skirts or skirt suits with their own haircuts
+([office haircuts](../README.md#office-haircuts-11-october-2026)).
 Marie, the adult director, has a shorter skirt and open V-neck blouse inside her
 jacket, showing upper chest and bare legs. Only her outfit uses this neckline.
 The remote fitness avatar retains its athletic clothing. Identities, dialogue,

@@ -425,6 +425,7 @@
         "quip": "Reconciling since Tuesday.",
         "line": "The ledger said hi. Ledgers shouldn't talk.",
         "body": "casual_female.fbx",
+        "hair": "high_ponytail",
         "profile": "dana"
       },
       {
@@ -436,6 +437,7 @@
         "quip": "Last commit message: “fix”.",
         "line": "The migration is fine. Mostly fine.",
         "body": "casual3_male.fbx",
+        "hair": "slick_back",
         "profile": "raj"
       },
       {
@@ -447,6 +449,7 @@
         "quip": "47 spreadsheets open. Needs one more.",
         "line": "VLOOKUP is looking back at me. I think it's judging my formulas.",
         "body": "casual2_male.fbx",
+        "hair": "spiky",
         "profile": "miguel"
       },
       {
@@ -458,6 +461,7 @@
         "quip": "Has not blinked since 3 PM.",
         "line": "Invoices don't sleep. Neither do I.",
         "body": "casual2_female.fbx",
+        "hair": "bob",
         "profile": "kim"
       }
     ],
@@ -471,6 +475,7 @@
         "quip": "Has concerns. Will raise them in a meeting.",
         "line": "Has this been approved? In writing?",
         "body": "suit_female.fbx",
+        "hair": "top_knot",
         "profile": "greta"
       }
     ],
@@ -484,6 +489,7 @@
         "quip": "Calendar: 112% booked.",
         "line": "Got fifteen minutes? It's recurring.",
         "body": "suit_male.fbx",
+        "hair": "receding",
         "profile": "todd"
       }
     ],
@@ -497,6 +503,7 @@
         "quip": "Just one tiny thing before launch.",
         "line": "Small ask. Teeny. Barely a requirement.",
         "body": "casual2_female.fbx",
+        "hair": "braid",
         "profile": "priya"
       },
       {
@@ -508,6 +515,7 @@
         "quip": "Wants it viral by Monday.",
         "line": "What if it also did… everything?",
         "body": "casual2_male.fbx",
+        "hair": "afro",
         "profile": "leo"
       }
     ]
