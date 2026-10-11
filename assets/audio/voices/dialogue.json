@@ -1308,6 +1308,76 @@
       "fallback_duration": 5.5,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "doc_morgan",
+      "character": "NARRATOR",
+      "text": "Morgan called it leadership development. It was two coffees and a shoe wedged in the lift. For five glorious minutes, management could go fuck itself.",
+      "subtitle": "Morgan called it leadership development. It was two coffees and a shoe wedged in the lift. For five glorious minutes, management could go fuck itself.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_morgan.ogg",
+      "trigger": "Required aftermath: illustrated morgan memory before casualty shot",
+      "priority": 2,
+      "fallback_duration": 10.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_nadia",
+      "character": "NARRATOR",
+      "text": "Nadia saved him the good mug, then smothered the pager with a sweater. Even critical infrastructure occasionally needed to shut the fuck up. He kept the mug.",
+      "subtitle": "Nadia saved him the good mug, then smothered the pager with a sweater. Even critical infrastructure occasionally needed to shut the fuck up. He kept the mug.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_nadia.ogg",
+      "trigger": "Required aftermath: illustrated nadia memory before casualty shot",
+      "priority": 2,
+      "fallback_duration": 10.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_jun",
+      "character": "NARRATOR",
+      "text": "Jun closed the laptop. Lunch was not a fucking incident. The pigeons disagreed. He refereed their war over one chip. Tomorrow, one lunch would be left unopened.",
+      "subtitle": "Jun closed the laptop. Lunch was not a fucking incident. The pigeons disagreed. He refereed their war over one chip. Tomorrow, one lunch would be left unopened.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_jun.ogg",
+      "trigger": "Required aftermath: illustrated jun memory before casualty shot",
+      "priority": 2,
+      "fallback_duration": 10.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_jo",
+      "character": "NARRATOR",
+      "text": "Jo made him promise: Monday, cheap noodles. No meetings. No heroic bullshit. Just lunch. He drew the route like they had all the time in the world.",
+      "subtitle": "Jo made him promise: Monday, cheap noodles. No meetings. No heroic bullshit. Just lunch. He drew the route like they had all the time in the world.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_jo.ogg",
+      "trigger": "Required aftermath: illustrated jo memory before casualty shot",
+      "priority": 2,
+      "fallback_duration": 10.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_val",
+      "character": "NARRATOR",
+      "text": "Val laughed at his terrible band. Two pencils. One printer. The drummer had a paper jam and the frontman had no fucking talent. There would be no encore.",
+      "subtitle": "Val laughed at his terrible band. Two pencils. One printer. The drummer had a paper jam and the frontman had no fucking talent. There would be no encore.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_val.ogg",
+      "trigger": "Required aftermath: illustrated val memory before casualty shot",
+      "priority": 2,
+      "fallback_duration": 10.0,
+      "optional": false,
+      "status": "generated"
     }
   ]
 }

@@ -10,6 +10,12 @@ solid furniture envelopes, clears pantry wall/desk-prop intersections, releases 
 engineer beside the chair, and rebakes navigation. It is an implemented visual candidate; director acceptance
 and moving-combat performance remain open under the Office After Hours gate.
 
+The 11 October memorial pass replaces repeated 3D desk tableaux with five distinct
+illustrated shared moments, local documentary narration and silent casualty shots.
+See [aftermath](game_design.md#incident-001-aftermath-implemented-prototype-11-october-2026).
+It is an implemented creative candidate; the director must accept the illustration
+style, narration and emotional/comedic pacing before it is treated as final.
+
 ## Milestones
 
 | Milestone | Scope and current status | Gate before expansion |

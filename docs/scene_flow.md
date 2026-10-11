@@ -14,7 +14,7 @@ travel is needed, and whether a detour is optional.
 | Containment | Two waves; dependency response adds a Blocker | Escalate known threats; the five-minute ETA remains optional with no expiry penalty |
 | Second change request → corridor | Upgrade → gate opens; NEXT leads to the corridor entrance, then inside the vault | Give the office fight a destination and connect the crew's charge to the boss |
 | Vault arrival → The Variance | Walk beyond the arrival line; staged crew loss → Unpaid Overtime → playable boss | Existing dramatic climax; TAB skips to combat, with OPEN / shield cues |
-| Defeat / victory | Played fall or duel/finale → report; restart or title navigation | End the current run clearly; Stage One completion saves at the chapter boundary |
+| Defeat / victory | Played fall → report, or duel → golden form fades → five narrated memories / silent casualty shots → departure and Monday → title | End the current run clearly; memories play automatically, TAB skips the finale; Stage One completion saves at the chapter boundary |
 
 The compulsory path remains discrepancy → upgrade → management commitment → containment
 → upgrade → vault → boss → aftermath/report. Coffee, conversations and Quick Sync do

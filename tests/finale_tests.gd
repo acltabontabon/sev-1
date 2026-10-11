@@ -52,7 +52,44 @@ func _run() -> void:
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
 	finale._beat("memorial")
-	finale.tick(finale.MEMORIAL_EACH * 5 + .1)
+	var recalled: Array[String] = []
+	var living_set: Node = finale.recollection
+	var memory_images: Array[Texture2D] = []
+	var memory_canvas: Control = finale.recollection.canvas
+	for index in range(5):
+		await process_frame
+		finale.tick(.2)
+		check(finale.recollection.visible and finale.recollection.canvas.visible and not finale.memorial_name.visible and finale.recollection.artwork.texture != null,
+			"each memory displays its authored living illustration before the casualty shot")
+		memory_images.append(finale.recollection.artwork.texture)
+		check(finale.recollection.artwork.material == finale.recollection.memory_material and not story.crew_freeze.visible,
+			"memory grading affects the drawing while leaving captions sharp")
+		var framing_from: Vector2 = finale.recollection.artwork.size
+		finale.tick(.5)
+		check(finale.recollection.artwork.size.distance_to(framing_from) > .01,
+			"gentle framing drift gives the remembered moment its own motion")
+		recalled.append(finale.MEMORIAL[finale.memorial_index][0])
+		story.voice._process(.1)
+		check(story.voice.current_line == finale.MEMORIAL_VOICES[index] and not story.voice.subtitle.is_empty(),
+			"each teammate has synchronized narrator speech and subtitles")
+		finale.clock = finale.memorial_at + finale.memorial_duration + 1.0
+		finale.tick(.001)
+		check(finale.recollection.visible, "a delayed voice keeps the living shot until its last word")
+		story.voice.clear()
+		finale.tick(.001)
+		check(not finale.recollection.visible and finale.memorial_name.visible and not story.panel.visible,
+			"narrated memory cuts to a silent named casualty shot")
+		check(not story.crew_freeze.visible and not finale.recollection.canvas.visible,
+			"the present-day casualty restores the clear picture and original screen effect")
+		finale.clock = finale.memorial_loss_at + finale.MEMORIAL_EACH
+		finale.tick(.01)
+	var distinct_images: bool = true
+	for first in range(memory_images.size()):
+		for second in range(first):
+			distinct_images = distinct_images and memory_images[first].get_rid() != memory_images[second].get_rid()
+	check(distinct_images, "each fallen teammate receives a different illustrated moment")
+	check(recalled == ["Manager", "SRE", "Designer", "Intern", "Director"],
+		"all five teammates receive their own memory before grief")
 	check(finale.beat == "grief" and incident.coworkers.cavalry_fallen() == 5 and not character.weapon.visible,
 		"the memorial reaches grief while all five casualties remain fallen")
 	await physics_frame
@@ -139,7 +176,7 @@ func _run() -> void:
 	story.skip()
 	await process_frame
 	await process_frame
-	check(not is_instance_valid(corridor) and not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
+	check(not is_instance_valid(living_set) and not is_instance_valid(memory_canvas) and not is_instance_valid(corridor) and not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
 		"TAB removes the tear, carried props and memory audio and restores the weapon")
 	scene.reset_encounter()
 	await process_frame

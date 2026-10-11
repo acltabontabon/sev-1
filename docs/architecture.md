@@ -797,7 +797,7 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `final_blow()` on the hidden
   real boss to slice it (severing limbs on the staged monster first and mirroring that on
   the real one); the RESOLVED ending then runs `all_hands.gd` (death, receipts, cent,
-  memorial, tear close-up, desk sword placement and belongings pickup, the walk out
+  five narrated living memories alternating with memorial loss shots, tear close-up, desk sword placement and belongings pickup, the walk out
   with recalled coffee/lunch/gossip conversations, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
   SubViewport, its tiles fed by small cameras on off-map sets) on real time before returning to the main menu. After Monday’s final reply,
@@ -826,8 +826,16 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   The scene is
   hidden at the street cut and freed with the other aftermath props on skip or retry.
   Physics regression samples the whole hero and camera route for solid intersections.
+  `memorial_memory.gd` owns a full-screen illustration canvas beneath the letterbox
+  and captions. Five distinct local PNGs capture the crew's shared moments; each
+  has its own slow zoom/pan. `memory_grade.gdshader` grades only the drawing with
+  light grain, softened paper edges and fades, leaving subtitles sharp. Conceal
+  removes the canvas immediately at the casualty cut; teardown frees it on skip/retry.
+  The original screen effect and gameplay environment are never modified.
+  `all_hands.gd` measures each local narrator clip and waits for the voice queue to
+  empty before starting a separate 2.4-second silent casualty hold.
   `tests/finale_tests.gd`
-  checks recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
+  checks distinct illustrations, framing drift, canvas cleanup, delayed speech, narrator captions, recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
   replacements; the engineer objects before the note-taker records unanimous consent.
   Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting
   exit use shot cues rather than numeric step positions, so dialogue additions retain

@@ -240,7 +240,33 @@ reads clearly, the recovery feels earned, and the finisher remains the payoff.
 
 ### Incident 001 aftermath (implemented prototype, 11 October 2026)
 
-After the duel and the five memorial shots, the engineer looks down at JO and the
+After the duel, the engineer's golden Unpaid Overtime form fades over five seconds.
+The recovered cent leads into a compulsory memorial sequence of five original
+illustrated memories. Loose graphite, ink and sparse watercolor interpretations of the
+same engineer and crew capture shared actions, rather than repeated staged dialogue:
+
+- Morgan holds the elevator with his shoe while handing the engineer a coffee.
+- Nadia offers the saved mug while smothering his pager during a long operations shift.
+- Jun closes the laptop, offers bread, and gets the engineer to surrender his phone
+  during a rooftop lunch; pigeons squabble over their crumbs.
+- Jo and the engineer draw the route to the cheap noodle shop and make a pinky promise
+  for Monday, on the lobby floor after his first shift. That lunch has not happened.
+- Val laughs while the engineer performs a pencil drum solo and the printer spits
+  paper as his ridiculous drummer.
+
+Each image has its own setting, composition and slow framing drift. Faded paper
+edges, gentle fades, light grain and “BEFORE THE INCIDENT” identify these as memories.
+The opening's stock documentary narrator tells each small story with restrained
+warmth and dark office humor. Background activity belongs to the drawing's moment;
+there are no wandering extra actors. The illustration style is intentionally distinct
+from the playable 3D models, as authorized by the creator. These are animated
+illustrated stills with recorded local narration, not generated video.
+The 54.37 seconds of recorded narration are delivered sincerely, including the
+creator-requested profanity and absurd office details. Each line finishes before a
+clear, silent 2.4-second shot of that colleague where they fell. The memorial takes
+about 70 seconds in total, extending the previous five loss shots by about 58 seconds. TAB still skips the finale. Art prompts, source files, checksums and visual
+review are recorded in [illustration provenance](../assets/environment/memorial_illustrations/README.md).
+The actual casualties remain untouched. After these five memorial shots, the engineer looks down at JO and the
 camera moves to his face as one tear rolls down his cheek. The original mourning
 theme begins during the memorial and continues through the rainy departure. Back at
 his workstation he stands the Legacy Monolith blade-down beside the desk, then
