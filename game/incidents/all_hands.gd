@@ -5,7 +5,7 @@ extends Node3D
 ##  "receipts"  receipts snow over the vault; a low orbit round the engineer, wrecked and
 ##              bloody, as his Unpaid Overtime slowly burns out; a receipt drifts down.
 ##  "cent"      close on it: the missing transaction, $0.01, cost: 5 staff (the narrator).
-##  "memorial"  In Memoriam: a glide past each of the five where they fell.
+##  "memorial"  Living two-shots narrated one at a time, then where each teammate fell.
 ##  "grief"     a last look at JO; a tear rolls down the engineer's cheek.
 ##  "desk"      back at his desk: he collects his mug and personal effects.
 ##  "exit"      he walks through the empty lift corridor to a sad theme; the five return as
@@ -27,12 +27,14 @@ const CREW = preload("res://game/incidents/coworkers.gd")
 const DIALOGUES = preload("res://game/incidents/dialogues.gd")
 ## In Memoriam, in the order they fell.
 const MEMORIAL: Array = [
-	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "His calendar is still full."],
-	["SRE", "NADIA", "SITE RELIABILITY  ·  2020 – TONIGHT", "Her pager is still ringing."],
-	["Designer", "JUN", "PRODUCT DESIGN  ·  2021 – TONIGHT", "The kerning was perfect."],
-	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Never got a badge photo."],
-	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Her deck will be presented by someone else."]]
+	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "No more coffee breaks disguised as leadership development."],
+	["SRE", "NADIA", "SITE RELIABILITY  ·  2020 – TONIGHT", "The good mug is still waiting for him."],
+	["Designer", "JUN", "PRODUCT DESIGN  ·  2021 – TONIGHT", "One less chair at the lunch table."],
+	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Monday lunch. Still in the calendar."],
+	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Nobody left to laugh at his terrible first band."]]
 const MEMORIAL_EACH: float = 2.4
+const RECOLLECTION: Script = preload("res://game/incidents/memorial_memory.gd")
+const MEMORIAL_VOICES: Array[String] = ["doc_morgan", "doc_nadia", "doc_jun", "doc_jo", "doc_val"]
 ## The way out: each memory recalls an ordinary conversation beside the clear route.
 const MEMORIES: Array = [
 	["Manager", "ual/phone"],
@@ -93,6 +95,11 @@ var sword_from: Transform3D
 var sword_rest: Transform3D
 var saved_clock: String
 var departure: Node3D
+var recollection: Node3D
+var memorial_index: int = -1
+var memorial_at: float = 0.0
+var memorial_duration: float = 0.0
+var memorial_loss_at: float = -1.0
 var nightlife: Node3D
 
 
@@ -153,12 +160,17 @@ func _beat(next: String) -> void:
 		"cent":
 			story.say("doc_cent")
 		"memorial":
-			memorial_name.show()
-			memorial_line.show()
 			_start_mourning()
+			character.weapon.hide()
+			recollection = RECOLLECTION.new(story)
+			incident.add_child(recollection)
+			props.append(recollection)
+			_recall_next()
 		"grief":
 			memorial_name.hide()
 			memorial_line.hide()
+			if is_instance_valid(recollection):
+				recollection.conceal()
 			var fallen: Vector3 = _fallen_at("Intern")
 			player.global_position = fallen + Vector3(0, .05, 1.15)
 			player.visual.rotation.y = 0.0
@@ -279,7 +291,7 @@ func tick(delta: float) -> bool:
 	incident.main.get_node("HUD").visible = false
 	player.narrative_hold = true
 	story.caption.text = story.voice.subtitle
-	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card", "resolved", "next"]
+	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["card", "resolved", "next"]
 	var camera: Camera3D = story.camera
 	var engineer: Vector3 = player.global_position
 	if is_instance_valid(belongings) and beat != "desk":
@@ -323,24 +335,38 @@ func tick(delta: float) -> bool:
 			if t >= 2.0 and quiet:
 				_beat("memorial")
 		"memorial":
-			# Where each of them fell, in the order they fell; receipts settling on them.
-			var index: int = mini(int(t / MEMORIAL_EACH), MEMORIAL.size() - 1)
-			var local: float = t - index * MEMORIAL_EACH
-			var entry: Array = MEMORIAL[index]
-			var place: Vector3 = _fallen_at(entry[0])
-			var inward: Vector3 = Vector3(VAULT_AT.x - place.x, 0, VAULT_AT.z - place.z).normalized()
-			var side: Vector3 = inward.cross(Vector3.UP)
-			camera.global_position = place + Vector3.UP * 1.1 + inward * 1.7 + side * (.9 - local * .3)
-			camera.look_at(place + Vector3.UP * .4)
-			camera.fov = 40.0
-			_focus_far(3.2)
-			memorial_name.text = entry[1]
-			memorial_line.text = "%s\n%s" % [entry[2], entry[3]]
-			var alpha: float = smoothstep(0.0, .5, local) * (1.0 - smoothstep(MEMORIAL_EACH - .45, MEMORIAL_EACH, local))
-			memorial_name.modulate.a = alpha
-			memorial_line.modulate.a = alpha
-			if t >= MEMORIAL_EACH * MEMORIAL.size():
-				_beat("grief")
+			var local: float = clock - memorial_at
+			var entry: Array = MEMORIAL[memorial_index]
+			if local < memorial_duration or not quiet:
+				# Keep both people alive in the shot until the narrator finishes.
+				recollection.frame(local, memorial_duration)
+				memorial_name.hide()
+				memorial_line.hide()
+			else:
+				recollection.conceal()
+				story.panel.hide()
+				if memorial_loss_at < 0.0:
+					memorial_loss_at = clock
+				var loss_time: float = clock - memorial_loss_at
+				var place: Vector3 = _fallen_at(entry[0])
+				var inward: Vector3 = Vector3(VAULT_AT.x - place.x, 0, VAULT_AT.z - place.z).normalized()
+				var side: Vector3 = inward.cross(Vector3.UP)
+				camera.global_position = place + Vector3.UP * 1.1 + inward * 1.7 + side * (.9 - loss_time * .3)
+				camera.look_at(place + Vector3.UP * .4)
+				camera.fov = 40.0
+				_focus_far(3.2)
+				memorial_name.text = entry[1]
+				memorial_line.text = "%s\n%s" % [entry[2], entry[3]]
+				var alpha: float = smoothstep(0.0, .4, loss_time) * (1.0 - smoothstep(MEMORIAL_EACH - .45, MEMORIAL_EACH, loss_time))
+				memorial_name.modulate.a = alpha
+				memorial_line.modulate.a = alpha
+				memorial_name.show()
+				memorial_line.show()
+				if loss_time >= MEMORIAL_EACH and quiet:
+					if memorial_index + 1 < MEMORIAL.size():
+						_recall_next()
+					else:
+						_beat("grief")
 		"grief":
 			# First his colleague, then the face of someone who cannot fix this.
 			var head: Vector3 = tear_anchor.global_position
@@ -756,6 +782,22 @@ func _haunt(time: float) -> void:
 			memory_caption.text = "%s · remembered\n%s" % [memory.who, memory.text]
 			memory_caption.modulate.a = smoothstep(0.0, .3, within) * (1.0 - smoothstep(length - .3, length, within))
 			memory_caption.show()
+
+
+func _recall_next() -> void:
+	memorial_index += 1
+	memorial_at = clock
+	memorial_loss_at = -1.0
+	focus.dof_blur_far_enabled = false
+	memorial_name.hide()
+	memorial_line.hide()
+	recollection.recall(MEMORIAL[memorial_index][0])
+	var id: String = MEMORIAL_VOICES[memorial_index]
+	var entry: Dictionary = story.voice.lines[id]
+	var stream: AudioStream = load(entry.audio)
+	# Audio starts on the next process frame; leave breathing room before the loss cut.
+	memorial_duration = stream.get_length() + .8
+	story.say(id)
 
 
 func _boss_at() -> Vector3:

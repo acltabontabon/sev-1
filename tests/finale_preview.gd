@@ -36,7 +36,21 @@ func _run() -> void:
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
 	finale._beat("memorial")
+	if "--play-memorial" in OS.get_cmdline_user_args():
+		story.set_process(true)
+		while is_instance_valid(finale) and finale.beat in ["memorial", "grief"]:
+			await process_frame
+		if is_instance_valid(finale):
+			finale.finish(false)
+		await process_frame
+		quit()
+		return
 	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
+	if "--memorial" in OS.get_cmdline_user_args():
+		samples = []
+		for index in range(5):
+			samples.append(["memorial", .8, index])
+			samples.append(["memorial", 5.0, index])
 	if "--departure" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")
@@ -58,7 +72,10 @@ func _run() -> void:
 	for sample: Array in samples:
 		if finale.beat != sample[0]:
 			finale._beat(sample[0])
-		var elapsed: float = finale.clock - finale.beat_at
+		if sample.size() > 2 and sample[2] > finale.memorial_index:
+			story.voice.clear()
+			finale._recall_next()
+		var elapsed: float = finale.clock - (finale.memorial_at if sample.size() > 2 else finale.beat_at)
 		var target: float = float(sample[1]) if float(sample[1]) >= 0.0 else finale.exit_duration * -float(sample[1])
 		while elapsed < target:
 			finale.tick(1.0 / 60.0)
@@ -66,6 +83,8 @@ func _run() -> void:
 			await physics_frame
 		await RenderingServer.frame_post_draw
 		var path: String = "res://logs/finale_%s_%s.png" % [sample[0], str(int(sample[1])) if float(sample[1]) >= 0.0 else "late"]
+		if sample.size() > 2:
+			path = "res://logs/finale_memory_%d_%d.png" % [sample[2], int(sample[1])]
 		root.get_texture().get_image().save_png(path)
 		print("SHOT ", path)
 		if sample[0] in ["exit", "street"]:

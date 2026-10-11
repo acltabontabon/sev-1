@@ -145,3 +145,14 @@ Two instances of Poly Haven **Caged Hanging Light** by Ulan Cabanilla, CC0 1.0.
 The official 1K glTF buffers and JPEG maps were verified and embedded into a GLB;
 [source URLs, hashes and license](../assets/environment/operations/README.md).
 Original console/rack geometry and power-up SVG icons add no outside rights.
+
+## Illustrated memorial memories (11 October 2026)
+
+Five original PNGs were created with the built-in OpenAI image-generation tool from
+SEV-1's authored prompts, with no supplied reference images or artist imitation.
+They depict distinct shared moments with Morgan, Nadia, Jun, Jo and Val.
+[The asset record](../assets/environment/memorial_illustrations/README.md) links their
+full prompt set, original generated paths, selected-file checksums and visual review.
+These are AI-generated candidate illustrations; creator acceptance remains pending.
+Git LFS tracks the PNGs. Narration retains the existing stock Kokoro documentary
+profile and its recorded provenance; no runtime generation or paid runtime AI.
