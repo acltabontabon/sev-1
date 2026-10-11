@@ -4349,7 +4349,7 @@ omni_range = 3.2
 omni_attenuation = 1.4
 
 [node name="LoungeRug" parent="Decor" instance=ExtResource("60")]
-position = Vector3(9.40000, 0.01200, 11.00000)
+position = Vector3(6.40000, 0.01200, 13.40000)
 rotation_degrees = Vector3(0, 0, 0)
 scale = Vector3(3.4, 3.4, 3.4)
 
@@ -4359,27 +4359,27 @@ rotation_degrees = Vector3(0, 180, 0)
 scale = Vector3(2.1, 2.1, 2.1)
 
 [node name="LoungeChairWest" parent="Decor" instance=ExtResource("62")]
-position = Vector3(7.00000, 0.00000, 10.60000)
+position = Vector3(7.00000, 0.00000, 12.50000)
 rotation_degrees = Vector3(0, 90, 0)
 scale = Vector3(2.0, 2.0, 2.0)
 
 [node name="LoungeChairEast" parent="Decor" instance=ExtResource("62")]
-position = Vector3(11.60000, 0.00000, 10.90000)
+position = Vector3(9.80000, 0.00000, 11.40000)
 rotation_degrees = Vector3(0, -90, 0)
 scale = Vector3(2.0, 2.0, 2.0)
 
 [node name="LoungeTable" parent="Decor" instance=ExtResource("63")]
-position = Vector3(9.40000, 0.00000, 11.10000)
+position = Vector3(8.80000, 0.00000, 12.00000)
 rotation_degrees = Vector3(0, 0, 0)
 scale = Vector3(2.0, 2.0, 2.0)
 
 [node name="LoungeLaptop" parent="Decor" instance=ExtResource("64")]
-position = Vector3(9.20000, 0.43000, 11.00000)
-rotation_degrees = Vector3(0, 20, 0)
-scale = Vector3(1.6, 1.6, 1.6)
+position = Vector3(8.30000, 0.46000, 11.95000)
+rotation_degrees = Vector3(0, 0, 0)
+scale = Vector3(0.9, 0.9, 0.9)
 
 [node name="LoungeLamp" parent="Decor" instance=ExtResource("52")]
-position = Vector3(12.70000, 0.00000, 14.40000)
+position = Vector3(11.80000, 0.00000, 14.60000)
 rotation_degrees = Vector3(0, 0, 0)
 scale = Vector3(2.2, 2.2, 2.2)
 
@@ -4389,7 +4389,7 @@ rotation_degrees = Vector3(0, 0, 0)
 scale = Vector3(2.5, 2.5, 2.5)
 
 [node name="LoungePlantB" parent="Decor" instance=ExtResource("40")]
-position = Vector3(12.90000, 0.00000, 12.40000)
+position = Vector3(10.90000, 0.00000, 14.60000)
 rotation_degrees = Vector3(0, 70, 0)
 scale = Vector3(2.1, 2.1, 2.1)
 
@@ -4414,7 +4414,7 @@ rotation_degrees = Vector3(0, 180, 0)
 scale = Vector3(2.0, 2.0, 2.0)
 
 [node name="LoungeLampLight" type="OmniLight3D" parent="."]
-position = Vector3(12.70000, 2.30000, 14.40000)
+position = Vector3(11.80000, 2.30000, 14.60000)
 light_color = Color(1, 0.7, 0.42, 1)
 light_energy = 1.2
 shadow_enabled = false

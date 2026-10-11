@@ -1,5 +1,14 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Clear the lounge doorway (11 October 2026)
+
+Tidied the SHIP IT lounge into a compact seating group. The east armchair and
+plant no longer occupy the meeting-wing doorway approach; the lamp sits at the
+back wall, and the rug, coffee table and laptop align with the seating. RIO keeps
+his corrected sofa placement. An environment check verifies actual decorative
+mesh bounds leave the entrance clear, including props without collision.
+The packaged build predates this source fix.
+
 ## Source update — Emotional support human (11 October 2026)
 
 The engineer now answers his permanent AI-babysitting assignment with “So I’m the

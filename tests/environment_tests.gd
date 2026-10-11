@@ -143,6 +143,15 @@ func _run() -> void:
 	player.camera_rig.set_capture(true)
 	incident.presentation.skip()
 	await frames(10)
+	# Decorative props have no physics collision, so navigation alone misses a chair
+	# or plant visually blocking the doorway. Check their actual transformed meshes.
+	var lounge_approach: AABB = AABB(Vector3(11.8, .1, 10.5), Vector3(6.0, 2.5, 3.0))
+	var doorway_clutter: Array[String] = []
+	for node: Node in room.get_node("Decor").find_children("*", "MeshInstance3D", true, false):
+		var prop: MeshInstance3D = node as MeshInstance3D
+		if prop.mesh != null and lounge_approach.intersects(prop.global_transform * prop.get_aabb()):
+			doorway_clutter.append(str(room.get_path_to(prop)))
+	check(doorway_clutter.is_empty(), "the lounge doorway and approach are clear of visible furniture: %s" % str(doorway_clutter))
 	var start: Vector3 = Vector3(0, .05, 8)
 	for entry: Array in [["meeting wing corridor", Vector3(16.3, .05, 0)], ["Quick Sync room", room.get_node("SpawnPoints/QuickSyncCenter").position + Vector3(0, 0, 4)], ["Quick Sync annex", Vector3(29, .05, -8)], ["pantry", Vector3(22.6, .05, 6)], ["server corridor", Vector3(9, .05, -23)], ["server vault", room.get_node("SpawnPoints/VaultArrival").position]]:
 		check(path_reaches(start, entry[1]), "navigation reaches the %s from the desks" % entry[0])

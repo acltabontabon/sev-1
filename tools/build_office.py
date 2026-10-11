@@ -471,21 +471,22 @@ for idx,(x,z) in enumerate([(-9.0,5.0),(-6.5,5.0),(-9.0,0.0),(-6.5,0.0),(-9.0,-6
 for idx,(x,z) in enumerate([(-7.75,5.0),(-7.75,-6.0)]):
     decor(f'DeskLamp{idx}','lamp_square_table',(x,.76,z-.3),0,1.8)
     s.light(f'DeskLampLight{idx}',(x,1.35,z-.3),(1,.78,.5),.9,3.2)
-# The lounge (south-east): somewhere to pretend to rest.
-decor('LoungeRug','rug_round',(9.4,.012,11.0),0,3.4)
+# The lounge (south-east): a compact seating group, clear of the wing doorway.
+# Keep x >= 11.8, z 10.5..13.5 free for the approach; imported pivots are off-centre.
+decor('LoungeRug','rug_round',(6.4,0.012,13.4),0,3.4)
 decor('LoungeSofa','lounge_design_sofa',(9.4,0,13.9),180,2.1)
-decor('LoungeChairWest','lounge_chair_relax',(7.0,0,10.6),90,2.0)
-decor('LoungeChairEast','lounge_chair_relax',(11.6,0,10.9),-90,2.0)
-decor('LoungeTable','table_coffee',(9.4,0,11.1),0,2.0)
-decor('LoungeLaptop','laptop',(9.2,.43,11.0),20,1.6)
-decor('LoungeLamp','lamp_round_floor',(12.7,0,14.4),0,2.2)
+decor('LoungeChairWest','lounge_chair_relax',(7.0,0,12.5),90,2.0)
+decor('LoungeChairEast','lounge_chair_relax',(9.8,0,11.4),-90,2.0)
+decor('LoungeTable','table_coffee',(8.8,0,12.0),0,2.0)
+decor('LoungeLaptop','laptop',(8.3,0.46,11.95),0,0.9)
+decor('LoungeLamp','lamp_round_floor',(11.8,0,14.6),0,2.2)
 decor('LoungePlantA','potted_plant',(6.2,0,15.0),0,2.5)
-decor('LoungePlantB','potted_plant',(12.9,0,12.4),70,2.1)
+decor('LoungePlantB','potted_plant',(10.9,0,14.6),70,2.1)
 decor('LoungeTV','television_modern',(9.4,.9,15.55),180,2.0)
 decor('LoungeSpeakerA','speaker',(8.1,0,15.4),180,1.8)
 decor('LoungeSpeakerB','speaker',(10.7,0,15.4),180,1.8)
 decor('LoungeShelf','bookcase_open',(5.6,0,15.35),180,2.0)
-s.light('LoungeLampLight',(12.7,2.3,14.4),(1,.7,.42),1.2,5)
+s.light('LoungeLampLight',(11.8,2.3,14.6),(1,.7,.42),1.2,5)
 s.light('LoungeTVGlow',(9.4,1.6,14.9),(.35,.75,1),.8,4)
 # Deck and wing: plants on the deck corners, a bench and greenery along the corridor.
 for idx,x in enumerate([5.6,10.4]): decor(f'DeckPlant{idx}','potted_plant',(x,1.5,-10.5),idx*90,2.0)
