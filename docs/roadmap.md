@@ -18,6 +18,12 @@ and adds five local after-hours recollections with less repetitive profanity.
 It is an implemented creative candidate; the director must accept the illustration
 style, narration and emotional/comedic pacing before it is treated as final.
 
+The 11 October [corporate firefighting entrance](game_design.md#corporate-firefighting-entrance-implemented-prototype-11-october-2026)
+replaces panicked laps with a witnessed rush, fixed response stations, a connected
+hose, smooth authored flame/spell shapes and persistent casualties. Destructive
+Feedback replaces the designer's balloon pop. This is a playable creative candidate;
+director review of effects, hose grip, voice timing and comedy remains open.
+
 ## Milestones
 
 | Milestone | Scope and current status | Gate before expansion |

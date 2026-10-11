@@ -969,6 +969,7 @@ func _run() -> void:
 	var massacre_deadline: int = Time.get_ticks_msec() + 70000
 	var talking_at_once: int = 0
 	var crowded: bool = false
+	var designer_inflated: bool = false
 	var night_shift: Node = incident.coworkers
 	while not is_instance_valid(incident.boss) and Time.get_ticks_msec() < massacre_deadline:
 		await frames(1)
@@ -977,18 +978,20 @@ func _run() -> void:
 		for worker: Dictionary in night_shift.people:
 			if worker.charging or worker.dead:
 				talking += 1 if worker.line_left > 0.0 else 0
-				if worker.charging and not is_same(worker, prey) and not prey.is_empty() and prey.engaged:
+				if incident.presentation.hero_phase != "response" and worker.charging and not is_same(worker, prey) and not prey.is_empty() and prey.engaged:
 					# (It may sail over someone mid-leap; on the ground it keeps to its victim.)
 					crowded = crowded or night_shift.landed() and worker.body.global_position.distance_to(incident.presentation.demon.global_position) < 2.5
+		designer_inflated = designer_inflated or night_shift.person("Designer").body.scale.x > .63
 		talking_at_once = maxi(talking_at_once, talking)
 	check(incident.coworkers.cavalry_fallen() == 5 and is_instance_valid(incident.boss) and not incident.presentation.demon.visible, "all five fall, then the real Variance takes over")
 	check(talking_at_once == 1, "the night shift take turns: never two of them talking at once")
-	check(not crowded, "The Variance takes them one at a time while the rest run laps out of reach")
+	check(not designer_inflated, "Destructive Feedback cuts without inflating the designer")
+	check(not crowded, "The Variance takes them one at a time while the rest work at separate stations")
 	var fate: Callable = func(name: String) -> Dictionary: return night_shift.person(name)
-	check(fate.call("Manager").body.scale.y < .1 and not fate.call("SRE").pieces.is_empty() and not fate.call("Designer").body.visible \
+	check(fate.call("Manager").body.rotation.x < -1.4 and not fate.call("SRE").pieces.is_empty() and fate.call("Designer").body.visible and not fate.call("Designer").pieces.is_empty() \
 		and fate.call("Intern").body.find_child("Skeleton3D", true, false).get_bone_pose_scale(fate.call("Intern").body.find_child("Skeleton3D", true, false).find_bone("Abdomen")).x < .01 \
 		and fate.call("Director").body.scale.y < .05,
-		"each of them goes to their own move: flattened, sliced, popped, paid in exposure down to the legs, shrunk and stepped on")
+		"each of them goes to their own move: slammed prone, sliced, ruptured, paid in exposure down to the legs, shrunk and stepped on")
 	var spots: Array[Vector3] = []
 	for worker: Dictionary in night_shift.people:
 		if worker.dead:

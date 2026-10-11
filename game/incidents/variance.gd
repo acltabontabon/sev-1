@@ -8,7 +8,7 @@ signal false_positives
 const MOVES: Dictionary = {
 	"delayer": {"name": "DELAYERING", "tagline": "removing one layer of management", "hint": "step out from under it", "line": "move_delayer"},
 	"decommission": {"name": "DECOMMISSION", "tagline": "service has reached end of life", "hint": "roll through the ring", "line": "move_decommission"},
-	"pop": {"name": "MAKE IT POP", "tagline": "feedback has been provided", "hint": "don't stand under the feedback", "line": "move_pop"},
+	"pop": {"name": "DESTRUCTIVE FEEDBACK", "tagline": "cropped to approved dimensions", "hint": "don't stand under the feedback", "line": "move_pop"},
 	"expose": {"name": "PAID IN EXPOSURE", "tagline": "unpaid internship, fully compensated", "hint": "look away from the flash", "line": "move_expose"},
 	"downsize": {"name": "DOWNSIZING", "tagline": "headcount adjusted", "hint": "get out of the beam", "line": "move_downsize"},
 }

@@ -5,6 +5,7 @@ extends SceneTree
 ## `--vault` skips straight to the vault; `--finale` also skips the massacre, then lands
 ## the killing blow: the duel and the ending. Close the window or wait for it to end.
 var scene: Node
+var captures: Dictionary = {}
 var player: CharacterBody3D
 
 
@@ -69,6 +70,23 @@ func _run() -> void:
 		quit()
 		return
 	while not is_instance_valid(incident.boss):
+		if "--capture" in OS.get_cmdline_user_args():
+			var story: Node = incident.presentation
+			var elapsed: float = (Time.get_ticks_msec() - began) / 1000.0
+			var shot: String = ""
+			if story.hero_phase == "response":
+				var phase_time: float = story.massacre_time - story.hero_phase_at
+				shot = "rush" if phase_time < 2.8 else ("wide" if phase_time > 4 and phase_time < 6 else ("hose" if phase_time > 8 else ""))
+			elif incident.coworkers.executing() and not incident.coworkers.victim().is_empty() and incident.coworkers.victim().wind > (1.75 if incident.coworkers.victim().fate == "pop" else .65):
+				shot = "spell_%d" % incident.coworkers.cavalry_fallen()
+			elif story.beat_shot == "casualty":
+				shot = "casualty_%d" % incident.coworkers.cavalry_fallen()
+			elif story.hero_phase == "walk":
+				shot = "aftermath"
+			if not shot.is_empty() and not captures.has(shot) and elapsed > 1.5:
+				captures[shot] = true
+				await RenderingServer.frame_post_draw
+				root.get_texture().get_image().save_png("res://logs/vault_%s.png" % shot)
 		if incident.coworkers.cavalry_fallen() != fallen:
 			fallen = incident.coworkers.cavalry_fallen()
 			print("fell %d at %.1fs" % [fallen, (Time.get_ticks_msec() - began) / 1000.0])

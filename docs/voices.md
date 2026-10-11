@@ -351,3 +351,11 @@ delivery failure) and `handoff_eta` (Management requires a commitment before con
 Both use the existing local Kokoro stock protagonist/management profiles and processing;
 `provenance.json` records model revision, Apache-2.0 license source, hashes and durations.
 The main manifest now has 88 lines. Human listening acceptance remains pending.
+
+Corporate firefighting update (11 October 2026): ten cavalry recordings accompany
+the hose/bucket response and new last words. All eight `variance` recordings now use
+stock `bm_george` at 0.92 speed and −5 semitones, with the existing short doubling
+process. Runtime playback remains at neutral pitch. The direction is cold executive
+authority; profile, speed and baked pitch implement the change. Destructive Feedback
+replaces the old pop call. Crew last words wait for the boss's move call to finish.
+These remain listening candidates; the creator must accept authority, clarity and timing.
