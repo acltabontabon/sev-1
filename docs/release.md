@@ -1,6 +1,6 @@
 # Release engineering
 
-## Tagged GitHub releases (0.2.47 onward)
+## Tagged GitHub releases (0.2.48 onward)
 
 The creator has accepted unsigned, unnotarized distribution for this personal
 project. Developer ID certificates and notarization are not release requirements.
@@ -8,7 +8,7 @@ This does not close gameplay, visual, audio or performance acceptance gates.
 
 `.github/workflows/release.yml` runs on `v*` tag pushes. Native `windows-2022` and
 Intel `macos-15-intel` runners check out Git LFS assets, install official Godot
-4.7.2 standard and templates (verified against official SHA-512 sums), run the full
+4.7.2 standard and templates (verified against official SHA-512 sums), bootstrap cold asset imports before loading the startup theme, then run the full
 validator, export x86-64 only and run packaged headless gameplay smoke. Windows
 uses the runner's Inno Setup 6 compiler and verifies silent installation, installed
 gameplay smoke and uninstallation. Mac builds and verifies a drag-to-Applications
@@ -26,8 +26,8 @@ and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:
 
 ```sh
 git push origin main
-git tag -a v0.2.48 -m "SEV-1 0.2.48"
-git push origin v0.2.48
+git tag -a v0.2.49 -m "SEV-1 0.2.49"
+git push origin v0.2.49
 ```
 
 Tag and changelog/project/preset versions must agree. The pipeline requires no

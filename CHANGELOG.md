@@ -3,7 +3,7 @@
 Changes describe the implemented playable prototype. Creative acceptance and
 ordinary hardware playtesting remain separate from automated checks.
 
-## [0.2.47] — 2026-10-11
+## [0.2.48] — 2026-10-11
 
 First tagged GitHub release of **SEV-1: Friday Deployment**, a personal project.
 
@@ -36,6 +36,8 @@ First tagged GitHub release of **SEV-1: Friday Deployment**, a personal project.
   and Intel Mac x86-64 DMG (drag to Applications).
 - Packaged headless gameplay smoke checks, Windows install/uninstall checks,
   SHA-256 checksums and source-revision manifests.
+- Clean-checkout asset bootstrap prevents loading the startup theme before fonts
+  are imported; normal theme-enabled validation and export follow.
 - No signing certificates or notarization. Installation instructions and asset/
   engine notices are included with both packages.
 
@@ -54,6 +56,11 @@ for unsigned-app prompts, requirements and controls.
   Actual graphical performance and audio on those machines need human testing.
 - First-use hitches, combat balance, pacing, comedy, voices and music still need
   creator playtest acceptance. Automated checks do not prove those outcomes.
+
+## [0.2.47] — 2026-10-11
+
+Initial CI tag. Cold-checkout font import failed before packaging, so no installers
+or GitHub release were published. Superseded by 0.2.48.
 
 ## Earlier untagged development — 2026-10-10 to 2026-10-11
 

@@ -44,6 +44,8 @@ jobs:
           python -c 'import sys; sys.path.insert(0, "tools"); from package_ci import release_notes; import os; print(release_notes(os.environ["RELEASE_TAG"]))'
       - name: Install pinned Godot and export templates
         run: python tools/install_ci_godot.py
+      - name: Bootstrap clean asset imports
+        run: python tools/bootstrap_ci_import.py
       - name: Validate source
         run: python tools/validate.py
       - name: Export, smoke-test and build installer
