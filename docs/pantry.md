@@ -23,6 +23,16 @@ the existing wing. Its doorway grows from 3 m to 4.5 m; dining furniture moves t
 the north edge and vending to the back wall. A concrete floor and a second warm
 light distinguish the recovery room. Navigation is rebaked offline for this layout.
 
+Strange employees resolve their standing height against physical floor collision,
+with the existing 5 cm body clearance, rather than the elevated navigation voxels.
+This applies at every outbreak site and is checked again when a transformation
+reparents an employee onto a monster. Regular coworkers retain their authored
+floor, raised-deck and furniture placements. `tests/encounter_tests.gd` checks
+physical support at all seven outbreak sites and for every non-seated coworker;
+its existing seating checks cover the sofa sitter. Human checkpoint: approach a
+strange employee in the pantry, watch their feet while idle and talking, then
+trigger their transformation and confirm they do not rise off the floor.
+
 `game/rooms/office/pantry_antics.gd` owns the local visual state. The incident owns
 input, distance checks, coffee and progression. Props are reused on every press;
 there is no runtime navigation bake or spawning of combatants. The receipt remains

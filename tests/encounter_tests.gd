@@ -3,6 +3,44 @@ extends "res://tests/incident_tests.gd"
 ## They verify mechanics and cleanup, not tuning, readability or fun.
 
 
+## Check physical support, not navigation height, including raised floors and reveal parents.
+func check_npc_support() -> void:
+	for site: Array in incident.SITES:
+		var at: Vector3 = incident._on_floor(site[1])
+		var host: Node3D = incident._make_host("record", at)
+		await frames(3)
+		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+			host.global_position + Vector3.UP * .1, host.global_position - Vector3.UP, 1)
+		var support: Dictionary = host.get_world_3d().direct_space_state.intersect_ray(ray)
+		check(not support.is_empty() and absf(host.global_position.y - support.position.y - .05) < .005,
+			"strange employee stands on the physical floor at %s" % site[0])
+		# A reveal reparents the employee onto an enemy at navigation height.
+		var carrier: Node3D = Node3D.new()
+		incident.add_child(carrier)
+		carrier.position = at
+		host.reparent(carrier)
+		host.position = Vector3.ZERO
+		await frames(3)
+		check(absf(host.global_position.y - support.position.y - .05) < .005,
+			"transformation keeps the employee grounded at %s" % site[0])
+		carrier.position.y = support.position.y
+		await frames(3)
+		check(absf(host.global_position.y - support.position.y - .05) < .005,
+			"employee stays grounded when its reveal parent settles at %s" % site[0])
+		incident.actors.erase(host)
+		carrier.queue_free()
+		await frames(1)
+	for someone: Dictionary in incident.coworkers.people:
+		if someone.entry.routine in ["sit", "asleep"]:
+			continue # Furniture contact has dedicated hip/leg checks below.
+		var body: Node3D = someone.body
+		var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+			body.global_position + Vector3.UP * .1, body.global_position - Vector3.UP, 1)
+		var support: Dictionary = body.get_world_3d().direct_space_state.intersect_ray(ray)
+		check(not support.is_empty() and absf(body.global_position.y - support.position.y) < .005,
+			"regular coworker %s is supported by the floor or conference deck" % someone.entry.name)
+
+
 func fresh_stage(next: int) -> void:
 	scene.reset_encounter()
 	player.camera_rig.set_capture(true)
@@ -58,6 +96,7 @@ func _run() -> void:
 	var base_count: int = scene.find_children("*", "", true, false).size()
 	# Authored composition.
 	await fresh_stage(incident.Stage.INVESTIGATION)
+	await check_npc_support()
 	incident.stage = incident.Stage.ENCOUNTER_ONE
 	check(incident.waves().size() == 2 and incident.stage_total() == 4, "first encounter is two authored waves")
 	incident.stage = incident.Stage.ENCOUNTER_TWO

@@ -39,6 +39,7 @@ var dread: float = 0.0
 var phase: String = "calm"
 ## Mid-conversation: the incident drives the gestures and the twitching waits.
 var talking: bool = false
+var grounded_at: Vector3 = Vector3.INF
 
 
 static func create(kind_: String, index: int) -> Node3D:
@@ -134,6 +135,20 @@ func _phase(next: String) -> void:
 		"convulse":
 			animator.play("CharacterArmature|RecieveHit", .08)
 			animator.speed_scale = 1.8
+
+
+## Navigation voxels sit above the rendered floor. These presentation-only actors
+## have no gravity, so resolve the physical support instead of keeping that height.
+## Recheck after reparenting onto a monster, which can still be settling during a reveal.
+func _physics_process(_delta: float) -> void:
+	if global_position == grounded_at:
+		return
+	var ray: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		global_position + Vector3.UP * .6, global_position - Vector3.UP * 1.5, 1)
+	var support: Dictionary = get_world_3d().direct_space_state.intersect_ray(ray)
+	if not support.is_empty() and (support.normal as Vector3).y > .7:
+		global_position.y = (support.position as Vector3).y + .05
+		grounded_at = global_position
 
 
 func _process(delta: float) -> void:
