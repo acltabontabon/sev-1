@@ -11,6 +11,8 @@ extends Node3D
 enum Pose { NONE, LOOK_DOWN, LOOK_UP, TYPING, ALERT, SLUMP, SIP, RELAX, GLANCE, ARMED, FINISH, RAGE }
 const SEATED: Array[int] = [Pose.TYPING, Pose.ALERT, Pose.SLUMP, Pose.SIP, Pose.RELAX, Pose.GLANCE]
 const ANIMATIONS: AnimationLibrary = preload("res://game/player/engineer_animations.res")
+## The developer outfit: hoodie, joggers and sneakers on the stock body's own skin.
+const OUTFIT: ArrayMesh = preload("res://assets/characters/hero_outfit/dev_hoodie.res")
 const SWORD_TRIAL: String = "res://assets/characters/kevin_trial/sword_trial.res"
 ## Source clip phases: anticipation ends, cutting motion ends. The melee clock owns
 ## playback, including hit-stop; animation never drives damage or controller travel.
@@ -96,6 +98,11 @@ var overtime_strength: float = 0.0
 var overtime_hair: Node3D
 var overtime_hair_material: StandardMaterial3D
 var rim_materials: Array[StandardMaterial3D] = []
+## Outfit lights as [material, idle energy, battle energy]: LEDs, lenses, soles.
+var gear_glow: Array[Array] = []
+var print_labels: Array[Label3D] = []
+var watch_screen: StandardMaterial3D
+var back_kit: Node3D
 var bones: Dictionary = {}
 var striking: bool = false
 var called_out: bool = false
@@ -325,6 +332,8 @@ var conversing: bool = false
 func _physics_process(delta: float) -> void:
 	# Hide only the artwork: finale prop ownership can still hide the whole pivot.
 	blade_art.visible = not story_pose in SEATED
+	# The back print and sticky note would show through the chair's backrest.
+	back_kit.visible = not story_pose in SEATED
 	if conversing:
 		clock += delta
 		crouch = 0.0
@@ -806,6 +815,12 @@ func _glow() -> void:
 	for material in rim_materials:
 		material.emission = Color(.08, .62, .66).lerp(hue, battle)
 		material.emission_energy_multiplier = .25 + 2.6 * battle
+	for entry: Array in gear_glow:
+		(entry[0] as StandardMaterial3D).emission_energy_multiplier = lerpf(entry[1], entry[2], battle)
+	# The pager never stops: the watch blinks twice a second.
+	watch_screen.emission_energy_multiplier *= .45 + .55 * absf(sin(clock * 6.0))
+	for label in print_labels:
+		label.modulate.a = .72 + .28 * battle
 
 
 func _clip_name(clip: String) -> String:
@@ -866,12 +881,16 @@ func _ik(root: String, middle: String, end: String, target: Node3D, pole: Node3D
 	return ik
 
 
-## Identity pass: recolor the stock body into the on-call engineer and add his kit.
+## Identity pass: re-dress the stock body as the on-call developer and add his kit.
+## The outfit mesh (tools/build_hero_outfit.gd) keeps the source skin and bind poses.
 func _dress() -> void:
 	var body: MeshInstance3D = skeleton.find_children("*", "MeshInstance3D", false, false)[0]
+	body.mesh = OUTFIT
 	var palette: Dictionary = {
-		"Skin": Color(.56, .37, .26), "Shirt": Color(.15, .16, .19), "Pants": Color(.08, .11, .16),
-		"Belt": Color(.05, .05, .06), "Hair": Color(.05, .04, .04), "Face": Color(.03, .035, .04),
+		"Skin": Color(.56, .37, .26), "Glove": Color(.06, .065, .075), "Streak": Color(.1, .75, .85), "Hoodie": Color(.075, .08, .095), "Rib": Color(.045, .048, .056),
+		"Pants": Color(.11, .12, .14), "Belt": Color(.03, .03, .035),
+		"Shoe": Color(.9, .9, .88), "Sole": Color(.12, .95, .85),
+		"Hair": Color(.05, .04, .04), "Face": Color(.03, .035, .04),
 	}
 	for surface in body.mesh.get_surface_count():
 		var source: Material = body.mesh.surface_get_material(surface)
@@ -890,45 +909,227 @@ func _dress() -> void:
 			material.emission = Color(.35, .95, 1.0)
 			material.emission_energy_multiplier = 0.0
 			eye_material = material
+		if source.resource_name == "Hoodie":
+			# Brushed fleece: a soft sheen that lifts the silhouette off dark carpet.
+			material.rim_enabled = true
+			material.rim = .35
+			material.rim_tint = .4
+		if source.resource_name == "Sole":
+			# Light-up sneakers: they idle softly and flare in battle mode.
+			_glows(material, palette["Sole"], .5, 2.4)
 		body.set_surface_override_material(surface, material)
 	for edge in weapon.find_children("Edge*", "MeshInstance3D", false, false):
 		var rim: StandardMaterial3D = ((edge as MeshInstance3D).mesh.surface_get_material(0) as StandardMaterial3D).duplicate()
 		(edge as MeshInstance3D).material_override = rim
 		rim_materials.append(rim)
-	var unit: float = 1.0 / (skeleton.global_basis.get_scale().x if skeleton.is_inside_tree() else 100.0 * model_scale)
-	var neck: Node3D = _attach("Neck", unit)
-	_build_overtime_hair(_attach("Head", unit))
-	var phones: MeshInstance3D = MeshInstance3D.new()
-	var band: TorusMesh = TorusMesh.new()
-	band.inner_radius = .1
-	band.outer_radius = .135
-	band.rings = 20
-	band.ring_segments = 8
-	band.material = _flat(Color(.04, .045, .05), .4)
-	phones.mesh = band
-	phones.position = Vector3(0, .02, 0)
-	neck.add_child(phones)
+	var hoodie: StandardMaterial3D = _flat(palette["Hoodie"], .9)
+	var rib: StandardMaterial3D = _flat(palette["Rib"], .95)
+	var black: StandardMaterial3D = _flat(Color(.025, .025, .03), .35)
+	var metal: StandardMaterial3D = _flat(Color(.7, .72, .75), .3)
+	metal.metallic = .9
+	var cyan: Color = Color(.15, .9, 1.0)
+	var head: Node3D = _rest_attach("Head")
+	_build_overtime_hair(_attach("Head", 1.0 / skeleton.global_basis.get_scale().x))
+	_dress_glasses(head, black, cyan)
+	_dress_headphones(head, black, cyan)
+	var torso: Node3D = _rest_attach("Torso")
+	_dress_hoodie(torso, _rest_attach("Abdomen"), _rest_attach("Neck"), hoodie, rib, metal)
+	_dress_back(torso, cyan)
+	_dress_badge(torso, metal)
 	for side in [-1.0, 1.0]:
-		var cup: MeshInstance3D = MeshInstance3D.new()
+		# The sleeves are shoved up past the elbow, bunched for work.
+		var elbow: Node3D = _rest_attach("LowerArm.L" if side < 0 else "LowerArm.R")
+		var bunch: TorusMesh = TorusMesh.new()
+		bunch.inner_radius = .062
+		bunch.outer_radius = .108
+		bunch.rings = 14
+		bunch.ring_segments = 8
+		_piece(elbow, bunch, hoodie, Vector3(side * .61, 1.2, .005), Vector3(.12, 0, PI * .5), Vector3(1, 1.25, 1))
+		_piece(elbow, bunch, rib, Vector3(side * .645, 1.2, .005), Vector3(-.1, 0, PI * .5), Vector3(.85, .9, .85))
+	_dress_watch(_rest_attach("LowerArm.L"), black)
+	_dress_duck(_rest_attach("Hips"), metal)
+
+
+## Gear placed on `bone` in character space at the bind rest pose (metres, facing -Z,
+## arms out): the holder cancels the rest transform, so children follow every clip.
+func _rest_attach(bone: String) -> Node3D:
+	var attachment: BoneAttachment3D = BoneAttachment3D.new()
+	attachment.name = bone + "Kit"
+	attachment.bone_name = bone
+	skeleton.add_child(attachment)
+	var holder: Node3D = Node3D.new()
+	var to_character: Transform3D = global_transform.affine_inverse() * skeleton.global_transform
+	holder.transform = (to_character * skeleton.get_bone_global_rest(skeleton.find_bone(bone))).affine_inverse()
+	attachment.add_child(holder)
+	return holder
+
+
+func _piece(parent: Node3D, mesh: Mesh, material: Material, at: Vector3, turn: Vector3 = Vector3.ZERO, size: Vector3 = Vector3.ONE) -> MeshInstance3D:
+	var piece: MeshInstance3D = MeshInstance3D.new()
+	piece.mesh = mesh
+	piece.material_override = material
+	piece.position = at
+	piece.rotation = turn
+	piece.scale = size
+	parent.add_child(piece)
+	return piece
+
+
+## A square-section rod from `from` to `to`, for frames, cords and zips.
+func _rod(parent: Node3D, from: Vector3, to: Vector3, thickness: float, material: Material) -> MeshInstance3D:
+	var box: BoxMesh = BoxMesh.new()
+	box.size = Vector3(thickness, from.distance_to(to), thickness)
+	var piece: MeshInstance3D = _piece(parent, box, material, (from + to) * .5)
+	var along: Vector3 = (to - from).normalized()
+	var side: Vector3 = along.cross(Vector3.FORWARD if absf(along.z) < .9 else Vector3.RIGHT).normalized()
+	piece.basis = Basis(side, along, side.cross(along)).orthonormalized()
+	return piece
+
+
+## Battle mode and the idle hum: emission between `idle` and `fight` energy.
+func _glows(material: StandardMaterial3D, color: Color, idle: float, fight: float) -> void:
+	material.emission_enabled = true
+	material.emission = color
+	material.emission_energy_multiplier = idle
+	gear_glow.append([material, idle, fight])
+
+
+## Thick black rectangular frames, wrapped to the big head, with lenses that catch
+## monitor light (and become a HUD glow in battle mode).
+func _dress_glasses(holder: Node3D, frame: StandardMaterial3D, cyan: Color) -> void:
+	var head: Node3D = Node3D.new()
+	head.name = "Glasses"
+	holder.add_child(head)
+	var lens: StandardMaterial3D = _flat(Color(.45, .75, 1.0, .05), .55)
+	lens.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	# Blended specular is not scaled by alpha: without this the lenses go milky.
+	lens.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	lens.metallic_specular = 0.0
+	_glows(lens, cyan, .0, .22)
+	var glass: QuadMesh = QuadMesh.new()
+	glass.size = Vector2(.19, .14)
+	for side in [-1.0, 1.0]:
+		var rim: Node3D = Node3D.new()
+		rim.position = Vector3(side * .165, 1.672, -.338)
+		rim.rotation = Vector3(0, side * -.42, 0)
+		head.add_child(rim)
+		# A quad faces +Z; the lenses look forward along -Z.
+		_piece(rim, glass, lens, Vector3.ZERO, Vector3(0, PI, 0))
+		var w: float = .105
+		var h: float = .08
+		_rod(rim, Vector3(-w, h, 0), Vector3(w, h, 0), .034, frame)
+		_rod(rim, Vector3(-w, -h, 0), Vector3(w, -h, 0), .026, frame)
+		_rod(rim, Vector3(-w, -h, 0), Vector3(-w, h, 0), .026, frame)
+		_rod(rim, Vector3(w, -h, 0), Vector3(w, h, 0), .026, frame)
+		var hinge: Vector3 = Vector3(side * (.165 + .105 * cos(.42)), 1.7, -.338 + .105 * sin(.42))
+		_rod(head, hinge, Vector3(side * .318, 1.69, -.02), .02, frame)
+	_rod(head, Vector3(-.07, 1.705, -.36), Vector3(.07, 1.705, -.36), .022, frame)
+
+
+## Big over-ear cans worn properly, cyan LED rings on the cups.
+func _dress_headphones(holder: Node3D, plastic: StandardMaterial3D, cyan: Color) -> void:
+	var head: Node3D = Node3D.new()
+	head.name = "Headphones"
+	holder.add_child(head)
+	var points: Array[Vector3] = []
+	for step in range(17):
+		var angle: float = lerpf(-PI * .5, PI * .5, float(step) / 16.0)
+		points.append(Vector3(sin(angle) * .395, 1.64 + cos(angle) * .55, .03))
+	# Gunmetal so the band still reads over black hair.
+	var band: StandardMaterial3D = _flat(Color(.36, .38, .42), .3)
+	band.metallic = .8
+	for index in range(points.size() - 1):
+		_rod(head, points[index], points[index + 1], .045, band)
+	var cushion: StandardMaterial3D = _flat(Color(.05, .05, .055), .95)
+	var led: StandardMaterial3D = _flat(cyan, .3)
+	_glows(led, cyan, 1.1, 3.2)
+	for side in [-1.0, 1.0]:
 		var shell: CylinderMesh = CylinderMesh.new()
-		shell.top_radius = .055
-		shell.bottom_radius = .055
-		shell.height = .05
-		shell.material = _flat(Color(.08, .62, .66), .3, true)
-		cup.mesh = shell
-		cup.position = Vector3(side * .125, .02, .02)
-		cup.rotation = Vector3(0, 0, PI * .5)
-		neck.add_child(cup)
-	var torso: Node3D = _attach("Torso", unit)
-	var note: MeshInstance3D = MeshInstance3D.new()
+		shell.top_radius = .1
+		shell.bottom_radius = .115
+		shell.height = .075
+		shell.radial_segments = 20
+		_piece(head, shell, plastic, Vector3(side * .385, 1.63, .03), Vector3(0, 0, side * PI * .5))
+		var pad: CylinderMesh = CylinderMesh.new()
+		pad.top_radius = .118
+		pad.bottom_radius = .11
+		pad.height = .05
+		pad.radial_segments = 20
+		_piece(head, pad, cushion, Vector3(side * .335, 1.63, .03), Vector3(0, 0, side * PI * .5))
+		var ring: TorusMesh = TorusMesh.new()
+		ring.inner_radius = .07
+		ring.outer_radius = .088
+		ring.rings = 24
+		ring.ring_segments = 6
+		_piece(head, ring, led, Vector3(side * .424, 1.63, .03), Vector3(0, 0, PI * .5))
+		var arm: Vector3 = Vector3(side * .395, 1.64, .03)
+		_rod(head, arm, arm + Vector3(0, .12, 0), .032, band)
+
+
+## The open zip hoodie: hood bunched behind the neck, a ribbed collar, the white tee
+## between metal zip tapes, drawstrings with metal aglets. Pieces below the ribs ride
+## the abdomen so the front stays on the body when he twists into a swing.
+func _dress_hoodie(torso: Node3D, abdomen: Node3D, neck: Node3D, fabric: StandardMaterial3D, rib: StandardMaterial3D, metal: StandardMaterial3D) -> void:
+	var hood: SphereMesh = SphereMesh.new()
+	hood.radius = .2
+	hood.height = .4
+	hood.radial_segments = 20
+	hood.rings = 10
+	_piece(torso, hood, fabric, Vector3(0, 1.315, .135), Vector3(-.35, 0, 0), Vector3(1.15, .62, .62))
+	var lining: SphereMesh = hood.duplicate()
+	_piece(torso, lining, rib, Vector3(0, 1.345, .1), Vector3(-.35, 0, 0), Vector3(.9, .42, .5))
+	var collar: TorusMesh = TorusMesh.new()
+	collar.inner_radius = .085
+	collar.outer_radius = .14
+	collar.rings = 20
+	collar.ring_segments = 8
+	_piece(neck, collar, fabric, Vector3(0, 1.29, .01), Vector3(.18, 0, 0), Vector3(1, .7, 1))
+	var tee: StandardMaterial3D = _flat(Color(.86, .85, .8), .9)
+	# The chest's centre line down to the hem: (height, depth).
+	var edge: Array[Vector2] = [Vector2(1.27, -.09), Vector2(1.24, -.112), Vector2(1.18, -.134), Vector2(1.1, -.139), Vector2(1.0, -.143), Vector2(.89, -.146), Vector2(.79, -.145), Vector2(.73, -.15)]
+	for index in range(edge.size() - 1):
+		var part: Node3D = torso if edge[index + 1].x > .98 else abdomen
+		var a: Vector3 = Vector3(0, edge[index].x, edge[index].y)
+		var b: Vector3 = Vector3(0, edge[index + 1].x, edge[index + 1].y)
+		var panel: MeshInstance3D = _rod(part, a, b, .01, tee)
+		panel.scale = Vector3(.15 / .01, 1.02, .6)
+		for side in [-1.0, 1.0]:
+			var tape: Vector3 = Vector3(side * .078, 0, -.004)
+			_rod(part, a + tape, b + tape, .016, metal)
+	var prompt: Label3D = _print(">_", 64, .0014, Color(.1, .55, .25))
+	prompt.position = Vector3(.012, 1.13, -.146)
+	prompt.rotation = Vector3(0, PI, 0)
+	torso.add_child(prompt)
+	var cord: StandardMaterial3D = _flat(Color(.92, .92, .9), .8)
+	for side in [-1.0, 1.0]:
+		var top: Vector3 = Vector3(side * .1, 1.26, -.1)
+		var tip: Vector3 = Vector3(side * .105, 1.05, -.152)
+		_rod(torso, top, tip, .014, cord)
+		_rod(torso, tip, tip + Vector3(0, -.04, -.004), .02, metal)
+	var pull: BoxMesh = BoxMesh.new()
+	pull.size = Vector3(.022, .05, .01)
+	_piece(abdomen, pull, metal, Vector3(-.078, .76, -.158))
+
+
+## The back the gameplay camera watches all run: a glowing </> mark, the reckless
+## command he lives by, and the sticky note someone slapped on him.
+func _dress_back(torso: Node3D, cyan: Color) -> void:
+	back_kit = Node3D.new()
+	back_kit.name = "BackKit"
+	torso.add_child(back_kit)
+	var mark: Label3D = _print("</>", 120, .0017, cyan)
+	mark.position = Vector3(0, 1.06, .158)
+	back_kit.add_child(mark)
+	var line: Label3D = _print("git push --force", 30, .0017, cyan)
+	line.position = Vector3(0, .955, .166)
+	back_kit.add_child(line)
+	for label: Label3D in [mark, line]:
+		label.rotation = Vector3(.12, 0, 0)
+		print_labels.append(label)
 	var paper: BoxMesh = BoxMesh.new()
 	paper.size = Vector3(.15, .15, .01)
-	paper.material = _flat(Color(.98, .86, .3), .9)
-	note.mesh = paper
+	var note: MeshInstance3D = _piece(back_kit, paper, _flat(Color(.98, .86, .3), .9), Vector3(.115, .83, .165), Vector3(.1, 0, .16))
 	note.name = "StickyNote"
-	note.position = Vector3(-.03, .16, -.16)
-	note.rotation = Vector3(0, PI, .12)
-	torso.add_child(note)
 	var text: Label3D = Label3D.new()
 	text.text = "ON CALL\n(FOREVER)"
 	text.font_size = 22
@@ -937,13 +1138,79 @@ func _dress() -> void:
 	text.outline_size = 0
 	text.position = Vector3(0, 0, .007)
 	note.add_child(text)
-	var badge: MeshInstance3D = MeshInstance3D.new()
+
+
+func _print(text: String, size: int, pixel: float, color: Color) -> Label3D:
+	var label: Label3D = Label3D.new()
+	label.text = text
+	label.font_size = size
+	label.pixel_size = pixel
+	label.modulate = color
+	label.outline_size = 0
+	label.shaded = false
+	return label
+
+
+## The access badge on a retractable reel clipped to the hoodie edge.
+func _dress_badge(torso: Node3D, metal: StandardMaterial3D) -> void:
+	var reel: CylinderMesh = CylinderMesh.new()
+	reel.top_radius = .028
+	reel.bottom_radius = .028
+	reel.height = .015
+	_piece(torso, reel, _flat(Color(.85, .22, .12), .5), Vector3(-.13, 1.12, -.142), Vector3(PI * .5, 0, 0))
+	_rod(torso, Vector3(-.13, 1.1, -.15), Vector3(-.135, 1.01, -.158), .006, metal)
 	var card: BoxMesh = BoxMesh.new()
-	card.size = Vector3(.08, .1, .01)
-	card.material = _flat(Color(.72, .74, .67), .8)
-	badge.mesh = card
-	badge.position = Vector3(.1, .08, .17)
-	torso.add_child(badge)
+	card.size = Vector3(.085, .115, .008)
+	var badge: MeshInstance3D = _piece(torso, card, _flat(Color(.93, .93, .9), .6), Vector3(-.135, .955, -.162), Vector3(.08, 0, .06))
+	var stripe: BoxMesh = BoxMesh.new()
+	stripe.size = Vector3(.085, .026, .004)
+	_piece(badge, stripe, _flat(Color(.85, .16, .1), .6), Vector3(0, .042, -.005))
+	var photo: BoxMesh = BoxMesh.new()
+	photo.size = Vector3(.03, .036, .004)
+	_piece(badge, photo, _flat(Color(.3, .32, .36), .6), Vector3(-.018, .0, -.005))
+	var role: Label3D = _print("SRE", 40, .0008, Color(.08, .08, .1))
+	role.position = Vector3(.018, -.002, -.0075)
+	role.rotation = Vector3(0, PI, 0)
+	badge.add_child(role)
+
+
+## A smartwatch on the left wrist, the pager alert pulsing on its face.
+func _dress_watch(forearm: Node3D, strap: StandardMaterial3D) -> void:
+	var band: TorusMesh = TorusMesh.new()
+	band.inner_radius = .062
+	band.outer_radius = .079
+	band.rings = 16
+	band.ring_segments = 6
+	_piece(forearm, band, strap, Vector3(-.765, 1.19, .008), Vector3(0, 0, PI * .5), Vector3(1, 1.4, 1))
+	var case: BoxMesh = BoxMesh.new()
+	case.size = Vector3(.06, .02, .065)
+	_piece(forearm, case, strap, Vector3(-.765, 1.262, .008))
+	var screen: BoxMesh = BoxMesh.new()
+	screen.size = Vector3(.048, .004, .052)
+	watch_screen = _flat(Color(1, .2, .12), .2)
+	_glows(watch_screen, Color(1, .2, .12), 1.2, 3.0)
+	_piece(forearm, screen, watch_screen, Vector3(-.765, 1.273, .008))
+
+
+## Rubber-duck debugging: the duck hangs off a carabiner on his belt loop.
+func _dress_duck(hips: Node3D, metal: StandardMaterial3D) -> void:
+	var ring: TorusMesh = TorusMesh.new()
+	ring.inner_radius = .014
+	ring.outer_radius = .022
+	_piece(hips, ring, metal, Vector3(.228, .705, -.02), Vector3(PI * .5, 0, 0), Vector3(1, 1.6, 1))
+	_rod(hips, Vector3(.232, .68, -.02), Vector3(.236, .63, -.02), .008, metal)
+	var yellow: StandardMaterial3D = _flat(Color(1, .82, .1), .45)
+	var body_: SphereMesh = SphereMesh.new()
+	body_.radius = .045
+	body_.height = .07
+	_piece(hips, body_, yellow, Vector3(.24, .585, -.02), Vector3.ZERO, Vector3(1, 1, 1.25))
+	var head_: SphereMesh = SphereMesh.new()
+	head_.radius = .03
+	head_.height = .06
+	_piece(hips, head_, yellow, Vector3(.24, .635, -.042))
+	var beak: BoxMesh = BoxMesh.new()
+	beak.size = Vector3(.026, .012, .03)
+	_piece(hips, beak, _flat(Color(1, .45, .08), .5), Vector3(.24, .63, -.072))
 
 
 ## An original faceted, swept-up silhouette, attached to the animated head. The

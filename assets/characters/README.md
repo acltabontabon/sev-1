@@ -102,11 +102,11 @@ knight rotation key is re-expressed relative to the office body's rest pose, pos
 keys are scaled to the shorter body, scale keys are dropped and run/roll/attack clips
 are kept in place (the controller moves the body). Rerun it after reimporting either FBX.
 
-**Look.** `rigged_engineer.gd` recolors the stock body at load (warm skin, charcoal
-top, dark denim, black hair, dark eyes) and adds his kit on bone attachments:
-headphones with glowing cups, the "ON CALL (FOREVER)" sticky note on his back and an ID
-badge. The keyboard weapon is `keyboard_weapon.tscn`, emitted by
-`tools/build_characters.py` from the same geometry as before.
+**Look.** `rigged_engineer.gd` swaps in the [developer outfit](hero_outfit/README.md)
+(hoodie, gloves, joggers, light-up sneakers, dyed streak) and builds his kit on bone
+attachments: glasses, LED headphones, hood and open zip front, `</>` back print, the
+"ON CALL (FOREVER)" sticky note, badge reel, smartwatch and a rubber duck. The weapon is
+the [Heavy Greatsword](heavy_greatsword/README.md).
 
 **Contract.** `Player/Visual/Character` keeps `reset_pose()`, `defeat()`,
 `story_pose`, `sit`, `crouch` and `weapon`. Clips are chosen and scrubbed from
