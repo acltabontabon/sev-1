@@ -43,11 +43,12 @@ const MEMORIES: Array = [
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
 const DEPARTURE: PackedScene = preload("res://game/incidents/departure_corridor.tscn")
+const NIGHTLIFE: Script = preload("res://game/incidents/nightlife_street.gd")
 const DEPARTURE_AT: Vector3 = Vector3(0, -120, 0)
 const EXIT_PATH: Array[Vector3] = [DEPARTURE_AT + Vector3(-6, .05, 0), DEPARTURE_AT + Vector3(7.1, .05, 0)]
 const EXIT_SECONDS: float = 9.0
 ## The street at the foot of the tower (its west face), and his way away from it.
-const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 5.0), Vector3(-23.0, -69.95, 8.0)]
+const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 6.2), Vector3(-23.0, -69.95, 8.0)]
 const STREET_SECONDS: float = 7.5
 ## The office's west window, where the night shift stands to watch him go.
 const WINDOW: Vector3 = Vector3(-13.3, .05, 2.0)
@@ -91,6 +92,7 @@ var sword_from: Transform3D
 var sword_rest: Transform3D
 var saved_clock: String
 var departure: Node3D
+var nightlife: Node3D
 
 
 func _init(presentation: Node) -> void:
@@ -208,6 +210,8 @@ func _beat(next: String) -> void:
 			player.visual.rotation.y = atan2(-away.x, -away.z)
 			story.say("doc_end")
 		"window":
+			if is_instance_valid(nightlife):
+				nightlife.hide()
 			_stage_window()
 		"resolved":
 			fade.show()
@@ -384,12 +388,13 @@ func tick(delta: float) -> bool:
 				_beat("street")
 		"street":
 			# Low across the wet street, the tower behind him; he walks out of frame.
+			nightlife.tick(t)
 			var walk: float = _walk_progress(t, STREET_SECONDS)
 			character.story_walk_speed = _walk_speed(t, STREET_SECONDS, STREET_PATH[0].distance_to(STREET_PATH[1]))
 			player.global_position = STREET_PATH[0].lerp(STREET_PATH[1], walk)
-			camera.global_position = Vector3(-28.0, -69.25, 11.8) + Vector3(.6, .15, -.4) * walk
-			camera.look_at(Vector3(-18.0, -67.4, 6.0) + Vector3(0, 2.5, 0) * smoothstep(.6, 1.0, walk))
-			camera.fov = 46.0
+			camera.global_position = Vector3(-30.0, -68.1, 12.8) + Vector3(.6, .15, -.4) * walk
+			camera.look_at(Vector3(-18.0, -68.0, 5.5) + Vector3(0, 3.0, 0) * smoothstep(.6, 1.0, walk))
+			camera.fov = 50.0
 			if t >= STREET_SECONDS:
 				_beat("window")
 		"window":
@@ -847,6 +852,12 @@ func _float_receipt(t: float) -> void:
 
 ## Midnight at the foot of the tower: rain, a sodium streetlamp, a cold fill.
 func _stage_street() -> void:
+	if is_instance_valid(nightlife):
+		nightlife.show()
+	else:
+		nightlife = NIGHTLIFE.new()
+		incident.add_child(nightlife)
+		props.append(nightlife)
 	var rain: CPUParticles3D = CPUParticles3D.new()
 	rain.amount = 900
 	rain.lifetime = 1.2

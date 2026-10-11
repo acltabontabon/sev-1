@@ -64,6 +64,7 @@ if __name__ == "__main__":
     run("female_outfits", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/female_outfit_tests.gd"])
     run("coworker_restoration", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/coworker_restoration_tests.gd"])
     run("finale", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/finale_tests.gd"])
+    run("nightlife", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/nightlife_tests.gd"])
     run("rage", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/rage_tests.gd"])
     run("interface", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/interface_tests.gd"])
     print("All checks passed. Graphical review and human playtesting remain separate.")
