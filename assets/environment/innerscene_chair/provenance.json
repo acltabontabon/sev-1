@@ -1,0 +1,25 @@
+{
+  "asset": "VECTOR \u2014 Ergonomic Office Chair",
+  "author": "Innerscene",
+  "license": "CC0-1.0",
+  "retrieved": "2026-10-11",
+  "source_url": "https://www.innerscene.com/tools/library/3d-parts/vector-ergonomic-office-chair-ae299d68",
+  "download_url": "https://www.innerscene.com/api/library/vector-ergonomic-office-chair-ae299d68/download",
+  "source_sha256": "5a912cf6b2c875c614954808f74bdc8f33e0b544e3f8dcdc44a9b76ead321552",
+  "source_bytes": 5766012,
+  "derived_sha256": "f2962bd26f224c4e042a256e3022c9390db5b0558cfe75d44ba5307cb043bfe5",
+  "derived_bytes": 6653972,
+  "conversion": "Godot 4.7.2 SurfaceTool consolidation by material, preserving geometry and UVs; GLTFDocument export with PNG texture encoding",
+  "builder": "tools/build_office_chair.gd",
+  "triangles": 51164,
+  "material_surfaces": 5,
+  "fit": {
+    "rotation_y_degrees": 180,
+    "scale": [
+      1,
+      0.90615,
+      1
+    ],
+    "seat_top_metres": 0.56
+  }
+}

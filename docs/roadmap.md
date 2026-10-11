@@ -4,7 +4,8 @@ Advance through playable evidence, not calendar promises. Each milestone has an 
 
 The 11 October [office furnishing pass](workstation_trial.md) extends the existing
 free detailed desk to all eight workstations and adds acoustic ceiling finish, storage
-and meeting-room details. It is an implemented visual candidate; director acceptance
+and meeting-room details. The subsequent chair pass adds a fitted CC0 ergonomic chair
+across desk, conference and pantry seating. It is an implemented visual candidate; director acceptance
 and moving-combat performance remain open under the Office After Hours gate.
 
 ## Milestones

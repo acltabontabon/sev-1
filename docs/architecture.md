@@ -122,7 +122,10 @@ Metal Office Desk to all eight workstations. `tools/office_details.py` adds stat
 ceiling finish, divider hardware, perimeter filing storage and conference details;
 it is called during scene authoring, never at runtime. New details have no World
 collision and preserve the baked routes. Large visible finish still participates in
-the existing camera-only blocker generation. Chairs remain native placeholders.
+the existing camera-only blocker generation. The shared chair now instances the CC0
+Innerscene ergonomic model, consolidated offline into five material surfaces by
+`tools/build_office_chair.gd`. Seat height, chair origins, sitting poses and navigation
+are preserved; [source and build record](../assets/environment/innerscene_chair/README.md).
 
 Lighting uses subdued cool ambient fill, six ceiling spot pools (two shadow-casting),
 a warm workstation lamp, restrained incident spill, window bounce, and conference fill.

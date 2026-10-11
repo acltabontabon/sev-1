@@ -89,6 +89,14 @@ These binaries use the established Git LFS rules. Original desk mat, keycaps and
 markings add no outside rights. See [implementation and review checkpoint](workstation_trial.md).
 Character selection and subsequent trial status are recorded in that document.
 
+The shared office chair now uses Innerscene’s **VECTOR — Ergonomic Office Chair**,
+an original model released under CC0 1.0. Commercial use, modification and
+redistribution are permitted; attribution is voluntary. The original download,
+SHA-256 records, fitted dimensions, conversion and build instructions are preserved
+in [chair provenance](../assets/environment/innerscene_chair/README.md). Existing
+Git LFS rules cover both GLBs and texture PNGs. Consolidation changes mesh grouping
+without reducing the original geometry; no paid assets or runtime downloads.
+
 ## Heavy Greatsword trial — 11 October 2026
 
 The rigged engineer now carries Lucian Pavel's **Heavy Greatsword**, released as

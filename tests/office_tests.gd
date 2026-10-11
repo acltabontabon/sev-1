@@ -45,6 +45,24 @@ func _run() -> void:
 		if detail.mesh != null and combat_lane.intersects(detail.global_transform * detail.get_aabb()):
 			visual_clear = false
 	check(visual_clear, "office finish leaves the central fighting lane visually clear")
+	var detailed_chairs: Array[Node] = scene.find_children("DetailedChair", "", true, false)
+	var chairs_fit: bool = detailed_chairs.size() >= 8
+	for node in detailed_chairs:
+		var detail: Node3D = node
+		var chair: Node3D = detail.get_parent()
+		var chair_bounds: AABB
+		var first_part: bool = true
+		for part in detail.find_children("*", "MeshInstance3D", true, false):
+			var mesh_part: MeshInstance3D = part
+			var box: AABB = chair.global_transform.affine_inverse() * mesh_part.global_transform * mesh_part.get_aabb()
+			chair_bounds = box if first_part else chair_bounds.merge(box)
+			first_part = false
+		if first_part or absf(chair_bounds.position.y) > .003 or chair_bounds.size.x > .75 \
+				or chair_bounds.size.z > .75 or chair_bounds.size.y > 1.10:
+			chairs_fit = false
+		if not is_equal_approx(chair.get_node("SeatReference").position.y, .56):
+			chairs_fit = false
+	check(chairs_fit, "detailed chairs sit on the floor and fit the desk bays at the established seated height")
 
 	await setup_pair(Vector3(0, .05, 0))
 	player.position = Vector3(3, .05, -5)

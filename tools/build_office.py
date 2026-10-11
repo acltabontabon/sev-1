@@ -150,15 +150,11 @@ class Scene:
         (OUT/f'{file}.tscn').write_text(('[gd_scene format=3]\n\n'+ext+'\n\n'+'\n\n'.join(self.res+self.nodes)).rstrip()+'\n')
 
 chair=Scene('OfficeChair')
-chair.box('Seat',(0,.5,0),(.56,.12,.56),'fabric')
-chair.box('Back',(0,.93,.23),(.55,.65,.10),'fabric',rot=(-8,0,0))
-chair.cylinder('Stem',(0,.25,0),.055,.45,'metal')
-for i in range(5):
-    angle=i*72
-    chair.box(f'Foot{i}',(0,.08,0),(.055,.055,.82),'metal',rot=(0,angle,0))
-for x in [-.34,.34]:
-    chair.box(f'Arm{x}',(x,.76,.01),(.07,.055,.43),'plastic')
-    chair.box(f'Support{x}',(x,.60,.09),(.045,.3,.045),'metal')
+chair_ref = chair.external('res://assets/environment/innerscene_chair/vector_office_chair.glb', 'PackedScene')
+# Publisher faces +Z. Existing chairs face -Z. Fit the upholstered seat top to
+# .56 m and keep the caster floor at zero, preserving the established sitting poses.
+chair.nodes.append(f'[node name="DetailedChair" parent="." instance={chair_ref}]\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(1, 0.90615, 1)')
+chair.node('SeatReference', 'Marker3D', (0, .56, 0))
 chair.save('chair')
 
 # Workstation dimensions are workplace scale, not oversized boxes.

@@ -11,6 +11,6 @@ across all eight office workstations in the authorized office furnishing pass.
 - Local conversion embeds original mesh buffers and JPEGs into self-contained GLB files; geometry and maps remain unchanged. Source checksums and exact download URLs are recorded in provenance.json.
 - Git LFS already tracks environment GLB files. No paid assets or runtime downloads.
 
-Integration preserves each original collision envelope, chair, screen position and
+Integration preserves each original collision envelope, chair origin, screen position and
 interaction paths. The starting desk retains its dedicated close-up details and lamp;
 other desks use the shared workstation scene. Visual acceptance remains the creator’s decision.

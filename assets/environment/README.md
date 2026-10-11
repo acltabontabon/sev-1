@@ -10,6 +10,7 @@ The current office also uses verified free CC0 assets:
 - [Furniture and plants](kenney_furniture/README.md) from Kenney.
 - [Photographic culture prints](posters/README.md) from Poly Haven.
 - [Detailed desks and starting-desk lamp](poly_haven_workstation/README.md) from Poly Haven.
+- [Realistic ergonomic office chair](innerscene_chair/README.md) from Innerscene.
 
 See those records for authors, sources and license details. All eight workstations
 now reuse the detailed desk. New ceiling runners, vents, divider hardware, filing
@@ -19,16 +20,16 @@ includes captures and performance limitations.
 The project has not declared an overall distribution license; these files do not
 assert that the game or its original assets are public domain.
 
-Large surface materials use the recorded photographed PBR sets; chair fabric retains
-a seeded Godot NoiseTexture2D. Other materials use native roughness/metallic controls.
+Large surfaces and the imported chair use the recorded PBR materials; native fabric
+on desk mats and dividers retains a seeded Godot NoiseTexture2D. Other materials use native roughness/metallic controls.
 Signage uses Label3D with project fonts (see [font licenses](../fonts/README.md)). The city and repeated service-door
 frames are original abstract geometry, not photographs or a traversable extra level.
 Existing placeholder audio retains its separate provenance in `assets/audio/README.md`.
 
-Replacement priorities after visual feedback: a cohesive licensed office chair and
-workstation prop set, subtle tileable carpet/wood/paint PBR textures, and representative
-rigged characters. Record source URL, author, license, and attribution requirements
-before importing any replacements. Keep the tested simplified collision envelopes.
+The current free desk/chair pair replaces the original native furniture fallback.
+Monitors, small clutter and the broader environment still need visual refinement.
+Record source URL, author, license, and attribution requirements before importing
+replacements. Keep the tested simplified collision envelopes.
 
 Incident 001 adds original procedural transaction labels, a solid boss diamond, translucent
 false-copy silhouettes reusing the existing enemy mesh parts, dashboard color/text
