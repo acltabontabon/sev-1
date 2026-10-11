@@ -39,6 +39,9 @@ var dread: float = 0.0
 var phase: String = "calm"
 ## Mid-conversation: the incident drives the gestures and the twitching waits.
 var talking: bool = false
+## What they do while waiting to turn: on the phone by default, now and then a gesture.
+var idle_clip: String = "ual/phone"
+var gesture_clip: String = "ual/talking"
 var grounded_at: Vector3 = Vector3.INF
 
 
@@ -85,7 +88,7 @@ func _ready() -> void:
 	line.no_depth_test = true
 	line.visible = false
 	add_child(line)
-	animator.play("ual/phone")
+	animator.play(idle_clip)
 	animator.seek(randf() * animator.current_animation_length, true)
 	calm_left = randf_range(3.0, 7.0)
 	gesture_left = randf_range(4.0, 9.0)
@@ -127,7 +130,7 @@ func _phase(next: String) -> void:
 	line_left = 0.0
 	match next:
 		"calm":
-			animator.play("ual/phone", .2)
+			animator.play(idle_clip, .2)
 		"ping":
 			# The notification lands: a P1 ticket, assigned to them.
 			animator.play("ual/no", .15)
@@ -164,10 +167,10 @@ func _process(delta: float) -> void:
 		gesture_left -= delta
 		if gesture_left <= 0:
 			gesture_left = randf_range(6.0, 10.0)
-			animator.play("ual/talking", .25)
-		elif not animator.is_playing() or animator.current_animation == "ual/talking" and gesture_left < 3.0:
-			# Talking loops forever on its own; after a few seconds they're back on the phone.
-			animator.play("ual/phone", .3)
+			animator.play(gesture_clip, .25)
+		elif not animator.is_playing() or animator.current_animation == gesture_clip and gesture_left < 3.0:
+			# Talking loops forever on its own; after a few seconds they're back to idling.
+			animator.play(idle_clip, .3)
 		if is_instance_valid(player) and not said and player.global_position.distance_to(global_position) < 3.6:
 			said = true
 			line_left = 3.2

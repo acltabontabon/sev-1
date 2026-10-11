@@ -118,11 +118,11 @@ func _draw() -> void:
 	if incident.coworkers != null:
 		for someone: Dictionary in incident.coworkers.people:
 			people.append(someone.body)
-	for host: Node3D in incident.hosts + incident.sync_hosts:
+	for host: Node3D in incident.hosts + incident.sync_hosts + incident.party_hosts:
 		if is_instance_valid(host):
 			people.append(host)
 	var threats: Array[CharacterBody3D] = []
-	for actor: CharacterBody3D in incident.alive + incident.sync_alive + incident.bugs:
+	for actor: CharacterBody3D in incident.alive + incident.sync_alive + incident.party_alive + incident.bugs:
 		if not is_instance_valid(actor) or actor.health <= 0:
 			continue
 		if actor.disguised():

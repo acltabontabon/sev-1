@@ -30,7 +30,8 @@ Check the CLEARED tag after quitting and reopening; Circles II–VI are listed b
 3. After the first encounter, press E to answer Management from wherever you are
    (step away from nearby coworkers or appliances if E offers their interaction).
    Hear the call or skip it with Tab. Optional before that: the east wing. Press E at the pantry's
-   coffee machine; walk into Meeting Room 3 if you want the Quick Sync ambush.
+   coffee machine; press E at the birthday table to sing for Kevin; walk into Meeting Room 3
+   if you want the Quick Sync ambush.
 4. Reply to Leadership's DM. Contain two waves: hit The Blocker mid-cast or kill it
    first; step out of Meeting Invite circles before they start; don't ignore Scope Creep.
 5. Walk through the lifted gate and the server corridor into the vault. Fight The
@@ -68,7 +69,7 @@ Answer briefly; use 1 (poor) to 5 (strong) where helpful.
 11. Did the title screen and the opening make you want to start? Was the 50-second narrated opening right, or too long? Was the reveal scary and funny?
 12. Could you tell the four enemy types apart, and what each wanted you to do?
 13. Did the chat cards, change-request tickets and Leadership DM read easily in a fight?
-14. Did you visit the pantry or the Quick Sync room? Why or why not?
+14. Did you visit the pantry birthday or the Quick Sync room? Why or why not?
 
 Creator acceptance should include a normal win, a defeat/retry, all three management
 choices across runs, settings across a fresh launch, and a copied ZIP on another Mac.

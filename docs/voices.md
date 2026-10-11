@@ -51,6 +51,13 @@ recollection. Shots wait for playback completion, and the casualty introduction
 starts the existing mourning theme. Their fingerprints and checksums are recorded
 in the voice provenance JSON; listening acceptance remains pending.
 
+Pantry birthday update (11 October 2026): seven scene lines (`party_*`) and three
+guest HR barks (`host_kevin_hr`, `host_brenda_hr`, `host_marco_hr`) come from
+`talk.json` `party`, with new blended profiles `brenda`, `marco`, `kevin` and
+`kevin_turning` (the same voice slowed and doubled), plus the existing `you` profile
+for the engineer. `tools/voices.py talk` derives them; fingerprints and checksums are in
+`talk/provenance.json`. They are candidate performances awaiting listening review.
+
 ## Casting
 
 | Role | Stock voice | Language | Speed | Delivery / processing |

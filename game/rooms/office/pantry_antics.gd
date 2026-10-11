@@ -52,7 +52,7 @@ func _ready() -> void:
 	add_child(caption)
 	council = Node3D.new()
 	council.name = "LunchTribunal"
-	council.position = Vector3(25.8, 1.55, 8.8)
+	council.position = Vector3(29.8, 1.55, 8.8)
 	add_child(council)
 	for index in range(3):
 		var mug: Node3D = Node3D.new()
@@ -74,7 +74,7 @@ func _ready() -> void:
 			eye.position = Vector3(-.117, .04, z)
 	leftovers = Node3D.new()
 	leftovers.name = "OrganisedLeftovers"
-	leftovers.position = Vector3(25.55, 1.5, 11.55)
+	leftovers.position = Vector3(29.55, 1.5, 11.55)
 	add_child(leftovers)
 	for index in range(3):
 		var tub: MeshInstance3D = _box(leftovers, Vector3(.22, .12, .18), preload("res://game/rooms/office/ceramic.tres"))

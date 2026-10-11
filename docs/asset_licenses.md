@@ -60,6 +60,8 @@ without an account on 10 October 2026 and reviewed in the running game.
 | 5 culture-print photographs (0.2.29) | Poly Haven HDRI tonemapped previews, cropped and downscaled; CC0 1.0 | [assets/environment/posters](../assets/environment/posters/README.md) |
 | Night-city sky (2K HDRI) | Poly Haven "Hansaplatz", Greg Zaal; CC0 1.0 | [assets/environment/textures](../assets/environment/textures/README.md#night-sky-hdri) |
 | 8 pantry props | Kenney Furniture Kit; CC0 1.0, tinted at load | [assets/environment/kenney_furniture](../assets/environment/kenney_furniture/README.md) |
+| 7 party food props | Kenney Food Kit 2.0; CC0 1.0, texture URI lowercased | [assets/environment/kenney_food](../assets/environment/kenney_food/README.md) |
+| 2 party horns | Original, synthesized by `tools/build_party_horn.py`; no third-party material | [assets/audio/sfx](../assets/audio/sfx/README.md) |
 | 3 music beds | Original synthesis (`tools/build_music.py`) | [assets/audio/music](../assets/audio/music/README.md) |
 
 Kenney's furniture chair and round table were evaluated and rejected as toy-like. Mixamo and Freesound remain excluded because they require accounts.

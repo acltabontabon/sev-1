@@ -1224,10 +1224,10 @@ func _blocks_view(spot: Vector3, focus: Vector3) -> bool:
 	if incident.coworkers != null:
 		for someone: Dictionary in incident.coworkers.people:
 			bodies.append(someone.body)
-	for host: Node3D in incident.hosts + incident.sync_hosts:
+	for host: Node3D in incident.hosts + incident.sync_hosts + incident.party_hosts:
 		if is_instance_valid(host):
 			bodies.append(host)
-	for other: CharacterBody3D in incident.alive + incident.sync_alive + incident.bugs:
+	for other: CharacterBody3D in incident.alive + incident.sync_alive + incident.party_alive + incident.bugs:
 		if is_instance_valid(other) and other.health > 0:
 			bodies.append(other)
 	for body in bodies:
@@ -1246,7 +1246,7 @@ func _crowds_shot(from: Vector3, to: Vector3, actor: Node3D) -> bool:
 	if incident.coworkers != null:
 		for someone: Dictionary in incident.coworkers.people:
 			bodies.append(someone.body)
-	for other: CharacterBody3D in incident.alive + incident.sync_alive:
+	for other: CharacterBody3D in incident.alive + incident.sync_alive + incident.party_alive:
 		if other != actor and is_instance_valid(other):
 			bodies.append(other)
 	var a: Vector2 = Vector2(from.x, from.z)
