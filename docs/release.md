@@ -50,6 +50,29 @@ only Intel x86-64 in the executable and bundled dylibs before smoke testing.
 The original preset is restored after export.
 No paid identity or notarization is used by either path.
 
+## Verified playtest 0.2.50 — 11 October 2026
+
+Published [v0.2.50](https://github.com/acltabontabon/sev-1/releases/tag/v0.2.50)
+from `329bcfe7fb97d24f7147d54a7980058e8e9d068a` through
+[Actions run 38113874553](https://github.com/acltabontabon/sev-1/actions/runs/38113874553).
+Both native source validators passed. Windows export, packaged gameplay smoke,
+silent installation, installed-game smoke and uninstallation passed. Intel Mac
+export, architecture check, packaged smoke, DMG creation and verification passed.
+The release is published as a prerelease with the existing page template and direct
+Windows/Intel Mac installer links.
+
+Downloaded public manifests/checksum files match GitHub's asset digests. Both
+manifests identify the exact tagged source above, and their installer hashes agree
+with GitHub's computed installer digests. Windows setup is 115.6 MiB; the Intel Mac
+DMG is 131.0 MiB. Both are unsigned and unnotarized.
+
+This snapshot includes the office/chair/collision work, restored original Drew,
+removal of the human trial, clear lounge doorway, female office outfits and the
+preceding sword/monster/duel refinements listed in [the changelog](../CHANGELOG.md).
+Rendered local checks covered Drew/dialogue, standing/walking/seated outfits and
+the cleared hallway. These technical checks do not establish ordinary target GPU/
+audio performance, long-play wardrobe fit or human acceptance of combat and pacing.
+
 ## Verified playtest 0.2.49 — 11 October 2026
 
 Published [v0.2.49](https://github.com/acltabontabon/sev-1/releases/tag/v0.2.49)
