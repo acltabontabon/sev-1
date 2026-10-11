@@ -2078,3 +2078,12 @@ https://creativecommons.org/licenses/by/3.0/
 Modified for SEV-1: material conversion, normalized scale, exportable rig hierarchy,
 and original provisional motion clips. Original skin textures retained.
 Download records and detailed modifications: assets/enemies/demon_trials/README.md.
+
+SEV-1 KayKit skeleton comparison
+------------------------------
+Skeleton Minion from KayKit Character Pack: Skeletons 1.0 by Kay Lousberg.
+Source: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+Attribution is optional; credit is given voluntarily. Original embedded materials
+and animations retained. Runtime uniform scaling for visual comparison only.
+Source revision and SHA-256 hashes: assets/enemies/kaykit_trial/provenance.json.

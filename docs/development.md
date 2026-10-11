@@ -20,6 +20,12 @@ Packaged releases do not require an editor. F5 opens the title screen; F6 can ru
 standalone scenes, including `game/main.tscn`, the combat lab. Regression scenes
 retain the original click-to-capture pause UI.
 
+For the [KayKit skeleton comparison](../assets/enemies/kaykit_trial/README.md), run
+`sh tools/godot.sh --path . game/art_trials/kaykit_comparison.tscn`.
+You can also double-click `kaykit_trial.command` in Finder.
+Use 1–3 for idle/walk/punch, F/S/B for front/side/back and M for original/matched
+height; Escape closes it. This visual trial uses the current engineer and office.
+
 For export prerequisites, package formats, signing, and CI, use
 [release engineering](release.md). Player installation instructions live in
 [install.md](install.md); version history lives in [CHANGELOG.md](../CHANGELOG.md).

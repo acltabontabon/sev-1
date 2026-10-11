@@ -1,5 +1,9 @@
 # Enemy bodies
 
+The [KayKit Skeleton Minion comparison](kaykit_trial/README.md) stages one free
+CC0 skeleton beside the current engineer in the office. This isolated visual trial
+has original materials and animations; it does not replace the encounter roster.
+
 The creator-authorized [free demon variation trial](demon_trials/README.md) now
 alternates Night Demon and Chained Demon on Corrupted Records. Both use CC BY 3.0
 with required attribution, original textures, and provisional local motion clips.

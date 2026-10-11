@@ -1,0 +1,28 @@
+{
+  "creator": "Kay Lousberg",
+  "pack": "KayKit Character Pack: Skeletons 1.0",
+  "license": "CC0-1.0",
+  "source": "https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0",
+  "revision": "15b62b9bad122f72926c10fb14d622c73819fa54",
+  "retrieved": "2026-10-11",
+  "modifications": "None to source files. Runtime uniform scale for comparison; original embedded materials retained.",
+  "files": [
+    {
+      "file": "skeleton_minion.glb",
+      "source_path": "addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Minion.glb",
+      "sha256": "6ffc003f895bed0b074791e0e490846210a2e2f8fc7da300aba53cc185f95968"
+    },
+    {
+      "file": "license.txt",
+      "source_path": "LICENSE.txt",
+      "sha256": "5d822abca4e08c5a91d329e5372b3dc605cba8d994f752cb0f7dfdb7a0a79954"
+    }
+  ],
+  "import_sidecars": [
+    {
+      "file": "skeleton_minion_skeleton_texture.png",
+      "origin": "Godot 4.7.2 extracts the unchanged embedded skeleton_texture PNG from skeleton_minion.glb",
+      "sha256": "15741a25c53e04fa9bf3beac3bc0de442359404b1ff9be863b892cb551ad3657"
+    }
+  ]
+}
