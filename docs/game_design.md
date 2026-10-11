@@ -241,7 +241,14 @@ reads clearly, the recovery feels earned, and the finisher remains the payoff.
 ### Incident 001 aftermath (implemented prototype, 11 October 2026)
 
 After the duel, the engineer's golden Unpaid Overtime form fades over five seconds.
-The recovered cent leads into a compulsory memorial sequence of five original
+The narrator confirms that the fight is over while the gold fades. After the cent
+close-up, a wide vault shot names Morgan, Nadia, Jun, Jo and Val. The engineer walks
+to Morgan, hides his weapon and kneels beside her using the existing CC0 fixing
+motion. The narrator explains that no answer comes and his mind returns to a gentler
+moment: the lift, two coffees and a stolen break. A close view and short fade lead
+into the first sketch. Every bridge shot waits for its local narration to finish;
+subtitles follow the existing preference and TAB still skips the entire ending.
+This transition leads into a compulsory memorial sequence of five original
 illustrated memories. Loose graphite, ink and sparse watercolor interpretations of the
 same engineer and crew capture shared actions, rather than repeated staged dialogue:
 
@@ -270,7 +277,7 @@ about 70 seconds in total, extending the previous five loss shots by about 58 se
 review are recorded in [illustration provenance](../assets/environment/memorial_illustrations/README.md).
 The actual casualties remain untouched. After these five memorial shots, the engineer looks down at JO and the
 camera moves to his face as one tear rolls down his cheek. The original mourning
-theme begins during the memorial and continues through the rainy departure. Back at
+theme begins during the casualty introduction and continues through the rainy departure. Back at
 his workstation he stands the Legacy Monolith blade-down beside the desk, then
 stands and collects a small box
 with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays beside the desk, with its tip on the floor and clear of the monitor;

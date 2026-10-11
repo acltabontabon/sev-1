@@ -30,10 +30,20 @@ func _run() -> void:
 	incident.coworkers.fall_all_now()
 	incident.hold_ending = true
 	incident.player.camera_rig.controls_active = true
-	incident._enter(incident.Stage.RESOLVED)
+	story.demon.hide()
+	incident.player.get_node("Visual/Character").overtime(true)
+	if is_instance_valid(incident.boss):
+		incident.boss.final_blow()
+	if not incident.terminal():
+		incident._enter(incident.Stage.RESOLVED)
 	await process_frame
 	story.set_process(false)
 	var finale: Node = story.all_hands
+	# Replay begins after the final blow, when the normal death beat has reconciled these.
+	for index in range(3):
+		var ledger: Label3D = incident.room.get_node("LedgerText%d" % index)
+		ledger.text = "SUCCESS"
+		ledger.modulate = Color(.3, 1, .6)
 	if "--play-ending" in OS.get_cmdline_user_args():
 		finale._beat("receipts")
 		story.set_process(true)
@@ -42,7 +52,8 @@ func _run() -> void:
 		quit()
 		return
 	finale._beat("receipts")
-	finale._beat("memorial")
+	if "--transition" not in OS.get_cmdline_user_args():
+		finale._beat("memorial")
 	if "--play-memorial" in OS.get_cmdline_user_args():
 		story.set_process(true)
 		while is_instance_valid(finale) and finale.beat in ["memorial", "grief"]:
@@ -58,6 +69,10 @@ func _run() -> void:
 		for index in range(5):
 			samples.append(["memorial", .8, index])
 			samples.append(["memorial", 5.0, index])
+	if "--transition" in OS.get_cmdline_user_args():
+		story.voice.clear()
+		finale.character.overtime(false)
+		samples = [["casualties", 1.8], ["remember", 1.5], ["remember", 7.0], ["memorial", .8]]
 	if "--departure" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")
@@ -78,6 +93,8 @@ func _run() -> void:
 		samples = [["door", .5], ["door", 1.5], ["door", 3.8], ["door", 5.8]]
 	for sample: Array in samples:
 		if finale.beat != sample[0]:
+			if "--transition" in OS.get_cmdline_user_args():
+				story.voice.clear()
 			finale._beat(sample[0])
 		if sample.size() > 2 and sample[2] > finale.memorial_index:
 			story.voice.clear()

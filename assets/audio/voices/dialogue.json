@@ -1378,6 +1378,48 @@
       "fallback_duration": 10.0,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "doc_battle_over",
+      "character": "NARRATOR",
+      "text": "The fight was over. The Variance was gone. The gold faded, leaving one exhausted engineer in a room that had gone terribly quiet.",
+      "subtitle": "The fight was over. The Variance was gone. The gold faded, leaving one exhausted engineer in a room that had gone terribly quiet.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_battle_over.ogg",
+      "trigger": "After the final blow, as Unpaid Overtime fades",
+      "priority": 2,
+      "fallback_duration": 14.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_fallen",
+      "character": "NARRATOR",
+      "text": "Morgan. Nadia. Jun. Jo. Val. Five people who had come to help. He went to them, waiting for someone to tell him they were all right.",
+      "subtitle": "Morgan. Nadia. Jun. Jo. Val. Five people who had come to help. He went to them, waiting for someone to tell him they were all right.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_fallen.ogg",
+      "trigger": "The vault reveals the five casualties as he approaches Morgan",
+      "priority": 2,
+      "fallback_duration": 14.0,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "doc_remember",
+      "character": "NARRATOR",
+      "text": "He knelt beside Morgan. No answer. For once, there was nothing left to fix. His mind went somewhere gentler. A lift. Two coffees. A stolen break.",
+      "subtitle": "He knelt beside Morgan. No answer. For once, there was nothing left to fix. His mind went somewhere gentler. A lift. Two coffees. A stolen break.",
+      "voice_profile": "documentary",
+      "direction": "Wry nature-documentary narrator: slow, warm, grave, entirely sincere about the absurd. Never a parody or an impression of any real narrator.",
+      "audio": "res://assets/audio/voices/doc_remember.ogg",
+      "trigger": "He checks on Morgan before the first illustrated memory",
+      "priority": 2,
+      "fallback_duration": 14.0,
+      "optional": false,
+      "status": "generated"
     }
   ]
 }

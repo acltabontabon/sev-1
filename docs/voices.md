@@ -44,6 +44,13 @@ fingerprints, checksums and rights are in `voices/provenance.json`. Timing waits
 actual playback completion. No real-person voice reference or impersonation was used.
 Human listening, emotional pacing and comic timing acceptance remain pending.
 
+Aftermath transition update (11 October 2026): `doc_battle_over`, `doc_fallen` and
+`doc_remember` use the same stock documentary profile. They establish victory,
+name the casualties and explain the engineer's move from checking on Morgan into
+recollection. Shots wait for playback completion, and the casualty introduction
+starts the existing mourning theme. Their fingerprints and checksums are recorded
+in the voice provenance JSON; listening acceptance remains pending.
+
 ## Casting
 
 | Role | Stock voice | Language | Speed | Delivery / processing |
