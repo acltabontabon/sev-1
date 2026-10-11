@@ -51,7 +51,42 @@ func _run() -> void:
 	story.set_process(false)
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
-	finale._beat("memorial")
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_battle_over", "the aftermath first establishes that the battle is over")
+	finale.tick(5.6)
+	check(finale.beat == "receipts", "the fading form shot waits for the conclusion narration")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "cent", "the conclusion leads into the recovered cent")
+	story.voice.clear()
+	finale.tick(2.1)
+	check(finale.beat == "casualties" and not is_instance_valid(finale.recollection),
+		"the casualties are introduced in the vault before any memory appears")
+	var before_check: Vector3 = incident.player.global_position
+	finale.tick(1.6)
+	check(incident.player.global_position.distance_to(before_check) > .1 and character.story_walk_speed > 0,
+		"the engineer deliberately approaches Morgan to check on her")
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_fallen", "the narrator names the fallen crew during the approach")
+	finale.clock = finale.beat_at + finale.bridge_seconds
+	finale.tick(.01)
+	check(finale.beat == "casualties", "the casualty shot gives its narrator time to finish")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "remember" and character.preview_clip == "fixing" and not character.weapon.visible,
+		"he begins an unarmed kneeling check before reminiscing")
+	await physics_frame
+	await physics_frame
+	check(character.animator.current_animation == "rig/fixing", "the existing kneeling performance is actually applied to the engineer")
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_remember", "the narrator explains why the moment becomes a memory")
+	finale.clock = finale.beat_at + finale.bridge_seconds
+	finale.tick(.01)
+	check(finale.beat == "remember" and not is_instance_valid(finale.recollection), "the memory cannot interrupt the transition's last words")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "memorial" and character.preview_clip.is_empty() and not finale.fade.visible,
+		"the bridge releases the kneeling pose and fades into the first sketch")
 	var recalled: Array[String] = []
 	var living_set: Node = finale.recollection
 	var memory_images: Array[Texture2D] = []

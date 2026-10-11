@@ -835,10 +835,15 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   light grain, softened paper edges and fades, leaving subtitles sharp. Conceal
   removes the canvas immediately at the casualty cut; teardown frees it on skip/retry.
   The original screen effect and gameplay environment are never modified.
+  Before the sketches, `all_hands.gd` narrates the battle's conclusion during the
+  fading form, introduces the crew over a wide vault shot, then stages a short walk
+  to Morgan and the existing `rig/fixing` kneel. A face push and fade lead to her
+  sketch. Each bridge waits for speech completion; beat changes and cleanup clear
+  `preview_clip` so the kneeling performance cannot persist into gameplay.
   `all_hands.gd` measures each local narrator clip and waits for the voice queue to
   empty before starting a separate 2.4-second silent casualty hold.
   `tests/finale_tests.gd`
-  checks distinct illustrations, framing drift, canvas cleanup, delayed speech, narrator captions, recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
+  checks battle-conclusion and casualty narration, the approach/kneeling bridge, delayed memory entry, distinct illustrations, framing drift, canvas cleanup, delayed speech, narrator captions, recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
   replacements; the engineer objects before the note-taker records unanimous consent.
   Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting
   exit use shot cues rather than numeric step positions, so dialogue additions retain

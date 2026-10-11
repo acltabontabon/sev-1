@@ -5,7 +5,9 @@ extends Node3D
 ##  "receipts"  receipts snow over the vault; a low orbit round the engineer, wrecked and
 ##              bloody, as his Unpaid Overtime slowly burns out; a receipt drifts down.
 ##  "cent"      close on it: the missing transaction, $0.01, cost: 5 staff (the narrator).
-##  "memorial"  Living two-shots narrated one at a time, then where each teammate fell.
+##  "casualties" names the night shift as he approaches Morgan.
+##  "remember"  he kneels beside her; a close shot fades into the first sketch.
+##  "memorial"  distinct illustrated moments, then where each teammate fell.
 ##  "grief"     a last look at JO; a tear rolls down the engineer's cheek.
 ##  "desk"      back at his desk: he collects his mug and personal effects.
 ##  "exit"      he walks through the empty lift corridor to a sad theme; the five return as
@@ -100,6 +102,9 @@ var memorial_index: int = -1
 var memorial_at: float = 0.0
 var memorial_duration: float = 0.0
 var memorial_loss_at: float = -1.0
+var bridge_seconds: float = 0.0
+var check_from: Vector3
+var check_at: Vector3
 var nightlife: Node3D
 
 
@@ -140,6 +145,7 @@ func _beat(next: String) -> void:
 	beat = next
 	beat_at = clock
 	character.story_walk_speed = 0.0
+	character.preview_clip = ""
 	focus.dof_blur_far_enabled = false
 	focus.dof_blur_near_enabled = false
 	match beat:
@@ -157,9 +163,26 @@ func _beat(next: String) -> void:
 			character.story_pose = character.Pose.LOOK_DOWN
 			character.overtime_fade(5.0)
 			_drop_receipt()
+			story.say("doc_battle_over")
 		"cent":
 			story.say("doc_cent")
+		"casualties":
+			_start_mourning()
+			character.weapon.hide()
+			check_from = player.global_position
+			check_at = _fallen_at("Manager") + Vector3(0, .05, 1.15)
+			bridge_seconds = _voice_seconds("doc_fallen")
+			story.say("doc_fallen")
+		"remember":
+			player.global_position = check_at
+			character.preview_clip = "fixing"
+			character.preview_at = 0.0
+			bridge_seconds = _voice_seconds("doc_remember")
+			story.say("doc_remember")
 		"memorial":
+			story.voice.clear()
+			fade.hide()
+			fade.color.a = 0.0
 			_start_mourning()
 			character.weapon.hide()
 			recollection = RECOLLECTION.new(story)
@@ -322,7 +345,7 @@ func tick(delta: float) -> bool:
 			for index in range(story.vault_lights.size()):
 				story.vault_lights[index].light_energy = story.vault_energy[index] * smoothstep(1.0 + index * .6, 2.5 + index * .6, t)
 			_float_receipt(t)
-			if t >= 5.5:
+			if t >= 5.5 and quiet:
 				_beat("cent")
 		"cent":
 			# Close on it, him soft behind it: one cent.
@@ -333,6 +356,31 @@ func tick(delta: float) -> bool:
 			camera.fov = 36.0
 			_focus_far(1.0)
 			if t >= 2.0 and quiet:
+				_beat("casualties")
+		"casualties":
+			# The repaired ledger recedes; the people become the subject of the shot.
+			player.global_position = check_from.lerp(check_at, _walk_progress(t, 3.2))
+			character.story_walk_speed = _walk_speed(t, 3.2, check_from.distance_to(check_at))
+			character.story_pose = character.Pose.NONE if t < 3.2 else character.Pose.LOOK_DOWN
+			var heading: Vector3 = check_at - check_from
+			player.visual.rotation.y = atan2(-heading.x, -heading.z)
+			camera.global_position = Vector3(9, 4.0, -28.0).lerp(Vector3(9.4, 3.2, -29.0), smoothstep(0.0, bridge_seconds, t))
+			camera.look_at(Vector3(9, .4, -37.4))
+			camera.fov = 60.0
+			if t >= bridge_seconds and quiet:
+				_beat("remember")
+		"remember":
+			# Existing CC0 kneeling motion supplies the quiet check, without combat input.
+			character.preview_at = lerpf(.05, .5, smoothstep(0.0, bridge_seconds, t))
+			var body: Vector3 = _fallen_at("Manager") + Vector3.UP * .25
+			var head: Vector3 = character.skeleton.global_transform * character.skeleton.get_bone_global_pose(character.skeleton.find_bone("Head")).origin
+			var reveal: float = smoothstep(3.0, 6.0, t)
+			camera.global_position = (player.global_position + Vector3(2.8, 1.6, .95)).lerp(head + Vector3(2.6, .4, -2.4), reveal)
+			camera.look_at(body.lerp(head + Vector3.UP * .1, reveal))
+			camera.fov = lerpf(54.0, 45.0, reveal)
+			fade.show()
+			fade.color = Color(0, 0, 0, smoothstep(bridge_seconds - .7, bridge_seconds, t) * .75)
+			if t >= bridge_seconds and quiet:
 				_beat("memorial")
 		"memorial":
 			var local: float = clock - memorial_at
@@ -527,6 +575,7 @@ func finish(completed: bool = true) -> void:
 	story.crew_freeze.hide()
 	story.panel.hide()
 	character.overtime(false)
+	character.preview_clip = ""
 	character.story_pose = 0
 	character.sit = 0.0
 	character.story_hand_targets.clear()
@@ -587,7 +636,7 @@ func _unbloody() -> void:
 
 
 func _start_mourning() -> void:
-	if DisplayServer.get_name() == "headless":
+	if DisplayServer.get_name() == "headless" or mourn.playing:
 		return
 	mourn.volume_db = -30.0
 	mourn.play()
@@ -784,6 +833,11 @@ func _haunt(time: float) -> void:
 			memory_caption.show()
 
 
+func _voice_seconds(id: String) -> float:
+	var stream: AudioStream = load(story.voice.lines[id].audio)
+	return stream.get_length() + .8
+
+
 func _recall_next() -> void:
 	memorial_index += 1
 	memorial_at = clock
@@ -797,6 +851,7 @@ func _recall_next() -> void:
 	var stream: AudioStream = load(entry.audio)
 	# Audio starts on the next process frame; leave breathing room before the loss cut.
 	memorial_duration = stream.get_length() + .8
+	recollection.frame(0.0, memorial_duration)
 	story.say(id)
 
 
