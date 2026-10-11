@@ -1,5 +1,14 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Emotional support human (11 October 2026)
+
+The engineer now answers his permanent AI-babysitting assignment with “So I’m the
+emotional support human for five fucking chatbots.” This replaces “Fucking great”
+as the final spoken joke before returning to his desk. The local protagonist clip
+and matching caption are regenerated with the existing stock voice and provenance;
+the cutscene waits for the complete reply before moving on. Human listening and
+comedic-timing acceptance remain pending.
+
 ## Source update — RIO sits on the lounge sofa (11 October 2026)
 
 Corrected RIO's seating beside the SHIP IT sign. The sofa asset's pivot is at a

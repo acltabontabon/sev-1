@@ -99,7 +99,7 @@ For rendered grief, sword placement, pickup and memory checkpoints, run
 `sh tools/godot.sh --path . --script tests/finale_preview.gd`. In a normal run, use E
 with MORGAN, NADIA, JUN, JO or VAL and choose “Tell me something normal”; win the
 boss fight to hear that conversation recalled. The finale now closes with
-“Fucking great,” his return to the desk, and the start of Monday, followed by
+his “emotional support human for five fucking chatbots” reply, his return to the desk, and the start of Monday, followed by
 “TO BE CONTINUED” and the main menu; no extra victory speech plays afterward. Use `tests/finale_preview.gd -- --closing` to inspect
 just the final reply and return-to-work shots. Review the tear, animation transitions
 and sad-theme mix. TAB skips; R retries. These source changes are not in the existing ZIP.

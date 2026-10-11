@@ -312,7 +312,8 @@ or draws a take for an unvisited coworker. Memory clips use the Voice bus at −
 and play one at a time; the existing original mourning theme loops on the Music bus.
 Human acting and mix acceptance remain pending.
 
-The 11 October closing refinement replaces `allhands_engineer` with “Fucking great.”
+The 11 October closing refinement replaces `allhands_engineer` with
+“So I’m the emotional support human for five fucking chatbots.”
 The `good_days_variant_2` performances now vary their subjects: Migs, Gab and Bea,
 with JO retaining Kevin the ancient fridge yogurt. The four revised gossip clips
 and the final reply were regenerated locally with the existing profiles and

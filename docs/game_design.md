@@ -191,7 +191,7 @@ clips; TAB skips and R clears the props and this run's recalled lines. Hand cont
 stand-up motion and prop movement are blended; the box stays upright as he walks.
 Explicit cinematic gait matches the eased travel pace, including slow movement below
 the gameplay idle threshold and street shots without a physics floor update.
-Monday's postmortem follows the night. The engineer's last reply is “Fucking great.”
+Monday's postmortem follows the night. The engineer's last reply is “So I’m the emotional support human for five fucking chatbots.”
 He leaves the call, walks back across the office, gradually sits at his workstation
 and begins typing. “TO BE CONTINUED” fades in over black, then fades out into the
 main menu. Completing or skipping the finale unloads the run without a victory

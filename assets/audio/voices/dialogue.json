@@ -1074,8 +1074,8 @@
     {
       "id": "allhands_engineer",
       "character": "ENGINEER",
-      "text": "Fucking great.",
-      "subtitle": "Fucking great.",
+      "text": "So I'm the emotional support human for five fucking chatbots.",
+      "subtitle": "So I'm the emotional support human for five fucking chatbots.",
       "voice_profile": "protagonist",
       "direction": "Conversational, exhausted, competent. Dry sarcasm; never announce the punchline.",
       "audio": "res://assets/audio/voices/allhands_engineer.ogg",
