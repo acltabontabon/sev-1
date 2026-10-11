@@ -21,7 +21,8 @@ No outside promotional art or new font was introduced.
 
 ## Ending PR captures — 11 October 2026
 
-Unmodified staged in-engine captures of the completed ending changes. The check
+Unmodified staged in-engine captures of the initial memorial changes. The narrator
+text shown in these six captures predates the subsequent dialogue refinement. The check
 shot shows the engineer kneeling beside Morgan; the five memory captures show the
 selected sketch art with the actual narrator captions. Captured in Godot 4.7.2
 Forward+ / Metal on Apple M2 Pro. These establish framing and subtitle layout,
@@ -39,3 +40,19 @@ not measured performance, ordinary gameplay duration or listening acceptance.
 Memory artwork is AI-generated from authored prompts; its source files, exact
 prompts and review record are in [illustration provenance](../../assets/environment/memorial_illustrations/README.md).
 Git LFS tracks these screenshots; this directory remains excluded from game imports.
+
+
+## Departure refinement captures — 11 October 2026
+
+Unmodified 1280 × 720 staged captures from Godot 4.7.2, Forward+ / Metal,
+Apple M2 Pro. `tests/finale_preview.gd -- --departure` captures the ghost and
+street; `--street` repeats the exterior and window. The camera sees Morgan facing
+the walking lane, the subdued rainy frontage, and five rigged silhouettes without
+living actors behind them. Existing licensed models/materials were reused; no new
+outside assets were downloaded. These are visual checks, not performance measurements.
+
+| File | Local source |
+| --- | --- |
+| `ending_ghost_facing.png` | `logs/finale_exit_3.png` |
+| `ending_rainy_departure.png` | `logs/finale_street_8.png` |
+| `ending_window.png` | `logs/finale_window_2.png` |

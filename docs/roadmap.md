@@ -13,6 +13,8 @@ and moving-combat performance remain open under the Office After Hours gate.
 The 11 October memorial pass replaces repeated 3D desk tableaux with five distinct
 illustrated shared moments, local documentary narration and silent casualty shots.
 See [aftermath](game_design.md#incident-001-aftermath-implemented-prototype-11-october-2026).
+The departure refinement corrects raw-body facing, subdues the closing street,
+and adds five local after-hours recollections with less repetitive profanity.
 It is an implemented creative candidate; the director must accept the illustration
 style, narration and emotional/comedic pacing before it is treated as final.
 

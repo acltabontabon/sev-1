@@ -814,7 +814,14 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   bounds, including the rotated tip, determine floor contact; regression checks
   reject any tabletop or monitor intersection. `Dialogues.remembered_lines` stores
   the exact ordinary take heard this run; reset clears it while shuffled take bags
-  continue across retries. Memory clips play sequentially with matching captions;
+  continue across retries. Unvisited crew use authored `after_hours` fallback clips.
+  Raw +Z-facing memory bodies turn toward the sampled walking lane; manual animation
+  seeks keep their gestures on cinematic time. Street pedestrians use +Z along travel,
+  while the wrapped engineer retains its -Z convention. The sparse closing street
+  reuses the existing CC0 concrete material; five rigged crew models fill the final
+  window. That shot temporarily hides live crew and planted actors, restoring their
+  prior visibility at Monday or skip; its figures and light also hide for Monday.
+  Memory clips play sequentially with matching captions;
   the mourning WAV loops locally through the departure. The departure instantiates
   `departure_corridor.tscn` below the playable map, with a continuous floor and clear
   hero/camera tracks. Its local script sizes the temporary corridor for the sequential

@@ -38,7 +38,7 @@ These remain candidate performances awaiting human listening and comedic timing 
 Memorial update (11 October 2026): five new `doc_morgan`, `doc_nadia`, `doc_jun`,
 `doc_jo` and `doc_val` clips use the existing `documentary` stock profile (`bm_george`,
 0.88 speed). They narrate five distinct illustrated shared moments after the golden form fades,
-then leave each casualty shot silent. The five takes total 54.52 seconds and are
+then leave each casualty shot silent. The five takes total 53.28 seconds and are
 measured by the cinematic rather than cut to a fixed budget;
 fingerprints, checksums and rights are in `voices/provenance.json`. Timing waits for
 actual playback completion. No real-person voice reference or impersonation was used.
@@ -324,7 +324,10 @@ coffee, lunch or gossip, plus three shared engineer reply clips (28 ordinary-con
 use the existing locked stock voice blends and local generator, with license, source
 hash and generation metadata in `assets/audio/voices/talk/provenance.json`. No outside
 reference recordings or runtime synthesis. The ending recalls the take heard this run,
-or draws a take for an unvisited coworker. Memory clips use the Voice bus at −10 dB
+or uses one of five dedicated `after_hours` takes for an unvisited coworker.
+These add bleak policy satire with coffee/lunch invitations, recorded with the same
+stock blends. The five memorial narrator clips were also rewritten and regenerated
+to favor specific absurdity over repeated profanity. Memory clips use the Voice bus at −10 dB
 and play one at a time; the existing original mourning theme loops on the Music bus.
 Human acting and mix acceptance remain pending.
 
