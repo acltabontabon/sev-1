@@ -795,6 +795,15 @@ func _run() -> void:
 	check(player.specials.focus == 0 and player.specials.wave_cooldown == 0 and player.specials.blades.is_empty() and player.specials.dash_cooldown == 0 and player.specials.spin_left == 0, "restart clears FOCUS, cooldowns and blades")
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	# Minimap, seating and the corridor invites.
+	var sofa: Node3D = incident.room.get_node("Decor/LoungeSofa")
+	var rio: Node3D = incident.coworkers.person("Remote").body
+	var rio_skeleton: Skeleton3D = rio.find_child("Skeleton3D", true, false)
+	var hips: Vector3 = sofa.to_local(rio_skeleton.global_transform * rio_skeleton.get_bone_global_pose(rio_skeleton.find_bone("Hips")).origin)
+	check(hips.x > .35 and hips.x < .77 and hips.y > .25 and hips.y < .29 and hips.z > -.24 and hips.z < -.04, "RIO's hips rest above the sofa cushion between its arms and clear of the backrest")
+	for side: String in ["L", "R"]:
+		var knee: Vector3 = sofa.to_local(rio_skeleton.global_transform * rio_skeleton.get_bone_global_pose(rio_skeleton.find_bone("LowerLeg." + side)).origin)
+		var foot: Vector3 = sofa.to_local(rio_skeleton.global_transform * rio_skeleton.get_bone_global_pose(rio_skeleton.find_bone("Foot." + side)).origin)
+		check(knee.z > .03 and foot.z > .03, "RIO's %s shin hangs in front of the sofa instead of passing through its base" % side)
 	var minimap: Control = scene.get_node("HUD/Minimap")
 	check(minimap.floor_mesh != null and minimap.visible, "the minimap draws the walkable floor during play")
 	var character: Node3D = player.get_node("Visual/Character")

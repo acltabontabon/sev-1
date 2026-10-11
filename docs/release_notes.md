@@ -1,5 +1,13 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — RIO sits on the lounge sofa (11 October 2026)
+
+Corrected RIO's seating beside the SHIP IT sign. The sofa asset's pivot is at a
+corner, so the sitter now uses a sofa-local anchor between the arms, lifted onto
+the cushion with both shins clear of the front edge. Office-chair seating keeps
+its existing placement. Encounter checks measure the animated hips and legs
+against the sofa; the packaged build predates this source fix.
+
 ## Source update — To be continued (11 October 2026)
 
 After the engineer starts Monday at his desk, “TO BE CONTINUED” fades in over black,

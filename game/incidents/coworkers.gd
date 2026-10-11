@@ -72,8 +72,10 @@ var voice_until: int = 0
 var speaking: AudioStreamPlayer3D
 ## Bumped on restart and hush so a line queued for later never plays into the wrong scene.
 var cue: int = 0
-## How far forward of the sofa's centre a sitter's hips rest.
-const SOFA_FORWARD: float = .12
+## The Kenney sofa's origin is its front-right corner, not its centre. Local anchor
+## centres the sitter between the arms and lifts the clip onto the .23-high cushion.
+## SitDown's hips finish behind the body root, so leave room before the backrest.
+const SOFA_SEAT: Vector3 = Vector3(.56, .095, .06)
 ## Office-chair correction for the sitting clip (the engineer's SEATED_OFFSET).
 const CHAIR_LIFT: float = .17
 const CHAIR_FORWARD: float = .3
@@ -186,7 +188,7 @@ func _seat(body: Node3D) -> void:
 		body.position = best.global_position + Vector3.UP * CHAIR_LIFT + ahead * CHAIR_FORWARD
 	else:
 		body.rotation.y = turn
-		body.position = best.global_position + Vector3(sin(turn), 0, cos(turn)) * SOFA_FORWARD
+		body.global_position = best.to_global(SOFA_SEAT)
 
 
 ## The reveal turns heads, never the seated root: rotating a sitting body would sweep
