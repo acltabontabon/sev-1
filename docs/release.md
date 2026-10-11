@@ -26,6 +26,10 @@ fills its version and appends the matching `CHANGELOG.md` entry in a collapsed
 details panel. For 0.2.48 the marketing page was added after the build tag and is
 applied to the published release separately; subsequent tags render it in CI.
 
+These builds are work-in-progress playtests for feedback during active development.
+The page states that prominently and the workflow marks them as GitHub prereleases.
+Player download links use `/releases`, since `/releases/latest` excludes prereleases.
+
 For the next release, update `config/version` in `project.godot`, all version/path
 fields in `export_presets.cfg`, `VERSION` in `tools/release.py`, the README version,
 and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:

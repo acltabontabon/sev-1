@@ -2,6 +2,12 @@
 
 ### Your weekend has been escalated.
 
+**WORK IN PROGRESS · PLAYTEST RELEASE {{VERSION}}**
+
+SEV-1 is still in active development. These releases are for playtesting and
+feedback as the game continues to take shape. Expect unfinished content,
+rough edges and changes between builds.
+
 ![SEV-1 — Works on My Machine](https://media.githubusercontent.com/media/acltabontabon/sev-1/v{{VERSION}}/docs/marketing/title.png)
 
 Friday. 4:59 PM. You're one click away from going home.

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/acltabontabon/sev-1/releases/latest"><strong>Download the playtest →</strong></a>
+  <a href="https://github.com/acltabontabon/sev-1/releases"><strong>Download the playtest →</strong></a>
   &nbsp; · &nbsp; <a href="docs/install.md">Installation help</a>
   &nbsp; · &nbsp; <a href="CHANGELOG.md">What's new</a>
 </p>
@@ -52,7 +52,8 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 **Windows · Intel Mac · Keyboard & mouse**
 
 Download, install, and choose **Acknowledge Incident**. No developer tools needed.
-The current playtest includes one stage; more is planned. Contains graphic violence
+**Work in progress:** these releases are for playtesting and feedback while
+development continues. The current playtest includes one stage; more is planned. Contains graphic violence
 and strong language. See [installation help](docs/install.md) for requirements and
 unsigned-app prompts.
 
@@ -67,7 +68,7 @@ unsigned-app prompts.
 
 **No programming knowledge required. Knowing office life may make it worse.**
 
-[**Acknowledge Incident →**](https://github.com/acltabontabon/sev-1/releases/latest)
+[**Acknowledge Incident →**](https://github.com/acltabontabon/sev-1/releases)
 
 ---
 
