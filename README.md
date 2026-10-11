@@ -41,9 +41,9 @@ See the [tester guide and feedback questions](docs/testing.md).
 | Z | Circle Back: a steerable fire whirlwind that drags enemies in; the last pulse parks survivors (6 s cooldown) |
 | G | Works On My Machine: a 0.6 s counter stance; a hit inside it is cancelled and the attacker takes 60, staggered (3 s cooldown, mostly refunded on success) |
 | V | Force Rollback: ultimate omnislash, seven blinking cuts through nearby enemies then a slam, when the FOCUS bar is full |
-| E | Use: the OPERATIONS console, the coffee machine and other pantry objects |
-| 1 / 2 / 3 | Select evidence or an upgrade/corporate response |
-| Tab | Skip the opening (after first viewing) / boss arrival |
+| E | Answer the containment call after the first fight, or use pantry objects |
+| 1 / 2 / 3 | Select an upgrade/corporate response |
+| Tab | Skip the opening (after first viewing), management call or boss arrival |
 | R | Restart run; ignored inside settings/controls |
 | Escape | Pause / resume / back; pending decisions are preserved |
 
@@ -64,10 +64,12 @@ and Attempt to Log Off. The window close action also exits cleanly.
    noise of fighting, or when a colleague flags you. Hitting one unaware is a Surprise
    Review for double damage.
 2. Two waves of Corrupted Records and Scope Creep, then a change request (upgrade).
-3. Investigate at OPERATIONS: an evidence board shows three systems; press 1/2/3. The
+3. Answer Management (E) after the first encounter, from wherever you are.
+   Report the missing payment and active delivery outbreak, then commit to containment. The
    east wing is open: the pantry's coffee helps once, and Meeting Room 3 holds an
    optional Quick Sync ambush that pays out health and Burnout relief.
-4. Answer Leadership's DM, then contain two waves with The Blocker and The Meeting
+4. Your call response sets Burnout, an optional deadline or an extra Blocker.
+   Contain two waves with The Blocker and The Meeting
    Invite. Technical Debt speeds enemies; hits and decisions move Burnout.
 5. The security gate lifts. Walk the failing server corridor to the vault, where
    **The Variance** arrives: strike while OPEN, evade while SHIELDED, trust the solid ◆.
@@ -95,6 +97,14 @@ grief, plays the memories, shouted charge and spiked-hair form, then enters the 
 The packaged 0.2.45 build predates this refinement. In a normal run, reach the vault;
 TAB skips the cinematic and R retries the episode. Review the pacing, shout and hair
 silhouette; visual inspection and automated checks do not establish the emotional payoff.
+
+To retry Operations directly, run
+`sh tools/godot.sh --path . --script tests/operations_preview.gd -- --play`.
+Press E, watch or TAB-skip the containment briefing,
+then answer Management. Judge whether the briefing gives the next fight a clear purpose,
+and whether the deadline joke and consequence make the interruption worthwhile.
+R resets the full episode;
+rerun the command for another Operations checkpoint.
 
 For the revised ending (duel through departure and Monday), run
 `sh tools/godot.sh --path . --script tests/ending_preview.gd`.

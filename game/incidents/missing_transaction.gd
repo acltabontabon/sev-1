@@ -130,6 +130,7 @@ var spawn_delay: float = 0.0
 var remaining: int = 0
 var mistakes: int = 0
 var inspected: bool = false
+var management_call: Node3D
 var objective: String = ""
 var message: String = ""
 var report: String = ""
@@ -226,6 +227,9 @@ func _ready() -> void:
 		point.position = room.get_node("SpawnPoints/" + entry[1]).position
 		add_child(point)
 		interactions[entry[0]] = point
+	management_call = Node3D.new()
+	management_call.set_script(preload("res://game/incidents/management_call.gd"))
+	add_child(management_call)
 	reset_incident()
 
 
@@ -306,6 +310,8 @@ func terminal() -> bool:
 
 
 func _cleanup() -> void:
+	if is_instance_valid(management_call):
+		management_call.reset()
 	if is_instance_valid(standup_scene):
 		standup_scene.cancel()
 		standup_scene = null
@@ -353,7 +359,7 @@ func _enter(next: Stage) -> void:
 		return
 	stage = next
 	stage_time = 0
-	log_event(["", "Incident declared; first records arrive", "Discrepancy confirmed; investigation opened", "Containment started", "Escalated to: you (production core opened)", "Resolved", "Reopened: engineer offline"][stage])
+	log_event(["", "Incident declared; first records arrive", "Missing delivery exposed; Management called", "Containment started", "Escalated to: you (production core opened)", "Resolved", "Reopened: engineer offline"][stage])
 	spawn_delay = 2.0
 	match stage:
 		Stage.ENCOUNTER_ONE:
@@ -364,11 +370,11 @@ func _enter(next: Stage) -> void:
 			message = "The night shift is not okay.  •  Hit first: double damage."
 			light_target = 2.3
 		Stage.INVESTIGATION:
-			objective = "Investigate at OPERATIONS"
+			objective = "Delivery failed · E to answer Management"
 			message = "DISCREPANCY CONFIRMED  •  The pantry still has coffee."
-			console_marker.text = "↓ OPERATIONS\nE — INSPECT"
+			console_marker.text = ""
 			_plant_sync()
-			_dashboard("RECONCILIATION\nFAILED", "INVESTIGATION REQUIRED")
+			_dashboard("RECONCILIATION\nFAILED", "MANAGEMENT IS CALLING")
 		Stage.ENCOUNTER_TWO:
 			wave_index = 0
 			remaining = stage_total()
@@ -416,6 +422,8 @@ func _process(delta: float) -> void:
 		challenge_left = maxf(0, challenge_left - delta)
 		if challenge_left == 0:
 			challenge_result = "Expired — no penalty"
+	if stage == Stage.INVESTIGATION:
+		management_call.tick(delta)
 	elapsed += delta
 	stage_time += delta
 	if stage == Stage.ALERT and stage_time >= presentation.opening_duration():
@@ -891,7 +899,9 @@ func next_step() -> Dictionary:
 		Stage.INVESTIGATION:
 			if quick_sync == "active":
 				return {"text": "Survive the Quick Sync.", "point": none, "tag": ""}
-			return {"text": "Inspect the Operations console (E).", "point": CONSOLE_POSITION, "tag": "CONSOLE"}
+			if management_call.active:
+				return {"text": "Requesting containment.", "point": none, "tag": ""}
+			return {"text": "Delivery failed. E to answer Management.", "point": none, "tag": ""}
 		Stage.BOSS:
 			if not boss_triggered:
 				return {"text": "North, through the corridor, to the vault.", "point": room.get_node("SpawnPoints/VaultEntry").global_position, "tag": "VAULT"}
@@ -1357,15 +1367,9 @@ func encounter_status() -> String:
 
 
 func inspect_console() -> void:
-	if stage != Stage.INVESTIGATION or not near_console():
+	if stage != Stage.INVESTIGATION or modal_pending() or not sync_alive.is_empty():
 		return
-	presentation.say("evidence_open")
-	if not inspected:
-		presentation.evidence_shot()
-	inspected = true
-	console_marker.text = "EVIDENCE OPEN"
-	objective = "Which system lost it?  1 · 2 · 3"
-	message = "1  Core Ledger: SUCCESS — signed receipt confirms money was saved.\n2  Loan Management: FAILED — waiting for payment confirmation.\n3  Payment Processing: NOT FOUND — delivery log stops before arrival."
+	management_call.start()
 
 
 func interact() -> void:
@@ -1528,29 +1532,21 @@ func buff_text() -> String:
 	return "MOTIVATED  %ds" % ceili(coffee_left) if coffee_left > 0 else ""
 
 
-func choose_system(choice: int) -> void:
-	if modal_pending() or stage != Stage.INVESTIGATION or not inspected or not near_console():
-		return
-	if choice == 3:
-		_offer_corporate()
-	elif choice in [1, 2]:
-		mistakes += 1
-		objective = "Not that one. Who never received it?  1 · 2 · 3"
-
-
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused or event.is_echo():
 		return
 	if event.is_action_pressed("inspect_record"):
-		if stage == Stage.INVESTIGATION and near_console():
+		if management_call.active:
+			get_viewport().set_input_as_handled()
+			return
+		var local_use: bool = not talk_target().is_empty()
+		for point: Node3D in interactions.values():
+			local_use = local_use or point.in_range(player)
+		if stage == Stage.INVESTIGATION and not local_use:
 			inspect_console()
 		else:
 			interact()
 		get_viewport().set_input_as_handled()
-	for index in range(1, 4):
-		if event.is_action_pressed("choose_record_" + str(index)):
-			choose_system(index)
-			get_viewport().set_input_as_handled()
 
 
 func _make_copies() -> void:
@@ -1596,6 +1592,8 @@ func fail() -> void:
 
 
 func _finish() -> void:
+	if management_call.active:
+		management_call.reset()
 	decision_pending = false
 	if challenge_result == "Active":
 		challenge_result = "Interrupted"
@@ -1623,7 +1621,7 @@ func _finish() -> void:
 	report += "\n\nDebt: %d — %s\nUpgrades: %s" % [run.debt, run.severity(), run.summary()]
 	report += "\nBurnout: %d — %s\nManagement: %s\nCommitment: %s" % [run.burnout, run.burnout_title(), corporate_title(), challenge_result]
 	report += "\nPeak Burnout: %d • Enemies defeated: %d\nBoss: %s" % [run.peak_burnout, enemies_defeated, "Eliminated" if won else ("Encountered — unresolved" if boss_encountered else "Not encountered")]
-	report += "\n\nTime: %d:%02d    Investigation retries: %d\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, mistakes]
+	report += "\n\nTime: %d:%02d    Containment briefing: %s\nR — restart incident" % [int(elapsed) / 60, int(elapsed) % 60, "Completed" if management_call.completed else "Not completed"]
 	report += "\n\nEngineer request: go home. Status: pending approval.\nCalendar: Retrospective — tomorrow, 09:00." if won else "\n\nCalendar: Your retrospective attendance is still required."
 	room.get_node("Clock").text = "FRIDAY / 17:00" if won else "FRIDAY / 16:59"
 	player.melee.cancel()

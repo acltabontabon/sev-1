@@ -18,6 +18,12 @@ func defeat_wave() -> void:
 		await frames(2)
 
 
+## Lifecycle fixtures skip the presentation through the same entry as TAB.
+func clear_operations() -> void:
+	incident.presentation.skip()
+	await frames(2)
+
+
 ## The Variance waits in the server vault; staged runs walk in by teleport.
 func enter_vault() -> void:
 	player.position = Vector3(9, .05, -31.5)
@@ -72,16 +78,16 @@ func _run() -> void:
 	if is_instance_valid(first):
 		incident._on_record_died(first)
 	check(incident.stage == incident.Stage.INVESTIGATION, "duplicate death cannot advance incident")
-	await key(KEY_E)
-	check(not incident.inspected, "inspection cannot happen from across office")
+	check(not incident.inspected, "the incoming call waits for the engineer to answer")
 	player.position = incident.CONSOLE_POSITION
 	await frames(5)
 	await key(KEY_E)
-	check(incident.inspected, "E opens evidence near operations")
+	check(incident.inspected, "E answers Management near Operations")
 	await key(KEY_1)
-	check(incident.stage == incident.Stage.INVESTIGATION and incident.mistakes == 1, "wrong record gives retry feedback without advancing")
 	await key(KEY_3)
-	check(incident.decision_pending and paused, "3 identifies record and safely opens management decision")
+	check(incident.stage == incident.Stage.INVESTIGATION and not incident.decision_pending and incident.mistakes == 0, "number keys cannot solve or bypass Operations")
+	await clear_operations()
+	check(incident.decision_pending and paused and incident.management_call.completed, "skipping Operations opens management without a system choice")
 	await key(KEY_2)
 	check(incident.stage == incident.Stage.ENCOUNTER_TWO, "realistic estimate starts containment")
 	await frames(150)

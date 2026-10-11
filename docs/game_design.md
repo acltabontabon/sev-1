@@ -4,7 +4,7 @@ The [vision](vision.md) establishes the identity and status vocabulary. This des
 
 ## Gameplay loops
 
-**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, a short operations investigation, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. Stage One completion now autosaves as a chapter boundary; replay preserves it. Stage Two remains unavailable. See [chapter saves](chapter_saves.md).
+**Implemented prototype:** Incident 001 now combines the existing combat/office with two authored record encounters, the containment handoff, The Variance, and a resolution/death report. Milestone 9 adds the Friday workstation opening, event-based captions, corporate messages, office state changes, boss arrival and contextual postmortem statistics. R resets the entire episode. The single-opponent combat lab remains as a regression scene. Two temporary upgrade decisions now follow the record encounters; Technical Debt affects upcoming pursuit and office warnings. Stage One completion now autosaves as a chapter boundary; replay preserves it. Stage Two remains unavailable. See [chapter saves](chapter_saves.md).
 
 **Intended episode loop:** investigate a visible problem → enter a short encounter → learn what the enemy or environment communicates → resolve the encounter → uncover a consequence or choose a tradeoff → face a culminating threat → receive a contextual incident review and restart or continue. The exact run structure, duration beyond the first incident, and persistence beyond chapter completion remains unsettled.
 
@@ -116,7 +116,7 @@ Burnout and Technical Debt are now implemented; do not add Reputation alongside 
 
 ### Corporate decisions
 
-**Implemented Milestone 7:** “Management Escalation — ETA Required” appears after the investigation, before containment. Commit to Five Minutes adds 35 Burnout and an optional five-minute containment challenge worth 20 bonus Burnout relief; expiry has no penalty. Give a Realistic Estimate adds 8 Burnout without an encounter modifier. Escalate the Dependency removes up to 20 Burnout but adds one clearly identified record to containment. All paths grant the normal 15 relief on containment completion. The paused screen previews costs and recovery; each selection applies once. Different management replies acknowledge the choice. Technical Debt is unchanged, and Reputation remains deferred. See [implementation](architecture.md#burnout-and-corporate-pressure).
+**Implemented Milestone 7:** “Management Escalation — ETA Required” appears after the containment briefing, before containment. Commit to Five Minutes adds 35 Burnout and an optional five-minute containment challenge worth 20 bonus Burnout relief; expiry has no penalty. Give a Realistic Estimate adds 8 Burnout without an encounter modifier. Escalate the Dependency removes up to 20 Burnout but adds one clearly identified record to containment. All paths grant the normal 15 relief on containment completion. The paused screen previews costs and recovery; each selection applies once. Different management replies acknowledge the choice. Technical Debt is unchanged, and Reputation remains deferred. See [implementation](architecture.md#burnout-and-corporate-pressure).
 
 ## Death and post-incident review
 
@@ -150,7 +150,7 @@ Reuse one office footprint, existing interaction conventions, and a small cohere
 
 Implemented to answer the first external feedback; human acceptance pending. The office
 now has five purposeful areas: desks (start, environmental stories), Production
-Operations (investigation), a meeting wing with the optional Quick Sync trap, a pantry
+Operations (environmental storytelling), a meeting wing with the optional Quick Sync trap, a pantry
 with one useful interaction (coffee) and three reactions, and a gated server corridor
 leading to the vault where The Variance arrives. Encounters run authored waves with four
 regular archetypes: the Corrupted Record (melee), The Blocker (shields allies; interrupt
@@ -160,6 +160,24 @@ notice the engineer; a surprise hit deals double. Comedy is delivered through pl
 coffee policy, Quick Sync, Scope Creep's escalation, the status page that stays green)
 and through chat cards from named senders. The beat list above remains the creative
 direction; the Variance's harmless copies are unchanged.
+
+### Containment handoff (implemented prototype, 11 October 2026)
+
+The old Operations quiz and mandatory walk back are removed. After the first encounter
+and its upgrade, Management calls. E answers from the engineer's current location;
+the player may still take a pantry/Quick Sync breather before answering. A brief voiced
+handoff connects the fights: the missing money never reached delivery, the delivery
+system is still producing monsters, and the engineer asks to shut it down.
+
+Morgan demands a deadline first: “Screaming is not a valid unit of time.” The call then
+becomes the existing containment commitment decision. Promising five minutes adds
+Burnout and a bonus deadline; a realistic estimate adds less Burnout; escalating the
+dependency reduces pressure but adds a Blocker to the next encounter. Thus the scene
+provides the next target and lets the player shape its conditions. The branch's existing
+voiced reply accompanies containment's start. There is no separate update montage,
+Finance interruption, quiz, or extra fight. The two new local lines last about twelve
+seconds together; Tab skips straight to the decision. Human acceptance of the joke,
+clarity and pacing remains pending.
 
 ### Unpaid Overtime entrance (implemented prototype, 11 October 2026)
 

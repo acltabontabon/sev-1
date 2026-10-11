@@ -75,7 +75,7 @@ func verify_ui() -> void:
 	player.position = incident.CONSOLE_POSITION
 	incident.inspect_console()
 	incident.run.change_burnout(29, "Preview fixture")
-	incident.choose_system(3)
+	await clear_operations()
 	await frames(3)
 	check("29 → 64 / PRESSURED" in incident.upgrade_ui.summary(0) and "Taken 90%" in incident.upgrade_ui.summary(0), "management preview includes the immediate burnout band and combined defense")
 	for button in incident.upgrade_ui.buttons:
@@ -136,7 +136,7 @@ func simulated_runs() -> void:
 			elif incident.stage == incident.Stage.INVESTIGATION:
 				player.position = incident.CONSOLE_POSITION
 				await key(KEY_E)
-				await key(KEY_3)
+				await key(KEY_TAB)
 			elif incident.stage == incident.Stage.BOSS and not incident.boss_triggered:
 				await enter_vault()
 			elif is_instance_valid(incident.active_enemy):

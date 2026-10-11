@@ -325,3 +325,10 @@ Pau. Each coworker now has coffee, lunch and three distinct gossip stories in th
 existing session-local shuffled bag. Repeated visits and retries exhaust all five
 takes before repeating; the ending recalls the exact last take heard this run.
 Matching clips/captions and source/model/license hashes remain in talk provenance.
+
+
+The 11 October containment handoff adds `handoff_find` (engineer identifies the active
+delivery failure) and `handoff_eta` (Management requires a commitment before containment).
+Both use the existing local Kokoro stock protagonist/management profiles and processing;
+`provenance.json` records model revision, Apache-2.0 license source, hashes and durations.
+The main manifest now has 88 lines. Human listening acceptance remains pending.

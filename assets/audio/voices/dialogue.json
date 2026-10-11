@@ -1280,6 +1280,34 @@
       "fallback_duration": 5.0,
       "optional": false,
       "status": "generated"
+    },
+    {
+      "id": "handoff_find",
+      "character": "ENGINEER",
+      "text": "The money never arrived. The delivery system's still making monsters. I'm going to shut it down.",
+      "subtitle": "The money never arrived. The delivery system's still making monsters. I'm going to shut it down.",
+      "voice_profile": "protagonist",
+      "direction": "Urgent but dry; speak to a person, never announce the punchline.",
+      "audio": "res://assets/audio/voices/handoff_find.ogg",
+      "trigger": "First encounter cleared; management authorizes containment through a commitment",
+      "priority": 2,
+      "fallback_duration": 5.5,
+      "optional": false,
+      "status": "generated"
+    },
+    {
+      "id": "handoff_eta",
+      "character": "MANAGEMENT",
+      "text": "Great. Before you stop the monsters, leadership needs a deadline. Screaming is not a valid unit of time.",
+      "subtitle": "Great. Before you stop the monsters, leadership needs a deadline. Screaming is not a valid unit of time.",
+      "voice_profile": "management",
+      "direction": "Urgent but dry; speak to a person, never announce the punchline.",
+      "audio": "res://assets/audio/voices/handoff_eta.ogg",
+      "trigger": "First encounter cleared; management authorizes containment through a commitment",
+      "priority": 2,
+      "fallback_duration": 5.5,
+      "optional": false,
+      "status": "generated"
     }
   ]
 }

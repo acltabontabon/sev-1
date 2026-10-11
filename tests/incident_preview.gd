@@ -21,6 +21,11 @@ func shot(name_: String) -> void:
 		push_error(error_string(error))
 
 
+func clear_operations() -> void:
+	incident.presentation.skip()
+	await process_frame
+
+
 func _run() -> void:
 	if "--debt" in OS.get_cmdline_user_args() or "--burnout" in OS.get_cmdline_user_args():
 		preview_prefix = "burnout" if "--burnout" in OS.get_cmdline_user_args() else "debt"
@@ -47,7 +52,7 @@ func _run() -> void:
 	player.position = Vector3(-1.7, .05, -11)
 	incident.inspect_console()
 	await shot("investigation")
-	incident.choose_system(3)
+	await clear_operations()
 	await shot("management")
 	incident.choose_corporate(0 if preview_prefix == "burnout" else 1)
 	if preview_prefix == "burnout":

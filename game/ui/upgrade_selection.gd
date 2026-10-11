@@ -110,7 +110,7 @@ func _window_bar() -> PanelContainer:
 		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(dot)
 	var name_label: Label = Label.new()
-	name_label.text = "   ◆ Synergize — Direct message — Leadership"
+	name_label.text = "   ◆ Synergize — Incident call — Management"
 	name_label.theme_type_variation = "MonoLabel"
 	name_label.add_theme_font_size_override("font_size", 13)
 	name_label.add_theme_color_override("font_color", Color(.6, .7, .74))
@@ -344,9 +344,9 @@ func _input(event: InputEvent) -> void:
 
 func open_corporate(run: Node, seconds: float) -> void:
 	window_bar.show()
-	eyebrow.text = "LEADERSHIP  ·  17:04  ·  MARKED URGENT  ·  READ RECEIPTS ON"
-	heading.text = "“Quick one: can we fix this without making any changes? Also, ETA? I told the VP ‘shortly’.”"
-	subhead.text = "Leadership is waiting for your reply…"
+	eyebrow.text = "CONTAINMENT REQUEST  ·  MANAGEMENT CALL  ·  ETA REQUIRED"
+	heading.text = "“Before you shut delivery down: when will this be over?”"
+	subhead.text = "Choose your commitment. Clear the delivery outbreak to recover Burnout."
 	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   CLEARING CONTAINMENT RELIEVES %d BURNOUT   ·   DEBT UNCHANGED" % run.containment_relief
 	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
 	var titles: Array[String] = ["Commit to Five Minutes", "Give a Realistic Estimate", "Escalate the Dependency"]

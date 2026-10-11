@@ -71,7 +71,7 @@ func _run() -> void:
 		incident.choose_upgrade(path)
 		player.position = incident.CONSOLE_POSITION
 		incident.inspect_console()
-		incident.choose_system(3)
+		await clear_operations()
 		await dwell("run%d_management" % path)
 		incident.choose_corporate(path)
 		var count: int = incident.remaining

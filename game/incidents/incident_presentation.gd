@@ -815,6 +815,9 @@ func declare_incident() -> void:
 
 
 func skip() -> void:
+	if is_instance_valid(incident.management_call) and incident.management_call.active:
+		incident.management_call.finish()
+		return
 	if beat_shot == "all_hands" and is_instance_valid(all_hands):
 		all_hands.finish()
 		return
@@ -868,10 +871,13 @@ func stage_changed() -> void:
 			_end_opening()
 			say_sequence(["status_ok", "status_except"])
 		incident.Stage.INVESTIGATION:
-			say("investigate")
+			sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -6)
 		incident.Stage.ENCOUNTER_TWO:
 			var reply: String = ["mgmt_commit", "mgmt_estimate", "mgmt_escalate"][clampi(incident.corporate_choice, 0, 2)]
-			say_sequence(["not_found", "evidence_confirmed", reply])
+			if incident.management_call.reveal_spoken:
+				say_sequence(["evidence_confirmed", reply])
+			else:
+				say_sequence(["not_found", "evidence_confirmed", reply])
 			set_screens(Color(.65, .12, .04))
 		incident.Stage.BOSS:
 			say("gate_open")
@@ -1246,14 +1252,6 @@ func _crowds_shot(from: Vector3, to: Vector3, actor: Node3D) -> bool:
 	return false
 
 
-## Evidence opens: a short push onto the wall where three systems disagree.
-func evidence_shot() -> void:
-	if beat_shot.is_empty() and not incident.modal_pending():
-		beat_shot = "evidence"
-		beat_time = 0.0
-		camera.global_transform = incident.player.get_node("CameraRig/SpringArm3D/Camera3D").global_transform
-
-
 func _beats(delta: float) -> void:
 	if beat_shot.is_empty():
 		return
@@ -1274,17 +1272,6 @@ func _beats(delta: float) -> void:
 			_massacre_shot(get_process_delta_time())
 		"outbreak":
 			_outbreak_shot(delta, rig)
-		"evidence":
-			if incident.modal_pending() or incident.stage != incident.Stage.INVESTIGATION or beat_time > 2.6:
-				beat_shot = ""
-				release_camera()
-				return
-			incident.player.narrative_hold = true
-			var close: Transform3D = Transform3D(Basis.looking_at(Vector3(0, .1, -1)), Vector3(-1.7, 2.3, -11.6))
-			var weight: float = smoothstep(0, .9, beat_time) * (1.0 - smoothstep(2.0, 2.6, beat_time))
-			camera.global_transform = rig.global_transform.interpolate_with(close, weight)
-			camera.fov = lerpf(rig.fov, 50.0, weight)
-			camera.make_current()
 		"vault":
 			# Arrival without taking control: lights fail in order, a frame, a surge.
 			var arrive: float = boss_length
@@ -2354,7 +2341,7 @@ func _process(delta: float) -> void:
 	# The finale owns its caption visibility, including the Monday call.
 	if beat_shot != "all_hands":
 		panel.visible = visible_play and line_left > 0
-	feed.visible = visible_play and not beat_shot in ["massacre", "casualty"]
+	feed.visible = visible_play and not beat_shot in ["massacre", "casualty", "management_call"]
 	if visible_play:
 		feed.tick(delta)
 	title.visible = false

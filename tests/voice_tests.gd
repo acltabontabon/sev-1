@@ -11,7 +11,7 @@ func _run() -> void:
 	player = scene.get_node("Player")
 	var voice: Node = incident.voice
 	await frames(40)
-	check(voice.lines.size() == 86 and voice.current_line == "doc_office", "the cold open requests the authored narrator line")
+	check(voice.lines.size() == 88 and voice.current_line == "doc_office", "the cold open requests the authored narrator line")
 	voice.clear()
 	voice.request("enemy")
 	await frames(2)
@@ -63,11 +63,11 @@ func _run() -> void:
 	incident.choose_upgrade(0)
 	player.position = incident.CONSOLE_POSITION
 	incident.inspect_console()
-	check(voice.seen.has("evidence_open"), "console interaction triggers evidence speech")
-	incident.choose_system(3)
+	check(not voice.seen.has("evidence_open"), "escalation never asks the player to identify a transaction")
+	await clear_operations()
 	incident.choose_corporate(1)
 	await frames(2)
-	check(voice.current_line == "not_found" and incident.presentation.sequence == ["evidence_confirmed", "mgmt_estimate"], "correct evidence, confirmation and the chosen management reply play in order")
+	check(voice.current_line == "not_found" and incident.presentation.sequence == ["evidence_confirmed", "mgmt_estimate"], "automatic reveal is followed by confirmation and the management reply")
 	# Fixture moves only stages; original boss timing and mechanics remain live.
 	incident._cleanup()
 	incident._enter(incident.Stage.BOSS)

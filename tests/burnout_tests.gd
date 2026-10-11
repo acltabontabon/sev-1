@@ -8,7 +8,7 @@ func decision_fixture() -> void:
 	incident._enter(incident.Stage.INVESTIGATION)
 	player.position = incident.CONSOLE_POSITION
 	incident.inspect_console()
-	incident.choose_system(3)
+	await clear_operations()
 
 
 func _run() -> void:
@@ -77,7 +77,7 @@ func _run() -> void:
 	player.receive_damage(20, Vector3.ZERO)
 	check(player.health == 83, "two defense upgrades plus overload yield 17 incoming damage")
 	for choice in range(3):
-		decision_fixture()
+		await decision_fixture()
 		run.change_burnout(40, "Fixture")
 		run.apply_to(player)
 		var elapsed_before: float = incident.elapsed
@@ -107,7 +107,7 @@ func _run() -> void:
 		boss.exposed = true
 		boss.receive_damage(10000, player.position)
 		check(incident.terminal() and paused and incident.corporate_title() in incident.report and "Burnout:" in incident.report, "every corporate path reaches victory with truthful summary")
-	decision_fixture()
+	await decision_fixture()
 	await frames(3)
 	var button: Button = incident.upgrade_ui.buttons[2]
 	var point: Vector2 = button.get_global_rect().get_center()
@@ -126,11 +126,11 @@ func _run() -> void:
 	var returned: Array = incident.waves().back().back()
 	var dependency: CharacterBody3D = incident._spawn_entry(returned, incident.alive)
 	check(returned[0] == "blocker" and "DEPENDENCY RETURNED" in dependency.get_node("RecordMarker").text, "the escalated dependency returns as a labeled Blocker")
-	decision_fixture()
+	await decision_fixture()
 	incident.upgrade_ui.buttons[1].grab_focus()
 	await key(KEY_ENTER)
 	check(incident.corporate_choice == 1 and not paused, "Enter selects focused corporate card")
-	decision_fixture()
+	await decision_fixture()
 	await key(KEY_1)
 	player.camera_rig.set_capture(false)
 	var time_before: float = incident.challenge_left
@@ -145,13 +145,13 @@ func _run() -> void:
 	await key(KEY_R)
 	check(run.burnout == 0 and incident.corporate_choice == -1 and incident.challenge_left == 0, "restart clears burnout, decision, and challenge")
 	for index in range(3):
-		decision_fixture()
+		await decision_fixture()
 		await key(KEY_R)
 		await frames(3)
 		check(not incident.modal_pending() and not incident.upgrade_ui.panel.visible and run.burnout == 0, "restart from decision clears modal")
 		check(scene.find_children("*", "", true, false).size() == base_nodes, "retries retain bounded nodes")
 	check(player.damage_accepted.get_connections().size() == 1 and incident.upgrade_ui.selected.get_connections().size() == 1, "retry does not duplicate damage or modal subscriptions")
-	decision_fixture()
+	await decision_fixture()
 	await key(KEY_1)
 	player.invulnerable_left = 0
 	player.receive_damage(100000, Vector3.ZERO)

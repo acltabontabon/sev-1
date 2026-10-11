@@ -1374,5 +1374,37 @@
     "duration": 4.003833333333334,
     "peak": 0.7089282870292664,
     "review_status": "candidate; human listening acceptance pending"
+  },
+  "handoff_find": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "am_michael",
+    "generation_date": "2026-10-11T00:34:31.853389+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "5251d02fdd9521a9c4636cad10e3ef02ec374b0118c1c362a2b21cf8051a4994",
+    "sha256": "aff118763c95f8a3ae8086e2bbdebe9e15f66581ae6d28d79fa2bceb923bf0e2",
+    "master_sha256": "be0b92c64b154d3097fab7949f56380538bd5cbac927348caf75b70c8407d285",
+    "duration": 5.796541666666666,
+    "peak": 0.819620668888092,
+    "review_status": "candidate; human listening acceptance pending"
+  },
+  "handoff_eta": {
+    "provider": "local Kokoro",
+    "model": "hexgrad/Kokoro-82M",
+    "model_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+    "voice": "af_heart",
+    "generation_date": "2026-10-11T00:34:33.152743+00:00",
+    "usage_rights": "Apache-2.0 model; stock voice; authored game script. See model license and docs/voices.md.",
+    "license_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/f3ff3571791e39611d31c381e3a41a3af07b4987/README.md",
+    "processing": "trim-45db-pad80ms-loudnorm-20lufs-2dbtp-v1/clean",
+    "fingerprint": "3dc81e65ba447def945b6ed1fd88b0caef13fd8a8671294beb03b91f95e5097f",
+    "sha256": "d2d02dc2938bac996a9690e08419357724f2cc352eaf2779dff04e1269acb9a3",
+    "master_sha256": "5a26feb282eb5a846cbc638280102abaf3038b7e3dccdd0675429d4e8d5695b5",
+    "duration": 6.21225,
+    "peak": 0.7512061595916748,
+    "review_status": "candidate; human listening acceptance pending"
   }
 }

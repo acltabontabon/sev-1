@@ -44,6 +44,11 @@ func shot(title: String) -> void:
 	print("CAPTURE ", title)
 
 
+func clear_operations(incident: Node3D, _player: CharacterBody3D) -> void:
+	incident.presentation.skip()
+	await frames(2)
+
+
 func _run() -> void:
 	DirAccess.make_dir_recursive_absolute("res://builds")
 	for arg: String in OS.get_cmdline_user_args():
@@ -804,7 +809,7 @@ func ui_pass() -> void:
 		app.session.get_node("Player/CameraRig").controls_active = true
 		await process_frame
 	await shot("ui_evidence")
-	incident.choose_system(3)
+	await clear_operations(incident, incident.player)
 	app.show_page("")
 	await frames(10)
 	await shot("ui_leadership_dm")
@@ -848,7 +853,7 @@ func finale() -> void:
 	await live(1.1)
 	await shot("finale_evidence")
 	await live(2.0)
-	incident.choose_system(3)
+	await clear_operations(incident, incident.player)
 	incident.choose_corporate(1)
 	app.resume_incident()
 	incident._cleanup()

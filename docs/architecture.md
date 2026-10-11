@@ -154,13 +154,31 @@ by `tests/office_preview.gd`; see README for the command and measured results.
 
 The inherited lab enemy is hidden, disabled, and removed from the melee target group. The original combat tuning, enemy/melee behavior, office geometry and navigation are preserved. Milestone 9 adds only a short presentation hold to the player and an independent opening camera. Milestone 9 replaces the seven-second alert with a 24-active-second opening; a two-second arrival delay puts the first enemy in play around 26 seconds. Seen session retries shorten the opening to three seconds. Tab skips it. See the narrative presentation section below. Exported counts default to two first-encounter records and three second-encounter records, arriving one at a time. The second encounter changes pursuit speed from 2.4 to 3.4 m/s before the run debt multiplier. Arrivals use the farthest of three clear floor sites, a short delay, and existing spark effects. Defeated records retain a non-colliding collapsed pose; their total is bounded by authored counts and all are freed on reset.
 
-Investigation requires the player within four meters of the operations marker at (−1.7, 0, −12.5). E exposes three evidence lines; physical keys 1/2/3 select a system. Incorrect selections increment a report counter and provide an additional plain-language clue, without damage or progression. Payment Processing (3) advances the incident. Input is blocked while paused and key echoes are ignored. No financial calculation is required.
+The former Operations investigation stage now supplies a containment handoff. After
+encounter one and its upgrade, E can answer Management from anywhere while no optional
+Quick Sync fight/modal is active. No console-distance gate or forced walk remains.
+`management_call.gd` is a local incident child; it plays `handoff_find` then `handoff_eta`
+(about twelve seconds combined) and waits for each clip/fallback to end before advancing.
+The engineer reports the missing payment and active delivery outbreak; Morgan requests
+a commitment, then the existing corporate modal previews real containment consequences.
+TAB skips straight to that decision. Numbers no longer choose an evidence system.
+
+The call owns a checked camera shot and caption layer, holds gameplay input and hides
+HUD/feed. It stages the engineer at the actual answered location, uses Morgan's phone
+animation, and applies no damage/spawns. Completion restores the manager routine,
+gameplay camera and HUD/feed. Pause freezes it; death/reset cancels without overriding
+Friday's spawn. Natural playback suppresses the redundant missing-payment recap after
+the choice; a skipped briefing retains that recap. `tests/operations_tests.gd` covers
+actual E/TAB input away from Operations, natural dialogue/decision progression, pause,
+death and reset. `tests/operations_preview.gd` provides a playable checkpoint and Forward+
+captures. Speech is prerecorded locally through the existing Kokoro pipeline, with source,
+license, hashes and processing recorded in the voice manifests.
 
 `game/incidents/variance.gd` extends only the existing enemy implementation. The Variance has 700 health, the original telegraph/attack timing, and an eight-second repeating pattern: 4.5 seconds pursuing/attacking while shielded, then 3.5 seconds stationary and OPEN. Opening cancels its swing and accepts normal player damage; shielding rejects it. Milestone 8 freezes the phase clock during actor hit-stop, so an impact cannot consume the remaining OPEN time while motion is frozen. Its solid physical diamond, solid text diamond, and VERIFIED ORIGINAL marker remain consistent. On first reaching half health, exactly two non-colliding, non-attacking translucent silhouette projections appear, marked with hollow diamonds. They are visual decoys, not additional melee targets, and never multiply. This deliberately simple cue/decoy experiment needs human acceptance. Boss defeat retains a settled fractured pose and removes projections; there is no imported boss animation.
 
 The incident controller processes while paused only to settle environmental light changes. Gameplay elapsed time, spawn delays, and transitions stop while paused. All gameplay timing is local elapsed state, not scheduled callbacks. Terminal states cancel melee, release capture, show a deterministic report, and block resumption until R resets. The whole tree remains paused on the report; incident spill settles smoothly, and recovered dashboard signage/strip changes toward green. Restart resets that light immediately to its opening value, clears reports/evidence/counters, removes every spawned actor/projection, and restores the player at the workstation with the gameplay camera. A fresh scene load also resets everything. Milestone 9 retains only opening/boss seen flags across R within the same scene session; gameplay state never persists between runs.
 
-`tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, wrong/correct evidence, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/evidence/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
+`tests/incident_tests.gd` exercises actual E/number/F/R input plus controlled damage to traverse lifecycle cases quickly: early combat, illegal transitions, completion, duplicate death, containment briefing and automatic reveal, speed escalation, shielded/open boss damage, actual player melee against the boss, bounded copies, victory/death cleanup, terminal capture, repeated restart node/signal counts, environmental reset, and fresh scene reload. Controlled damage is test staging, not proof of full-run balance. `tests/incident_preview.gd` captures staged intro/containment briefing/boss/reports and optionally measures a 25-second high-health boss/copies scenario. README records settings and measured frame times. Headless validation does not establish audio quality, ordinary run duration, or fun.
 
 Known episode limits: the 5–10-minute target is unverified by a human run; expert runs may be shorter. Only one damaging enemy is active at a time. Copies are harmless projections. Health carries through the full episode with temporary upgrades but no healing system. Characters, effects, sound, and report presentation remain prototype assets. No full Circle I boss, persistent progression, additional floor or Windows runtime test is included. Milestone 10 adds the macOS release build described below.
 
@@ -288,7 +306,7 @@ produce .85 incoming. Rounding happens once at the existing damage boundary.
 Debt still affects only upcoming pursuit. Attack resources, input, hit windows,
 movement, dodge travel/invulnerability, and enemy tells are unchanged.
 
-After correct investigation, `decision_pending` blocks capture, spawns, and stage
+After the containment briefing, `decision_pending` blocks capture, spawns, and stage
 transitions until a valid choice. The existing persistent upgrade modal displays
 three corporate cards; its single subscription routes to the pending interaction.
 This follows the first upgrade and precedes containment and the second upgrade.
@@ -502,7 +520,7 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `BEATS` tables (50.5 s; 3 s on retry: a `FLY` spline fly-in from the night city, a narrated cold open, the `CREW` freeze-frame
   montage with a screen-reading desaturation shader and slammed name cards, the red
   monitor wave, the notification `STORM`, a dolly zoom, and a title slam; shots may carry
-  an end field of view or `"dolly"` and a dutch roll), the evidence push-in, the vault arrival (no
+  an end field of view or `"dolly"` and a dutch roll), the containment handoff, the vault arrival (no
   control loss), first-sighting slow motion and the terminal ending shot. A
   `sequence` queue plays lines that belong together through the bounded voice queue;
   stage changes clear it. A small music director cross-fades `assets/audio/music` beds on
@@ -514,8 +532,8 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   turns gameplay lines into sender cards (max three, expiring). ALERT-stage lines use
   film subtitles instead.
 - **HUD and dialogs.** `playtest_hud.gd` restyles its labels into a ticket header and adds
-  a vitals card, boss bar, notice and evidence board. `upgrade_selection.gd` builds
-  change-request tickets or a leadership DM inside its three buttons and stores each
+  a vitals card, boss bar and notice. `upgrade_selection.gd` builds
+  change-request tickets or an incident-call response inside its three buttons and stores each
   card's plain summary in meta `summary`; closing clears card contents.
 - **Office.** `tools/build_office.py` adds the meeting wing, pantry, gate, corridor, vault,
   `SpawnPoints` markers, PBR materials (triplanar), Kenney props (tinted by

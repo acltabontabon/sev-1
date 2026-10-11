@@ -163,12 +163,14 @@ func _run() -> void:
 	# Guidance: the next step always says what to do and, when there is somewhere to go, where.
 	await fresh_stage(incident.Stage.INVESTIGATION)
 	var investigate: Dictionary = incident.next_step()
-	check(investigate.get("tag", "") == "CONSOLE" and (investigate.point as Vector3).distance_to(incident.CONSOLE_POSITION) < .1, "during the investigation the next step points to the console")
+	check(investigate.get("tag", "") == "" and "answer Management" in investigate.text, "after the first encounter the call can be answered without backtracking")
 	await frames(2)
 	var hud: CanvasLayer = scene.get_node("HUD")
-	check(hud.guide.visible and hud.guide_text.text.begins_with("NEXT") and hud.guide_arrow.visible, "the HUD shows the next step with a compass arrow")
+	check(hud.guide.visible and "NEXT  ·  Delivery failed. E to answer Management." in hud.guide_text.text and not hud.guide_arrow.visible, "the HUD offers the management call without a false destination arrow")
 	await fresh_stage(incident.Stage.BOSS)
 	check(incident.next_step().get("tag", "") == "VAULT", "before the boss the next step points to the vault")
+	await frames(2)
+	check(hud.guide.visible and hud.guide_arrow.visible and " m" in hud.guide_text.text, "the vault destination keeps its compass arrow and distance")
 	# Every outbreak site, and every spawn slot around it, is reachable on foot.
 	var stranded: Array[String] = []
 	for entry: Array in incident.SITES:
