@@ -3,6 +3,11 @@
 Changes describe the implemented playable prototype. Creative acceptance and
 ordinary hardware playtesting remain separate from automated checks.
 
+## Unreleased
+
+- Monsters are 10% larger, with matching label clearance, hover offsets and death
+  effect sizing. Collision, attack reach and movement tuning remain unchanged.
+
 ## [0.2.49] — 2026-10-11
 
 First tagged GitHub release of **SEV-1: Friday Deployment**, a personal project.

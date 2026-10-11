@@ -162,7 +162,7 @@ func _ready() -> void:
 			if child.name != "Throbber" and child.name != "Pages":
 				(child as Node3D).hide()
 		# Bars and labels clear the head of taller bodies.
-		var top: float = maxf(2.35, MonsterRig.KINDS[rig_kind].height + .35)
+		var top: float = maxf(2.35, rig.spec.height + .35)
 		$HealthBack.position.y = top
 		$HealthFill.position.y = top
 		label.position.y = maxf(label.position.y, top + .2)

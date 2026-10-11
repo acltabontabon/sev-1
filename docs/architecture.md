@@ -583,7 +583,8 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   before `super._ready()`) and hides the native boxes, keeping the record's loading halo
   and each archetype's prop (BLOCKED sign, invite card, sticky notes, status crown). The
   rig (Quaternius' "Ultimate Monsters" plus the creator-authorized CC BY 3.0 demon
-  body trial, fixed per-kind scale) plays motion clips from AI state with a manually advanced
+  body trial, fixed per-kind scale with a shared 10% presentation size increase) plays
+  motion clips from AI state with a manually advanced
   AnimationPlayer (spawn, locomotion, attack scrubbed to the melee windows, hit, cast,
   death, sink). `monster_flesh.gdshader` dresses flat Quaternius materials; the
   Night Demon and Chained Demon variants preserve their source albedo textures

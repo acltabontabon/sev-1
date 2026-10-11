@@ -6,6 +6,8 @@ extends Node3D
 
 const OVERLAY: Shader = preload("res://game/enemies/corruption.gdshader")
 const FLESH: Shader = preload("res://game/enemies/monster_flesh.gdshader")
+## Presentation size only; actor collision and combat distances keep their tuning.
+const SIZE_MULTIPLIER: float = 1.1
 ## The pack's cheerful flat colours, regraded dark: [colour, roughness, metallic, wet,
 ## glow]. Unlisted materials are darkened. Eyes glow dimly; nothing is neon.
 const PALETTE: Dictionary = {
@@ -119,7 +121,12 @@ static func create(kind_: String, owner_actor: CharacterBody3D) -> MonsterRig:
 
 func _ready() -> void:
 	process_physics_priority = 10
-	spec = KINDS[kind]
+	spec = KINDS[kind].duplicate()
+	spec.height *= SIZE_MULTIPLIER
+	if spec.has("scale"):
+		spec.scale *= SIZE_MULTIPLIER
+	if spec.has("lift"):
+		spec.lift *= SIZE_MULTIPLIER
 	model = load(spec.model).instantiate()
 	add_child(model)
 	model.rotation.y = PI

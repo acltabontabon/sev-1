@@ -1325,7 +1325,7 @@ func _outbreak_shot(delta: float, rig: Camera3D) -> void:
 		lower_name.add_theme_color_override("font_color", Color(1, .42, .3))
 		lower_note.text = actor.motto
 	# Before: a slow push onto the employee. After: back off to fit the monster.
-	var height: float = MonsterRig.KINDS[actor.rig_kind].height if actor.rig != null else 2.0
+	var height: float = actor.rig.spec.height if actor.rig != null else 2.0
 	var eye: Vector3 = actor.global_position + Vector3.UP * (1.1 if not outbreak_burst else lerpf(1.1, height * .6, smoothstep(burst, burst + .5, beat_time)))
 	var spot: Vector3
 	if beat_time < burst:
