@@ -10,7 +10,11 @@ func _run() -> void:
 	player.hitstop_enabled = false
 	await setup_pair()
 	var view: Node3D = player.presentation
-	check(view.get_node("WeaponPivot/EscalationBlade") != null and view.animator.has_animation("rig/roll") and view.animator.has_animation("rig/death"), "rigged engineer loads the keyboard and the retargeted action clips")
+	check(view.get_node("WeaponPivot/EscalationBlade") != null and view.animator.has_animation("rig/roll") and view.animator.has_animation("rig/death"), "rigged engineer loads the greatsword and the retargeted action clips")
+	var sword: MeshInstance3D = view.weapon.get_node("EscalationBlade/HeavyGreatsword")
+	var bounds: AABB = sword.transform * sword.get_aabb()
+	check(absf(bounds.position.z + 2.32) < .01 and absf(bounds.end.z - .03) < .01, "imported blade matches the grip and trail envelope")
+	check(bounds.position.x < 0 and bounds.end.x > 0 and bounds.size.x < .5, "imported sword is centered across the grip without an oversized guard")
 	var tip: Vector3 = view.weapon.transform * Vector3(0, 0, -1.47)
 	check(tip.y > .05, "resting keyboard stays above floor")
 	var rest: Transform3D = view.weapon.transform

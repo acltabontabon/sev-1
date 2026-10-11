@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://game/player/rigged_engineer.gd" id="1"]
 [ext_resource type="PackedScene" path="res://assets/characters/quaternius/casual_male.fbx" id="2"]
-[ext_resource type="PackedScene" path="res://game/player/keyboard_weapon.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://game/player/heavy_greatsword_weapon.tscn" id="3"]
 [ext_resource type="Script" path="res://game/player/weapon_trail.gd" id="4"]
 
 [node name="Character" type="Node3D"]

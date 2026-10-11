@@ -85,3 +85,12 @@ URLs: [workstation provenance](../assets/environment/poly_haven_workstation/READ
 These binaries use the established Git LFS rules. Original desk mat, keycaps and notebook
 markings add no outside rights. See [implementation and review checkpoint](workstation_trial.md).
 Free character candidates in that document remain unimported.
+
+## Heavy Greatsword trial — 11 October 2026
+
+The rigged engineer now carries Lucian Pavel's **Heavy Greatsword**, released as
+CC0 1.0 on OpenGameArt. The original mesh and 2K textures are converted to an embedded
+GLB using the existing character Git LFS rules. Voluntary attribution, exact download,
+archive checksum and rebuild instructions: [weapon provenance](../assets/characters/heavy_greatsword/README.md).
+The original native Monolith remains available as a fallback. Creator visual acceptance
+is pending; this trial adds no new combat mechanics.

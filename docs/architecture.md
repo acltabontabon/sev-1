@@ -840,3 +840,14 @@ HUD/camera/control and begins the transformation; restart frees it via actor cle
 Headless encounter tests opt in with `standup_in_headless`. The facilitator alone uses
 the new CC0 Squidle model and `standup` palette/clip spec; other Meeting Invites retain
 the dragon. No enemy stats or special-move mechanics changed.
+
+## Heavy Greatsword visual trial — 11 October 2026
+
+The creator selected Lucian Pavel's CC0 Heavy Greatsword. The rigged engineer now
+instances `heavy_greatsword_weapon.tscn`, with the imported mesh fitted to the existing
+pommel-to-tip envelope and hand targets. The shoulder offset fits the narrower blade.
+Story sequences duplicate the same weapon, including the bounds-based parked sword.
+Original `keyboard_weapon.tscn` and the native engineer remain available; character
+regeneration does not overwrite the selected weapon. Melee timing, damage, reach and
+trail offsets are unchanged. The authored metallic, normal and AO maps are embedded;
+roughness is a local constant. [Provenance and rebuilding](../assets/characters/heavy_greatsword/README.md).

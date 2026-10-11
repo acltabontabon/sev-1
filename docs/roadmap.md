@@ -109,3 +109,8 @@ The 11 October [free workstation fidelity trial](workstation_trial.md) upgrades 
 the engineer’s starting desk with CC0 Poly Haven props. It preserves the existing
 collision and screen staging. Creator visual acceptance remains pending; this is
 not a whole-office or character replacement. Further asset selection is free-only.
+
+The creator selected a [CC0 Heavy Greatsword trial](../assets/characters/heavy_greatsword/README.md)
+on 11 October 2026. The rigged engineer carries the imported sword with the existing
+combat and story poses; the original native Monolith stays available. Gate: creator
+accepts the materials, grip, shoulder carry, swing readability and parked story prop.

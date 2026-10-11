@@ -185,7 +185,7 @@ func shoulder_transform() -> Transform3D:
 	var basis: Basis = Basis.looking_at(along, Vector3.RIGHT)
 	var edge: Vector3 = Vector3(.43, 1.27, .02)
 	# Width (local X) points up: lift the centre line half a blade above the resting edge.
-	var center: Vector3 = edge + basis.x * .22
+	var center: Vector3 = edge + basis.x * .12
 	return Transform3D(basis, center - along * .75)
 
 
