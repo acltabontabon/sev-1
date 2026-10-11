@@ -164,7 +164,7 @@ small earrings. Marie alone has a shorter skirt and lower-cut blouse; Nadia and 
 female planted employees retain ordinary office outfits. Original FBX rigs are
 preserved; haircuts are now per character (below). [Source, edits and review](office_outfits/README.md).
 
-## Office haircuts (11 October 2026)
+## Office haircuts (12 October 2026)
 
 Every overtime coworker and planted employee now wears their own original haircut
 instead of the pack's three shared ones; Nadia (SRE) keeps the pack's tied-back hair.
@@ -174,8 +174,27 @@ procedural cut to the animated Head bone, fitted to the shared head's measured s
 Cast choices live in `coworkers.gd` `CAST` and the `talk.json` crew (`"hair"`); street
 strangers draw a stable cut from `POOL`.
 
-`tests/hairstyle_tests.gd` checks distinct cuts, crown coverage, head-following animation,
+The refinement uses continuous tapered curved locks for swept pixies, textured crops,
+pompadours, layered bobs, shoulder-length curtains and tied styles. Curls and the afro
+use a continuous textured scalp shell; the ponytail and braid no longer use rows of
+beads. Denser scalp sampling and thicker fitted caps cover the previous buzz-cut
+skin gaps. At the creator's request, Casey (Microwave)'s balding horseshoe is replaced
+by a narrow swept mohawk with bare sides.
+Hair has a restrained satin finish. Each cut remains one cached mesh with one or two
+material surfaces, attached to the original head bone; it has no simulated sway.
+Morgan retains the female suit body from main and wears a swept pixie. The designer
+retains a rose-dyed quiff over dark roots; Nadia retains the pack's tied-back cut.
+All geometry is original project code, authored with Codex assistance; no external
+hair asset, new license obligation or runtime dependency was introduced.
+
+`tests/hairstyle_tests.gd` checks distinct cuts, crown coverage, actual triangle coverage
+over sampled buzz-cut scalp points, Morgan's female body, head-following animation,
 the planted-employee overlay, the waist slice and retry. `tests/hairstyle_preview.gd`
 renders every cut front/back/side (`builds/hair_sheet_*.png`) and
 `tests/hairstyle_office_preview.gd` frames the cast in the office (`builds/hair_office.png`).
-Human visual acceptance remains open.
+Human visual acceptance remains open. For a quick visual retry, run either preview
+with `sh tools/godot.sh --path . --script tests/hairstyle_preview.gd` (studio) or
+`sh tools/godot.sh --path . --script tests/hairstyle_office_preview.gd` (office).
+Then launch the game, walk the floor and judge silhouettes while people sit, walk
+and talk. Check outbreak transforms and vault casualty cams as well. Hair is rigid
+to the head; faint memory ghosts in `all_hands.gd` still use stock hair.

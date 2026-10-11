@@ -32,7 +32,7 @@ const SCALP_RADII: PackedFloat32Array = [
 	0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555,
 ]
 ## Every style a body can be given. "" keeps the stock hair.
-const STYLES: Array[String] = ["side_part", "pompadour", "bedhead", "curly", "man_bun", "horseshoe",
+const STYLES: Array[String] = ["side_part", "pompadour", "bedhead", "curly", "man_bun", "mohawk",
 	"shoulder", "chignon", "mullet", "undercut", "buzz_beard", "high_ponytail", "slick_back", "spiky",
 	"bob", "top_knot", "receding", "braid", "afro"]
 ## Strangers who are not in the cast draw from these.
@@ -109,7 +109,8 @@ static func _material(color: Color, stock: Material) -> StandardMaterial3D:
 	var material: StandardMaterial3D = (stock as StandardMaterial3D).duplicate() if stock is StandardMaterial3D else StandardMaterial3D.new()
 	material.resource_name = "Hair"
 	material.albedo_color = color
-	material.roughness = .72
+	material.roughness = .58
+	material.metallic_specular = .32
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return material
 
@@ -124,112 +125,125 @@ static func mesh(style: String) -> ArrayMesh:
 	var accented: bool = true
 	match style:
 		"side_part":
-			# A neat manager's part: combed over to one side, a little volume on top.
-			_cap(hair, {"line": [60, 98, 148], "lift": .05, "crown": .04, "strands": .012})
-			_blob(hair, _on(-28, 34, .06), Vector3(.3, .1, .24), Vector3(.25, 0, .3))
-			_blob(hair, _on(30, 50, .04), Vector3(.24, .08, .26), Vector3(0, 0, -.35))
+			# A sculpted swept pixie: a clean temple and a long diagonal fringe.
+			_cap(hair, {"line": [57, 91, 136], "lift": .065, "crown": .06})
+			for index in range(6):
+				var t: float = index / 5.0
+				_lock(hair, Vector3(-.37 + t * .09, .82, -.24 + t * .42),
+					Vector3(-.3, 1.18, -.12 + t * .52), Vector3(.26, 1.18 - t * .12, .16 + t * .4),
+					Vector3(.43, .64 + t * .06, .26 + t * .19), .105, .052)
 			accented = false
 		"pompadour":
-			# Tight sides, everything else swept up and out over the forehead: the sales pitch.
-			_cap(hair, {"line": [58, 98, 148], "lift": .035, "crown": .04, "brow": .3, "strands": .012})
+			_cap(hair, {"line": [56, 92, 138], "lift": .075, "crown": .085, "brow": .085})
+			for index in range(7):
+				var t: float = index / 6.0
+				_lock(hair, Vector3(-.35, .85, -.28 + t * .52),
+					Vector3(-.32, 1.28, -.2 + t * .64), Vector3(.28, 1.25, -.08 + t * .58),
+					Vector3(.46, .75 + t * .1, -.18 + t * .46), .105, .07)
 			accented = false
 		"bedhead":
-			# Slept at the desk: lumpy, with tufts going every which way.
-			_cap(hair, {"line": [64, 98, 148], "lift": .05, "lumps": .03, "seed": 3.0})
-			for tuft: Array in [[0, 8, .2, 10], [40, 30, .18, -20], [-50, 26, .2, 15], [150, 34, .2, 30],
-					[-140, 40, .18, -25], [95, 50, .16, 0], [-95, 52, .16, 10], [10, 40, .17, -30], [180, 58, .15, 0]]:
-				var root: Vector3 = _on(tuft[0], tuft[1], .02)
-				var out: Vector3 = (root - SCALP).normalized().rotated(Vector3.UP, deg_to_rad(tuft[3]))
-				_cone(hair, root, root + out * tuft[2] + Vector3.UP * .05, .09)
+			# Tousled crop; broad overlapping locks instead of upright cones.
+			_cap(hair, {"line": [62, 94, 140], "lift": .07, "crown": .055})
+			for index in range(9):
+				var x: float = -.38 + index * .093
+				var wave: float = sin(index * 2.3)
+				_lock(hair, Vector3(x, .88, -.3), Vector3(x - .16, 1.13 + wave * .07, -.05),
+					Vector3(x + .13, 1.12, .34), Vector3(x + .07, .71 + wave * .06, .55), .09, .055)
 			accented = false
 		"curly":
-			# A mop of tight curls over a short cap.
-			_cap(hair, {"line": [62, 98, 146], "lift": .05})
-			for row: Array in [[8, 3, 0.0], [28, 8, 20.0], [48, 11, 0.0], [68, 12, 15.0], [88, 10, 0.0], [110, 7, 180.0]]:
-				for index in range(row[1]):
-					var azimuth: float = row[2] + 360.0 * index / row[1]
-					if row[0] >= 68 and absf(wrapf(azimuth, -180, 180)) < (40 if row[0] < 100 else 110):
-						continue
-					_blob(hair, _on(azimuth, row[0], .08), Vector3.ONE * .12, Vector3.ZERO, 7, 4)
+			# Dense, overlapping curl clumps above a neat tapered perimeter.
+			_cap(hair, {"line": [60, 91, 138], "lift": .13, "crown": .12, "curl": .025, "lumps": .018, "edge": .6})
 			accented = false
 		"man_bun":
-			# Scraped back into a bun, the scrum master's tell.
-			_cap(hair, {"line": [60, 98, 148], "lift": .035, "strands": .018})
-			_blob(hair, _on(180, 42, .17), Vector3(.17, .16, .16))
-			_blob(accent, _on(180, 46, .06), Vector3(.12, .12, .05), Vector3(-.75, 0, 0))
-		"horseshoe":
-			# Bald on top, a ring round the back: forty minutes waiting for the microwave.
-			_cap(hair, {"top": [70, 60, 54], "line": [64, 100, 150], "lift": .04, "lumps": .012})
+			_cap(hair, {"line": [58, 92, 140], "lift": .07, "crown": .06, "strands": .009})
+			_swept(hair, .015, 0.0)
+			_bun(hair, Vector3(0, .91, -.5), Vector3(.2, .15, .17))
+			_blob(accent, Vector3(0, .88, -.43), Vector3(.125, .105, .065))
+		"mohawk":
+			# Bare clipped sides and a narrow, continuous crest with swept tips.
+			_crest_base(hair)
+			for index in range(9):
+				var angle: float = deg_to_rad(62.0 - index * 20.0)
+				var azimuth: float = 0.0 if angle >= 0.0 else 180.0
+				var root: Vector3 = _on(azimuth, absf(rad_to_deg(angle)), .018)
+				var out: Vector3 = Vector3(0, cos(angle), sin(angle))
+				var back: Vector3 = Vector3(0, sin(angle), -cos(angle))
+				var height: float = .22 + .045 * sin(index * .7)
+				_lock(hair, root - out * .04, root + out * height * .7,
+					root + out * height + back * .08, root + out * height + back * .19,
+					.135, .14)
 			accented = false
 		"shoulder":
-			# Working from home since 2020; the haircut never came back from lockdown.
-			_cap(hair, {"line": [56, 132, 154], "lift": .06, "crown": .03, "strands": .014, "drape": 1.0})
+			_cap(hair, {"line": [54, 148, 157], "lift": .075, "crown": .045, "drape": 1.0, "strands": .01})
+			_layers(hair, .16)
 			accented = false
 		"chignon":
-			# Sleek, side-swept and pinned low at the nape: a director's updo.
-			_cap(hair, {"line": [60, 100, 150], "lift": .035, "strands": .016})
-			_blob(hair, _on(-22, 40, .05), Vector3(.28, .09, .22), Vector3(.2, 0, .35))
-			_blob(hair, _on(180, 128, .12), Vector3(.24, .17, .16))
+			_cap(hair, {"line": [57, 94, 143], "lift": .065, "strands": .008})
+			for index in range(5):
+				var t: float = index / 4.0
+				_lock(hair, Vector3(-.36, .88, -.12 + t * .3), Vector3(-.18, 1.12, .38 + t * .18),
+					Vector3(.42, .98, .43), Vector3(.46, .57 + t * .025, .15), .09, .035)
+			_bun(hair, Vector3(0, .07, -.5), Vector3(.25, .16, .16))
 			accented = false
 		"mullet":
-			# Business under the cap, party down the back.
-			_cap(hair, {"top": [72, 74, 76], "line": [80, 100, 168], "lift": .045, "lumps": .015, "drape": 1.0,
-				"centre": 180, "span": 72})
+			_cap(hair, {"top": [72, 74, 76], "line": [80, 98, 162], "lift": .065, "drape": 1.0,
+				"centre": 180, "span": 72, "strands": .01})
 			accented = false
 		"undercut":
-			# Clipped dark sides; a dyed quiff down the middle, tallest over the forehead.
-			_cap(accent, {"line": [66, 98, 148], "lift": .03})
-			_blob(hair, Vector3(0, .98, -.04), Vector3(.24, .12, .5), Vector3(-.12, 0, 0))
-			_blob(hair, _on(0, 36, .13), Vector3(.24, .15, .22), Vector3(-.55, 0, 0))
+			_cap(accent, {"line": [62, 91, 138], "lift": .065})
+			# Rose-coloured swept quiff, rooted in the darker clipped sides.
+			_cap(hair, {"line": [55, 43, 72], "lift": .075, "crown": .13, "brow": .17, "strands": .012})
+			_swept(hair, .20, .12, .28)
 		"buzz_beard":
-			# Clippers on a three, and a full beard that is on a different incident.
-			_cap(hair, {"line": [64, 98, 148], "lift": .03})
-			_cap(hair, {"top": [122, 98, 98], "line": [168, 118, 118], "lift": .045, "lumps": .01, "centre": 0,
-				"span": 112})
+			_cap(hair, {"line": [61, 94, 140], "lift": .06})
+			_cap(hair, {"top": [125, 96, 98], "line": [164, 116, 116], "lift": .07, "centre": 0, "span": 110})
 			accented = false
 		"high_ponytail":
-			_cap(hair, {"line": [58, 98, 146], "lift": .035, "strands": .018})
-			_blob(accent, _on(180, 36, .07), Vector3(.1, .1, .06), Vector3(-.5, 0, 0))
-			# Gathered at the crown, it arcs out and falls between the shoulder blades.
-			var tail: Array = []
-			for step in range(13):
-				var along: float = step / 12.0
-				tail.append(_on(180, 36 + 86 * along, .09 + .15 * sin(along * PI * .75)))
-			for step in range(12):
-				_segment(hair, tail[step], tail[step + 1], lerpf(.13, .06, step / 11.0))
+			_cap(hair, {"line": [57, 94, 140], "lift": .07, "crown": .06, "strands": .01})
+			_swept(hair, .015, 0.0)
+			for index in range(5):
+				var x: float = (index - 2) * .043
+				_lock(hair, Vector3(x, .94, -.39), Vector3(x * 1.6, 1.12, -.94),
+					Vector3(x * 1.8, .2, -.92), Vector3(x * .5 + .1, -.36, -.59), .065, .055)
+			_blob(accent, Vector3(0, .96, -.45), Vector3(.13, .115, .05), Vector3(-.4, 0, 0))
 		"slick_back":
-			# Combed straight back with product, high off the forehead.
-			_cap(hair, {"line": [54, 98, 150], "lift": .045, "crown": .03, "brow": .05, "strands": .03})
+			_cap(hair, {"line": [54, 92, 138], "lift": .075, "crown": .075, "brow": .04})
+			_swept(hair, .08, 0.0)
 			accented = false
 		"spiky":
-			_cap(hair, {"line": [62, 98, 146], "lift": .035})
-			for index in range(13):
-				var azimuth: float = 360.0 * index / 10.0 if index < 10 else 120.0 * (index - 10)
-				var polar: float = 42.0 if index < 10 else 14.0
-				var root: Vector3 = _on(azimuth, polar, .02)
-				var out: Vector3 = ((root - SCALP).normalized() + Vector3.UP * .8).normalized()
-				_cone(hair, root, root + out * .22, .09)
+			_cap(hair, {"line": [61, 92, 139], "lift": .065, "crown": .04})
+			for index in range(8):
+				var x: float = -.35 + index * .1
+				_lock(hair, Vector3(x, .86, -.25), Vector3(x - .1, 1.04, .04),
+					Vector3(x + .12, 1.17, .29), Vector3(x + .15, 1.12 + .09 * sin(index * 2.1), .46), .11, .07)
 			accented = false
 		"bob":
-			# A blunt jaw-length bob with a full fringe.
-			_cap(hair, {"line": [66, 132, 136], "lift": .07, "crown": .03, "strands": .01, "drape": 1.0})
+			_cap(hair, {"line": [57, 133, 133], "lift": .075, "crown": .045, "drape": 1.0, "strands": .008})
+			_layers(hair, -.02)
 			accented = false
 		"top_knot":
-			_cap(hair, {"line": [58, 98, 146], "lift": .03, "strands": .02})
-			_blob(hair, Vector3(0, 1.1, -.12), Vector3(.17, .15, .17))
-			_blob(accent, Vector3(0, .99, -.1), Vector3(.11, .05, .11))
+			_cap(hair, {"line": [57, 93, 140], "lift": .065, "strands": .009})
+			_bun(hair, Vector3(0, 1.1, -.16), Vector3(.19, .16, .18))
+			_blob(accent, Vector3(0, .98, -.14), Vector3(.12, .045, .12))
 		"receding":
-			# The temples gave up years ago; the middle is holding on for the next reorg.
-			_cap(hair, {"line": [58, 100, 150], "temples": 34, "lift": .035, "strands": .014})
+			_cap(hair, {"line": [57, 96, 143], "temples": 24, "lift": .08, "strands": .006})
 			accented = false
 		"braid":
-			_cap(hair, {"line": [58, 100, 152], "lift": .04, "strands": .02})
-			for link in range(7):
-				var side: float = .035 if link % 2 == 0 else -.035
-				_blob(hair, Vector3(side, .12 - link * .1, -.46 + link * .012), Vector3(.1, .08, .08), Vector3(0, 0, side * 8.0))
-			_blob(accent, Vector3(0, -.6, -.38), Vector3(.06, .04, .06))
+			_cap(hair, {"line": [57, 95, 145], "lift": .065, "strands": .009})
+			# Three continuous interwoven sections, ending in a tapered loose tail.
+			for strand in range(3):
+				for link in range(8):
+					var a: float = strand * TAU / 3.0 + link * PI * .75
+					var b: float = a + PI * .75
+					var y: float = .28 - link * .095
+					var r: float = .082 - link * .004
+					var start: Vector3 = Vector3(sin(a) * r, y, -.54 + cos(a) * r)
+					var end: Vector3 = Vector3(sin(b) * r, y - .095, -.54 + cos(b) * r)
+					_lock(hair, start, start + Vector3.DOWN * .04, end + Vector3.UP * .04, end, .06 - link * .002, .045, false)
+			_blob(accent, Vector3(0, -.49, -.54), Vector3(.08, .04, .075))
+			_lock(hair, Vector3(0, -.5, -.54), Vector3(-.03, -.58, -.55), Vector3(.01, -.63, -.51), Vector3(.04, -.69, -.5), .07, .045)
 		"afro":
-			_cap(hair, {"line": [60, 94, 136], "lift": .16, "crown": .12, "lumps": .045, "seed": 1.7})
+			_cap(hair, {"line": [59, 91, 131], "lift": .20, "crown": .07, "lumps": .022, "seed": 1.7, "curl": .025, "round": .8, "edge": .6})
 			accented = false
 		_:
 			push_error("No hairstyle called " + style)
@@ -241,6 +255,78 @@ static func mesh(style: String) -> ArrayMesh:
 		accent.commit(result)
 	built[style] = result
 	return result
+
+
+## Continuous sculpted locks with an elliptical section and a pointed finish. Parallel
+## transported-looking frames use the scalp direction, keeping broad faces on the outside.
+## Shared per style; no per-frame geometry or extra draw calls per lock.
+static func _lock(tool: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3,
+		width: float, depth: float, tapered: bool = true) -> void:
+	var grid: Array = []
+	const STEPS: int = 16
+	const SIDES: int = 10
+	for step in range(STEPS + 1):
+		var t: float = step / float(STEPS)
+		var u: float = 1.0 - t
+		var at: Vector3 = a * u * u * u + b * 3.0 * u * u * t + c * 3.0 * u * t * t + d * t * t * t
+		var tangent: Vector3 = ((b - a) * 3.0 * u * u + (c - b) * 6.0 * u * t + (d - c) * 3.0 * t * t).normalized()
+		var out: Vector3 = (at - SCALP).normalized()
+		var side: Vector3 = tangent.cross(out).normalized()
+		if side.length_squared() < .01:
+			side = tangent.cross(Vector3.RIGHT).normalized()
+		out = side.cross(tangent).normalized()
+		var taper: float = lerpf(1.0, .025, pow(t, 2.0)) * lerpf(.3, 1.0, smoothstep(0.0, .18, t)) if tapered else 1.0
+		var strip: Array = []
+		for index in range(SIDES):
+			var angle: float = TAU * index / SIDES
+			var normal: Vector3 = (side * cos(angle) / width + out * sin(angle) / depth).normalized()
+			strip.append([at + (side * cos(angle) * width + out * sin(angle) * depth) * taper, normal])
+		grid.append(strip)
+	for step in range(STEPS):
+		for index in range(SIDES):
+			var next: int = (index + 1) % SIDES
+			_quad(tool, grid[step][index], grid[step][next], grid[step + 1][index], grid[step + 1][next])
+
+
+## The close-cut strip joins the mohawk's raised locks; the rest of the scalp stays bare.
+static func _crest_base(tool: SurfaceTool) -> void:
+	var grid: Array = []
+	for index in range(33):
+		var angle: float = deg_to_rad(65.0 - index * 5.4)
+		var azimuth: float = 0.0 if angle >= 0.0 else 180.0
+		var out: Vector3 = Vector3(0, cos(angle), sin(angle))
+		var at: Vector3 = _on(azimuth, absf(rad_to_deg(angle)), .035)
+		grid.append([[at - Vector3.RIGHT * .12, out], [at + Vector3.RIGHT * .12, out]])
+	for index in range(grid.size() - 1):
+		_quad(tool, grid[index][0], grid[index][1], grid[index + 1][0], grid[index + 1][1])
+
+
+static func _swept(tool: SurfaceTool, height: float, lean: float, half_width: float = .39) -> void:
+	for index in range(8):
+		var x: float = lerpf(-half_width, half_width, index / 7.0)
+		var arch: float = 1.0 - absf(x) / .65
+		_lock(tool, Vector3(x, .77, .36), Vector3(x + lean, 1.04 + height * arch, .49),
+			Vector3(x + lean, 1.06 + height * .3, -.28), Vector3(x * .8, .72, -.5), half_width * .3, .055)
+
+
+## A curved curtain at each temple, with a shaped perimeter and longer layers at the nape.
+static func _layers(tool: SurfaceTool, length: float) -> void:
+	for side in [-1.0, 1.0]:
+		for index in range(6):
+			var t: float = index / 5.0
+			_lock(tool, Vector3(side * .035, 1.02, .28 - t * .53),
+				Vector3(side * .5, 1.00, .53 - t * .85), Vector3(side * .57, .4, .42 - t * .88),
+				Vector3(side * (.44 + .06 * t), .05 - length - t * .035, .22 - t * .64), .115, .047)
+
+
+static func _bun(tool: SurfaceTool, at: Vector3, size: Vector3) -> void:
+	_blob(tool, at, size, Vector3.ZERO, 20, 12)
+	for index in range(5):
+		var t: float = index / 4.0
+		_lock(tool, at + Vector3(-size.x * .8, -.045 + t * .03, 0),
+			at + Vector3(-size.x, size.y * 1.2, -size.z * .8 + t * .2),
+			at + Vector3(size.x, size.y * 1.2, -size.z + t * .18),
+			at + Vector3(size.x * .85, -.06, 0), .042, .025)
 
 
 ## A point `out` above the scalp, `azimuth` degrees round from the face, `polar` down from the crown.
@@ -266,7 +352,7 @@ static func _scalp(azimuth: float, polar: float) -> float:
 
 ## Where the hair sits from: the skin, or for draped hair below the ears, the width at the ears.
 static func _base(spec: Dictionary, azimuth: float, polar: float) -> float:
-	var skin: float = _scalp(azimuth, polar)
+	var skin: float = lerpf(_scalp(azimuth, polar), .54, spec.get("round", 0.0))
 	return lerpf(skin, _scalp(azimuth, minf(polar, PI * .5)), spec.get("drape", 0.0)) if polar > PI * .5 else skin
 
 
@@ -291,8 +377,8 @@ static func _cap(tool: SurfaceTool, spec: Dictionary) -> void:
 	var span: float = deg_to_rad(spec.get("span", 180.0))
 	var centre: float = deg_to_rad(spec.get("centre", 0.0))
 	var whole: bool = span >= PI
-	var columns: int = 28 if whole else maxi(8, int(28.0 * span / PI))
-	var rows: int = 9
+	var columns: int = 112 if whole else maxi(16, int(72.0 * span / PI))
+	var rows: int = 36 if spec.has("curl") else 22
 	var crowned: bool = top.max() > .5
 	var grid: Array = []
 	for column in range(columns + (0 if whole else 1)):
@@ -300,6 +386,7 @@ static func _cap(tool: SurfaceTool, spec: Dictionary) -> void:
 		var from: float = _profile(top, azimuth)
 		var temple: float = (absf(wrapf(azimuth, -PI, PI)) - deg_to_rad(42)) / deg_to_rad(16)
 		var to: float = maxf(from, _profile(line, azimuth) - deg_to_rad(spec.get("temples", 0.0)) * exp(-temple * temple))
+		to += deg_to_rad(spec.get("edge", 0.0)) * sin(azimuth * 23.0)
 		var strip: Array = []
 		if crowned:
 			strip.append([_point(spec, azimuth, from, _base(spec, azimuth, from) - .03), -_along(spec, azimuth, from)])
@@ -321,8 +408,9 @@ static func _thickness(spec: Dictionary, azimuth: float, polar: float) -> float:
 	var thickness: float = spec.get("lift", .05)
 	thickness += spec.get("crown", 0.0) * clampf(1.0 - polar / deg_to_rad(75), 0, 1)
 	thickness += spec.get("brow", 0.0) * pow(maxf(cos(azimuth), 0.0), 3) * clampf(1.0 - absf(polar - deg_to_rad(38)) / deg_to_rad(36), 0, 1)
-	thickness += spec.get("lumps", 0.0) * (sin(azimuth * 5.0 + seed) * sin(polar * 6.0 + seed * 1.3) + .5 * sin(azimuth * 11.0 + polar * 7.0 + seed * 2.1))
-	thickness += spec.get("strands", 0.0) * absf(sin(azimuth * 9.0))
+	thickness += spec.get("lumps", 0.0) * (sin(azimuth * 5.0 + seed) * sin(polar * 6.0 + seed * 1.3) + .5 * sin(azimuth * 11.0 + polar * 7.0 + seed * 2.1)) * minf(polar * 4.0, 1.0)
+	thickness += spec.get("strands", 0.0) * absf(sin(azimuth * 9.0 + polar * 1.5))
+	thickness += spec.get("curl", 0.0) * cos(polar * 18.0) * cos(azimuth * 18.0 + sin(polar * 9.0)) * minf(polar * 5.0, 1.0)
 	return thickness
 
 
@@ -360,17 +448,6 @@ static func _blob(tool: SurfaceTool, at: Vector3, size: Vector3, tilt: Vector3 =
 	_ellipsoid(tool, at, size, Basis.from_euler(tilt), segments, rings)
 
 
-## A rounded length of hair from `from` to `to`, overlapping its neighbours and lying
-## flatter against the head than across it.
-static func _segment(tool: SurfaceTool, from: Vector3, to: Vector3, thickness: float) -> void:
-	var length: Vector3 = to - from
-	var along: Vector3 = length.normalized()
-	var out: Vector3 = ((from + to) * .5 - SCALP).normalized()
-	out = (out - along * out.dot(along)).normalized()
-	var turn: Basis = Basis(along.cross(out), along, out)
-	_ellipsoid(tool, (from + to) * .5, Vector3(thickness, length.length(), thickness * .6), turn, 10, 6)
-
-
 static func _ellipsoid(tool: SurfaceTool, at: Vector3, size: Vector3, turn: Basis, segments: int, rings: int) -> void:
 	var grid: Array = []
 	for ring in range(rings + 1):
@@ -386,19 +463,6 @@ static func _ellipsoid(tool: SurfaceTool, at: Vector3, size: Vector3, turn: Basi
 		for segment in range(segments):
 			var next: int = (segment + 1) % segments
 			_quad(tool, grid[ring][segment], grid[ring][next], grid[ring + 1][segment], grid[ring + 1][next])
-
-
-## A five-sided faceted tuft from `root` to `tip`.
-static func _cone(tool: SurfaceTool, root: Vector3, tip: Vector3, width: float) -> void:
-	var axis: Vector3 = (tip - root).normalized()
-	var side: Vector3 = axis.cross(Vector3.FORWARD if absf(axis.y) > .9 else Vector3.UP).normalized()
-	for index in range(5):
-		var a: Vector3 = root + side.rotated(axis, TAU * index / 5.0) * width
-		var b: Vector3 = root + side.rotated(axis, TAU * (index + 1) / 5.0) * width
-		var normal: Vector3 = (b - a).cross(tip - a).normalized()
-		if normal.dot((a + b) * .5 - root) < 0.0:
-			normal = -normal
-		_triangle(tool, [a, normal], [b, normal], [tip, normal])
 
 
 static func _quad(tool: SurfaceTool, a: Array, b: Array, c: Array, d: Array) -> void:

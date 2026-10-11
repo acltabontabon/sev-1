@@ -32,10 +32,34 @@ func world_bounds(hair: MeshInstance3D) -> AABB:
 	return hair.global_transform * hair.mesh.get_aabb()
 
 
+## Check the actual triangle surface, not its bounding box: the former thin buzz cap
+## exposed skin between vertices around the temples and crown in rendered portraits.
+func check_scalp_coverage() -> void:
+	var faces: PackedVector3Array = HAIR.mesh("buzz_beard").get_faces()
+	var exposed: int = 0
+	for polar in [8.0, 24.0, 40.0, 53.0, 76.0]:
+		for azimuth in range(0, 360, 15):
+			# Forehead is intentionally exposed below the front hairline.
+			if polar > 55 and (azimuth < 65 or azimuth > 295):
+				continue
+			var skin: Vector3 = HAIR._on(azimuth + 3.0, polar, .004)
+			var ray: Vector3 = (skin - HAIR.SCALP).normalized() * .2
+			var covered: bool = false
+			for triangle in range(0, faces.size(), 3):
+				if Geometry3D.segment_intersects_triangle(skin, skin + ray,
+						faces[triangle], faces[triangle + 1], faces[triangle + 2]) != null:
+					covered = true
+					break
+			if not covered:
+				exposed += 1
+	check(exposed == 0, "buzz cut covers sampled scalp between mesh vertices (%d exposed points)" % exposed)
+
+
 func _run() -> void:
+	check_scalp_coverage()
 	for style in HAIR.STYLES:
 		var bounds: AABB = HAIR.mesh(style).get_aabb()
-		check(bounds.size.x > .5 and bounds.size.length() < 3.5 and AABB(Vector3(-1.3, -1.3, -1.3), Vector3.ONE * 2.6).encloses(bounds),
+		check(bounds.size.x > (.2 if style == "mohawk" else .5) and bounds.size.length() < 3.5 and AABB(Vector3(-1.3, -1.3, -1.3), Vector3.ONE * 2.6).encloses(bounds),
 			"the %s cut is built around the head: %s" % [style, bounds])
 	var crew_styles: Array = []
 	for kind: String in ["record", "blocker", "invite", "scope"]:
@@ -69,13 +93,14 @@ func _run() -> void:
 		var bounds: AABB = world_bounds(hair)
 		if style == "mullet":
 			check(bounds.position.y < head_at(body).y - .2 * size, "Facilities' mullet hangs below the hard hat")
-		elif style == "horseshoe":
-			check(bounds.end.y < head_at(body).y + .85 * size and bounds.size.x > .9 * size, "Microwave is bald on top with a ring round the back")
+		elif style == "mohawk":
+			check(bounds.end.y > head_at(body).y + 1.1 * size and hair.mesh.get_aabb().size.x < .35, "Microwave wears a tall narrow mohawk with exposed sides")
 		else:
 			check(bounds.end.y > head_at(body).y + .85 * size, "%s's hair reaches above the crown" % person.entry.name)
 	check(worn.size() >= 11, "eleven coworkers wear eleven different haircuts")
 	# Through animation, the cut stays on the head.
 	var manager: Dictionary = crew.person("Manager")
+	check(manager.body.scene_file_path.ends_with("suit_female.fbx"), "Morgan retains main's female office body after the rebase")
 	var cut: Node3D = hairstyles(manager.body)[0]
 	manager.animator.play("CharacterArmature|Walk", 0.0)
 	manager.animator.seek(.1, true)
