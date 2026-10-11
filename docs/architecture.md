@@ -552,11 +552,12 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   and head bones (limited yaw); body roots, hips and legs remain fixed on their
   furniture. Opening cleanup and coworker reset restore the saved bone poses.
 - **Notifications.** `voice_controller.gd` emits `line_started`; `game/ui/notification_feed.gd`
-  turns gameplay lines into sender cards (max three, expiring). ALERT-stage lines use
+  turns gameplay lines into one expiring radio caption, labeled “NO REPLY NEEDED.”
+  Channels, timestamps, read receipts and reaction counters are omitted. ALERT-stage lines use
   film subtitles instead.
 - **HUD and dialogs.** `playtest_hud.gd` restyles its labels into a ticket header and adds
   a vitals card, boss bar and notice. `upgrade_selection.gd` builds
-  change-request tickets or an incident-call response inside its three buttons and stores each
+  plain combat power-ups or an incident-call response inside its three buttons and stores each
   card's plain summary in meta `summary`; closing clears card contents.
 - **Office.** `tools/build_office.py` adds the meeting wing, pantry, gate, corridor, vault,
   `SpawnPoints` markers, PBR materials (triplanar), Kenney props (tinted by
@@ -927,3 +928,25 @@ a single rendered duel measured 59.92 FPS mean, 16.667 ms median, 17.028 ms p95 
 were excluded. This staged measurement does not establish ordinary full-run
 performance or Windows runtime behavior. Human timing, weight and listening
 acceptance remain open; no release was rebuilt.
+
+
+## Operations and choice clarity (11 October 2026)
+
+Operations uses the existing wood/material palette with vertical battens behind the racks,
+a shallow wall shelf, warm edge strips and a server-corridor arrow. The two live screens
+remain the focal point; the lower label stays short rather than cycling a long uptime joke.
+These are wall details without world collision; floor routes and baked navigation stay valid.
+No outside assets were added for this pass.
+
+Power-ups now say “Choose a power-up” after an area clear. Each card leads with its combat
+benefit, reads tuning from the run exports, shows debt and enemy chase speed before/after,
+and states that it lasts this run. The existing corporate names remain secondary.
+Management's separate reply screen explains Burnout as stress. Selection, stacking,
+consequences and retry behavior are preserved. The upgrade confirmation is a short HUD
+notice; its redundant debt voice line and the timed visibility/RCA jokes are removed.
+
+Rendered office, power-up and radio views were inspected at 1280×720 with Forward+/Metal
+on Apple M2 Pro. This is visual review, not a performance measurement or human acceptance.
+Playtest: clear the first outbreak, choose with 1/2/3, then follow NEXT and press E to
+answer Management. Check whether the power-up cost is clear and the wall reads as a
+monitoring area with a route to the server corridor. Human combat/audio acceptance remains open.

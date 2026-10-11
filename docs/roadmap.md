@@ -149,3 +149,10 @@ adds a reciprocal sword/trident lock, duck, riposte, block and knockback exchang
 boss finisher. Gate: creator accepts contact, weight, camera continuity, pacing and
 sound, including TAB skip and retry. It uses existing CC0 motion and adds no boss
 mechanic, new episode or release build.
+
+
+The 11 October Operations clarity pass frames the live status screens with existing
+materials and adds server-corridor wayfinding. Power-up cards lead with combat effects,
+cost and run duration; radio captions show one message at a time and distinguish
+passive speech from dialogue choices. [Implementation and playtest checkpoint](architecture.md#operations-and-choice-clarity-11-october-2026).
+Creator visual and comprehension acceptance remains open.

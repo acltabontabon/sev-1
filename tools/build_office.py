@@ -327,7 +327,7 @@ s.box('ForgottenBag',(-5,.22,9.6),(.36,.44,.25),'fabric')
 # Operations wall: large restrained information, hardware and ordered cable tray.
 for idx,x in enumerate([-9.8,-8.7,-7.6,-6.5]): s.instance(f'Rack{idx}','server_rack',(x,0,-13.8),0)
 s.box('OperationsPanel',(-1.7,2.5,-15.68),(7.8,3.8,.10),'walnut')
-s.text('OperationsTitle','PRODUCTION OPERATIONS',(-1.7,4.10,-15.60),.006,62)
+s.text('OperationsTitle','PRODUCTION OPERATIONS',(-1.7,4.10,-15.60),.0048,62)
 for idx,x in enumerate([-4.1,.7]):
     s.box(f'Dashboard{idx}',(x,2.6,-15.51),(3.5,2.0,.09),'plastic')
     s.box(f'DashboardFace{idx}',(x,2.6,-15.45),(3.33,1.82,.008),'screen')
@@ -348,7 +348,7 @@ for i in range(7): s.box(f'GateSlat{i}',(0,-1.6+i*.55,.12),(3.9,.05,.01),'black'
 s.text('GateSign','RESTRICTED  ·  PRODUCTION CORE',(0,.6,.13),.00453,44,(1,.62,.2,1),parent='VaultGate')
 s.text('GateSubsign','Authorized personnel and whoever is on call',(0,.18,.13),.0038,30,(1,.8,.5,1),parent='VaultGate')
 s.text('DoorNotice','B2  ·  SERVER CORRIDOR',(9,4.45,-15.72),.005,44,(1,.62,.2,1))
-s.text('Wayfinding','OPERATIONS  /  04',(-8.3,3.4,-15.6),.005,48)
+s.text('Wayfinding','SERVER RACKS',(-8.3,3.4,-15.44),.0038,40)
 # Selective dry humor, not a wall of jokes.
 # A status-page printout, framed like an award: green dot and all.
 status=s.node('StatusPrint','Node3D',(13.70,2.4,7),props='rotation_degrees = Vector3(0, -90, 0)\n')
@@ -382,7 +382,7 @@ for idx,(y,text,mat,tilt,dx,size) in enumerate([(2.22,'WHO DEPLOYED\nON FRIDAY?'
     s.text(f'StickyText{idx}',text,(dx,y,.007),size,64,(.15,.15,.2,1),parent=stickies,rot=(0,0,tilt),face=SIGN_FONT)
 s.box('Whiteboard',(-12.0,2.2,-3.65),(1.7,1.1,.04),'paper')
 s.text('WhiteboardText','ON-CALL ROTATION\nMon  YOU\nTue  YOU\nWed  YOU (backup: you)',(-12.0,2.25,-3.62),.0028,40,(.15,.2,.3,1))
-s.text('Uptime','UPTIME 99.999%',(-1.7,1.05,-15.6),.004,48,(.3,.95,.7,1))
+s.text('Uptime','LIVE INCIDENT STATUS',(-1.7,1.05,-15.6),.0035,40,(.3,.95,.7,1))
 
 # ---------------------------------------------------------------- Area B/C wing
 # Meeting wing: corridor x 14..18.5; Quick Sync and the pantry open off it.
@@ -625,5 +625,13 @@ s.nodes = [node for node in s.nodes if not any(f'name="{name}"' in node for name
 lamp = s.external('res://assets/environment/poly_haven_workstation/desk_lamp_arm_01.glb', 'PackedScene')
 s.nodes.append(f'[node name="TaskLamp" parent="." instance={lamp}]\nposition = Vector3(-3.37, 0.8225, 9.12)\nrotation_degrees = Vector3(0, 180, 0)\nscale = Vector3(0.72, 0.72, 0.72)')
 build_office_details(s)
+# A quiet architectural surround frames the incident screens, off the combat floor.
+for idx,x in enumerate([-5.85,2.45]):
+    s.box(f'OpsEdge{idx}',(x,2.5,-15.55),(.07,3.8,.05),'warm')
+for idx in range(12):
+    s.box(f'OpsBatten{idx}',(-11.5+idx*.45,2.05,-15.6),(.09,3.8,.12),'walnut')
+s.box('OpsShelf',(-1.7,.86,-15.35),(7.8,.10,.55),'walnut')
+s.text('OpsRoute','SERVER CORRIDOR  →',(-1.7,.54,-15.59),.004,44,(1,.78,.48,1))
+s.text('OpsZone','01  /  MONITORING',(-8.4,3.9,-15.44),.0035,40,(.72,.85,.87,1))
 s.save('office_after_hours')
 print('Authored office scene, shared materials, and three reusable furniture scenes.')

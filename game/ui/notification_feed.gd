@@ -1,12 +1,9 @@
 extends Control
-## "Synergize": the incident told through a believable internal chat client.
+## One expiring radio caption at a time, separate from interactive conversations.
 ## Each spoken line arrives as a card from its sender's channel; the engineer's own
 ## lines are said out loud, so they get a different, unboxed treatment.
 
-const LIMIT: int = 3
-## Corporate channels collect reactions while you read; nobody replies.
-const REACTORS: Array[String] = ["MANAGEMENT", "LEADERSHIP", "PEOPLE OPERATIONS", "INCIDENT CHANNEL", "PRODUCT", "STATUS PAGE"]
-const REACTIONS: Array[String] = ["+1", "eyes", "pray", "rocket", "fire"]
+const LIMIT: int = 1
 const LINGER: float = 2.2
 ## Speaker: initials, color, channel, small print.
 const SENDERS: Dictionary = {
@@ -61,7 +58,7 @@ func post(character: String, text: String, seconds: float, time: String) -> Cont
 	return card
 
 
-func _chat_card(character: String, text: String, time: String) -> Control:
+func _chat_card(character: String, text: String, _time: String) -> Control:
 	var sender: Array = SENDERS.get(character, [character.left(2), Color(.6, .7, .75), "#general", ""])
 	var panel: PanelContainer = PanelContainer.new()
 	panel.theme_type_variation = "Card"
@@ -96,7 +93,7 @@ func _chat_card(character: String, text: String, time: String) -> Control:
 	body.add_theme_constant_override("separation", 2)
 	row.add_child(body)
 	var head: Label = Label.new()
-	head.text = "%s   %s  ·  %s" % [_title(character), sender[2], time]
+	head.text = _title(character)
 	head.theme_type_variation = "Eyebrow"
 	head.add_theme_color_override("font_color", sender[1].lightened(.2))
 	head.clip_text = true
@@ -104,6 +101,12 @@ func _chat_card(character: String, text: String, time: String) -> Control:
 	head.custom_minimum_size.x = 300
 	head.size_flags_horizontal = Control.SIZE_FILL
 	body.add_child(head)
+	var purpose: Label = Label.new()
+	purpose.name = "Purpose"
+	purpose.text = "RADIO · NO REPLY NEEDED"
+	purpose.theme_type_variation = "Eyebrow"
+	purpose.add_theme_font_size_override("font_size", 12)
+	body.add_child(purpose)
 	var message: Label = Label.new()
 	message.name = "Message"
 	message.text = text
@@ -111,23 +114,6 @@ func _chat_card(character: String, text: String, time: String) -> Control:
 	message.custom_minimum_size.x = 300
 	message.add_theme_font_size_override("font_size", 17)
 	body.add_child(message)
-	if not sender[3].is_empty():
-		var foot: Label = Label.new()
-		foot.text = sender[3]
-		foot.theme_type_variation = "Caption"
-		foot.add_theme_font_size_override("font_size", 12)
-		body.add_child(foot)
-	if character in REACTORS:
-		var chip: Label = Label.new()
-		chip.name = "Reactions"
-		chip.theme_type_variation = "MonoLabel"
-		chip.add_theme_font_size_override("font_size", 11)
-		chip.add_theme_color_override("font_color", sender[1].lightened(.3))
-		panel.set_meta("reaction", REACTIONS[(text.length() + character.length()) % REACTIONS.size()])
-		panel.set_meta("count", 1)
-		panel.set_meta("next", .6)
-		chip.text = "[ %s  1 ]" % panel.get_meta("reaction")
-		body.add_child(chip)
 	return panel
 
 
@@ -168,16 +154,6 @@ func _layout() -> void:
 
 
 func tick(delta: float) -> void:
-	for card: Control in cards:
-		var chip: Label = card.find_child("Reactions", true, false)
-		if chip == null:
-			continue
-		var next: float = card.get_meta("next") - delta
-		if next <= 0:
-			card.set_meta("count", card.get_meta("count") + 1 + card.get_meta("count") / 4)
-			next = randf_range(.35, .9)
-			chip.text = "[ %s  %d ]   [ seen  %d ]" % [card.get_meta("reaction"), card.get_meta("count"), card.get_meta("count") * 3 + 4]
-		card.set_meta("next", next)
 	for card: Control in cards.duplicate():
 		var left: float = card.get_meta("expires") - delta
 		card.set_meta("expires", left)

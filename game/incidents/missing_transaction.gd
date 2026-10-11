@@ -1691,15 +1691,12 @@ func _offer_upgrade(next: Stage) -> void:
 func choose_upgrade(index: int) -> void:
 	if not upgrade_pending or index < 0 or index > 2 or terminal():
 		return
-	var before: int = run.debt
 	run.select(index)
 	run.apply_to(player)
 	upgrade_pending = false
 	upgrade_ui.close()
 	_enter(upgrade_next)
-	message = "%s • +%d DEBT → %d / %s\n%s" % [run.TITLES[index], run.debt - before, run.debt, run.severity(), message]
-	if run.debt > before:
-		presentation.say("debt")
+	message = "Power-up active: %s · this run only\n%s" % [["More damage", "Less damage taken", "Faster dodge"][index], message]
 	player.camera_rig.set_capture(true)
 
 

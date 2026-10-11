@@ -1239,6 +1239,18 @@ height = 0.16
 radial_segments = 12
 material = ExtResource("25")
 
+[sub_resource type="BoxMesh" id="r297"]
+size = Vector3(0.07000, 3.80000, 0.05000)
+material = ExtResource("14")
+
+[sub_resource type="BoxMesh" id="r298"]
+size = Vector3(0.09000, 3.80000, 0.12000)
+material = ExtResource("8")
+
+[sub_resource type="BoxMesh" id="r299"]
+size = Vector3(7.80000, 0.10000, 0.55000)
+material = ExtResource("8")
+
 [node name="OfficeAfterHours" type="Node3D"]
 script = ExtResource("1")
 
@@ -2146,7 +2158,7 @@ mesh = SubResource("r70")
 position = Vector3(-1.70000, 4.10000, -15.60000)
 text = "PRODUCTION OPERATIONS"
 font_size = 62
-pixel_size = 0.006
+pixel_size = 0.0048
 modulate = Color(0.65, 0.77, 0.77, 1)
 outline_size = 0
 rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
@@ -2349,10 +2361,10 @@ rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
 
 
 [node name="Wayfinding" type="Label3D" parent="."]
-position = Vector3(-8.30000, 3.40000, -15.60000)
-text = "OPERATIONS  /  04"
-font_size = 48
-pixel_size = 0.005
+position = Vector3(-8.30000, 3.40000, -15.44000)
+text = "SERVER RACKS"
+font_size = 40
+pixel_size = 0.0038
 modulate = Color(0.65, 0.77, 0.77, 1)
 outline_size = 0
 rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
@@ -2681,9 +2693,9 @@ rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
 
 [node name="Uptime" type="Label3D" parent="."]
 position = Vector3(-1.70000, 1.05000, -15.60000)
-text = "UPTIME 99.999%"
-font_size = 48
-pixel_size = 0.004
+text = "LIVE INCIDENT STATUS"
+font_size = 40
+pixel_size = 0.0035
 modulate = Color(0.3, 0.95, 0.7, 1)
 outline_size = 0
 rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
@@ -6252,3 +6264,98 @@ rotation_degrees = Vector3(0.00000, -7.00000, 0.00000)
 [node name="MeetingCup1" type="MeshInstance3D" parent="OfficeFinish"]
 position = Vector3(9.38000, 2.44000, -7.60000)
 mesh = SubResource("r296")
+
+
+[node name="OpsEdge0" type="MeshInstance3D" parent="."]
+position = Vector3(-5.85000, 2.50000, -15.55000)
+mesh = SubResource("r297")
+cast_shadow = 0
+
+[node name="OpsEdge1" type="MeshInstance3D" parent="."]
+position = Vector3(2.45000, 2.50000, -15.55000)
+mesh = SubResource("r297")
+cast_shadow = 0
+
+[node name="OpsBatten0" type="MeshInstance3D" parent="."]
+position = Vector3(-11.50000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten1" type="MeshInstance3D" parent="."]
+position = Vector3(-11.05000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten2" type="MeshInstance3D" parent="."]
+position = Vector3(-10.60000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten3" type="MeshInstance3D" parent="."]
+position = Vector3(-10.15000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten4" type="MeshInstance3D" parent="."]
+position = Vector3(-9.70000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten5" type="MeshInstance3D" parent="."]
+position = Vector3(-9.25000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten6" type="MeshInstance3D" parent="."]
+position = Vector3(-8.80000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten7" type="MeshInstance3D" parent="."]
+position = Vector3(-8.35000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten8" type="MeshInstance3D" parent="."]
+position = Vector3(-7.90000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten9" type="MeshInstance3D" parent="."]
+position = Vector3(-7.45000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten10" type="MeshInstance3D" parent="."]
+position = Vector3(-7.00000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsBatten11" type="MeshInstance3D" parent="."]
+position = Vector3(-6.55000, 2.05000, -15.60000)
+mesh = SubResource("r298")
+
+
+[node name="OpsShelf" type="MeshInstance3D" parent="."]
+position = Vector3(-1.70000, 0.86000, -15.35000)
+mesh = SubResource("r299")
+
+
+[node name="OpsRoute" type="Label3D" parent="."]
+position = Vector3(-1.70000, 0.54000, -15.59000)
+text = "SERVER CORRIDOR  →"
+font_size = 44
+pixel_size = 0.004
+modulate = Color(1, 0.78, 0.48, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)
+
+
+[node name="OpsZone" type="Label3D" parent="."]
+position = Vector3(-8.40000, 3.90000, -15.44000)
+text = "01  /  MONITORING"
+font_size = 40
+pixel_size = 0.0035
+modulate = Color(0.72, 0.85, 0.87, 1)
+outline_size = 0
+rotation_degrees = Vector3(0.00000, 0.00000, 0.00000)

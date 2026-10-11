@@ -23,9 +23,10 @@ func _run() -> void:
 	check(hud.banner.visible and "SEV-1 DECLARED" in hud.banner_text.text, "declaring the incident raises the full-width alert banner")
 	check(incident.timeline.size() == 1 and "declared" in incident.timeline[0][1], "the postmortem timeline records the declaration")
 	check(story.sequence == ["status_except"] and incident.voice.current_line == "status_ok", "the status page claim and its correction are queued as one joke")
-	check(feed.cards.size() == 1 and "All systems operational." in feed.cards[0].find_child("Message", true, false).text, "a spoken corporate line arrives as a chat card")
+	check(feed.cards.size() == 1 and "All systems operational." in feed.cards[0].find_child("Message", true, false).text, "a spoken corporate line arrives as a radio card")
+	check(feed.cards[0].find_child("Purpose", true, false).text == "RADIO · NO REPLY NEEDED", "radio speech clearly distinguishes itself from interactive dialogue")
 	await frames(150)
-	check(feed.cards.size() == 2 and "Except three." in feed.cards[0].find_child("Message", true, false).text, "the correction lands as its own card after the claim")
+	check(feed.cards.size() == 1 and "Except three." in feed.cards[0].find_child("Message", true, false).text, "the correction lands as its own card after the claim")
 	# Investigation has no arrivals, so only the lines under test speak.
 	incident._cleanup()
 	incident._enter(incident.Stage.INVESTIGATION)
@@ -78,7 +79,10 @@ func _run() -> void:
 	incident._offer_upgrade(incident.Stage.INVESTIGATION)
 	await frames(3)
 	var buttons: Array[Button] = incident.upgrade_ui.buttons
-	check(buttons[0].has_focus() and flavor_ok(buttons), "change requests open focused, each with its flavor line")
+	check(buttons[0].has_focus() and flavor_ok(buttons), "power-ups open focused with plain combat descriptions")
+	check(incident.upgrade_ui.heading.text == "Choose a power-up" and "run ends" in incident.upgrade_ui.subhead.text, "power-up purpose and duration are explicit")
+	check("More damage" in incident.upgrade_ui.summary(0) and "+35%" in incident.upgrade_ui.summary(0), "power-up summary ties the benefit to its actual value")
+	check(feed.LIMIT == 1, "only one radio caption may occupy combat space")
 	await key(KEY_RIGHT)
 	check(buttons[1].has_focus(), "right arrow walks to the next change request")
 	for button in buttons:

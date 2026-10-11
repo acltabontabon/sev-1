@@ -1,14 +1,12 @@
 extends CanvasLayer
 ## One persistent modal per incident; stays interactive while combat is paused.
-## Upgrades are change-request tickets on the Change Advisory Board's table; the
-## management decision is an urgent DM with three ways to answer. Each card keeps its
+## Power-ups lead with combat benefits; management offers three clear replies.
+## Each card keeps its
 ## full plain-text summary in meta "summary" for accessibility and tests.
 signal selected(index: int)
-const FLAVOR: Array[String] = ["“Tests are just opinions.”", "“Slower. Safer. Somehow controversial.”", "“Nothing is more permanent.”"]
+const FLAVOR: Array[String] = ["Hit harder with every attack.", "Take less damage from enemy hits.", "Dodge again sooner."]
 const REPLIES: Array[String] = ["“Five minutes.”", "“I'll have a realistic estimate shortly.”", "“It's blocked on another team.”"]
 const RISK: Array = [["RISK: HIGH", Color(1, .38, .25)], ["RISK: LOW", Color(.35, .9, .6)], ["RISK: MEDIUM", Color(1, .72, .3)]]
-const BENEFITS: Array[String] = ["+35% damage", "−20% damage taken", "−25% dodge recovery"]
-const TILT: Array[float] = [-.022, .012, -.008]
 var panel: CenterContainer
 var shade: ColorRect
 var header: VBoxContainer
@@ -257,39 +255,34 @@ var guard_left: float = 0.0
 
 func open(run: Node) -> void:
 	window_bar.hide()
-	eyebrow.text = "CHANGE ADVISORY BOARD  ·  EMERGENCY SESSION  ·  QUORUM: YOU"
-	heading.text = "Approve one shortcut."
-	subhead.text = "Every shortcut is approved. Tech debt now %d / %d — %s. Choices last this run only." % [run.debt, run.debt_limit, run.severity()]
-	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   R RESTARTS THE RUN"
+	eyebrow.text = "AREA CLEARED  ·  COMBAT PAUSED"
+	heading.text = "Choose a power-up"
+	subhead.text = "Pick one. Bonuses stack and last until this run ends. Debt makes enemies chase faster."
+	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   CHOOSE TO CONTINUE"
+	var titles: Array[String] = ["More damage", "Less damage taken", "Faster dodge"]
+	var benefits: Array[String] = [
+		"+%d%% attack damage" % roundi(run.damage_bonus * 100),
+		"−%d%% damage taken" % roundi(run.defense_bonus * 100),
+		"−%d%% dodge recovery" % roundi(run.recovery_bonus * 100)]
 	for index in range(3):
 		var button: Button = buttons[index]
 		var risk: Array = RISK[index]
 		button.text = ""
-		button.rotation = TILT[index]
-		_card_style(button, Color(.075, .085, .095, .98), risk[1], 6)
+		button.rotation = 0.0
+		_card_style(button, Color(.075, .085, .095, .98), risk[1], 12)
 		var column: VBoxContainer = _clear(button)
-		var top: HBoxContainer = HBoxContainer.new()
-		top.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		column.add_child(top)
-		_badge(top, index + 1, risk[1])
-		top.get_child(0).size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		var gap: Control = Control.new()
-		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		top.add_child(gap)
-		_pill(top, risk[0], risk[1])
-		_text(column, "CR-%04d  ·  FILED 17:%02d" % [412 + index * 37, 4 + index], "Eyebrow")
-		_text(column, run.TITLES[index], "Headline", 36)
-		_text(column, FLAVOR[index], "Caption", 16, Color(.72, .76, .8))
+		_badge(column, index + 1, risk[1])
+		_text(column, titles[index], "Headline", 32)
+		_text(column, run.TITLES[index], "Caption", 15, Color(.65, .7, .74))
 		column.add_child(HSeparator.new())
-		_text(column, BENEFITS[index], "Headline", 30, Color(.55, 1, .8))
+		_text(column, benefits[index], "Headline", 27, Color(.55, 1, .8))
+		_text(column, FLAVOR[index], "Caption", 17)
 		var after: int = clampi(run.debt + run.cost(index), 0, run.debt_limit)
-		_text(column, ("+%d tech debt" % run.cost(index)) if run.cost(index) > 0 else "No tech debt", "Subhead", 18, risk[1] if run.cost(index) > 0 else Color(.55, 1, .8))
-		_meter(column, run.debt, after, run.debt_limit, risk[1])
-		_text(column, "Debt %d → %d (%s)  ·  enemies +%d%% pursuit" % [run.debt, after, run.severity(after), roundi((run.pressure(after) - 1) * 100)], "MonoLabel", 12, Color(.65, .7, .74))
-		_text(column, run.modifier_summary(index), "MonoLabel", 12, Color(.65, .7, .74))
-		_stamp(button, "APPROVE?", risk[1])
-		var text: String = run.option_text(index)
-		button.set_meta("summary", text.insert(text.find("\n") + 1, FLAVOR[index] + "\n\n"))
+		_text(column, ("Cost: +%d debt" % run.cost(index)) if run.cost(index) > 0 else "No added debt", "Subhead", 18, risk[1])
+		_text(column, "Enemy chase speed: +%d%% → +%d%%" % [roundi((run.pressure() - 1) * 100), roundi((run.pressure(after) - 1) * 100)], "Caption", 16)
+		_text(column, "Debt: %d → %d" % [run.debt, after], "Caption", 15, Color(.65, .7, .74))
+		_text(column, "THIS RUN ONLY", "Eyebrow")
+		button.set_meta("summary", "%s\n%s\n%s" % [titles[index], FLAVOR[index], run.option_text(index)])
 	_show_choices()
 
 
@@ -345,8 +338,8 @@ func _input(event: InputEvent) -> void:
 func open_corporate(run: Node, seconds: float) -> void:
 	window_bar.show()
 	eyebrow.text = "CONTAINMENT REQUEST  ·  MANAGEMENT CALL  ·  ETA REQUIRED"
-	heading.text = "“Before you shut delivery down: when will this be over?”"
-	subhead.text = "Choose your commitment. Clear the delivery outbreak to recover Burnout."
+	heading.text = "Management asks: how long?"
+	subhead.text = "Choose a reply to continue. Burnout is stress: high stress increases damage dealt and taken."
 	footer.text = "1 · 2 · 3   OR   ← →  +  ENTER   ·   CLEARING CONTAINMENT RELIEVES %d BURNOUT   ·   DEBT UNCHANGED" % run.containment_relief
 	var changes: Array[int] = [run.commit_burnout, run.estimate_burnout, -run.dependency_relief]
 	var titles: Array[String] = ["Commit to Five Minutes", "Give a Realistic Estimate", "Escalate the Dependency"]

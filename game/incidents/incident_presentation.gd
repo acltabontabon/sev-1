@@ -1436,12 +1436,8 @@ func used(key: String) -> void:
 
 ## Environmental storytelling that runs during play: the gate, the corridor, the sparks.
 func _environment(delta: float) -> void:
-	# The public status page stays green and keeps improving while everything is red.
-	var uptime: Label3D = incident.room.get_node("Uptime")
-	if incident.alert_played:
-		uptime.text = "STATUS PAGE: ALL SYSTEMS OPERATIONAL  ·  UPTIME 99.9%02d%%" % (90 + int(incident.elapsed / 7.0) % 10)
-	else:
-		uptime.text = "UPTIME 99.999%"
+	# Keep this wall a legible landmark; incident details live on the two screens.
+	incident.room.get_node("Uptime").text = "LIVE INCIDENT STATUS" if incident.alert_played else "MONITORING ONLINE"
 	var gate: Node3D = incident.room.get_node("VaultGate")
 	var open: bool = incident.stage == incident.Stage.BOSS
 	gate.position.y = move_toward(gate.position.y, 5.9 if open else 2.0, delta * 2.2)
@@ -2385,10 +2381,8 @@ func _process(delta: float) -> void:
 			boss_seen = true
 			say("boss", true)
 	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 10: say("contain")
-	if incident.stage == incident.Stage.ENCOUNTER_TWO and time > 18: say("visibility")
 	if incident.player.dodging and incident.stage in [incident.Stage.ENCOUNTER_ONE, incident.Stage.ENCOUNTER_TWO, incident.Stage.BOSS]:
 		say("first_dodge")
-	if incident.stage == incident.Stage.BOSS and incident.boss_time > 22: say("rca")
 	caption.text = voice.subtitle
 	if incident.stage == incident.Stage.ALERT and "\n" in caption.text:
 		# Film subtitles: the line only; the shot already shows who is speaking.
