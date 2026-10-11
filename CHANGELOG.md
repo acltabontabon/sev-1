@@ -5,6 +5,11 @@ ordinary hardware playtesting remain separate from automated checks.
 
 ## [0.2.51] — 2026-10-12
 
+Release-page follow-up: replaced the reused launch imagery and generic copy with
+build-specific highlights and fresh captures of the released gameplay. The README
+now shows the current title, rollback survey and crew conversation. Installer
+artifacts and the published game tag are unchanged.
+
 - Force Rollback now generates mandatory satisfaction paperwork. Subsequent hits
   stamp approval stars; ignoring the form counts as consent. The survey never
   captures combat input, hides during conversations/cinematics and clears on retry.

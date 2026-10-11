@@ -1,7 +1,7 @@
 <h1 align="center">SEV-1: Friday Deployment</h1>
 
 <p align="center">
-  <img src="docs/marketing/title.png" alt="SEV-1 title over an exhausted engineer in the nighttime office" width="960">
+  <img src="docs/marketing/v0_2_51_title.png" alt="SEV-1 0.2.51 title menu with the on-call engineer reaching for coffee" width="960">
 </p>
 
 <h3 align="center">Your weekend has been escalated.</h3>
@@ -38,16 +38,16 @@ Grab an oversized sword. Fight your way through the office. Try to clock out.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/marketing/combat.png" alt="The engineer unleashes a fiery whirlwind against office monsters" width="480"></td>
-    <td width="50%"><img src="docs/marketing/conversation.png" alt="A voiced conversation with the engineering manager offers the reply: Can I go home?" width="480"></td>
+    <td width="50%"><img src="docs/marketing/v0_2_51_rollback.png" alt="Force Rollback ends with a mandatory satisfaction survey while the engineer faces a skeleton" width="480"></td>
+    <td width="50%"><img src="docs/marketing/v0_2_51_crew.png" alt="The engineer and Jo share an off-the-clock conversation" width="480"></td>
   </tr>
   <tr>
-    <td align="center"><em>Resolve the incident. Aggressively.</em></td>
-    <td align="center"><em>There will be a follow-up meeting.</em></td>
+    <td align="center"><em>Your feedback is mandatory. Your sword will do.</em></td>
+    <td align="center"><em>Tell me something normal.</em></td>
   </tr>
 </table>
 
-<p align="center"><sub>Actual development screenshots. Presentation may change between builds.</sub></p>
+<p align="center"><sub>In-engine captures from the 0.2.51 gameplay source. Preview scenes stage the encounters and cameras.</sub></p>
 
 ## Your shift starts here
 

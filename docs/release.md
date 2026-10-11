@@ -25,6 +25,19 @@ direct installer links, features, installation and feedback. `tools/package_ci.p
 fills its version and appends the matching `CHANGELOG.md` entry in a collapsed
 details panel. 0.2.49 and subsequent tags render it directly in CI.
 
+Each release page must lead with that build's changes since the previous playtest,
+not repeat the previous promotional pitch. Refresh and visually review screenshots
+that demonstrate those highlights; changing a tag in an old image URL is not a
+screenshot update. Record capture source/version in `docs/marketing/README.md`.
+Keep downloads near the top and first-time controls brief or collapsed.
+
+For a page-only correction after publication, capture the released gameplay source
+and pin image URLs to the full commit containing the reviewed screenshots. Update
+the page template's images and highlights together for the next build. Never move
+the published game tag to add screenshots, or point historical pages at mutable
+`main` images. The existing installers and checksums remain tied to their original
+source manifest.
+
 These builds are work-in-progress playtests for feedback during active development.
 The page states that prominently and the workflow marks them as GitHub prereleases.
 Player download links use `/releases`, since `/releases/latest` excludes prereleases.
@@ -67,6 +80,14 @@ Downloaded public manifests/checksums match GitHub's asset digests; both manifes
 identify the exact tagged source above and agree with GitHub's installer digests.
 Windows setup is 140.2 MiB; the Intel Mac DMG is 156.1 MiB. Both remain unsigned
 and unnotarized.
+
+The creator subsequently identified that the first published page reused older
+launch screenshots and too much generic copy. The page correction leads with
+0.2.51's rollback survey, personal crew conversations, birthday ambush and expanded
+vault. Fresh in-engine captures are pinned to screenshot commit
+`dd23683dbbbac547ce73299d337d98d4e4af1d7d`; the capture source's runtime matches
+the released tag. The root README also uses current title/survey/conversation
+captures. This is a presentation correction, not a new executable release.
 
 This snapshot combines the committed opening corrections with the rollback
 survey, crew promises, dialogue/grade pass and the intervening birthday, vault,
