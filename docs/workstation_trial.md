@@ -11,7 +11,7 @@ geometry, keeping the close-up keycaps confined to the starting desk.
 The dedicated `polished_workstation.tscn` retains the tabletop collision, chair origin,
 monitor/display positions and existing story node paths. The imported desk is fitted
 to the original 2.25 × 0.95 m footprint and 0.8225 m surface height. Tabletop and
-drawer-pedestal boxes fit the imported geometry. The monitor and mug remain simplified;
+drawer-pedestal boxes fit the imported geometry. The monitor remains simplified;
 this pass does not establish final art quality for the whole office.
 
 `tools/office_details.py`, called by the office builder, adds a suspended acoustic
@@ -40,10 +40,12 @@ the solid chair, with capsule clearance checked on skip and retry. Judge the uph
 proportions, character fit and camera readability
 by starting a normal run and walking around the desk bays. R retries the incident.
 
-The seated engineer now parks the greatsword blade-down on the floor beside the
-desk's right pedestal. Typing and notification hand contacts clear the tabletop;
+The creator's revised opening direction hides the sword during seated desk staging
+and restores it when the engineer arms himself or enters gameplay. A reusable original
+ceramic coffee mug with a rounded lip, handle and coffee surface replaces the starting
+desk's cylinder placeholder. Typing and notification hand contacts clear the tabletop;
 slumped hands rest in his lap, and transitions lift the hands before crossing the
-desk edge. `tests/presentation_tests.gd` checks the actual sword bounds and solved
+desk edge. `tests/presentation_tests.gd` checks sword visibility, mug support and solved
 fist bones through the title reactions. Inspect the title screen for a full reaction
 cycle to judge the placement and motion; human visual acceptance remains pending.
 

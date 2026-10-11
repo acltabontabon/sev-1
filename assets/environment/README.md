@@ -28,6 +28,11 @@ Existing placeholder audio retains its separate provenance in `assets/audio/READ
 
 The current free desk/chair pair replaces the original native furniture fallback.
 Monitors, small clutter and the broader environment still need visual refinement.
+The starting desk's [coffee mug](../../game/rooms/office/coffee_mug.tscn) is original
+AI-assisted Godot-native geometry authored on 11 October 2026: tapered ceramic body,
+rounded rim, loop handle and coffee surface. It uses no outside art or textures,
+introduces no third-party license or attribution requirement, and remains under the
+creator's original-content rights. Title-camera visual review remains provisional.
 Record source URL, author, license, and attribution requirements before importing
 replacements. Keep the tested simplified collision envelopes.
 

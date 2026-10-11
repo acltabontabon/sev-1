@@ -28,7 +28,7 @@ const ELEMENTS: Array[Dictionary] = [
 ]
 ## Fist centres clear the .8225 m tabletop and the keyboard, including hand thickness.
 const DESK_HANDS: Array[Vector3] = [Vector3(-.17, .9, -.5), Vector3(.13, .9, -.5)]
-## Blade down on the floor beside the desk's right pedestal, outside its footprint.
+## Hidden during seated desk staging; the existing rest transform remains available.
 const SEATED_SWORD: Transform3D = Transform3D(Basis(Vector3.RIGHT, -PI * .5), Vector3(1.45, 2.34, -.87))
 ## The sitting clip was authored for a lower stool set further back: seated, the body
 ## shifts up onto the cushion and forward off the backrest so the chair never cuts it.
@@ -104,6 +104,7 @@ var hit_hooked: bool = false
 var hand_to_weapon: Transform3D = Transform3D.IDENTITY
 @onready var model: Node3D = $Model
 @onready var weapon: Node3D = $WeaponPivot
+@onready var blade_art: Node3D = $WeaponPivot/EscalationBlade
 @onready var trail: MeshInstance3D = $WeaponTrail
 @onready var right_target: Node3D = $RightTarget
 @onready var left_target: Node3D = $LeftTarget
@@ -322,6 +323,8 @@ var conversing: bool = false
 
 
 func _physics_process(delta: float) -> void:
+	# Hide only the artwork: finale prop ownership can still hide the whole pivot.
+	blade_art.visible = not story_pose in SEATED
 	if conversing:
 		clock += delta
 		crouch = 0.0

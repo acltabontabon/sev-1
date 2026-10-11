@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://game/rooms/office/chair.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://assets/environment/poly_haven_workstation/metal_office_desk.glb" id="10"]
 [ext_resource type="Material" path="res://game/rooms/office/fabric.tres" id="11"]
+[ext_resource type="PackedScene" path="res://game/rooms/office/coffee_mug.tscn" id="12"]
 
 [sub_resource type="BoxMesh" id="r0"]
 size = Vector3(2.25000, 0.06500, 0.95000)
@@ -216,14 +217,9 @@ mesh = SubResource("r11")
 rotation_degrees = Vector3(0.00000, 12.00000, 0.00000)
 
 
-[node name="Mug" type="MeshInstance3D" parent="."]
-position = Vector3(0.82000, 0.91000, 0.18000)
-mesh = SubResource("r12")
-
-
-[node name="Coffee" type="MeshInstance3D" parent="."]
-position = Vector3(0.82000, 1.00200, 0.18000)
-mesh = SubResource("r13")
+[node name="Mug" parent="." instance=ExtResource("12")]
+position = Vector3(0.82, 0.8225, 0.18)
+rotation_degrees = Vector3(0, -20, 0)
 
 
 [node name="Code0" type="MeshInstance3D" parent="."]

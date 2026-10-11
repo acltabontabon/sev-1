@@ -87,11 +87,12 @@ func _desk_contacts() -> void:
 	var rig: Node3D = backdrop.character
 	var desk: Node3D = backdrop.room.get_node("YourWorkstation")
 	await frames(120)
-	var blade: MeshInstance3D = rig.weapon.get_node("EscalationBlade/HeavyGreatsword")
-	var box: AABB = desk.global_transform.affine_inverse() * blade.global_transform * blade.get_aabb()
-	check(box.position.x > 1.125 and box.position.y >= .015 and box.position.y < .03,
-		"title sword stands beside the desk with its actual tip on the floor")
-	var planted: Transform3D = rig.weapon.global_transform
+	check(not rig.blade_art.is_visible_in_tree(), "title desk hides the sword")
+	var mug: Node3D = desk.get_node("Mug")
+	var body: MeshInstance3D = mug.get_node("Body")
+	var cup_bounds: AABB = desk.global_transform.affine_inverse() * body.global_transform * body.get_aabb()
+	check(absf(cup_bounds.position.y - .8225) < .002 and mug.get_node("Handle").visible and mug.get_node("Coffee").visible,
+		"detailed coffee mug has a handle and coffee and rests on the tabletop")
 	for pose: int in [rig.Pose.GLANCE, rig.Pose.SLUMP, rig.Pose.TYPING, rig.Pose.SIP, rig.Pose.RELAX, rig.Pose.TYPING]:
 		rig.story_pose = pose
 		var clear: bool = true
@@ -103,7 +104,13 @@ func _desk_contacts() -> void:
 				if absf(fist.x) < 1.125 and absf(fist.z) < .475:
 					clear = clear and fist.y >= .875
 		check(clear, "seated pose %d and its transition keep both hands above the tabletop" % pose)
-		check(rig.weapon.global_transform.is_equal_approx(planted), "desk reactions leave the sword planted")
+		check(not rig.blade_art.is_visible_in_tree(), "desk reactions keep the sword hidden")
+	rig.story_pose = rig.Pose.ARMED
+	await frames(2)
+	check(rig.blade_art.is_visible_in_tree(), "arming for the incident restores the sword")
+	rig.weapon.hide()
+	await frames(2)
+	check(not rig.blade_art.is_visible_in_tree(), "staging respects a separately hidden weapon pivot")
 	backdrop.queue_free()
 	await frames(2)
 

@@ -186,6 +186,8 @@ desk.save('workstation')
 polished = copy.deepcopy(desk)
 polished.name = 'PolishedWorkstation'
 polished.nodes[0] = '[node name="PolishedWorkstation" type="Node3D"]'
+polished.nodes = [node for node in polished.nodes if 'name="Mug"' not in node and 'name="Coffee"' not in node]
+polished.instance('Mug', 'coffee_mug', (.82, .8225, .18), -20)
 for i, node in enumerate(polished.nodes):
     if ('name="Mesh"' in node and 'parent="Top"' in node) or any(f'name="{name}"' in node for name in ['Leg-0.94', 'Leg0.94', 'CableTray']):
         polished.nodes[i] += '\nvisible = false'

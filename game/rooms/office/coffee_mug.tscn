@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="Ceramic"]
+albedo_color = Color(0.72, 0.65, 0.51, 1)
+roughness = 0.23
+
+[sub_resource type="StandardMaterial3D" id="CoffeeMaterial"]
+albedo_color = Color(0.045, 0.018, 0.009, 1)
+roughness = 0.18
+
+[sub_resource type="CylinderMesh" id="Cup"]
+material = SubResource("Ceramic")
+top_radius = 0.07
+bottom_radius = 0.064
+height = 0.18
+radial_segments = 48
+
+[sub_resource type="TorusMesh" id="Lip"]
+material = SubResource("Ceramic")
+inner_radius = 0.063
+outer_radius = 0.073
+rings = 48
+ring_segments = 12
+
+[sub_resource type="TorusMesh" id="HandleMesh"]
+material = SubResource("Ceramic")
+inner_radius = 0.035
+outer_radius = 0.055
+rings = 40
+ring_segments = 12
+
+[sub_resource type="CylinderMesh" id="CoffeeSurface"]
+material = SubResource("CoffeeMaterial")
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.001
+radial_segments = 48
+
+[node name="CoffeeMug" type="Node3D"]
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.09, 0)
+mesh = SubResource("Cup")
+
+[node name="Rim" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.18, 0)
+mesh = SubResource("Lip")
+
+[node name="Handle" type="MeshInstance3D" parent="."]
+position = Vector3(0.083, 0.095, 0)
+rotation_degrees = Vector3(90, 0, 0)
+scale = Vector3(1, 1, 1.2)
+mesh = SubResource("HandleMesh")
+
+[node name="Coffee" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.181, 0)
+mesh = SubResource("CoffeeSurface")
