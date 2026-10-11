@@ -47,6 +47,8 @@ const NIGHTLIFE: Script = preload("res://game/incidents/nightlife_street.gd")
 const DEPARTURE_AT: Vector3 = Vector3(0, -120, 0)
 const EXIT_PATH: Array[Vector3] = [DEPARTURE_AT + Vector3(-6, .05, 0), DEPARTURE_AT + Vector3(7.1, .05, 0)]
 const EXIT_SECONDS: float = 9.0
+const DOOR_PATH: Array[Vector3] = [EXIT_PATH[1], DEPARTURE_AT + Vector3(14.2, .05, 0)]
+const DOOR_SECONDS: float = 6.5
 ## The street at the foot of the tower (its west face), and his way away from it.
 const STREET_PATH: Array[Vector3] = [Vector3(-15.0, -69.95, 6.2), Vector3(-23.0, -69.95, 8.0)]
 const STREET_SECONDS: float = 7.5
@@ -195,6 +197,13 @@ func _beat(next: String) -> void:
 			departure.global_position = DEPARTURE_AT
 			props.append(departure)
 			_summon_memories()
+		"door":
+			memory_caption.hide()
+			for memory: Dictionary in memories:
+				memory.body.hide()
+			player.global_position = DOOR_PATH[0]
+			departure.set_door(0.0)
+			story.sting(preload("res://assets/audio/sfx/door_open.ogg"), -10)
 		"street":
 			# A cut to the street: rain, a sodium lamp, the tower going up into the dark.
 			if is_instance_valid(departure):
@@ -364,9 +373,10 @@ func tick(delta: float) -> bool:
 				_beat("exit")
 		"exit":
 			# A dedicated corridor keeps furniture and live coworkers out of the shot.
-			var walk: float = _walk_progress(t, exit_duration)
-			character.story_walk_speed = _walk_speed(t, exit_duration, EXIT_PATH[0].distance_to(EXIT_PATH[1]))
-			player.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], walk)
+			var travel: Vector4 = departure.travel(t)
+			character.story_walk_speed = travel.w
+			character.story_pose = character.Pose.ARMED if travel.w <= .001 else character.Pose.NONE
+			player.global_position = Vector3(travel.x, travel.y, travel.z)
 			engineer = player.global_position
 			var heading: Vector3 = EXIT_PATH[1] - EXIT_PATH[0]
 			player.visual.rotation.y = atan2(-heading.x, -heading.z)
@@ -385,6 +395,18 @@ func tick(delta: float) -> bool:
 				camera.look_at(engineer + Vector3(1.2, 1.0, 1.0))
 				camera.fov = 54.0
 			if t >= exit_duration:
+				_beat("door")
+		"door":
+			# Hold a full-body view: the mark, opening panels and threshold all stay in frame.
+			character.story_pose = character.Pose.NONE
+			departure.set_door(smoothstep(.15, 1.35, t))
+			player.global_position = DOOR_PATH[0].lerp(DOOR_PATH[1], _walk_progress(t, DOOR_SECONDS))
+			character.story_walk_speed = _walk_speed(t, DOOR_SECONDS, DOOR_PATH[0].distance_to(DOOR_PATH[1]))
+			player.visual.rotation.y = -PI * .5
+			camera.global_position = DEPARTURE_AT + Vector3(5.0, 1.65, -1.8)
+			camera.look_at(DEPARTURE_AT + Vector3(10.2, 1.8, 0))
+			camera.fov = 52.0
+			if t >= DOOR_SECONDS:
 				_beat("street")
 		"street":
 			# Low across the wet street, the tower behind him; he walks out of frame.
@@ -709,14 +731,8 @@ func _summon_memories() -> void:
 		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false,
 			"cue": cue, "length": length, "text": remembered.text, "who": DIALOGUES.tree(entry[0]).who})
 		cue += length + .9
-	exit_duration = maxf(EXIT_SECONDS, cue + .7)
-	# Place each memory beside the route at the time its own voice is heard.
-	# Variable-length takes must not leave the active memory behind the camera.
-	for index in range(memories.size()):
-		var memory: Dictionary = memories[index]
-		var at: float = float(memory.cue) + float(memory.length) * .4
-		memory.body.global_position = EXIT_PATH[0].lerp(EXIT_PATH[1], _walk_progress(at, exit_duration)) + Vector3(0, -.05, 2.25)
-		memory.body.rotation.y = 0.0
+	departure.configure(memories, EXIT_PATH[0], EXIT_PATH[1])
+	exit_duration = departure.duration
 
 
 ## One intelligible fragment at a time. A memory vanishes after its line, not mid-word.

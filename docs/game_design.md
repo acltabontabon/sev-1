@@ -248,9 +248,13 @@ stands and collects a small box
 with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays beside the desk, with its tip on the floor and clear of the monitor;
 he leaves the office unarmed with his personal effects.
 
-The departure cuts from his workstation to an empty lift corridor, staged separately
-from the furnished playable office. A carpet runner leads toward the ground-floor lift;
-wall lights and metal trim frame a clear walking lane and two unobstructed camera tracks.
+The departure cuts from his workstation to an empty office exit corridor, staged separately
+from the furnished playable office. He takes normal strides between five memories,
+pausing briefly to listen rather than stretching the walking animation across their speech.
+A carpet runner leads toward sliding office doors beneath the actual SYNERGEX mark.
+The final full-body shot holds the logo and threshold as both panels open, and he
+walks completely through the doorway before the cut to the rainy street.
+Wall lights and metal trim frame a clear walking lane and two unobstructed camera tracks.
 The temporary corridor disappears at the street cut and is removed on skip or retry.
 
 Faint, warm memories recall the five as people: coffee invitations, lunch plans and
@@ -268,8 +272,8 @@ He leaves the call, walks back across the office, gradually sits at his workstat
 and begins typing. “TO BE CONTINUED” fades in over black, then fades out into the
 main menu. Completing or skipping the finale unloads the run without a victory
 report or extra dialogue; a new incident can be started from the title desk.
-The night walk covers a longer stretch at about 60% greater travel speed, with its
-animation pace matched to the movement. Gossip varies across the office: Migs protects his nacho break with a fake dentist
+The cinematic gait matches the walking legs and rests during the recalled lines.
+Gossip varies across the office: Migs protects his nacho break with a fake dentist
 appointment and borrows the CEO’s parking space; Gab’s holiday reply starts a small
 rebellion; Bea argues with the printer. JO keeps Kevin, the ancient fridge yogurt
 who somehow receives a retention bonus. Ten additional gossip takes bring in Wei,

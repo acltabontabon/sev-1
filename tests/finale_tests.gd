@@ -72,13 +72,14 @@ func _run() -> void:
 		spaced = spaced and memory.cue >= previous_end
 		previous_end = memory.cue + memory.length
 	check(spaced and finale.exit_duration > previous_end, "the walk gives every recorded line time to finish without overlapping another memory")
-	finale.tick(1.0)
+	finale.tick(2.5)
 	check(finale.memory_caption.visible and "remembered" in finale.memory_caption.text,
 		"remembered speech has matching accessible captions")
 	story.voice.subtitles_enabled = false
 	finale.tick(.1)
 	check(not finale.memory_caption.visible, "memory captions respect the subtitle preference")
 	story.voice.subtitles_enabled = true
+	finale.clock = finale.beat_at + .4
 	for frame in range(50):
 		finale.tick(1.0 / 60.0)
 		await physics_frame
@@ -87,7 +88,7 @@ func _run() -> void:
 		finale.tick(1.0 / 60.0)
 		await physics_frame
 	check(character.story_walk_speed > 8.1 / (finale.exit_duration - .6) and character.animator.current_animation == "rig/walk" and character.animator.current_animation_position != walk_at,
-		"the faster office exit advances its walk cycle with a pace matched to travel")
+		"the office exit advances its walk cycle with a pace matched to travel")
 	character.story_walk_speed = .2
 	character._physics_process(1.0 / 60.0)
 	check(character.animator.current_animation == "rig/walk", "even slower cinematic travel keeps walking below the gameplay idle threshold")

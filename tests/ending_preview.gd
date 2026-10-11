@@ -3,6 +3,7 @@ extends SceneTree
 ## sh tools/godot.sh --path . --script tests/ending_preview.gd
 ## -- --closing skips to Monday's final reply. --capture saves card/menu PNGs and quits.
 ## -- --duel-only watches the real application duel, then closes at the aftermath.
+## -- --departure starts at the belongings pickup, then shows the complete office exit.
 var app: Node
 var viewing: bool = true
 var captured: bool = false
@@ -48,7 +49,7 @@ func _run() -> void:
 		incident._enter(stage)
 	player.global_position = Vector3(9, .05, -31)
 	await physics_frame
-	if "--closing" in OS.get_cmdline_user_args():
+	if "--closing" in OS.get_cmdline_user_args() or "--departure" in OS.get_cmdline_user_args():
 		story.skip()
 		incident._enter(incident.Stage.RESOLVED)
 		while not is_instance_valid(story.all_hands):
@@ -57,11 +58,12 @@ func _run() -> void:
 		finale._beat("receipts")
 		finale._beat("grief")
 		finale._beat("desk")
-		finale._beat("card")
-		finale._beat("monday")
-		finale.meeting.step = finale.meeting.STEPS.size() - 2
-		story.voice.clear()
-		finale.meeting._next()
+		if "--closing" in OS.get_cmdline_user_args():
+			finale._beat("card")
+			finale._beat("monday")
+			finale.meeting.step = finale.meeting.STEPS.size() - 2
+			story.voice.clear()
+			finale.meeting._next()
 	else:
 		await create_timer(1.0).timeout
 		story.skip()

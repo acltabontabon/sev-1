@@ -36,11 +36,11 @@ func _run() -> void:
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
 	finale._beat("memorial")
-	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["street", 3.0]]
+	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
 	if "--departure" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")
-		samples = [["exit", 3.0], ["exit", -0.75], ["street", 3.0]]
+		samples = [["exit", 3.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
 	if "--closing" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")
@@ -50,6 +50,11 @@ func _run() -> void:
 		story.voice.clear()
 		finale.meeting._next()
 		samples = [["monday", 1.0], ["return_meeting", 1.6], ["return_floor", 1.6], ["return_desk", 4.0], ["return_desk", 6.0]]
+	if "--door" in OS.get_cmdline_user_args():
+		finale._beat("grief")
+		finale._beat("desk")
+		finale._beat("exit")
+		samples = [["door", .5], ["door", 1.5], ["door", 3.8], ["door", 5.8]]
 	for sample: Array in samples:
 		if finale.beat != sample[0]:
 			finale._beat(sample[0])
