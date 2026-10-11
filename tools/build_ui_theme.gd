@@ -58,6 +58,8 @@ func _initialize() -> void:
 	var clear: StyleBoxEmpty = StyleBoxEmpty.new()
 	clear.set_content_margin_all(2)
 	clear.content_margin_left = 18
+	# Reserve the focus indent in the normal width so short labels cannot clip.
+	clear.content_margin_right = 16
 	var marked: StyleBoxFlat = _box(Color(1, .3, .17, .08), ALARM, 0, 0, 2)
 	marked.border_width_left = 4
 	# Focus slides the entry right; the alarm bar stays on the original edge.

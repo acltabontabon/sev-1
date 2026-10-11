@@ -1,5 +1,12 @@
 # SEV-1: Friday Deployment — Playtest Build 0.2
 
+## Source update — Title menu focus clipping (12 October 2026)
+
+The title and other menu entries now reserve space for the focus indent, so short
+labels such as “Play” remain fully visible when highlighted. The release UI check
+measures focused label width, and a rendered title check shows the complete label.
+This source fix has not been packaged into a new playtest build.
+
 ## 0.2.50 — Office collision and cast refinement (11 October 2026)
 
 This playtest packages the source refinements since 0.2.49. Earlier source/package

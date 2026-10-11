@@ -63,6 +63,11 @@ func _run() -> void:
 		for control: Node in app.box.find_children("*", "Control", true, false):
 			if control is Button and control.is_visible_in_tree():
 				check(bounds.encloses(control.get_global_rect()), "%s: %s fits the 1280×720 view" % [page_name, control.text])
+				if control.theme_type_variation == "MenuEntry":
+					var focus_style: StyleBox = control.get_theme_stylebox("focus")
+					var text_width: float = control.get_theme_font("font").get_string_size(control.text, HORIZONTAL_ALIGNMENT_LEFT, -1, control.get_theme_font_size("font_size")).x
+					var needed_width: float = text_width + focus_style.get_content_margin(SIDE_LEFT) + focus_style.get_content_margin(SIDE_RIGHT)
+					check(control.size.x + 1.0 >= needed_width, "%s: focused %s label is not clipped" % [page_name, control.text])
 	app.show_page("main")
 	await frames(3)
 	for cycle in range(10):
