@@ -34,11 +34,38 @@ consolidated offline from 60 pieces to five material surfaces, with no runtime b
 
 `sh tools/godot.sh --path . --script tests/capture_chairs.gd` writes four fixed views
 under `builds/chair_*.png`; the desk fit, seated engineer, title backdrop and conference
-table were visually inspected. Existing seated offsets and chair world origins are
-preserved during the staged sitting pose. Gameplay now releases the engineer beside
-the solid chair, with capsule clearance checked on skip and retry. Judge the upholstery,
+table were visually inspected. The 12 October opening correction fits the visible
+clothing to the 0.56 m cushion (the pelvis bone alone understated the clipping),
+straightens the occupied chair and moves it 7 cm toward the desk. Typing, relief
+and alert reactions keep his back beside the backrest; relief rests the hands in
+his lap. The chair rolls back during the stand, then he steps into the aisle before
+control returns. The full opening locks the player controller during reset, before
+the first physics tick: otherwise collision recovery can push the seated capsule
+roughly 66 cm behind the solid chair during a slow rendered startup. The opening
+also holds the seat anchor until the authored exit. Skip and retry still release
+him clear of the solid furniture. Judge the upholstery,
 proportions, character fit and camera readability
 by starting a normal run and walking around the desk bays. R retries the incident.
+
+The opening now holds level desk and reaction shots on the same side of the desk,
+keeps the monitor inserts clear of his head, and avoids the previous close dolly
+through his face. Shot cuts do not interpolate through the intervening furniture.
+The rear apparition stands beyond the chair in shadow, approaches without growing
+through the engineer, and catches one red pulse at the attack. Its eye materials
+are local copies, restored for the vault; both head silhouettes stay separate.
+The 50.5-second timeline, narration and incident beats are preserved.
+`tests/opening_staging_tests.gd` checks controller-first startup ordering, live
+anchoring, skinned cushion/backrest contact in all three opening poses, camera
+clearance and framing, apparition separation, chair reset, skip clearance and the
+continuous handoff. Use the [opening shortcut](../README.md) to judge the fit and
+pacing in motion; human acceptance remains pending.
+
+Verification on 12 October: all 51 opening-staging assertions and the complete
+`python3 tools/validate.py` suite passed. Normal playback was captured and inspected
+at 1280×720 on Apple M2 Pro, Godot 4.7.2 / Metal Forward+. The startup trace changed
+from an ejected root at z=10.926 to the authored z=10.27 throughout the seated shots;
+the exit reaches the aisle before the gameplay camera takes over. These are
+correctness and visual checks, not a frame-time benchmark or listening acceptance.
 
 The creator's revised opening direction hides the sword during seated desk staging
 and restores it when the engineer arms himself or enters gameplay. A reusable original

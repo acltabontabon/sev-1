@@ -76,6 +76,10 @@ Source-checkout checkpoint: double-click [duel_preview.command](duel_preview.com
 to watch the new Stage One boss choreography directly. Creator pacing and sound
 review remain pending; the shortcut is a quick source-checkout checkpoint.
 
+For the opening seating and camera checkpoint, double-click [opening_preview.command](opening_preview.command).
+Watch the desk reactions and the step away from the chair; control returns in the office.
+Relaunch the shortcut to replay the full opening.
+
 For the corporate firefighting entrance, double-click [boss_intro_preview.command](boss_intro_preview.command).
 Watch the hose response, Destructive Feedback and the lasting aftermath; TAB skips.
 

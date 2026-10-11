@@ -11,9 +11,14 @@ const DUEL: Script = preload("res://game/incidents/duel.gd")
 const RAGE_MEMORY: Script = preload("res://game/incidents/rage_memory.gd")
 const RECORD_VISUAL: PackedScene = preload("res://game/enemies/record_visual.tscn")
 const SEAT: Vector3 = Vector3(-2.5, .05, 10.27)
+const OPENING_EXIT: Vector3 = Vector3(-1.7, .05, 10.95)
+## Pull the occupied chair under the retargeted pelvis, rather than reaching from its front edge.
+const CHAIR_AT: Vector3 = Vector3(0, 0, .80)
 const MONITOR: Vector3 = Vector3(-2.5, 1.26, 9.19)
 ## Where the seated engineer's face is (rigged_engineer.SEATED_OFFSET lifts him onto the cushion).
-const FACE: Vector3 = Vector3(-2.5, 1.63, 9.92)
+const FACE: Vector3 = Vector3(-2.5, 1.63, 10.12)
+const REVEAL_FROM: Vector3 = Vector3(-2.9, 0, 13.0)
+const REVEAL_TO: Vector3 = Vector3(-2.9, 0, 12.45)
 const OPENING_LENGTH: float = 50.5
 ## Opening shots: start, camera from, camera to, look from, look to, field of view, and
 ## optionally an end field of view (or "dolly": the lens widens as the camera closes so
@@ -24,29 +29,31 @@ const SHOTS: Array = [
 	[0.0, Vector3(4.0, 5.2, -12.0), Vector3(2.0, 4.6, -5.0), Vector3(-1.0, .5, 8.0), Vector3(-2.0, .8, 9.0), 64.0, 60.0],
 	[4.3, Vector3(-9.5, 3.4, -9.0), Vector3(-9.0, 2.6, -1.5), Vector3(-6.0, .8, 2.0), Vector3(-5.0, .9, 6.0), 56.0, 52.0],
 	# (8.6–16.6 s: the night shift, one freeze-frame each; see CREW.)
-	# Down to the one desk still lit.
-	[16.6, Vector3(1.6, 4.2, 3.0), Vector3(-.7, 2.25, 13.1), Vector3(-2.5, .9, 6.0), Vector3(-2.5, 1.25, 9.6), 58.0, 46.0],
-	[22.6, Vector3(-1.62, 1.95, 10.7), Vector3(-1.78, 1.87, 10.38), MONITOR + Vector3(.12, 0, 0), MONITOR + Vector3(.08, 0, 0), 36.0],
-	[25.5, Vector3(-1.98, 1.95, 8.25), Vector3(-2.16, 1.9, 8.45), FACE, FACE + Vector3(0, .02, 0), 42.0],
-	[28.5, Vector3(-2.26, 1.55, 9.98), Vector3(-2.36, 1.49, 9.74), MONITOR, MONITOR, 33.0],
-	# The click. Everything goes red.
-	[29.1, Vector3(-2.5, 1.27, 9.95), Vector3(-2.5, 1.27, 9.84), MONITOR, MONITOR, 42.0, 42.0, -6.0],
-	[29.8, Vector3(-4.2, 1.15, 12.9), Vector3(-4.6, 1.0, 12.3), Vector3(-7.4, 1.3, -6.0), Vector3(-7.6, 1.2, -6.0), 50.0, 50.0, 12.0],
-	# Every ping at once: the lens widens as it closes on him.
-	[30.8, Vector3(-1.8743, 1.9429, 7.8342), Vector3(-2.2867, 1.7367, 9.2089), FACE, FACE, 26.0, "dolly"],
-	[35.6, Vector3(-1.82, 1.28, 9.5), Vector3(-1.92, 1.32, 9.62), FACE + Vector3(0, .02, 0), FACE, 38.0, 32.0, -7.0],
+	# Settle beside the desk, without flying through the monitor or his chair.
+	[16.6, Vector3(1.0, 2.6, 12.9), Vector3(.1, 2.05, 12.0), Vector3(-2.5, 1.0, 9.9), Vector3(-2.5, 1.1, 9.9), 52.0, 48.0],
+	# Screen insert from the open right side; his head stays outside the sightline.
+	[22.6, Vector3(-1.1, 1.8, 10.55), Vector3(-1.25, 1.72, 10.3), MONITOR, MONITOR, 42.0],
+	# Reaction from beside the monitor, with room around his entire head.
+	[25.5, Vector3(-.85, 1.95, 8.85), Vector3(-1.0, 1.92, 8.95), FACE, FACE, 46.0],
+	[28.5, Vector3(-1.85, 1.55, 10.05), Vector3(-1.88, 1.53, 10.0), MONITOR, MONITOR, 44.0],
+	# The click. Keep the screen in the same place as the alarm arrives.
+	[29.1, Vector3(-1.88, 1.53, 10.0), Vector3(-1.9, 1.51, 9.96), MONITOR, MONITOR, 44.0],
+	[29.8, Vector3(-.4, 2.15, 11.9), Vector3(-.5, 2.1, 11.7), Vector3(-5.5, 1.3, -5.0), Vector3(-5.5, 1.3, -5.0), 54.0],
+	# Slow reaction push; stay beside the monitor and outside the head's silhouette.
+	[30.8, Vector3(-.85, 1.95, 8.85), Vector3(-1.12, 1.88, 9.05), FACE, FACE, 46.0, 44.0],
+	[35.6, Vector3(-1.12, 1.88, 9.05), Vector3(-1.18, 1.86, 9.08), FACE, FACE, 44.0, 43.0],
 	# Black. Then the power goes, row by row.
 	[37.6, Vector3(-1.1, 1.85, 11.7), Vector3(-1.35, 1.95, 11.0), Vector3(-3.0, 2.0, -14.5), Vector3(-3.2, 2.1, -14.5), 46.0],
 	# The night shift, in the dark, all looking at you.
-	[39.6, Vector3(-3.2, 1.45, 4.6), Vector3(-3.5, 1.4, 3.0), Vector3(-8.0, 1.0, -2.6), Vector3(-8.0, 1.0, -3.4), 56.0, 50.0, -3.0],
-	# From behind his chair, down the aisle: the flicker.
-	[41.6, Vector3(-1.75, 1.55, 11.9), Vector3(-1.78, 1.55, 11.75), Vector3(-1.6, 1.3, -6.0), Vector3(-1.6, 1.3, -6.0), 50.0, 46.0],
-	# Behind you.
-	[43.6, Vector3(-2.32, 1.6, 8.95), Vector3(-2.38, 1.6, 9.12), FACE + Vector3(0, .25, 0), FACE + Vector3(0, .3, 0), 44.0, 38.0, 4.0],
-	[44.75, Vector3(-2.32, 1.6, 8.95), Vector3(-2.32, 1.6, 8.95), FACE, FACE, 44.0],
-	# The lights slam back on. He stands. Title.
-	[45.9, Vector3(-.75, 1.05, 11.35), Vector3(-.95, 1.15, 11.05), Vector3(-2.45, 1.35, 10.2), Vector3(-2.45, 1.5, 10.25), 44.0],
-	[47.3, Vector3(-2.25, 1.55, 12.4), Vector3(-2.1, 2.25, 13.5), Vector3(-2.6, 1.5, 6.0), Vector3(-2.6, 1.3, 4.0), 55.0],
+	[39.6, Vector3(-3.2, 1.45, 4.6), Vector3(-3.5, 1.4, 3.0), Vector3(-8.0, 1.0, -2.6), Vector3(-8.0, 1.0, -3.4), 56.0, 50.0],
+	# From beside his chair, down the aisle: the flicker.
+	[41.6, Vector3(-1.3, 1.8, 11.9), Vector3(-1.3, 1.8, 11.75), Vector3(-1.6, 1.3, -6.0), Vector3(-1.6, 1.3, -6.0), 50.0, 46.0],
+	# Both faces fit: the engineer in front, the apparition behind his shoulder.
+	[43.6, Vector3(.3, 1.9, 8.6), Vector3(.3, 1.9, 8.6), Vector3(-2.5, 1.7, 11.0), Vector3(-2.5, 1.7, 11.0), 54.0],
+	[44.75, Vector3(-1.0, 2.1, 8.8), Vector3(-1.0, 2.1, 8.8), FACE, FACE, 52.0],
+	# The lights slam back on. A wide side view gives the stand-up room to read.
+	[45.9, Vector3(.5, 1.9, 12.1), Vector3(.4, 2.0, 12.2), Vector3(-2.25, 1.15, 10.2), Vector3(-2.0, 1.25, 10.5), 52.0],
+	[47.3, Vector3(.4, 2.0, 12.2), Vector3(-.2, 2.6, 14.0), Vector3(-2.0, 1.25, 10.5), Vector3(-1.7, 1.3, 8.8), 52.0, 55.0],
 ]
 ## Timed beats, fired once each as the opening clock crosses them.
 const BEATS: Array = [
@@ -213,6 +220,7 @@ var massacre_look: Vector3 = Vector3(9, 1.2, -38)
 var screen_words: Array[Label3D] = []
 var screen_black: StandardMaterial3D
 var demon: MonsterRig
+var opening_eyes: Array[ShaderMaterial] = []
 var base_exposure: float = 1.0
 const FLASHES: Array = [[41.8, Vector3(-1.2, 0, -12.0)], [42.5, Vector3(-1.5, 0, -3.5)], [43.15, Vector3(-2.0, 0, 4.5)]]
 const FLASH_LENGTH: float = .14
@@ -280,6 +288,7 @@ func _ready() -> void:
 	voice = incident.voice
 	layer = 4
 	camera = Camera3D.new()
+	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	camera.fov = 55
 	incident.add_child(camera)
 	for side in [0, 1]:
@@ -506,12 +515,22 @@ func _ready() -> void:
 	demon = MonsterRig.create("variance", null)
 	demon.name = "OpeningVariance"
 	var glow_light: OmniLight3D = OmniLight3D.new()
-	glow_light.position = Vector3(0, 2.4, -1.0)
+	glow_light.name = "OpeningRim"
+	glow_light.position = Vector3(-.8, 2.6, .6)
 	glow_light.light_color = Color(1, .12, .06)
-	glow_light.light_energy = 3.5
-	glow_light.omni_range = 5.0
+	glow_light.light_energy = .8
+	glow_light.omni_range = 3.5
 	demon.add_child(glow_light)
 	incident.add_child(demon)
+	# Own these eye materials: the apparition can lose its bright cartoon eye discs
+	# without recolouring the shared combat boss or other monsters.
+	for mesh: MeshInstance3D in demon.meshes:
+		for surface in range(mesh.mesh.get_surface_count()):
+			var source: Material = mesh.mesh.surface_get_material(surface)
+			if source != null and source.resource_name == "Eye_White":
+				var eyes: ShaderMaterial = mesh.get_active_material(surface).duplicate() as ShaderMaterial
+				mesh.set_surface_override_material(surface, eyes)
+				opening_eyes.append(eyes)
 	demon.hide()
 	screen_black = StandardMaterial3D.new()
 	screen_black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -606,14 +625,22 @@ func reset_story() -> void:
 	shake = 0
 	_end_opening()
 	_restore_corridor()
+	incident.room.get_node("YourWorkstation/Chair").position = CHAIR_AT
 	desk.reset_screen()
 	desk.set_live(true)
 	var character: Node3D = incident.player.get_node("Visual/Character")
 	if short_opening:
-		incident.player.position = Vector3(-1.7, .05, 10.95)
+		incident.player.position = OPENING_EXIT
 		incident.player.visual.rotation.y = .35
 	else:
+		# Lock physics before the first controller tick: the capsule deliberately
+		# overlaps the solid chair during staging. Waiting for _opening/_process lets
+		# collision recovery eject him behind it on a slow rendered startup.
+		incident.player.narrative_hold = true
+		incident.player.velocity = Vector3.ZERO
 		incident.player.position = SEAT
+		incident.player.reset_physics_interpolation()
+		incident.room.get_node("YourWorkstation/Chair").rotation.y = 0.0
 		incident.player.visual.rotation.y = 0
 		character.story_pose = CHARACTER.Pose.TYPING
 		character.sit = 1.0
@@ -1468,12 +1495,25 @@ func _environment(delta: float) -> void:
 			incident.room.get_node("Spark%d" % index).visible = flicker
 
 
+func _opening_eye_light(active: bool) -> void:
+	for eyes: ShaderMaterial in opening_eyes:
+		eyes.set_shader_parameter("emission_color", Color(.65, .025, .01) if active else Color(.9, .55, .15))
+		eyes.set_shader_parameter("emission_strength", .18 if active else 1.4)
+		eyes.set_shader_parameter("base_color", Color(.12, .015, .008) if active else Color(.55, .45, .2))
+
+
 func _end_opening() -> void:
+	_opening_eye_light(false)
+	var rim: OmniLight3D = demon.get_node("OpeningRim")
+	rim.position = Vector3(0, 2.4, -1.0)
+	rim.light_energy = 3.5
+	rim.omni_range = 5.0
+	incident.player.get_node("Visual/Character").story_walk_speed = 0.0
 	# However the opening ends, play starts in a clean, lit, readable office.
 	# Sitting is staged without physics. Release beside the now-solid chair rather
 	# than enabling movement with the engineer's capsule inside its seat/backrest.
 	if incident.player.position.distance_to(SEAT) < .8:
-		incident.player.position = Vector3(-1.7, .05, 10.95)
+		incident.player.position = OPENING_EXIT
 		incident.player.velocity = Vector3.ZERO
 	for mesh in monitors:
 		mesh.material_override = screen_material
@@ -1558,6 +1598,11 @@ func _fire(entry: Array) -> void:
 		"typing":
 			desk.set_typing("Leadership is typing…")
 		"flicker":
+			_opening_eye_light(true)
+			var rim: OmniLight3D = demon.get_node("OpeningRim")
+			rim.position = Vector3(-.8, 2.6, .6)
+			rim.light_energy = .8
+			rim.omni_range = 3.5
 			sting(preload("res://assets/audio/sfx/light_relay.ogg"), -8)
 		"screens":
 			_screens(entry[2])
@@ -1598,6 +1643,19 @@ func _opening(time: float, delta: float) -> void:
 	while beat < BEATS.size() and time >= BEATS[beat][0]:
 		_fire(BEATS[beat])
 		beat += 1
+	# Roll the chair clear as he rises, then take a visible step into the aisle before
+	# the camera hands over. Gameplay must not begin with a teleport out of the chair.
+	var character: Node3D = incident.player.get_node("Visual/Character")
+	if time < 47.3:
+		incident.player.position = SEAT
+	if time >= 45.95:
+		incident.room.get_node("YourWorkstation/Chair").position = CHAIR_AT + Vector3.BACK * .65 * smoothstep(45.95, 47.25, time)
+	if time >= 47.3:
+		var step: float = smoothstep(47.3, 48.6, time)
+		incident.player.position = SEAT.lerp(OPENING_EXIT, step)
+		character.story_pose = CHARACTER.Pose.NONE
+		character.story_walk_speed = 1.0 if time < 48.6 else 0.0
+		incident.player.visual.rotation.y = lerp_angle(-2.275, .35, smoothstep(48.6, 49.2, time))
 	# Camera: authored shot, eased within its duration; the last second hands over to play.
 	var index: int = 0
 	while index + 1 < SHOTS.size() and time >= SHOTS[index + 1][0]:
@@ -2205,11 +2263,15 @@ func _reveal(time: float, delta: float) -> void:
 			sting(preload("res://assets/audio/sfx/heavy_impact.ogg"), -7)
 			shake = .4
 	elif time >= 43.6 and time < 44.75:
-		# Behind you: it rises out of the dark over his shoulder.
+		# Already standing in the dark: a separate silhouette behind the chair,
+		# then one deliberate approach. Never grow up through the engineer's body.
 		demon.visible = true
-		var rise: float = smoothstep(43.6, 44.3, time)
-		demon.global_position = Vector3(-2.45, lerpf(-1.6, 0.0, rise), 11.15)
-		demon.rotation.y = 0.0
+		var approach: float = smoothstep(43.7, 44.65, time)
+		demon.global_position = REVEAL_FROM.lerp(REVEAL_TO, approach)
+		demon.rotation.y = .18
+		var rim: OmniLight3D = demon.get_node("OpeningRim")
+		# A restrained edge first; the attack catches one short red light pulse.
+		rim.light_energy = .55 + 1.7 * maxf(0.0, 1.0 - absf(time - 44.34) / .12)
 	if demon.visible:
 		demon.animator.advance(delta)
 	# The power goes: the whole floor sinks into the dark (the flashes and the screens
@@ -2217,6 +2279,8 @@ func _reveal(time: float, delta: float) -> void:
 	var dark_level: float = 1.0
 	if time >= 38.0 and time < 45.9:
 		dark_level = lerpf(1.0, .4, smoothstep(38.0, 39.6, time))
+		if time >= 43.6:
+			dark_level = .22
 		if _flashing(time):
 			dark_level = 1.1
 	elif time >= 45.9 and time < OPENING_LENGTH - 1.0:

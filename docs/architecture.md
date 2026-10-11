@@ -546,12 +546,18 @@ No autoloads or frameworks were added; new behavior lives with its owners.
 - **Opening and beats.** `incident_presentation.gd` stages the opening from `SHOTS` and
   `BEATS` tables (50.5 s; 3 s on retry: a `FLY` spline fly-in from the night city, a narrated cold open, the `CREW` freeze-frame
   montage with a screen-reading desaturation shader and slammed name cards, the red
-  monitor wave, the notification `STORM`, a dolly zoom, and a title slam; shots may carry
+  monitor wave, the notification `STORM`, clear desk/reaction shots, a shadowed
+  apparition behind the chair, and a title slam; shots may carry
   an end field of view or `"dolly"` and a dutch roll), the Operations escalation, the vault arrival (no
   control loss), first-sighting slow motion and the terminal ending shot. A
   `sequence` queue plays lines that belong together through the bounded voice queue;
   stage changes clear it. A small music director cross-fades `assets/audio/music` beds on
   the `Music` bus, which a sidechain compressor ducks under `Voice`.
+  Full-opening reset locks player physics before the first controller tick, preventing
+  solid-chair collision recovery from displacing the seated actor. The occupied
+  chair fits the skinned hips; it rolls back for a staged step into gameplay.
+  The apparition remains over two metres behind the hero, with separated head
+  silhouettes and instance-local dim eye materials restored before the vault.
   The missing-transaction reveal calls `coworkers.stare_at()` to turn only the neck
   and head bones (limited yaw); body roots, hips and legs remain fixed on their
   furniture. Opening cleanup and coworker reset restore the saved bone poses.

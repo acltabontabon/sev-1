@@ -60,6 +60,7 @@ if __name__ == "__main__":
     run("skill_impact", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/skill_impact_tests.gd"])
     run("duel", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/duel_tests.gd"])
     run("sword_motion", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/sword_motion_tests.gd"])
+    run("opening_staging", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/opening_staging_tests.gd"])
     run("opening_stare", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/opening_stare_tests.gd"])
     run("coworker_aid", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/coworker_aid_tests.gd"])
     run("female_outfits", ["--headless", "--fixed-fps", "60", "--path", ".", "--script", "tests/female_outfit_tests.gd"])
