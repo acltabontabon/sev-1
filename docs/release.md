@@ -20,6 +20,12 @@ in Actions artifacts. Publication retries use the same tag and replace its asset
 manual retries must select an existing version tag, not `main`. Do not move a
 published tag. Headless runner checks do not prove ordinary GPU/audio compatibility.
 
+`docs/release_page.md` owns the player-facing release page: pitch, screenshots,
+direct installer links, features, installation and feedback. `tools/package_ci.py`
+fills its version and appends the matching `CHANGELOG.md` entry in a collapsed
+details panel. For 0.2.48 the marketing page was added after the build tag and is
+applied to the published release separately; subsequent tags render it in CI.
+
 For the next release, update `config/version` in `project.godot`, all version/path
 fields in `export_presets.cfg`, `VERSION` in `tools/release.py`, the README version,
 and add its entry to root `CHANGELOG.md`. Validate, commit on main, then:

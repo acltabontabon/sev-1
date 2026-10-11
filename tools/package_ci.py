@@ -23,7 +23,9 @@ def release_notes(tag):
     match = re.search(rf"^## \[{re.escape(VERSION)}\][^\n]*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
     if not match:
         raise SystemExit(f"Missing changelog entry for {VERSION}")
-    return match.group(1).strip() + "\n"
+    changelog = match.group(1).strip()
+    template = (ROOT / "docs/release_page.md").read_text(encoding="utf-8")
+    return template.replace("{{VERSION}}", VERSION).replace("{{CHANGELOG}}", changelog) + "\n"
 
 
 def main():
