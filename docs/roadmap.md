@@ -10,6 +10,20 @@ solid furniture envelopes, clears pantry wall/desk-prop intersections, releases 
 engineer beside the chair, and rebakes navigation. It is an implemented visual candidate; director acceptance
 and moving-combat performance remain open under the Office After Hours gate.
 
+The 11 October memorial pass replaces repeated 3D desk tableaux with five distinct
+illustrated shared moments, local documentary narration and silent casualty shots.
+See [aftermath](game_design.md#incident-001-aftermath-implemented-prototype-11-october-2026).
+The departure refinement corrects raw-body facing, subdues the closing street,
+and adds five local after-hours recollections with less repetitive profanity.
+It is an implemented creative candidate; the director must accept the illustration
+style, narration and emotional/comedic pacing before it is treated as final.
+
+The 11 October [corporate firefighting entrance](game_design.md#corporate-firefighting-entrance-implemented-prototype-11-october-2026)
+replaces panicked laps with a witnessed rush, fixed response stations, a connected
+hose, smooth authored flame/spell shapes and persistent casualties. Destructive
+Feedback replaces the designer's balloon pop. This is a playable creative candidate;
+director review of effects, hose grip, voice timing and comedy remains open.
+
 ## Milestones
 
 | Milestone | Scope and current status | Gate before expansion |
@@ -160,3 +174,10 @@ previous presentation and requested a bolder redesign. Power-ups are now free, f
 single-effect rewards; normal upgrade debt costs and pursuit penalties are retired.
 [Implementation and playtest checkpoint](architecture.md#operations-and-choice-clarity-11-october-2026).
 Creator visual and comprehension acceptance remains open.
+
+
+The 11 October vault follow-up expands the existing boss room to 24 × 21 m, adds
+detailed industrial equipment, a taller ceiling and six resettable breakable props.
+The boss, fire-response stations and story remain in their existing encounter.
+`boss_arena_preview.command` is the direct combat checkpoint; creator judgment of
+visual quality, dodge space and destruction feel remains open.

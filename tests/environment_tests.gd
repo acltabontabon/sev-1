@@ -109,6 +109,7 @@ func label_overflows(room: Node3D) -> Array[String]:
 
 ## Wall texts too small to read from the nearest spot a player can stand: letter-line
 ## height in pixels at 1080p through the 70° gameplay camera, 3.5 m behind the player.
+## Horizontal floor markings need a different viewing model and are excluded.
 ## Ambient screen details (the desk clock, a build log) and the drifting invites are exempt.
 func unreadable_texts(room: Node3D, minimum_px: float) -> Array[String]:
 	var small: Array[String] = []
@@ -117,7 +118,7 @@ func unreadable_texts(room: Node3D, minimum_px: float) -> Array[String]:
 		var label: Label3D = node
 		var path: String = str(room.get_path_to(label))
 		if not label.is_visible_in_tree() or label.text.strip_edges().is_empty() or label.billboard != BaseMaterial3D.BILLBOARD_DISABLED \
-				or path in ["DeskTime", "BuildFailed"] or path.begins_with("CalendarDrift"):
+				or absf(label.global_basis.z.normalized().y) > .7 or path in ["DeskTime", "BuildFailed"] or path.begins_with("CalendarDrift"):
 			continue
 		var line: float = label.get_aabb().size.y / (label.text.count("\n") + 1) * label.global_basis.get_scale().y
 		var normal: Vector3 = label.global_basis.z.normalized()

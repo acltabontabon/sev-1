@@ -853,6 +853,10 @@
               {}
             ]
           ]
+        },
+        "after_hours": {
+          "text": "They renamed bereavement leave unexpected availability. I booked us coffee before they find a use for that too.",
+          "replies": []
         }
       },
       "profile": "morgan"
@@ -1079,6 +1083,10 @@
               {}
             ]
           ]
+        },
+        "after_hours": {
+          "text": "Monday. Noodles. I put lunch in the calendar as a critical dependency. Nobody knows what that means, so they approved it. You promised.",
+          "replies": []
         }
       },
       "profile": "jo"
@@ -1336,6 +1344,10 @@
               {}
             ]
           ]
+        },
+        "after_hours": {
+          "text": "The wellness app says I need eight hours of sleep. My pager has opened a disciplinary case against it. Take the good mug. Go home.",
+          "replies": []
         }
       }
     },
@@ -1407,6 +1419,10 @@
               {}
             ]
           ]
+        },
+        "after_hours": {
+          "text": "Finance rejected the sympathy flowers. No measurable return. Next time we send a cactus and call it a resilience consultant. Come on. Coffee is on me.",
+          "replies": []
         }
       }
     },
@@ -1481,6 +1497,10 @@
               {}
             ]
           ]
+        },
+        "after_hours": {
+          "text": "They put a deadline on the grief survey. I drew a little coffin around the submit button. Anyway. Lunch tomorrow? Somewhere with trees.",
+          "replies": []
         }
       }
     }
@@ -1680,18 +1700,18 @@
   },
   "cavalry": {
     "Manager": {
-      "charge": "I'll escalate this to DEATH!",
+      "charge": "Production's on fire. Nadia, hose! Everyone else, look billable.",
       "help": "Somebody escalate! HELP US!",
-      "last": "Mark it GREEN on the status report! It's GREEN! IT'S GREEN!",
+      "last": "Please put my ashes in the escalation chain.",
       "pain": [
         "AGH! Not before my one-on-one!",
         "OW! OW! I'm MANAGEMENT!"
       ]
     },
     "SRE": {
-      "charge": "I'm on call! This is MY call!",
+      "charge": "The runbook says stay calm. The runbook is on fire.",
       "help": "It's not in the runbook! HELP!",
-      "last": "Not dead! Just… degraded performance! All systems operational!",
+      "last": "If my pager rings, bury it separately.",
       "pain": [
         "UGH! That's going in the postmortem!",
         "AAH! Paging myself! PAGING MYSELF!"
@@ -1700,16 +1720,16 @@
     "Designer": {
       "charge": "NOT ON MY ERROR PAGE!",
       "help": "Tell my husband the kerning was perfect!",
-      "last": "Is my blood on brand?! TELL ME IT'S ON BRAND!",
+      "last": "Wait! That's a destructive edit!",
       "pain": [
-        "OW! Not the face! The face is on brand!",
+        "I'm fanning the flames. That's what the action item said!",
         "AAGH! My wrists! I need those for Figma!"
       ]
     },
     "Intern": {
-      "charge": "Is this part of onboarding?!",
+      "charge": "Cloud backup! It's a bucket. They gave me a bucket.",
       "help": "HELP US! It's my FIRST DAY!",
-      "last": "Does this count… for college credit?!",
+      "last": "Can I expense... being vapor?",
       "pain": [
         "OW! Is this HR?!",
         "AAAH! MOM! MOOOM!"
@@ -1718,9 +1738,9 @@
     "Director": {
       "charge": "Let's align on VIOLENCE!",
       "help": "Let's circle back! LET'S CIRCLE BACK!",
-      "last": "Put my death in the deck! Make it a HOCKEY STICK!",
+      "last": "Tell Finance... I'm a smaller expense now.",
       "pain": [
-        "OW! Let's take this OFFLINE!",
+        "Good news. I've accepted the risk. On your behalf.",
         "AGH! That is NOT synergy!"
       ]
     }

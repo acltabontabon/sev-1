@@ -3,8 +3,8 @@ extends Node3D
 const MOTION: AnimationLibrary = preload("res://game/player/engineer_animations.res")
 const CREW: Script = preload("res://game/incidents/coworkers.gd")
 const FONT: Font = preload("res://assets/fonts/barlow_condensed_semibold.ttf")
-const PINK: Color = Color(1.0, .08, .4)
-const CYAN: Color = Color(.08, .8, 1.0)
+const PINK: Color = Color(.32, .14, .19)
+const CYAN: Color = Color(.22, .34, .4)
 var walkers: Array[Dictionary] = []
 var patrons: Array[Node3D] = []
 var club_light: OmniLight3D
@@ -20,7 +20,9 @@ func _ready() -> void:
 	name = "NightlifeStreet"
 	position = Vector3(-14.5, -70, 0)
 	rotation.y = -PI / 2.0
-	var stone: StandardMaterial3D = _material(Color(.09, .1, .12), .55)
+	var stone: StandardMaterial3D = preload("res://game/rooms/office/stone.tres").duplicate()
+	stone.albedo_color = Color(.22, .25, .28)
+	stone.roughness = .65
 	var metal: StandardMaterial3D = _material(Color(.025, .025, .035), .35)
 	var glass: StandardMaterial3D = _material(Color(.06, .09, .13), .12)
 	glass.metallic = .65
@@ -33,7 +35,7 @@ func _ready() -> void:
 	_box("CanopyNeon", Vector3(-1.5, 3.49, 1.83), Vector3(7.1, .045, .045), pink)
 	_box("ClubSign", Vector3(-1.5, 2.95, .22), Vector3(6.4, .9, .15), stone)
 	_text("ClubName", "VELVET", Vector3(-1.5, 3.08, .32), .010, PINK)
-	_text("ClubType", "STRIP CLUB  /  OPEN LATE", Vector3(-1.5, 2.66, .32), .0034, Color(1, .65, .8))
+	_text("ClubType", "STRIP CLUB  /  LAST ORDERS", Vector3(-1.5, 2.66, .32), .0034, Color(1, .65, .8))
 	_box("ClubDoor", Vector3(-1.7, 1.24, .22), Vector3(1.45, 2.48, .12), glass)
 	for side in [-1.0, 1.0]:
 		_box("DoorNeon", Vector3(-1.7 + side * .79, 1.26, .32), Vector3(.035, 2.52, .04), pink)
@@ -42,17 +44,17 @@ func _ready() -> void:
 			_box("Louvre", Vector3(-1.5 + side * 2.35, .3 + slat * .23, .3), Vector3(1.74, .065, .1), metal)
 	_box("DoorHandle", Vector3(-1.21, 1.1, .32), Vector3(.035, .45, .04), amber)
 	_text("EntryNotice", "21+", Vector3(-1.7, 1.55, .31), .004, Color(1, .75, .8))
-	# A warm food counter and cyan bar make a district, rather than one isolated sign.
+	# Closed counters and tired venue lights frame the empty office entrance.
 	_box("FoodFacade", Vector3(-12.8, 1.95, 0), Vector3(4.8, 3.9, .3), stone)
-	_box("FoodWindow", Vector3(-12.8, 1.7, .2), Vector3(3.9, 1.6, .08), amber)
+	_box("FoodWindow", Vector3(-12.8, 1.7, .2), Vector3(3.9, 1.6, .08), metal)
 	_box("FoodCounter", Vector3(-12.8, .94, .7), Vector3(4.2, .17, 1.25), metal)
 	_box("FoodAwning", Vector3(-12.8, 2.6, .85), Vector3(4.8, .17, 1.8), metal)
 	_text("FoodSign", "MIDNIGHT NOODLES", Vector3(-12.8, 3.08, .23), .0048, Color(1, .7, .28))
-	_text("Menu", "HOT BOWLS  /  COLD DRINKS", Vector3(-12.8, 1.93, .27), .0028, Color(.16, .08, .04))
+	_text("Menu", "CLOSED  /  SEE YOU MONDAY", Vector3(-12.8, 1.93, .34), .0028, Color(.6, .62, .6))
 	_box("BarFacade", Vector3(15.25, 2.0, 0), Vector3(5.5, 4, .3), stone)
 	_box("BarGlass", Vector3(15.25, 1.3, .22), Vector3(4.6, 2.3, .12), glass)
 	_text("BarSign", "BLUE HOUR", Vector3(15.25, 2.96, .3), .008, CYAN)
-	_text("BarCaption", "COCKTAILS  /  LIVE SET", Vector3(15.25, 2.45, .3), .003, Color(.5, .8, 1))
+	_text("BarCaption", "CLOSED  /  LAST TRAIN GONE", Vector3(15.25, 2.45, .3), .003, Color(.5, .8, 1))
 	_box("BarNeon", Vector3(15.25, 3.5, .28), Vector3(4.7, .045, .045), cyan)
 	# A deep vestibule: the hero begins behind opening panels, clear of the tower wall.
 	_box("OfficeBack", Vector3(EXIT_X, 1.8, 0), Vector3(6.2, 3.6, .2), metal)
@@ -91,23 +93,33 @@ func _ready() -> void:
 		reflection.position = Vector3(-1.5 if index == 0 else 15.25, .013, 8.5)
 		reflection.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(reflection)
-	club_light = _light(Vector3(-1.5, 2.6, 1.9), PINK, 2.5, 7.5)
-	_light(Vector3(15.2, 2.3, 1.5), CYAN, 2.1, 7)
-	_light(Vector3(-12.8, 2.2, 1.4), Color(1, .62, .28), 2.0, 6)
-	# Rope line, door host, two conversations and people taking the late train home.
+	club_light = _light(Vector3(-1.5, 2.6, 1.9), PINK, .65, 6.0)
+	_light(Vector3(15.2, 2.3, 1.5), CYAN, .7, 7)
+	_light(Vector3(-12.8, 2.2, 1.4), Color(.72, .64, .48), .45, 6)
+	# The last stragglers outside closing venues; the empty pavement carries the shot.
 	for index in range(3):
 		_box("QueuePost", Vector3(-.2 + index * .9, .5, 2.2), Vector3(.07, 1, .07), metal)
 		if index < 2:
 			_box("VelvetRope", Vector3(.25 + index * .9, .85, 2.2), Vector3(.9, .055, .055), _material(Color(.32, .02, .05), .8))
-	_person("DoorHost", "suit_male.fbx", Vector3(-2.9, .02, 1.4), .2, "ual/idle", Color(.045, .045, .065))
-	_person("PatronA", "casual_female.fbx", Vector3(.3, .02, 1.2), -1.0, "ual/talking", Color(.55, .035, .15))
-	_person("PatronB", "casual2_male.fbx", Vector3(1.1, .02, 1.45), 1.7, "ual/phone", Color(.17, .28, .4))
-	_person("BarPatronA", "casual2_female.fbx", Vector3(14.6, .02, 1.1), -1.1, "ual/talking", Color(.16, .35, .4))
-	_person("BarPatronB", "casual_male.fbx", Vector3(15.6, .02, 1.5), 1.2, "ual/talking", Color(.32, .15, .3))
+	_person("DoorHost", "suit_male.fbx", Vector3(-2.9, .02, 1.4), .2, "ual/phone", Color(.045, .045, .065))
 	_person("FoodCustomer", "casual3_male.fbx", Vector3(-12.7, .02, 1.7), PI, "ual/phone", Color(.45, .27, .12))
 	_walker("PedestrianA", "casual_male.fbx", Vector3(-17, .02, 4.2), Vector3(-8, .02, 4.2), Color(.3, .42, .5))
 	_walker("PedestrianB", "casual2_female.fbx", Vector3(20, .02, 4.5), Vector3(11, .02, 4.5), Color(.6, .22, .4))
-	_walker("PedestrianC", "casual2_male.fbx", Vector3(0, .02, 5.6), Vector3(-9, .02, 5.6), Color(.3, .3, .18))
+
+	# Rain-darkened frontage: downpipes, shutter, drains and a deserted waiting bench.
+	for x in [-5.1, 3.0, 12.2, 18.3]:
+		_box("Downpipe", Vector3(x, 1.95, .28), Vector3(.09, 3.9, .09), metal)
+	for slat in range(10):
+		_box("FoodShutter", Vector3(-12.8, 1.03 + slat * .14, .27), Vector3(3.86, .035, .045), stone)
+	for x in [-8.0, 9.8]:
+		_box("StormDrain", Vector3(x, .063, 6.25), Vector3(1.1, .025, .42), metal)
+		for slot in range(7):
+			_box("DrainSlot", Vector3(x - .45 + slot * .15, .078, 6.25), Vector3(.045, .008, .36), asphalt)
+	for slat in range(4):
+		_box("BenchSlat", Vector3(-7.7, .51, .68 + slat * .13), Vector3(2.0, .07, .11), stone)
+	for x in [-8.4, -7.0]:
+		_box("BenchLeg", Vector3(x, .25, .86), Vector3(.09, .5, .5), metal)
+	_box("BenchBack", Vector3(-7.7, .9, .52), Vector3(2.0, .52, .075), stone)
 
 
 func tick(time: float) -> void:
@@ -124,7 +136,7 @@ func tick(time: float) -> void:
 		var length: float = maxf(animator.current_animation_length, .001)
 		animator.seek(fposmod(time * float(entry.rate) + float(entry.phase), length), true)
 		animator.advance(0.0)
-	club_light.light_energy = 2.5 + sin(time * 2.2) * .12
+	club_light.light_energy = .65 + sin(time * 1.3) * .035
 
 
 ## Wait for the panels, emerge and round the corner without stopping or snapping.
@@ -236,7 +248,8 @@ func _person(label: String, model: String, at: Vector3, facing: float, clip: Str
 
 
 func _walker(label: String, model: String, from: Vector3, to: Vector3, shirt: Color) -> void:
-	var body: Node3D = _person(label, model, from, atan2(from.x - to.x, from.z - to.z), "CharacterArmature|Walk", shirt)
+	# Raw imported people face +Z, unlike the wrapped playable engineer.
+	var body: Node3D = _person(label, model, from, atan2(to.x - from.x, to.z - from.z), "CharacterArmature|Walk", shirt)
 	var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 	# Match skeletal stride rate to the actual distance travelled per cinematic second.
 	animations.back().rate = from.distance_to(to) / SECONDS / 1.6

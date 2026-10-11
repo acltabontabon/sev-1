@@ -50,7 +50,7 @@ static func line(talk: Dictionary, node_id: String) -> Dictionary:
 static func memory(name: String) -> Dictionary:
 	var talk: Dictionary = tree(name)
 	var clip: String = talk.voice + "good_days"
-	return remembered_lines[clip].duplicate() if remembered_lines.has(clip) else line(talk, "good_days")
+	return remembered_lines[clip].duplicate() if remembered_lines.has(clip) else line(talk, "after_hours" if talk.nodes.has("after_hours") else "good_days")
 
 
 static func data() -> Dictionary:

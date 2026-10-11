@@ -268,7 +268,7 @@ remembered, and management thanking itself, unhinged and satirical.
   - A low orbit round the engineer among his colleagues as Unpaid Overtime slowly burns
     out; one gold receipt drifts down to him: TXN 000001, $0.01, FOUND. The narrator:
     "And there it was. The missing transaction. One cent."
-  - In Memoriam: a glide past each of the five where they fell (MORGAN: "His calendar
+  - In Memoriam: a glide past each of the five where they fell (MORGAN: "Her calendar
     is still full." JO: "Never got a badge photo.").
   - 11:58 PM, a mandatory all-hands in the lobby under the SYNERGEX logo, lit like a
     keynote (spotlight, LIVE · 3,411 ON MUTE), an audience of one in the dark.
@@ -301,7 +301,7 @@ an enraged voice, an aura that pushes the boss back, and nothing on screen but h
   across the room to each scene; the wide shot watches side-on; the rest run panicked
   laps away from wherever it is going.
   - **DELAYERING** (mid-vault, "removing one layer of management"): a shadow grows under
-    MORGAN, who shakes his head at it; flattened into the floor. Stamp: DELAYERED.
+    MORGAN, who shakes her head at it; flattened into the floor. Stamp: DELAYERED.
   - **DECOMMISSION** (at the server racks, mid-rollback): an end-of-life scan, then in
     half; the pager on the upper half keeps ringing. Stamp: DECOMMISSIONED.
   - **MAKE IT POP** (at the ledger, giving the monster notes): JUN inflates, wobbling,

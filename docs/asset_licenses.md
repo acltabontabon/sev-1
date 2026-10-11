@@ -145,3 +145,38 @@ Two instances of Poly Haven **Caged Hanging Light** by Ulan Cabanilla, CC0 1.0.
 The official 1K glTF buffers and JPEG maps were verified and embedded into a GLB;
 [source URLs, hashes and license](../assets/environment/operations/README.md).
 Original console/rack geometry and power-up SVG icons add no outside rights.
+
+## Illustrated memorial memories (11 October 2026)
+
+Five original PNGs were created with the built-in OpenAI image-generation tool from
+SEV-1's authored prompts, with no supplied reference images or artist imitation.
+They depict distinct shared moments with Morgan, Nadia, Jun, Jo and Val.
+[The asset record](../assets/environment/memorial_illustrations/README.md) links their
+full prompt set, original generated paths, selected-file checksums and visual review.
+These are AI-generated candidate illustrations; creator acceptance remains pending.
+Git LFS tracks the PNGs. Narration retains the existing stock Kokoro documentary
+profile and its recorded provenance; no runtime generation or paid runtime AI.
+
+## Corporate firefighting cutscene — 11 October 2026
+
+`game/incidents/vault_response.gd`, `vault_flame.gdshader` and `vault_spell.gdshader`
+are original AI-assisted Godot geometry/shaders: extinguisher, nozzle, hose, fan,
+bucket, clipboard, damaged equipment, flame silhouettes and cutting crescents.
+No outside models or textures were added. Sparse smoke reuses the existing
+[Kenney Smoke Pack CC0 texture](../assets/effects/kenney_smoke/README.md), and
+casualty pools reuse the game's generated blood textures. Crew bodies and motion
+reuse the licensed Quaternius assets above. Ten revised crew recordings and
+all eight Variance lines use the existing local voice pipeline; exact text, profiles and output
+hashes remain in `assets/audio/voices/talk/provenance.json` and `provenance.json`.
+Rendered creator review remains a separate gate from automated validation.
+
+
+## Expanded production vault — 11 October 2026
+
+[Poly Haven Power Box 01](https://polyhaven.com/a/power_box_01), by Rico Cilliers
+and Yann Kervran, is CC0 1.0. The original 1K glTF geometry and textures are embedded
+in a GLB with source checksums preserved in
+[the asset record](../assets/environment/vault/README.md). Git LFS tracks the model.
+Caged hanging lights and PBR surfaces reuse the existing licensed library. The
+server cabinets, cooling banks, structural frames, cable trays, arena and breakable
+equipment are original AI-assisted project geometry. No runtime download is needed.

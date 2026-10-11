@@ -18,3 +18,72 @@ Original game visuals and writing retain the creator's rights. Depicted models,
 fonts, materials, and other third-party assets retain their existing licenses;
 see the [asset inventory](../asset_licenses.md) and its source records.
 No outside promotional art or new font was introduced.
+
+## Ending PR captures — 11 October 2026
+
+Unmodified staged in-engine captures of the initial memorial changes. The narrator
+text shown in these six captures predates the subsequent dialogue refinement. The check
+shot shows the engineer kneeling beside Morgan; the five memory captures show the
+selected sketch art with the actual narrator captions. Captured in Godot 4.7.2
+Forward+ / Metal on Apple M2 Pro. These establish framing and subtitle layout,
+not measured performance, ordinary gameplay duration or listening acceptance.
+
+| File | Local source | Resolution |
+| --- | --- | --- |
+| `ending_check_morgan.png` | `logs/finale_remember_1.png` | 1280 × 720 |
+| `ending_memory_morgan.png` | `logs/finale_memory_0_5.png` | 1280 × 720 |
+| `ending_memory_nadia.png` | `logs/finale_memory_1_5.png` | 1280 × 720 |
+| `ending_memory_jun.png` | `logs/finale_memory_2_5.png` | 1280 × 720 |
+| `ending_memory_jo.png` | `logs/finale_memory_3_5.png` | 1744 × 981 |
+| `ending_memory_val.png` | `logs/finale_memory_4_5.png` | 1824 × 1026 |
+
+Memory artwork is AI-generated from authored prompts; its source files, exact
+prompts and review record are in [illustration provenance](../../assets/environment/memorial_illustrations/README.md).
+Git LFS tracks these screenshots; this directory remains excluded from game imports.
+
+
+## Departure refinement captures — 11 October 2026
+
+Unmodified 1280 × 720 staged captures from Godot 4.7.2, Forward+ / Metal,
+Apple M2 Pro. `tests/finale_preview.gd -- --departure` captures the ghost and
+street; `--street` repeats the exterior and window. The camera sees Morgan facing
+the walking lane, the subdued rainy frontage, and five rigged silhouettes without
+living actors behind them. Existing licensed models/materials were reused; no new
+outside assets were downloaded. These are visual checks, not performance measurements.
+
+| File | Local source |
+| --- | --- |
+| `ending_ghost_facing.png` | `logs/finale_exit_3.png` |
+| `ending_rainy_departure.png` | `logs/finale_street_8.png` |
+| `ending_window.png` | `logs/finale_window_2.png` |
+
+## Corporate firefighting captures — 11 October 2026
+
+Unmodified 1280 × 720 staged captures from Godot 4.7.2, Forward+ / Metal on
+Apple M2 Pro, using `tests/cutscene_preview.gd -- --vault --capture`.
+`boss_response.png` shows the two-handed nozzle grip and curved water stream;
+`boss_destructive_feedback.png` shows the cutting frame replacing the balloon pop.
+Props and shaders are original; characters, animation and smoke reuse the existing
+licensed assets. These captures verify composition, not performance or human acceptance.
+
+| File | Local source |
+| --- | --- |
+| `boss_response.png` | `logs/vault_hose.png` |
+| `boss_destructive_feedback.png` | `logs/vault_spell_2.png` |
+
+
+## Expanded vault captures — 11 October 2026
+
+Unmodified 1280 × 720 captures from Godot 4.7.2 Forward+ / Metal on Apple M2 Pro.
+`boss_arena.png` comes from `logs/vault_wide.png`, the fire-response entrance replay.
+`boss_arena_equipment.png` comes from `logs/arena_power.png`, captured by
+`tests/vault_arena_preview.gd`. They show the expanded production core and the
+licensed Poly Haven electrical cabinet beside original server cabinets.
+[Asset provenance](../../assets/environment/vault/README.md) records the CC0 source.
+These images do not establish performance or creator acceptance.
+
+The separate final arena preview measured 1,197 frame intervals over ten seconds
+after five seconds of warmup: median 8.303 ms, p95 10.589 ms. Hardware/settings:
+Apple M2 Pro, 1280 × 720, Forward+ / Metal, MSAA 2×, SSAO, glow and fog. Scenario:
+stationary wide camera with an active boss; captures excluded, validation finished.
+This narrow sample is not a full-combat or cross-platform performance guarantee.

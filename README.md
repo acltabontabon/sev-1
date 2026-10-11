@@ -76,4 +76,14 @@ Source-checkout checkpoint: double-click [duel_preview.command](duel_preview.com
 to watch the new Stage One boss choreography directly. Creator pacing and sound
 review remain pending; the shortcut is a quick source-checkout checkpoint.
 
+For the corporate firefighting entrance, double-click [boss_intro_preview.command](boss_intro_preview.command).
+Watch the hose response, Destructive Feedback and the lasting aftermath; TAB skips.
+
+For an immediate playable boss fight, double-click [boss_arena_preview.command](boss_arena_preview.command).
+Try the wider dodge lanes and smash the equipment cases and coolant canisters.
+Relaunch the shortcut for a fresh fight.
+
+For the revised ending, double-click [ending_preview.command](ending_preview.command).
+TAB skips; relaunch to retry. Judge the ghost eyelines, bleak departure, and dialogue timing.
+
 [Share playtest feedback](docs/testing.md) · [Credits](docs/asset_licenses.md) · [Development](docs/development.md)

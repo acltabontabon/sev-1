@@ -5,7 +5,9 @@ extends Node3D
 ##  "receipts"  receipts snow over the vault; a low orbit round the engineer, wrecked and
 ##              bloody, as his Unpaid Overtime slowly burns out; a receipt drifts down.
 ##  "cent"      close on it: the missing transaction, $0.01, cost: 5 staff (the narrator).
-##  "memorial"  In Memoriam: a glide past each of the five where they fell.
+##  "casualties" names the night shift as he approaches Morgan.
+##  "remember"  he kneels beside her; a close shot fades into the first sketch.
+##  "memorial"  distinct illustrated moments, then where each teammate fell.
 ##  "grief"     a last look at JO; a tear rolls down the engineer's cheek.
 ##  "desk"      back at his desk: he collects his mug and personal effects.
 ##  "exit"      he walks through the empty lift corridor to a sad theme; the five return as
@@ -27,19 +29,22 @@ const CREW = preload("res://game/incidents/coworkers.gd")
 const DIALOGUES = preload("res://game/incidents/dialogues.gd")
 ## In Memoriam, in the order they fell.
 const MEMORIAL: Array = [
-	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "His calendar is still full."],
-	["SRE", "NADIA", "SITE RELIABILITY  ·  2020 – TONIGHT", "Her pager is still ringing."],
-	["Designer", "JUN", "PRODUCT DESIGN  ·  2021 – TONIGHT", "The kerning was perfect."],
-	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Never got a badge photo."],
-	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Her deck will be presented by someone else."]]
+	["Manager", "MORGAN", "MANAGER  ·  2019 – TONIGHT", "No more coffee breaks disguised as leadership development."],
+	["SRE", "NADIA", "SITE RELIABILITY  ·  2020 – TONIGHT", "The good mug is still waiting for him."],
+	["Designer", "JUN", "PRODUCT DESIGN  ·  2021 – TONIGHT", "One less chair at the lunch table."],
+	["Intern", "JO", "INTERN  ·  TODAY – TONIGHT", "Monday lunch. Still in the calendar."],
+	["Director", "VAL", "DIRECTOR  ·  2018 – TONIGHT", "Nobody left to laugh at his terrible first band."]]
 const MEMORIAL_EACH: float = 2.4
+const RECOLLECTION: Script = preload("res://game/incidents/memorial_memory.gd")
+const MEMORIAL_VOICES: Dictionary = {"Manager": "doc_morgan", "SRE": "doc_nadia",
+	"Designer": "doc_jun", "Intern": "doc_jo", "Director": "doc_val"}
 ## The way out: each memory recalls an ordinary conversation beside the clear route.
 const MEMORIES: Array = [
-	["Manager", "ual/phone"],
+	["Manager", "ual/talking"],
 	["SRE", "ual/interact"],
 	["Designer", "ual/talking"],
 	["Intern", "ual/yes"],
-	["Director", "ual/phone"]]
+	["Director", "ual/talking"]]
 const VAULT_AT: Vector3 = Vector3(9.0, .05, -33.8)
 const POSTMORTEM: Script = preload("res://game/incidents/postmortem_call.gd")
 const DEPARTURE: PackedScene = preload("res://game/incidents/departure_corridor.tscn")
@@ -93,7 +98,17 @@ var sword_from: Transform3D
 var sword_rest: Transform3D
 var saved_clock: String
 var departure: Node3D
+var recollection: Node3D
+var memorial_index: int = -1
+var memorial_at: float = 0.0
+var memorial_duration: float = 0.0
+var memorial_loss_at: float = -1.0
+var bridge_seconds: float = 0.0
+var check_from: Vector3
+var check_at: Vector3
 var nightlife: Node3D
+var window_hidden: Array[Node3D] = []
+var window_memories: Array[Node3D] = []
 
 
 func _init(presentation: Node) -> void:
@@ -133,6 +148,7 @@ func _beat(next: String) -> void:
 	beat = next
 	beat_at = clock
 	character.story_walk_speed = 0.0
+	character.preview_clip = ""
 	focus.dof_blur_far_enabled = false
 	focus.dof_blur_near_enabled = false
 	match beat:
@@ -150,15 +166,37 @@ func _beat(next: String) -> void:
 			character.story_pose = character.Pose.LOOK_DOWN
 			character.overtime_fade(5.0)
 			_drop_receipt()
+			story.say("doc_battle_over")
 		"cent":
 			story.say("doc_cent")
-		"memorial":
-			memorial_name.show()
-			memorial_line.show()
+		"casualties":
 			_start_mourning()
+			character.weapon.hide()
+			check_from = player.global_position
+			check_at = _fallen_at("Manager") + Vector3(0, .05, 1.15)
+			bridge_seconds = _voice_seconds("doc_fallen")
+			story.say("doc_fallen")
+		"remember":
+			player.global_position = check_at
+			character.preview_clip = "fixing"
+			character.preview_at = 0.0
+			bridge_seconds = _voice_seconds("doc_remember")
+			story.say("doc_remember")
+		"memorial":
+			story.voice.clear()
+			fade.hide()
+			fade.color.a = 0.0
+			_start_mourning()
+			character.weapon.hide()
+			recollection = RECOLLECTION.new(story)
+			incident.add_child(recollection)
+			props.append(recollection)
+			_recall_next()
 		"grief":
 			memorial_name.hide()
 			memorial_line.hide()
+			if is_instance_valid(recollection):
+				recollection.conceal()
 			var fallen: Vector3 = _fallen_at("Intern")
 			player.global_position = fallen + Vector3(0, .05, 1.15)
 			player.visual.rotation.y = 0.0
@@ -187,6 +225,8 @@ func _beat(next: String) -> void:
 			story.desk.alarm(true)
 			story.sting(preload("res://assets/audio/sfx/chat_ping.ogg"), -4)
 		"exit":
+			_exposure(.42)
+			story.voice.clear()
 			character.story_hand_targets.clear()
 			character.story_pose = 0
 			character.sit = 0.0
@@ -222,6 +262,10 @@ func _beat(next: String) -> void:
 			story.sting(preload("res://assets/audio/sfx/door_open.ogg"), -14)
 			story.say("doc_end")
 		"window":
+			for actor: Variant in [incident.coworkers] + incident.actors:
+				if is_instance_valid(actor) and actor is Node3D and actor.visible:
+					window_hidden.append(actor)
+					actor.hide()
 			if is_instance_valid(nightlife):
 				nightlife.hide()
 			_stage_window()
@@ -230,6 +274,9 @@ func _beat(next: String) -> void:
 			titles.show()
 			titles.text = "INCIDENT 001 — RESOLVED\nProduction recovered. Nobody else did."
 		"card":
+			_restore_window_actors()
+			for figure: Node3D in window_memories:
+				figure.hide()
 			incident.room.get_node("Clock").text = "MONDAY / 09:00"
 			titles.text = "MONDAY, 9:00 AM\nBLAMELESS POSTMORTEM  ·  ATTENDANCE MANDATORY"
 			if mourn.playing:
@@ -279,7 +326,7 @@ func tick(delta: float) -> bool:
 	incident.main.get_node("HUD").visible = false
 	player.narrative_hold = true
 	story.caption.text = story.voice.subtitle
-	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["memorial", "card", "resolved", "next"]
+	story.panel.visible = not story.voice.subtitle.is_empty() and beat not in ["card", "resolved", "next"]
 	var camera: Camera3D = story.camera
 	var engineer: Vector3 = player.global_position
 	if is_instance_valid(belongings) and beat != "desk":
@@ -310,7 +357,7 @@ func tick(delta: float) -> bool:
 			for index in range(story.vault_lights.size()):
 				story.vault_lights[index].light_energy = story.vault_energy[index] * smoothstep(1.0 + index * .6, 2.5 + index * .6, t)
 			_float_receipt(t)
-			if t >= 5.5:
+			if t >= 5.5 and quiet:
 				_beat("cent")
 		"cent":
 			# Close on it, him soft behind it: one cent.
@@ -321,26 +368,65 @@ func tick(delta: float) -> bool:
 			camera.fov = 36.0
 			_focus_far(1.0)
 			if t >= 2.0 and quiet:
+				_beat("casualties")
+		"casualties":
+			# The repaired ledger recedes; the people become the subject of the shot.
+			player.global_position = check_from.lerp(check_at, _walk_progress(t, 3.2))
+			character.story_walk_speed = _walk_speed(t, 3.2, check_from.distance_to(check_at))
+			character.story_pose = character.Pose.NONE if t < 3.2 else character.Pose.LOOK_DOWN
+			var heading: Vector3 = check_at - check_from
+			player.visual.rotation.y = atan2(-heading.x, -heading.z)
+			camera.global_position = Vector3(9, 4.0, -28.0).lerp(Vector3(9.4, 3.2, -29.0), smoothstep(0.0, bridge_seconds, t))
+			camera.look_at(Vector3(9, .4, -37.4))
+			camera.fov = 60.0
+			if t >= bridge_seconds and quiet:
+				_beat("remember")
+		"remember":
+			# Existing CC0 kneeling motion supplies the quiet check, without combat input.
+			character.preview_at = lerpf(.05, .5, smoothstep(0.0, bridge_seconds, t))
+			var body: Vector3 = _fallen_at("Manager") + Vector3.UP * .25
+			var head: Vector3 = character.skeleton.global_transform * character.skeleton.get_bone_global_pose(character.skeleton.find_bone("Head")).origin
+			var reveal: float = smoothstep(3.0, 6.0, t)
+			camera.global_position = (player.global_position + Vector3(2.8, 1.6, .95)).lerp(head + Vector3(2.6, .4, -2.4), reveal)
+			camera.look_at(body.lerp(head + Vector3.UP * .1, reveal))
+			camera.fov = lerpf(54.0, 45.0, reveal)
+			fade.show()
+			fade.color = Color(0, 0, 0, smoothstep(bridge_seconds - .7, bridge_seconds, t) * .75)
+			if t >= bridge_seconds and quiet:
 				_beat("memorial")
 		"memorial":
-			# Where each of them fell, in the order they fell; receipts settling on them.
-			var index: int = mini(int(t / MEMORIAL_EACH), MEMORIAL.size() - 1)
-			var local: float = t - index * MEMORIAL_EACH
-			var entry: Array = MEMORIAL[index]
-			var place: Vector3 = _fallen_at(entry[0])
-			var inward: Vector3 = Vector3(VAULT_AT.x - place.x, 0, VAULT_AT.z - place.z).normalized()
-			var side: Vector3 = inward.cross(Vector3.UP)
-			camera.global_position = place + Vector3.UP * 1.1 + inward * 1.7 + side * (.9 - local * .3)
-			camera.look_at(place + Vector3.UP * .4)
-			camera.fov = 40.0
-			_focus_far(3.2)
-			memorial_name.text = entry[1]
-			memorial_line.text = "%s\n%s" % [entry[2], entry[3]]
-			var alpha: float = smoothstep(0.0, .5, local) * (1.0 - smoothstep(MEMORIAL_EACH - .45, MEMORIAL_EACH, local))
-			memorial_name.modulate.a = alpha
-			memorial_line.modulate.a = alpha
-			if t >= MEMORIAL_EACH * MEMORIAL.size():
-				_beat("grief")
+			var local: float = clock - memorial_at
+			var entry: Array = MEMORIAL[memorial_index]
+			if local < memorial_duration or not quiet:
+				# Keep both people alive in the shot until the narrator finishes.
+				recollection.frame(local, memorial_duration)
+				memorial_name.hide()
+				memorial_line.hide()
+			else:
+				recollection.conceal()
+				story.panel.hide()
+				if memorial_loss_at < 0.0:
+					memorial_loss_at = clock
+				var loss_time: float = clock - memorial_loss_at
+				var place: Vector3 = _fallen_at(entry[0])
+				var inward: Vector3 = Vector3(VAULT_AT.x - place.x, 0, VAULT_AT.z - place.z).normalized()
+				var side: Vector3 = inward.cross(Vector3.UP)
+				camera.global_position = place + Vector3.UP * 1.1 + inward * 1.7 + side * (.9 - loss_time * .3)
+				camera.look_at(place + Vector3.UP * .4)
+				camera.fov = 40.0
+				_focus_far(3.2)
+				memorial_name.text = entry[1]
+				memorial_line.text = "%s\n%s" % [entry[2], entry[3]]
+				var alpha: float = smoothstep(0.0, .4, loss_time) * (1.0 - smoothstep(MEMORIAL_EACH - .45, MEMORIAL_EACH, loss_time))
+				memorial_name.modulate.a = alpha
+				memorial_line.modulate.a = alpha
+				memorial_name.show()
+				memorial_line.show()
+				if loss_time >= MEMORIAL_EACH and quiet:
+					if memorial_index + 1 < MEMORIAL.size():
+						_recall_next()
+					else:
+						_beat("grief")
 		"grief":
 			# First his colleague, then the face of someone who cannot fix this.
 			var head: Vector3 = tear_anchor.global_position
@@ -428,7 +514,7 @@ func tick(delta: float) -> bool:
 			# Long lens from across the city, up to the one lit window: the night shift.
 			camera.global_position = Vector3(-74.0, 13.0, 28.0)
 			camera.look_at(WINDOW + Vector3.UP * .9)
-			camera.fov = lerpf(3.2, 2.6, minf(1.0, t / 5.0))
+			camera.fov = lerpf(6.2, 5.4, minf(1.0, t / 5.0))
 			if t >= 4.5 and quiet:
 				_beat("resolved")
 		"resolved":
@@ -493,6 +579,7 @@ func finish(completed: bool = true) -> void:
 	if done:
 		return
 	done = true
+	_restore_window_actors()
 	story.finale_completed = completed
 	story.sequence.clear()
 	story.voice.clear()
@@ -501,6 +588,7 @@ func finish(completed: bool = true) -> void:
 	story.crew_freeze.hide()
 	story.panel.hide()
 	character.overtime(false)
+	character.preview_clip = ""
 	character.story_pose = 0
 	character.sit = 0.0
 	character.story_hand_targets.clear()
@@ -561,7 +649,7 @@ func _unbloody() -> void:
 
 
 func _start_mourning() -> void:
-	if DisplayServer.get_name() == "headless":
+	if DisplayServer.get_name() == "headless" or mourn.playing:
 		return
 	mourn.volume_db = -30.0
 	mourn.play()
@@ -719,13 +807,16 @@ func _summon_memories() -> void:
 		var ghost: StandardMaterial3D = StandardMaterial3D.new()
 		ghost.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		ghost.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		ghost.albedo_color = Color(.84, .79, .69, 0.0)
-		for mesh: Node in body.find_children("*", "MeshInstance3D", true, false):
-			(mesh as MeshInstance3D).material_override = ghost
+		ghost.albedo_color = Color(.64, .72, .78, 0.0)
+		for mesh: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
+			_memory_outfit(mesh, cast)
+			mesh.material_override = ghost
 			(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var animator: AnimationPlayer = body.find_child("AnimationPlayer", true, false)
 		animator.add_animation_library("ual", MOTION)
+		animator.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 		animator.play(entry[1])
+		animator.advance(0.0)
 		var remembered: Dictionary = DIALOGUES.memory(entry[0])
 		var whisper: AudioStreamPlayer = AudioStreamPlayer.new()
 		whisper.bus = &"Voice"
@@ -733,11 +824,17 @@ func _summon_memories() -> void:
 		whisper.volume_db = -10.0
 		body.add_child(whisper)
 		var length: float = whisper.stream.get_length()
-		memories.append({"body": body, "ghost": ghost, "whisper": whisper, "seen": false,
+		memories.append({"body": body, "animator": animator, "ghost": ghost, "whisper": whisper, "seen": false,
 			"cue": cue, "length": length, "text": remembered.text, "who": DIALOGUES.tree(entry[0]).who})
 		cue += length + .9
 	departure.configure(memories, EXIT_PATH[0], EXIT_PATH[1])
 	exit_duration = departure.duration
+
+
+## These single-material apparitions need the outfit mesh, not discarded palette overrides.
+func _memory_outfit(mesh: MeshInstance3D, cast: Dictionary) -> void:
+	if mesh.skin != null and CREW.FEMALE_OUTFITS.has(cast.body):
+		mesh.mesh = CREW.DIRECTOR_OUTFIT if cast.get("outfit", "office") == "low_cut" else CREW.FEMALE_OUTFITS[cast.body]
 
 
 ## One intelligible fragment at a time. A memory vanishes after its line, not mid-word.
@@ -747,7 +844,10 @@ func _haunt(time: float) -> void:
 		var within: float = time - float(memory.cue)
 		var length: float = memory.length
 		var alpha: float = smoothstep(-.4, .4, within) * (1.0 - smoothstep(length, length + .7, within))
-		memory.ghost.albedo_color.a = alpha * .14
+		memory.ghost.albedo_color.a = alpha * .2
+		var animator: AnimationPlayer = memory.animator
+		animator.seek(fposmod(maxf(within, 0.0) * .65, maxf(animator.current_animation_length, .001)), true)
+		animator.advance(0.0)
 		if within >= 0.0 and not memory.seen:
 			memory.seen = true
 			if DisplayServer.get_name() != "headless":
@@ -756,6 +856,28 @@ func _haunt(time: float) -> void:
 			memory_caption.text = "%s · remembered\n%s" % [memory.who, memory.text]
 			memory_caption.modulate.a = smoothstep(0.0, .3, within) * (1.0 - smoothstep(length - .3, length, within))
 			memory_caption.show()
+
+
+func _voice_seconds(id: String) -> float:
+	var stream: AudioStream = load(story.voice.lines[id].audio)
+	return stream.get_length() + .8
+
+
+func _recall_next() -> void:
+	memorial_index += 1
+	memorial_at = clock
+	memorial_loss_at = -1.0
+	focus.dof_blur_far_enabled = false
+	memorial_name.hide()
+	memorial_line.hide()
+	recollection.recall(MEMORIAL[memorial_index][0])
+	var id: String = MEMORIAL_VOICES[MEMORIAL[memorial_index][0]]
+	var entry: Dictionary = story.voice.lines[id]
+	var stream: AudioStream = load(entry.audio)
+	# Audio starts on the next process frame; leave breathing room before the loss cut.
+	memorial_duration = stream.get_length() + .8
+	recollection.frame(0.0, memorial_duration)
+	story.say(id)
 
 
 func _boss_at() -> Vector3:
@@ -922,32 +1044,38 @@ func _stage_street() -> void:
 	props.append(cold)
 
 
+func _restore_window_actors() -> void:
+	for actor: Variant in window_hidden:
+		if is_instance_valid(actor):
+			actor.show()
+	window_hidden.clear()
+
+
 ## Five of them in the lit window, black against the light, watching him go.
 func _stage_window() -> void:
 	var black: StandardMaterial3D = StandardMaterial3D.new()
 	black.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	black.albedo_color = Color(.01, .01, .012)
-	for index in range(5):
-		var figure: Node3D = Node3D.new()
-		var body: MeshInstance3D = MeshInstance3D.new()
-		var torso: CapsuleMesh = CapsuleMesh.new()
-		torso.radius = .2
-		torso.height = 1.15
-		body.mesh = torso
-		body.material_override = black
-		body.position.y = .58
-		figure.add_child(body)
-		var head: MeshInstance3D = MeshInstance3D.new()
-		var ball: SphereMesh = SphereMesh.new()
-		ball.radius = .14
-		ball.height = .28
-		head.mesh = ball
-		head.material_override = black
-		head.position.y = 1.32
-		figure.add_child(head)
+	for index in range(MEMORIES.size()):
+		var cast: Dictionary = {}
+		for member: Dictionary in CREW.CAST:
+			if member.name == MEMORIES[index][0]:
+				cast = member
+		var figure: Node3D = load(ROOT + cast.body).instantiate()
+		figure.name = "WindowMemory" + str(index)
 		incident.add_child(figure)
-		figure.global_position = WINDOW + Vector3(0, 0, (index - 2) * .62)
+		figure.scale = Vector3.ONE * .52
+		for mesh: MeshInstance3D in figure.find_children("*", "MeshInstance3D", true, false):
+			_memory_outfit(mesh, cast)
+			mesh.material_override = black
+		figure.global_position = WINDOW + Vector3(0, 0, (index - 2) * .78)
+		figure.rotation.y = -PI * .5
+		var animator: AnimationPlayer = figure.find_child("AnimationPlayer", true, false)
+		animator.add_animation_library("ual", MOTION)
+		animator.play("ual/idle")
+		animator.advance(float(index) * .23)
 		props.append(figure)
+		window_memories.append(figure)
 	var warm: OmniLight3D = OmniLight3D.new()
 	warm.light_color = Color(1, .8, .55)
 	warm.light_energy = 6.0
@@ -955,6 +1083,7 @@ func _stage_window() -> void:
 	incident.add_child(warm)
 	warm.global_position = WINDOW + Vector3(2.6, 1.4, 0)
 	props.append(warm)
+	window_memories.append(warm)
 
 
 

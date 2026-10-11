@@ -61,6 +61,9 @@ func configure(memories: Array[Dictionary], _from: Vector3, to: Vector3) -> void
 		var at: float = float(memory.cue) + float(memory.length) * .4
 		var sample: Vector4 = travel(at)
 		memory.body.global_position = Vector3(sample.x, sample.y - .05, sample.z + 2.25)
+		# Raw Quaternius bodies face +Z; the wrapped playable engineer faces -Z.
+		var toward_lane: Vector3 = Vector3(sample.x, sample.y, sample.z) - memory.body.global_position
+		memory.body.global_rotation.y = atan2(toward_lane.x, toward_lane.z)
 
 
 ## Continuous travel under the recalled voices, with only the departure/end eased.

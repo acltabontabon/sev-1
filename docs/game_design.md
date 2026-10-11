@@ -210,6 +210,42 @@ Human acceptance remains pending: enter during investigation, watch the transfor
 run and dodge through the center and annex, and judge whether the overlapping Invite
 and projector circles feel fair, readable and funny. R restarts the incident.
 
+### Corporate firefighting entrance (implemented prototype, 11 October 2026)
+
+Before the Stage One boss fight, the crew rushes past the engineer through the vault
+door and takes five response stations. He sees them go and follows. Morgan brings
+an extinguisher labelled HOTFIX; Nadia deploys a two-handed hose; Jun fans the
+metrics; Jo brings a CLOUD BACKUP bucket; Val accepts the risk on everyone else's
+behalf. A brief reduction in the flames lets the response appear to work.
+
+The Variance answers with five deliberate magical executions. Continuous copper-red
+crescents establish the spell before contact. Jun's former balloon pop is replaced by
+**Destructive Feedback**: a four-sided cutting frame closes around her, leaving
+physical remains and a CROPPED TO SCOPE stamp. Prone bodies, separated pieces,
+charred legs, the downsized director, casualty pools and dropped tools persist into
+combat. The ensuing grief and Unpaid Overtime transformation remain intact.
+
+The vault now spans **24 × 21 m**, roughly 65% more floor area, with a 7.5 m ceiling.
+Detailed server cabinets, cooling banks, structural frames, overhead cable trays,
+industrial power boxes and a monumental ledger wall frame a clear central fight.
+Side and rear lanes leave room to dodge. Six equipment cases and coolant canisters
+can be smashed with melee, Reply All, Blame Shift or Circle Back; each leaves six
+physical pieces that settle on the floor without blocking movement. Props award no
+kill credit or ultimate charge, and retry restores them. The boss also destroys equipment
+at its actual attack impacts: local quake/slam footprints, feedback landings, the
+downsizing beam impact and nearby exposure overload. Decommission sweeps props
+away as its expanding ring reaches them. Windups and cancelled attacks do no
+scenery damage; intervening walls protect props. Boss destruction remains independent
+of whether the engineer dodges the attack and awards no player credit.
+Flames use continuous tapered shaders,
+water follows a connected curved stream, smoke is sparse, and impact debris is
+restrained. Ten crew recordings and all eight boss lines were regenerated locally. The Variance
+uses a lower stock voice, shifted down five semitones, with measured executive delivery.
+TAB skips directly to a playable fight with its aftermath; restart removes the response.
+`boss_arena_preview.command` jumps straight into the expanded arena for a combat retry.
+Use `boss_intro_preview.command` for the source checkpoint. Director acceptance of
+hose grip, effects, death choreography, sound and comedy remains pending.
+
 ### Unpaid Overtime entrance (implemented prototype, 11 October 2026)
 
 The loss of the night shift drives the engineer's transformation before The Variance
@@ -240,9 +276,45 @@ reads clearly, the recovery feels earned, and the finisher remains the payoff.
 
 ### Incident 001 aftermath (implemented prototype, 11 October 2026)
 
-After the duel and the five memorial shots, the engineer looks down at JO and the
+After the duel, the engineer's golden Unpaid Overtime form fades over five seconds.
+The narrator confirms that the fight is over while the gold fades. After the cent
+close-up, a wide vault shot names Morgan, Nadia, Jun, Jo and Val. The engineer walks
+to Morgan, hides his weapon and kneels beside her using the existing CC0 fixing
+motion. The narrator explains that no answer comes and his mind returns to a gentler
+moment: the lift, two coffees and a stolen break. A close view and short fade lead
+into the first sketch. Every bridge shot waits for its local narration to finish;
+subtitles follow the existing preference and TAB still skips the entire ending.
+This transition leads into a compulsory memorial sequence of five original
+illustrated memories. Loose graphite, ink and sparse watercolor interpretations of the
+same engineer and crew capture shared actions, rather than repeated staged dialogue:
+
+- Morgan holds the elevator with her shoe while handing the engineer a coffee.
+  Morgan is a woman; her in-game body and the memory sketch match her existing
+  female voice, and the narrator explicitly refers to her as “she.”
+- Nadia offers the saved mug while smothering his pager during a long operations shift.
+- Jun closes the laptop, offers bread, and gets the engineer to surrender his phone
+  during a rooftop lunch; pigeons squabble over their crumbs.
+- Jo and the engineer draw the route to the cheap noodle shop and make a pinky promise
+  for Monday, on the lobby floor after his first shift. That lunch has not happened.
+- Val laughs while the engineer performs a pencil drum solo and the printer spits
+  paper as his ridiculous drummer.
+
+Each image has its own setting, composition and slow framing drift. Faded paper
+edges, gentle fades, light grain and “BEFORE THE INCIDENT” identify these as memories.
+The opening's stock documentary narrator tells each small story with restrained
+warmth and dark office humor. Background activity belongs to the drawing's moment;
+there are no wandering extra actors. The illustration style is intentionally distinct
+from the playable 3D models, as authorized by the creator. These are animated
+illustrated stills with recorded local narration, not generated video.
+The 53.28 seconds of recorded narration are delivered sincerely. The revised comedy
+comes from absurd specifics: a pager escalating to a sweater, a pigeon promoting
+itself, and a printer band receiving a performance plan. Each line finishes before a
+clear, silent 2.4-second shot of that colleague where they fell. The memorial takes
+about 70 seconds in total, extending the previous five loss shots by about 58 seconds. TAB still skips the finale. Art prompts, source files, checksums and visual
+review are recorded in [illustration provenance](../assets/environment/memorial_illustrations/README.md).
+The actual casualties remain untouched. After these five memorial shots, the engineer looks down at JO and the
 camera moves to his face as one tear rolls down his cheek. The original mourning
-theme begins during the memorial and continues through the rainy departure. Back at
+theme begins during the casualty introduction and continues through the rainy departure. Back at
 his workstation he stands the Legacy Monolith blade-down beside the desk, then
 stands and collects a small box
 with his laptop, mug and JO's “MONDAY LUNCH?” reminder. The sword stays beside the desk, with its tip on the floor and clear of the monitor;
@@ -261,13 +333,22 @@ The temporary corridor disappears at the street cut and is removed on skip or re
 Faint, warm memories recall the five as people: coffee invitations, lunch plans and
 ridiculous gossip. “Tell me something normal” in their living conversations cycles
 five locally prerecorded takes per coworker (coffee, lunch and three gossip stories). The walk recalls the exact take heard
-this run; an unvisited coworker supplies a shuffled take. Memory audio is sequential,
+this run; an unvisited coworker supplies a dedicated after-hours recollection.
+These five locally recorded fallback lines pair small kindnesses with absurd policy:
+bereavement renamed availability, sleep facing disciplinary action, a timed grief
+survey, lunch approved as a critical dependency, and a cactus sold as a resilience consultant. Memory audio is sequential,
 with captions that respect the subtitle preference. Their positions beside the lane
 match the timing of each recorded line. The walk accommodates complete
 clips; TAB skips and R clears the props and this run's recalled lines. Hand contacts,
 stand-up motion and prop movement are blended; the box stays upright as he walks.
 Explicit cinematic gait matches the eased travel pace, including slow movement below
 the gameplay idle threshold and street shots without a physics floor update.
+The ghosts face the passing engineer, retain their established outfits, and gesture
+slowly on cinematic time. The rainy exterior is colder and sparsely populated:
+four late-night stragglers, subdued venue lights, shuttered noodles, wet textured
+stone, drains and an empty bench. Pedestrians face their actual direction of travel.
+Five recognizable crew models replace the placeholder shapes in the final window.
+This is a bleak departure; the comic recollections do not erase the loss.
 Monday's postmortem follows the night. The engineer's last reply is “So I’m the emotional support human for five fucking chatbots.”
 He leaves the call, walks back across the office, gradually sits at his workstation
 and begins typing. “TO BE CONTINUED” fades in over black, then fades out into the

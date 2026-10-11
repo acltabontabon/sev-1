@@ -1,0 +1,145 @@
+{
+  "provider": "OpenAI built-in image generation",
+  "date": "2026-10-11",
+  "mode": "Original generation followed by built-in imagegen edits into loose graphite/ink sketches.",
+  "review_status": "All five selected sketch sources visually inspected; creator acceptance pending.",
+  "prompts": [
+    {
+      "id": "morgan",
+      "prompt": "Use case: illustration-story. Asset type: full-screen 16:9 illustrated memory cinematic for a darkly funny office action game. Create exactly ONE continuous landscape illustration, no panels. Artistic medium: expressive graphite outlines, translucent watercolor and gouache, luminous muted amber and blue with selective vibrant accents, paper grain, unfinished sketch edges, tender lived-in human acting, visually sophisticated storybook graphic novel, no artist imitation. This is a remembered shared moment, slightly dreamlike, emotionally sincere with one small office absurdity. The engineer is ALWAYS a tired Filipino man in his early thirties, medium-brown skin, messy short black hair, faint stubble, charcoal rolled-sleeve shirt, dark blue trousers, an office lanyard, tired kind eyes. Make people anatomically convincing with expressive gestures, no toy or chibi bodies. Keep narrative action within the upper 75 percent; lower 20 percent is quiet painterly space for in-game subtitles. No title, speech bubbles, UI, watermark or captions. Background people, if present, are doing relevant work, never aimlessly wandering. Memory: Morgan, a fair-skinned blond manager in a loosened navy suit, secretly holds an elevator open with his foot while balancing two takeaway coffees. He reaches one coffee toward the exhausted engineer who is mid-step escaping the office, his shoulders relaxing into a rare grin. Their hands meet around the cup. View from inside an amber elevator toward a cool fluorescent office corridor; company papers and inboxes recede out of focus. Elevator doors framing this small conspiracy, glowing Friday evening outside glass. Cinematic intimate wide shot with diagonal motion and warm negative space. A tiny coffee receipt is tucked in Morgan's folder as if it were a leadership document. Capture friendship through an action, not two stationary people talking."
+    },
+    {
+      "id": "nadia",
+      "prompt": "Use case: illustration-story. Asset type: full-screen 16:9 illustrated memory cinematic for a darkly funny office action game. Create exactly ONE continuous landscape illustration, no panels. Artistic medium: expressive graphite outlines, translucent watercolor and gouache, luminous muted amber and blue with selective vibrant accents, paper grain, unfinished sketch edges, tender lived-in human acting, visually sophisticated storybook graphic novel, no artist imitation. This is a remembered shared moment, slightly dreamlike, emotionally sincere with one small office absurdity. The engineer is ALWAYS a tired Filipino man in his early thirties, medium-brown skin, messy short black hair, faint stubble, charcoal rolled-sleeve shirt, dark blue trousers, an office lanyard, tired kind eyes. Make people anatomically convincing with expressive gestures, no toy or chibi bodies. Keep narrative action within the upper 75 percent; lower 20 percent is quiet painterly space for in-game subtitles. No title, speech bubbles, UI, watermark or captions. Background people, if present, are doing relevant work, never aimlessly wandering. Memory: Nadia, a medium-brown-skinned woman with a black ponytail, dark gray blouse, and black office skirt, sits beside the engineer at a blue-lit operations desk during a long night. Engineer's cheek is resting on his folded arm, half asleep. Nadia slides a beautiful chipped cream ceramic mug gently into his hand while using her other hand to smother a tiny blinking pager beneath a folded sweater, giving him an amused protective look. He opens one eye and curls his fingers around the warm mug. Steam is bright against server glass. View from ABOVE at an intimate diagonal angle; server lights, cables, scribbled notes and rain reflections, a working colleague visible only as an out-of-focus figure behind glass. Composition of hands, mug and exhausted face, cool cobalt and warm steam; quiet kindness. Clearly a different room and composition than an elevator."
+    },
+    {
+      "id": "jun",
+      "prompt": "Use case: illustration-story. Asset type: full-screen 16:9 illustrated memory cinematic for a darkly funny office action game. Create exactly ONE continuous landscape illustration, no panels. Artistic medium: expressive graphite outlines, translucent watercolor and gouache, luminous muted amber and blue with selective vibrant accents, paper grain, unfinished sketch edges, tender lived-in human acting, visually sophisticated storybook graphic novel, no artist imitation. This is a remembered shared moment, slightly dreamlike, emotionally sincere with one small office absurdity. The engineer is ALWAYS a tired Filipino man in his early thirties, medium-brown skin, messy short black hair, faint stubble, charcoal rolled-sleeve shirt, dark blue trousers, an office lanyard, tired kind eyes. Make people anatomically convincing with expressive gestures, no toy or chibi bodies. Keep narrative action within the upper 75 percent; lower 20 percent is quiet painterly space for in-game subtitles. No title, speech bubbles, UI, watermark or captions. Background people, if present, are doing relevant work, never aimlessly wandering. Memory: Jun, a slim East Asian male designer with neat dark side-parted hair and a teal overshirt, shares a real lunch with the engineer on a sunny rooftop garden. Both are SITTING casually side by side on a wooden bench. Jun has gently closed the engineer's open laptop, using a paper lunch bag to cover it, and is offering him an oversized bread roll. The engineer laughs with his mouth full, one hand surrendering his phone into the bag. Two paper lunch plates and crumbs, pigeons squabbling over a chip at their feet. Warm outdoor greenery, city highrises softened into watercolor behind them, expressive leaves in the breeze. Low wide camera, generous luminous afternoon sky. Meaningful screen-free friendship, no meeting table, no monitors, no walls full of signs."
+    },
+    {
+      "id": "jo",
+      "prompt": "Use case: illustration-story. Asset type: full-screen 16:9 illustrated memory cinematic for a darkly funny office action game. Create exactly ONE continuous landscape illustration, no panels. Artistic medium: expressive graphite outlines, translucent watercolor and gouache, luminous muted amber and blue with selective vibrant accents, paper grain, unfinished sketch edges, tender lived-in human acting, visually sophisticated storybook graphic novel, no artist imitation. This is a remembered shared moment, slightly dreamlike, emotionally sincere with one small office absurdity. The engineer is ALWAYS a tired Filipino man in his early thirties, medium-brown skin, messy short black hair, faint stubble, charcoal rolled-sleeve shirt, dark blue trousers, an office lanyard, tired kind eyes. Make people anatomically convincing with expressive gestures, no toy or chibi bodies. Keep narrative action within the upper 75 percent; lower 20 percent is quiet painterly space for in-game subtitles. No title, speech bubbles, UI, watermark or captions. Background people, if present, are doing relevant work, never aimlessly wandering. Memory: Jo, a very young medium-brown-skinned male intern with close-cropped dark hair, orange T-shirt and new ID lanyard, sits on the floor beside the engineer in a quiet office lobby at the end of his first shift. They are both crouched over a makeshift map on the engineer's open notebook laid on their knees. Engineer traces a route to a cheap noodle shop with his pen; Jo eagerly pins a small sticky reminder reading only 'MONDAY?' on the page and raises his pinky to make a promise. Engineer hooks his pinky around Jo's, smiling. An oversized new-hire cardboard box and commuter backpacks, empty reception seating, dusk through tall lobby glass; one receptionist finishing badge envelopes in the distance. Close low cinematic composition concentrating on linked fingers and the optimistic young face. Amber and dusty coral, poignant unfinished promise. Do not depict them already eating noodles: the lunch has yet to happen."
+    },
+    {
+      "id": "val",
+      "prompt": "Use case: illustration-story. Asset type: full-screen 16:9 illustrated memory cinematic for a darkly funny office action game. Create exactly ONE continuous landscape illustration, no panels. Artistic medium: expressive graphite outlines, translucent watercolor and gouache, luminous muted amber and blue with selective vibrant accents, paper grain, unfinished sketch edges, tender lived-in human acting, visually sophisticated storybook graphic novel, no artist imitation. This is a remembered shared moment, slightly dreamlike, emotionally sincere with one small office absurdity. The engineer is ALWAYS a tired Filipino man in his early thirties, medium-brown skin, messy short black hair, faint stubble, charcoal rolled-sleeve shirt, dark blue trousers, an office lanyard, tired kind eyes. Make people anatomically convincing with expressive gestures, no toy or chibi bodies. Keep narrative action within the upper 75 percent; lower 20 percent is quiet painterly space for in-game subtitles. No title, speech bubbles, UI, watermark or captions. Background people, if present, are doing relevant work, never aimlessly wandering. Memory: Val, an older fair-skinned female director with a blonde ponytail, burgundy blouse, black jacket and office skirt, has dissolved into helpless laughter in a cramped midnight print room. Engineer is passionately performing a terrible imaginary drum solo with two pencils on a stack of paper beside a battered office copier; the copier spits a long curling paper sheet like a drum fill. Val leans against a filing cabinet, one hand over her mouth and the other clutching a mug, nearly spilling coffee while laughing. Engineer looks mock-serious like a rockstar. One crooked paper tray and stacks of files, purple fluorescent light mixed with warm desk lamp. Energetic diagonal composition, playful hands and the paper ribbon, real shared laughter amid ordinary work, no generic desk conversation. Faint playful sketches of music beats blend into the paper texture without words."
+    }
+  ],
+  "initial_images": [
+    {
+      "name": "morgan",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-05f552d7-7680-4cd6-bf58-190ff7c5f41e.png",
+      "sha256": "334d5d878e8551d0a7a66cf55dc807d48409e524310ac34a831363ad3ab99ac2",
+      "review": "Distinct setting, coherent engineer identity, shared action, room for captions; source visually inspected.",
+      "superseded_workspace_file": "morgan.png"
+    },
+    {
+      "name": "nadia",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-5242818e-649f-49e2-99e3-12a6b27e5bd4.png",
+      "sha256": "a089ce794f98a9f62943d8e9c2d0ba10841cb820e2ae0a88f924ca0ecbc5e986",
+      "review": "Distinct setting, coherent engineer identity, shared action, room for captions; source visually inspected.",
+      "superseded_workspace_file": "nadia.png"
+    },
+    {
+      "name": "jun",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-a8b290e8-d631-4c6b-8708-d11a5c9b7bda.png",
+      "sha256": "f4c24bf5c3e8fd7701d44b4c6dbd3219fde35a8b4e40dc93950aacc943d0b50f",
+      "review": "Distinct setting, coherent engineer identity, shared action, room for captions; source visually inspected.",
+      "superseded_workspace_file": "jun.png"
+    },
+    {
+      "name": "jo",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-cd1555d1-9055-4bc8-8454-f7aed2557ec0.png",
+      "sha256": "c828b40c379ec79718ffa0d098eee41be58266a511c31c754ee9903fd1c13a27",
+      "review": "Distinct setting, coherent engineer identity, shared action, room for captions; source visually inspected.",
+      "superseded_workspace_file": "jo.png"
+    },
+    {
+      "name": "val",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-2e4ab0f1-24bc-4c12-9d18-97ddf7e17921.png",
+      "sha256": "edafd9c0702b8e99367ec09b22fe5c9e25c31dffa415ab8e1d72deff5267abdb",
+      "review": "Distinct setting, coherent engineer identity, shared action, room for captions; source visually inspected.",
+      "superseded_workspace_file": "val.png"
+    }
+  ],
+  "sketch_prompts": [
+    {
+      "id": "morgan",
+      "prompt": "Edit this image into a much looser, artistic CINEMATIC MEMORY SKETCH. Preserve its core shared action, people, identities, composition and 16:9 landscape framing, but completely redraw the rendering. Use quick expressive graphite and dip-pen strokes on pale worn sketchbook paper, irregular hatching, visible construction marks, unfinished silhouettes, sparse watercolor accents, simplified expressive ADULT faces and hands. Let forgotten background details dissolve into empty paper. It must feel like a personal recollection drawn imperfectly, not a glossy detailed AI concept painting or a photographic filter. No polished photorealism, no airbrushed skin, no endless tiny details, no decorative corporate slogans. Remove incidental text and posters except the one specifically requested reminder. No comic panels, UI, watermark or speech bubbles. Keep the bottom 20 percent as quiet pale paper for the game's narrator subtitles. Preserve the emotional connection and humor of the active gesture. Keep engineer as brown-skinned Filipino adult with messy short dark hair and dark rolled sleeves. Morgan holds the elevator open with his shoe, handing the engineer coffee. Exaggerate the awkward shoe slightly, and the conspiratorial grins. Selective amber wash on the lift and coffee. Loosen the office beyond into barely remembered fluorescent lines.",
+      "reference": "exec-05f552d7-7680-4cd6-bf58-190ff7c5f41e.png"
+    },
+    {
+      "id": "nadia",
+      "prompt": "Edit this image into a much looser, artistic CINEMATIC MEMORY SKETCH. Preserve its core shared action, people, identities, composition and 16:9 landscape framing, but completely redraw the rendering. Use quick expressive graphite and dip-pen strokes on pale worn sketchbook paper, irregular hatching, visible construction marks, unfinished silhouettes, sparse watercolor accents, simplified expressive ADULT faces and hands. Let forgotten background details dissolve into empty paper. It must feel like a personal recollection drawn imperfectly, not a glossy detailed AI concept painting or a photographic filter. No polished photorealism, no airbrushed skin, no endless tiny details, no decorative corporate slogans. Remove incidental text and posters except the one specifically requested reminder. No comic panels, UI, watermark or speech bubbles. Keep the bottom 20 percent as quiet pale paper for the game's narrator subtitles. Preserve the emotional connection and humor of the active gesture. Keep engineer as brown-skinned Filipino adult with messy short dark hair and dark rolled sleeves. Nadia offers her exhausted colleague his chipped good mug while smothering his tiny pager under a sweater. Focus pencil detail on their hands, sleepy eyes and steam. Sparse cobalt server lights and warm coffee wash. Background work is ghostly drawn outlines.",
+      "reference": "exec-5242818e-649f-49e2-99e3-12a6b27e5bd4.png"
+    },
+    {
+      "id": "jun",
+      "prompt": "Edit this image into a much looser, artistic CINEMATIC MEMORY SKETCH. Preserve its core shared action, people, identities, composition and 16:9 landscape framing, but completely redraw the rendering. Use quick expressive graphite and dip-pen strokes on pale worn sketchbook paper, irregular hatching, visible construction marks, unfinished silhouettes, sparse watercolor accents, simplified expressive ADULT faces and hands. Let forgotten background details dissolve into empty paper. It must feel like a personal recollection drawn imperfectly, not a glossy detailed AI concept painting or a photographic filter. No polished photorealism, no airbrushed skin, no endless tiny details, no decorative corporate slogans. Remove incidental text and posters except the one specifically requested reminder. No comic panels, UI, watermark or speech bubbles. Keep the bottom 20 percent as quiet pale paper for the game's narrator subtitles. Preserve the emotional connection and humor of the active gesture. Keep engineer as brown-skinned Filipino adult with messy short dark hair and dark rolled sleeves. Jun closes the laptop and offers an absurdly large bread roll; the engineer laughs and surrenders his phone. Keep the bench and the ridiculous pigeons arguing over their crumb. Simplify the city into unfinished pencil geometry, sparse leaf green and sun yellow washes. Emphasize humor in pigeon poses, never photoreal faces.",
+      "reference": "exec-a8b290e8-d631-4c6b-8708-d11a5c9b7bda.png"
+    },
+    {
+      "id": "jo",
+      "prompt": "Edit this image into a much looser, artistic CINEMATIC MEMORY SKETCH. Preserve its core shared action, people, identities, composition and 16:9 landscape framing, but completely redraw the rendering. Use quick expressive graphite and dip-pen strokes on pale worn sketchbook paper, irregular hatching, visible construction marks, unfinished silhouettes, sparse watercolor accents, simplified expressive ADULT faces and hands. Let forgotten background details dissolve into empty paper. It must feel like a personal recollection drawn imperfectly, not a glossy detailed AI concept painting or a photographic filter. No polished photorealism, no airbrushed skin, no endless tiny details, no decorative corporate slogans. Remove incidental text and posters except the one specifically requested reminder. No comic panels, UI, watermark or speech bubbles. Keep the bottom 20 percent as quiet pale paper for the game's narrator subtitles. Preserve the emotional connection and humor of the active gesture. Keep engineer as brown-skinned Filipino adult with messy short dark hair and dark rolled sleeves. Jo is a YOUNG ADULT INTERN, around twenty years old, NOT a child: give him adult proportions and an adult face, keeping orange T-shirt and close-cropped hair. He and the engineer hook pinkies above a hand-drawn noodle-shop map. Retain only 'MONDAY?' on the sticky note; erase all other lettering. Focus on the linked fingers and unfinished promise. Sparse dusty coral and amber washes.",
+      "reference": "exec-cd1555d1-9055-4bc8-8454-f7aed2557ec0.png"
+    },
+    {
+      "id": "val",
+      "prompt": "Edit this image into a much looser, artistic CINEMATIC MEMORY SKETCH. Preserve its core shared action, people, identities, composition and 16:9 landscape framing, but completely redraw the rendering. Use quick expressive graphite and dip-pen strokes on pale worn sketchbook paper, irregular hatching, visible construction marks, unfinished silhouettes, sparse watercolor accents, simplified expressive ADULT faces and hands. Let forgotten background details dissolve into empty paper. It must feel like a personal recollection drawn imperfectly, not a glossy detailed AI concept painting or a photographic filter. No polished photorealism, no airbrushed skin, no endless tiny details, no decorative corporate slogans. Remove incidental text and posters except the one specifically requested reminder. No comic panels, UI, watermark or speech bubbles. Keep the bottom 20 percent as quiet pale paper for the game's narrator subtitles. Preserve the emotional connection and humor of the active gesture. Keep engineer as brown-skinned Filipino adult with messy short dark hair and dark rolled sleeves. Engineer performs a ridiculous pencil drum solo while Val nearly spills her mug laughing and the copier ejects a curling paper encore. Emphasize dynamic comic pencil gestures, flying sheet and Val's helpless laughter. Sparse plum-violet wash with a warm lamp. Background files dissolve into scratchy remembered marks.",
+      "reference": "exec-2e4ab0f1-24bc-4c12-9d18-97ddf7e17921.png"
+    }
+  ],
+  "selected_images": [
+    {
+      "name": "morgan",
+      "file": "morgan_sketch.png",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-ef929c84-34dc-4144-b029-c94a0e94664b.png",
+      "sha256": "15d5cd92968db675fe37b7bcef72ac186b289b624d534c13ddc974f3dc0e5e28",
+      "review": "Visually reviewed: Morgan is an adult woman in a navy office suit; engineer, coffee exchange, elevator action and sketch style preserved."
+    },
+    {
+      "name": "nadia",
+      "file": "nadia_sketch.png",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-78a2d8c6-465d-401a-960f-b6bb82230ca3.png",
+      "sha256": "7e5ed863e7faa3aa6be839bad0b5909c71a78fca3d325600e7d3e969448918c4",
+      "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+    },
+    {
+      "name": "jun",
+      "file": "jun_sketch.png",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-d8055277-ca43-4eab-aa3c-47f00fc86ef8.png",
+      "sha256": "06e66569614a360b144c3ed8bed9def06b625187b676d0213336f7ed27540f2d",
+      "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+    },
+    {
+      "name": "jo",
+      "file": "jo_sketch.png",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-3a83045d-39fa-4b15-9617-8765e8571243.png",
+      "sha256": "77a7e32d63ad9ee316c61b51b385195c1d8b09a389fa4eca2e43d97eefe49926",
+      "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+    },
+    {
+      "name": "val",
+      "file": "val_sketch.png",
+      "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-2fdbb417-75e5-4756-a60a-1e18e833ef89.png",
+      "sha256": "eed11f7e13af38f2d021525e576cc6e2e1be96765f394e499e49a54aa7d2ee97",
+      "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+    }
+  ],
+  "corrections": [
+    {
+      "date": "2026-10-11",
+      "character": "Morgan",
+      "instruction": "Creator confirmed Morgan is a woman; she/her.",
+      "provider": "OpenAI built-in imagegen",
+      "prompt": "Edit only Morgan, the blond person on the RIGHT, to correctly depict her as an adult WOMAN: short blond bob, a woman's face and proportions, navy business blazer, white blouse, navy office skirt and low flat shoes. She is Morgan, the female engineering manager. Keep her conspiratorial warm smile and exactly the same action: one foot holds the elevator door open while she hands a coffee to the engineer, carrying her second coffee and folder. Preserve the engineer on the LEFT completely unchanged. Preserve the elevator, coffee cups, interaction, sketch composition, graphite/ink strokes, selective amber watercolor, unfinished background and quiet lower caption area. Do not add text or change any other person. This is a precise gender/identity correction, not a new scene.",
+      "superseded_image": {
+        "name": "morgan",
+        "file": "morgan_sketch.png",
+        "source_path": "/Users/aclt/.codex/generated_images/01a12ae0-1500-7821-99a7-8a70b5c0599a/exec-211f2fab-6fe7-4b72-a415-cd808f0f988c.png",
+        "sha256": "70a4a784e77e8c5470ba992809a3314343cf18a22a5c5c7845375a9881fbfb92",
+        "review": "Distinct shared action and setting; rough graphite/ink marks, selective color, adult identities and caption space visually reviewed."
+      }
+    }
+  ]
+}

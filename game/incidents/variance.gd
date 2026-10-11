@@ -8,7 +8,7 @@ signal false_positives
 const MOVES: Dictionary = {
 	"delayer": {"name": "DELAYERING", "tagline": "removing one layer of management", "hint": "step out from under it", "line": "move_delayer"},
 	"decommission": {"name": "DECOMMISSION", "tagline": "service has reached end of life", "hint": "roll through the ring", "line": "move_decommission"},
-	"pop": {"name": "MAKE IT POP", "tagline": "feedback has been provided", "hint": "don't stand under the feedback", "line": "move_pop"},
+	"pop": {"name": "DESTRUCTIVE FEEDBACK", "tagline": "cropped to approved dimensions", "hint": "don't stand under the feedback", "line": "move_pop"},
 	"expose": {"name": "PAID IN EXPOSURE", "tagline": "unpaid internship, fully compensated", "hint": "look away from the flash", "line": "move_expose"},
 	"downsize": {"name": "DOWNSIZING", "tagline": "headcount adjusted", "hint": "get out of the beam", "line": "move_downsize"},
 }
@@ -188,3 +188,12 @@ func _phase_magic() -> void:
 	ElementFx.flash(self, crown_at, magic_accent if exposed else magic_color, 5.0, 9.0, .35)
 	ElementFx.sigil(self, global_position, magic_accent if exposed else magic_color, 3.0, 1.2, -1.0 if exposed else 1.0)
 
+
+## The close-range cataclysm tears through scenery when its quake actually lands.
+func _release_magic() -> void:
+	super._release_magic()
+	var forward: Vector3 = -visual.global_basis.z
+	forward.y = 0
+	var front: Vector3 = global_position + forward.normalized() * melee.reach * .6
+	moves.smash_props(front, 3.4)
+	moves.smash_props(global_position, 2.0)

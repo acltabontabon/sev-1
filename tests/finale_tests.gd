@@ -20,6 +20,10 @@ func check(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	var dialogue: GDScript = load("res://game/incidents/dialogues.gd")
+	dialogue.remembered_lines.clear()
+	var fallback: Dictionary = dialogue.memory("Manager")
+	check(fallback.clip == "talk_manager_after_hours" and "bereavement" in fallback.text,
+		"unvisited crew supply an authored late-night recollection with matching speech")
 	var heard: Dictionary = dialogue.line(dialogue.tree("Intern"), "good_days")
 	check(dialogue.memory("Intern") == heard, "the ending recalls the actual conversation heard, with the matching voice clip")
 	var intern_talk: Dictionary = dialogue.tree("Intern")
@@ -51,8 +55,80 @@ func _run() -> void:
 	story.set_process(false)
 	var finale: Node = story.all_hands
 	finale._beat("receipts")
-	finale._beat("memorial")
-	finale.tick(finale.MEMORIAL_EACH * 5 + .1)
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_battle_over", "the aftermath first establishes that the battle is over")
+	finale.tick(5.6)
+	check(finale.beat == "receipts", "the fading form shot waits for the conclusion narration")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "cent", "the conclusion leads into the recovered cent")
+	story.voice.clear()
+	finale.tick(2.1)
+	check(finale.beat == "casualties" and not is_instance_valid(finale.recollection),
+		"the casualties are introduced in the vault before any memory appears")
+	var before_check: Vector3 = incident.player.global_position
+	finale.tick(1.6)
+	check(incident.player.global_position.distance_to(before_check) > .1 and character.story_walk_speed > 0,
+		"the engineer deliberately approaches Morgan to check on her")
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_fallen", "the narrator names the fallen crew during the approach")
+	finale.clock = finale.beat_at + finale.bridge_seconds
+	finale.tick(.01)
+	check(finale.beat == "casualties", "the casualty shot gives its narrator time to finish")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "remember" and character.preview_clip == "fixing" and not character.weapon.visible,
+		"he begins an unarmed kneeling check before reminiscing")
+	await physics_frame
+	await physics_frame
+	check(character.animator.current_animation == "rig/fixing", "the existing kneeling performance is actually applied to the engineer")
+	story.voice._process(.1)
+	check(story.voice.current_line == "doc_remember", "the narrator explains why the moment becomes a memory")
+	finale.clock = finale.beat_at + finale.bridge_seconds
+	finale.tick(.01)
+	check(finale.beat == "remember" and not is_instance_valid(finale.recollection), "the memory cannot interrupt the transition's last words")
+	story.voice.clear()
+	finale.tick(.01)
+	check(finale.beat == "memorial" and character.preview_clip.is_empty() and not finale.fade.visible,
+		"the bridge releases the kneeling pose and fades into the first sketch")
+	var recalled: Array[String] = []
+	var living_set: Node = finale.recollection
+	var memory_images: Array[Texture2D] = []
+	var memory_canvas: Control = finale.recollection.canvas
+	for index in range(5):
+		await process_frame
+		finale.tick(.2)
+		check(finale.recollection.visible and finale.recollection.canvas.visible and not finale.memorial_name.visible and finale.recollection.artwork.texture != null,
+			"each memory displays its authored living illustration before the casualty shot")
+		memory_images.append(finale.recollection.artwork.texture)
+		check(finale.recollection.artwork.material == finale.recollection.memory_material and not story.crew_freeze.visible,
+			"memory grading affects the drawing while leaving captions sharp")
+		var framing_from: Vector2 = finale.recollection.artwork.size
+		finale.tick(.5)
+		check(finale.recollection.artwork.size.distance_to(framing_from) > .01,
+			"gentle framing drift gives the remembered moment its own motion")
+		recalled.append(finale.MEMORIAL[finale.memorial_index][0])
+		story.voice._process(.1)
+		check(story.voice.current_line == ["doc_morgan", "doc_nadia", "doc_jun", "doc_jo", "doc_val"][index] and not story.voice.subtitle.is_empty(),
+			"each teammate has synchronized narrator speech and subtitles")
+		finale.clock = finale.memorial_at + finale.memorial_duration + 1.0
+		finale.tick(.001)
+		check(finale.recollection.visible, "a delayed voice keeps the living shot until its last word")
+		story.voice.clear()
+		finale.tick(.001)
+		check(not finale.recollection.visible and finale.memorial_name.visible and not story.panel.visible,
+			"narrated memory cuts to a silent named casualty shot")
+		check(not story.crew_freeze.visible and not finale.recollection.canvas.visible,
+			"the present-day casualty restores the clear picture and original screen effect")
+		finale.clock = finale.memorial_loss_at + finale.MEMORIAL_EACH
+		finale.tick(.01)
+	var distinct_images: bool = true
+	for first in range(memory_images.size()):
+		for second in range(first):
+			distinct_images = distinct_images and memory_images[first].get_rid() != memory_images[second].get_rid()
+	check(distinct_images, "each fallen teammate receives a different illustrated moment")
+	check(recalled == ["Manager", "SRE", "Designer", "Intern", "Director"],
+		"all five teammates receive their own memory before grief")
 	check(finale.beat == "grief" and incident.coworkers.cavalry_fallen() == 5 and not character.weapon.visible,
 		"the memorial reaches grief while all five casualties remain fallen")
 	await physics_frame
@@ -139,7 +215,7 @@ func _run() -> void:
 	story.skip()
 	await process_frame
 	await process_frame
-	check(not is_instance_valid(corridor) and not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
+	check(not is_instance_valid(living_set) and not is_instance_valid(memory_canvas) and not is_instance_valid(corridor) and not is_instance_valid(tear_attachment) and not is_instance_valid(carry_attachment) and not is_instance_valid(box) and not is_instance_valid(sword) and character.weapon.visible,
 		"TAB removes the tear, carried props and memory audio and restores the weapon")
 	scene.reset_encounter()
 	await process_frame

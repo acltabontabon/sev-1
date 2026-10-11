@@ -568,6 +568,17 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `prop_tint.gd`) and `calendar_drift.gd`. `tools/bake_office_navigation.gd` bakes the
   larger footprint. The gate and Quick Sync doors are generated without collision so
   navigation bakes through them; the incident enables collision while they are shut.
+- **Production vault.** `tools/vault_layout.py` authors the 24 × 21 m room, reusable
+  `production_rack.tscn`, cooling banks, cable trays, taller structure and equipment.
+  The outer tower shell clears its 7.5 m ceiling. Navigation includes the expanded
+  floor and conservative envelopes around the six intact breakables.
+  `vault_breakable.gd` owns prop health, recoil, six bounded physical fragments and
+  reset. Melee permits a ray to hit the target prop itself; other walls still block it.
+  Area/projectile specials include the breakables group without enemy hit credit,
+  FOCUS, kill stamps or target-lock changes. Debris uses layer 128 and collides only
+  with the world, so it cannot obstruct the player. `main.gd` restores props on retry.
+  `tests/vault_arena_tests.gd` exercises real sword/skill hits, obstruction, settling,
+  reset and rear-lane paths; `vault_arena_preview.gd -- --play` starts a boss retry.
 - **Interactions.** `game/incidents/interaction_point.gd` is a distance-checked prompt;
   `missing_transaction.gd` owns what each pantry object does. Coffee adds
   `run.motivation` (outgoing damage) and `player.move_multiplier` for 40 s.
@@ -787,9 +798,14 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   on routines (asleep, sit, pace, carry, fix, stand with a periodic gesture). No collision. Each
   has one line shown when the engineer walks past; they cower while `battle_mode` is
   engaged and the manager claims credit when a fight ends. `reset()` restores them.
-- **The vault and the finale.** When the gate opens five of the crew charge the staged
-  monster (`coworkers.gd` CAVALRY/STAGE: one victim at a time at their own spot, the rest
-  lapping away from it, one voice at a time via `_say` modes). The presentation's
+- **The vault and the finale.** When the gate opens five of the crew await the engineer, then rush through
+  the doorway to fixed firefighting stations (`coworkers.gd` CAVALRY/STAGE). The
+  `response` phase holds executions while he follows them; `_say` modes serialize voices.
+  `vault_response.gd` owns the original firefighting props, continuous flame/crescent
+  shaders, a curved hose and water stream, two local SRE hand IK modifiers, dropped
+  tools and persistent casualty decals. Its reset also removes the hand modifiers.
+  The four-sided Destructive Feedback frame replaces the designer inflation; physical
+  slices and prone remains survive until the incident resets. The presentation's
   massacre beat calls `execute_next()` once the floor is quiet; each death is one of The
   Variance's `MOVES` (`variance.gd`) with its own wind-up and casualty framing. The
   engineer's entrance (`_hero_phase`: walk, grief, roar, reply) puts him into Unpaid
@@ -800,7 +816,7 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   `final_blow()` on the hidden
   real boss to slice it (severing limbs on the staged monster first and mirroring that on
   the real one); the RESOLVED ending then runs `all_hands.gd` (death, receipts, cent,
-  memorial, tear close-up, desk sword placement and belongings pickup, the walk out
+  five narrated living memories alternating with memorial loss shots, tear close-up, desk sword placement and belongings pickup, the walk out
   with recalled coffee/lunch/gossip conversations, street, window; then Monday's postmortem,
   `postmortem_call.gd`: a 2D call rendered into the Quick Sync screen through a
   SubViewport, its tiles fed by small cameras on off-map sets) on real time before returning to the main menu. After Monday’s final reply,
@@ -817,7 +833,14 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   bounds, including the rotated tip, determine floor contact; regression checks
   reject any tabletop or monitor intersection. `Dialogues.remembered_lines` stores
   the exact ordinary take heard this run; reset clears it while shuffled take bags
-  continue across retries. Memory clips play sequentially with matching captions;
+  continue across retries. Unvisited crew use authored `after_hours` fallback clips.
+  Raw +Z-facing memory bodies turn toward the sampled walking lane; manual animation
+  seeks keep their gestures on cinematic time. Street pedestrians use +Z along travel,
+  while the wrapped engineer retains its -Z convention. The sparse closing street
+  reuses the existing CC0 concrete material; five rigged crew models fill the final
+  window. That shot temporarily hides live crew and planted actors, restoring their
+  prior visibility at Monday or skip; its figures and light also hide for Monday.
+  Memory clips play sequentially with matching captions;
   the mourning WAV loops locally through the departure. The departure instantiates
   `departure_corridor.tscn` below the playable map, with a continuous floor and clear
   hero/camera tracks. Its local script sizes the temporary corridor for the sequential
@@ -829,8 +852,21 @@ No autoloads or frameworks were added; new behavior lives with its owners.
   The scene is
   hidden at the street cut and freed with the other aftermath props on skip or retry.
   Physics regression samples the whole hero and camera route for solid intersections.
+  `memorial_memory.gd` owns a full-screen illustration canvas beneath the letterbox
+  and captions. Five distinct local PNGs capture the crew's shared moments; each
+  has its own slow zoom/pan. `memory_grade.gdshader` grades only the drawing with
+  light grain, softened paper edges and fades, leaving subtitles sharp. Conceal
+  removes the canvas immediately at the casualty cut; teardown frees it on skip/retry.
+  The original screen effect and gameplay environment are never modified.
+  Before the sketches, `all_hands.gd` narrates the battle's conclusion during the
+  fading form, introduces the crew over a wide vault shot, then stages a short walk
+  to Morgan and the existing `rig/fixing` kneel. A face push and fade lead to her
+  sketch. Each bridge waits for speech completion; beat changes and cleanup clear
+  `preview_clip` so the kneeling performance cannot persist into gameplay.
+  `all_hands.gd` measures each local narrator clip and waits for the voice queue to
+  empty before starting a separate 2.4-second silent casualty hold.
   `tests/finale_tests.gd`
-  checks recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
+  checks battle-conclusion and casualty narration, the approach/kneeling bridge, delayed memory entry, distinct illustrations, framing drift, canvas cleanup, delayed speech, narrator captions, recall, grief, pickup, sword placement, caption preferences, skip and retry. The postmortem's VP proposes AI
   replacements; the engineer objects before the note-taker records unanimous consent.
   Replacement tiles join only during `pm_backfill`. Photo capture, cleanup and meeting
   exit use shot cues rather than numeric step positions, so dialogue additions retain

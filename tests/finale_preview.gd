@@ -30,17 +30,58 @@ func _run() -> void:
 	incident.coworkers.fall_all_now()
 	incident.hold_ending = true
 	incident.player.camera_rig.controls_active = true
-	incident._enter(incident.Stage.RESOLVED)
+	story.demon.hide()
+	incident.player.get_node("Visual/Character").overtime(true)
+	if is_instance_valid(incident.boss):
+		incident.boss.final_blow()
+	if not incident.terminal():
+		incident._enter(incident.Stage.RESOLVED)
 	await process_frame
 	story.set_process(false)
 	var finale: Node = story.all_hands
+	# Replay begins after the final blow, when the normal death beat has reconciled these.
+	for index in range(3):
+		var ledger: Label3D = incident.room.get_node("LedgerText%d" % index)
+		ledger.text = "SUCCESS"
+		ledger.modulate = Color(.3, 1, .6)
+	if "--play-ending" in OS.get_cmdline_user_args():
+		finale._beat("receipts")
+		story.set_process(true)
+		while is_instance_valid(finale) and not finale.done:
+			await process_frame
+		quit()
+		return
 	finale._beat("receipts")
-	finale._beat("memorial")
-	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
-	if "--departure" in OS.get_cmdline_user_args():
+	if "--transition" not in OS.get_cmdline_user_args():
+		finale._beat("memorial")
+	if "--play-memorial" in OS.get_cmdline_user_args():
+		story.set_process(true)
+		while is_instance_valid(finale) and finale.beat in ["memorial", "grief"]:
+			await process_frame
+		if is_instance_valid(finale):
+			finale.finish(false)
+		await process_frame
+		quit()
+		return
+	var samples: Array = [["grief", 5.5], ["desk", 2.0], ["desk", 5.5], ["exit", 3.0], ["exit", 5.0], ["exit", 8.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
+	if "--memorial" in OS.get_cmdline_user_args():
+		samples = []
+		for index in range(5):
+			samples.append(["memorial", .8, index])
+			samples.append(["memorial", 5.0, index])
+	if "--transition" in OS.get_cmdline_user_args():
+		story.voice.clear()
+		finale.character.overtime(false)
+		samples = [["casualties", 1.8], ["remember", 1.5], ["remember", 7.0], ["memorial", .8]]
+	if "--departure" in OS.get_cmdline_user_args() or "--street" in OS.get_cmdline_user_args():
+		story.voice.clear()
+		finale.recollection.conceal()
+		finale.character.overtime(false)
 		finale._beat("grief")
 		finale._beat("desk")
-		samples = [["exit", 3.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0]]
+		samples = [["exit", 3.0], ["exit", -0.75], ["door", 1.5], ["door", 3.8], ["door", 5.8], ["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
+	if "--street" in OS.get_cmdline_user_args():
+		samples = [["street", 3.0], ["street", 8.0], ["street", 11.5], ["window", 2.0]]
 	if "--closing" in OS.get_cmdline_user_args():
 		finale._beat("grief")
 		finale._beat("desk")
@@ -57,8 +98,13 @@ func _run() -> void:
 		samples = [["door", .5], ["door", 1.5], ["door", 3.8], ["door", 5.8]]
 	for sample: Array in samples:
 		if finale.beat != sample[0]:
+			if "--transition" in OS.get_cmdline_user_args():
+				story.voice.clear()
 			finale._beat(sample[0])
-		var elapsed: float = finale.clock - finale.beat_at
+		if sample.size() > 2 and sample[2] > finale.memorial_index:
+			story.voice.clear()
+			finale._recall_next()
+		var elapsed: float = finale.clock - (finale.memorial_at if sample.size() > 2 else finale.beat_at)
 		var target: float = float(sample[1]) if float(sample[1]) >= 0.0 else finale.exit_duration * -float(sample[1])
 		while elapsed < target:
 			finale.tick(1.0 / 60.0)
@@ -66,6 +112,8 @@ func _run() -> void:
 			await physics_frame
 		await RenderingServer.frame_post_draw
 		var path: String = "res://logs/finale_%s_%s.png" % [sample[0], str(int(sample[1])) if float(sample[1]) >= 0.0 else "late"]
+		if sample.size() > 2:
+			path = "res://logs/finale_memory_%d_%d.png" % [sample[2], int(sample[1])]
 		root.get_texture().get_image().save_png(path)
 		print("SHOT ", path)
 		if sample[0] in ["exit", "street"]:

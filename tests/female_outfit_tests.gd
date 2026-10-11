@@ -51,7 +51,7 @@ func _run() -> void:
 	paused = false
 	var crew: Node3D = incident.coworkers
 	crew.set_process(false)
-	for entry: Array in [["SRE", "ual/sitting_talking"], ["Director", "CharacterArmature|Walk"]]:
+	for entry: Array in [["Manager", "CharacterArmature|Walk"], ["SRE", "ual/sitting_talking"], ["Director", "CharacterArmature|Walk"]]:
 		var person: Dictionary = crew.person(entry[0])
 		var body: Node3D = person.body
 		var animator: AnimationPlayer = person.animator

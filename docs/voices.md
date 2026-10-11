@@ -35,6 +35,22 @@ welcome. Existing stock executive, management, protagonist and postmortem profil
 are retained; fingerprints, checksums and rights are in `voices/provenance.json`.
 These remain candidate performances awaiting human listening and comedic timing review.
 
+Memorial update (11 October 2026): five new `doc_morgan`, `doc_nadia`, `doc_jun`,
+`doc_jo` and `doc_val` clips use the existing `documentary` stock profile (`bm_george`,
+0.88 speed). They narrate five distinct illustrated shared moments after the golden form fades,
+then leave each casualty shot silent. The five takes total 53.28 seconds and are
+measured by the cinematic rather than cut to a fixed budget;
+fingerprints, checksums and rights are in `voices/provenance.json`. Timing waits for
+actual playback completion. No real-person voice reference or impersonation was used.
+Human listening, emotional pacing and comic timing acceptance remain pending.
+
+Aftermath transition update (11 October 2026): `doc_battle_over`, `doc_fallen` and
+`doc_remember` use the same stock documentary profile. They establish victory,
+name the casualties and explain the engineer's move from checking on Morgan into
+recollection. Shots wait for playback completion, and the casualty introduction
+starts the existing mourning theme. Their fingerprints and checksums are recorded
+in the voice provenance JSON; listening acceptance remains pending.
+
 ## Casting
 
 | Role | Stock voice | Language | Speed | Delivery / processing |
@@ -308,7 +324,10 @@ coffee, lunch or gossip, plus three shared engineer reply clips (28 ordinary-con
 use the existing locked stock voice blends and local generator, with license, source
 hash and generation metadata in `assets/audio/voices/talk/provenance.json`. No outside
 reference recordings or runtime synthesis. The ending recalls the take heard this run,
-or draws a take for an unvisited coworker. Memory clips use the Voice bus at −10 dB
+or uses one of five dedicated `after_hours` takes for an unvisited coworker.
+These add bleak policy satire with coffee/lunch invitations, recorded with the same
+stock blends. The five memorial narrator clips were also rewritten and regenerated
+to favor specific absurdity over repeated profanity. Memory clips use the Voice bus at −10 dB
 and play one at a time; the existing original mourning theme loops on the Music bus.
 Human acting and mix acceptance remain pending.
 
@@ -332,3 +351,11 @@ delivery failure) and `handoff_eta` (Management requires a commitment before con
 Both use the existing local Kokoro stock protagonist/management profiles and processing;
 `provenance.json` records model revision, Apache-2.0 license source, hashes and durations.
 The main manifest now has 88 lines. Human listening acceptance remains pending.
+
+Corporate firefighting update (11 October 2026): ten cavalry recordings accompany
+the hose/bucket response and new last words. All eight `variance` recordings now use
+stock `bm_george` at 0.92 speed and −5 semitones, with the existing short doubling
+process. Runtime playback remains at neutral pitch. The direction is cold executive
+authority; profile, speed and baked pitch implement the change. Destructive Feedback
+replaces the old pop call. Crew last words wait for the boss's move call to finish.
+These remain listening candidates; the creator must accept authority, clarity and timing.

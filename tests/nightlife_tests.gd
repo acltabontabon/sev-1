@@ -43,7 +43,7 @@ func _run() -> void:
 	finale._beat("desk")
 	finale._beat("street")
 	var nightlife: Node3D = finale.nightlife
-	check(nightlife.is_visible_in_tree() and nightlife.patrons.size() == 9, "the actual street cut adds animated nightlife patrons and pedestrians")
+	check(nightlife.is_visible_in_tree() and nightlife.patrons.size() == 4, "the street cut has a sparse cast of four late-night stragglers")
 	check("STRIP CLUB" in nightlife.get_node("ClubType").text and nightlife.get_node("FoodSign").text == "MIDNIGHT NOODLES", "the club frontage and late-night food counter have readable identities")
 	var initial: Vector3 = nightlife.to_local(incident.player.global_position)
 	check(initial.z < 1.0 and initial.z < nightlife.door_panels[0].position.z and incident.player.get_node("Visual/Character").story_pose == 0,
@@ -56,9 +56,13 @@ func _run() -> void:
 	var continuous: bool = true
 	var actor_clear: bool = true
 	var first: Vector3 = nightlife.walkers[0].body.global_position
+	var forward_travel: bool = true
 	for sample in range(120):
 		finale.clock = finale.beat_at + float(sample) / 10.0
 		finale.tick(.001)
+		for walker: Dictionary in nightlife.walkers:
+			var step: Vector3 = nightlife.to_global(walker.to) - nightlife.to_global(walker.from)
+			forward_travel = forward_travel and walker.body.global_basis.z.normalized().dot(step.normalized()) > .99
 		if sample > 20 and sample < 115:
 			continuous = continuous and character.story_walk_speed > .9
 		var volume: AABB = AABB(incident.player.global_position + Vector3(-.35, .1, -.35), Vector3(.7, 1.5, .7))
@@ -71,6 +75,7 @@ func _run() -> void:
 			var offset: Vector3 = patron.global_position - incident.player.global_position
 			offset.y = 0
 			clear = clear and offset.length() > .8
+	check(forward_travel, "both directions of pedestrian travel lead with the face throughout the shot")
 	check(continuous, "he keeps a steady walking pace through the rounded sidewalk turn")
 	finale.clock = finale.beat_at + 2.8
 	finale.tick(.001)
@@ -106,12 +111,22 @@ func _run() -> void:
 	for patron: Node3D in nightlife.patrons:
 		var animator: AnimationPlayer = patron.find_child("AnimationPlayer", true, false)
 		animated = animated and animator.is_playing()
-	check(animated, "all nine street characters have playing rigged animations")
+	check(animated, "all four street characters have playing rigged animations")
 	finale._beat("window")
+	var window_figures: Array[Node] = incident.find_children("WindowMemory*", "Node3D", false, false)
+	check(window_figures.size() == 5 and window_figures[0].find_child("Skeleton3D", true, false) != null,
+		"the final window uses five recognizable rigged crew silhouettes")
+	var actors_hidden: bool = true
+	for actor: Variant in incident.actors:
+		if is_instance_valid(actor) and actor is Node3D:
+			actors_hidden = actors_hidden and not actor.visible
+	check(actors_hidden, "no planted employees or remaining enemies intrude behind the silhouettes")
+	check(not incident.coworkers.visible, "living coworkers cannot wander through the final memorial window")
 	check(not nightlife.is_visible_in_tree(), "the nightlife hides for the five silhouettes in the memorial window")
 	finale.finish(false)
 	await process_frame
 	await process_frame
+	check(incident.coworkers.visible, "skip restores the live crew visibility after the window shot")
 	check(not is_instance_valid(nightlife), "skipping removes the complete nightlife scene, including its lights and characters")
 	scene.reset_encounter()
 	await process_frame
