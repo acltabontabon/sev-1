@@ -22,3 +22,9 @@ export_credentials.cfg
 /assets/characters/kevin_trial/*.fbx
 /assets/characters/kevin_trial/*.fbx.import
 /assets/characters/kevin_trial/*.res
+
+# Fab Standard License: keep the Reaper comparison asset local.
+/assets/enemies/reaper_trial/*.glb
+/assets/enemies/reaper_trial/*.glb.import
+/assets/enemies/reaper_trial/*.png
+/assets/enemies/reaper_trial/*.png.import
