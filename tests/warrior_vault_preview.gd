@@ -8,6 +8,8 @@ var angle: float = 0.0
 var orbiting: bool = false
 var comparison: bool = true
 var skin: ShaderMaterial
+var golem: Node3D
+var axe: Node3D
 var original_bounds: AABB
 const CLIPS: Array[String] = ["Idle_Combat", "Walking_D_Skeletons", "1H_Melee_Attack_Chop"]
 
@@ -18,7 +20,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1920, 1080)
-	root.title = "SEV-1 · Skeleton Warrior vault art trial"
+	root.title = "SEV-1 · Free skeleton golem vault trial"
 	root.window_input.connect(_on_input)
 	var path: String = "res://assets/enemies/warrior_trial/skeleton_warrior.glb"
 	if not ResourceLoader.exists(path):
@@ -68,10 +70,14 @@ func _run() -> void:
 				mesh.set_surface_override_material(surface, skin)
 	_accessory("handslot.r", "skeleton_axe")
 	_accessory("handslot.l", "skeleton_shield_large_a")
+	golem = load("res://game/art_trials/warrior_vault/golem_armor.gd").new()
+	scene.add_child(golem)
+	golem.build(warrior, axe)
+	golem.set_enabled(false)
 	_pose(0)
 	print("WARRIOR source height %.3f m; trial 3.600 m; factor %.3f" % [original_bounds.size.y, factor])
 	var title: Label3D = Label3D.new()
-	title.text = "THE VARIANCE · WARRIOR TRIAL"
+	title.text = "THE VARIANCE · GOLEM STYLE TRIAL"
 	title.position = Vector3(7.0, 3.85, -40)
 	title.font_size = 38
 	title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -86,7 +92,7 @@ func _run() -> void:
 	var caption: Label = Label.new()
 	caption.position = Vector2(30, 25)
 	caption.add_theme_font_size_override("font_size", 18)
-	caption.text = "THE VARIANCE · SKELETON WARRIOR TRIAL · 3.6 m / dark armor\n1 comparison · 2 close-up · I idle · W walk · A axe chop · D armor palette · Space orbit · Esc close\nFree CC0 KayKit · visual comparison, existing combat unchanged"
+	caption.text = "THE VARIANCE · SKELETON GOLEM STYLE TRIAL · Boss scale / dark armor\n1 comparison · 2 close-up · I idle · W walk · A axe chop · D armor palette · G golem / warrior · Space orbit · Esc close\nFree CC0 KayKit · visual comparison, existing combat unchanged"
 	layer.add_child(caption)
 	for index in range(90):
 		await process_frame
@@ -153,6 +159,8 @@ func _on_input(event: InputEvent) -> void:
 				_pose(2)
 			KEY_D:
 				skin.set_shader_parameter("dark_armor", not bool(skin.get_shader_parameter("dark_armor")))
+			KEY_G:
+				golem.set_enabled(not golem.enabled)
 			KEY_SPACE:
 				orbiting = not orbiting
 
@@ -185,6 +193,8 @@ func _accessory(bone: String, asset: String) -> void:
 	skeleton.add_child(hand)
 	var prop: Node3D = load("res://assets/enemies/warrior_trial/" + asset + ".gltf").instantiate()
 	hand.add_child(prop)
+	if asset == "skeleton_axe":
+		axe = prop
 	if "shield" in asset:
 		prop.rotation.y = PI
 	for node: Node in prop.find_children("*", "MeshInstance3D", true, false):

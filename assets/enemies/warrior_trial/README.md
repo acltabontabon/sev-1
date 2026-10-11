@@ -42,7 +42,17 @@ Adopting this as the actual boss is a separate creative decision.
 
 ## Selection update
 
-The creator selected the heavier KayKit Skeleton Golem from the EXTRA tier instead
-of this Warrior on 11 October 2026. This completed Warrior preview remains a
-comparison reference and is not selected for the playable boss. Golem intake awaits
-the paid EXTRA download; no purchase has been made by this workflow.
+The creator explored a free golem-style modification of the Warrior, then chose
+on 11 October 2026 to keep the KayKit skeleton family for regular monsters and
+search for a separate free boss asset. This preview is not selected for the boss.
+Normal encounters have not been changed by this work.
+
+The optional G toggle shows original AI-assisted armor geometry authored locally:
+chamfered shoulder/forearm/chest/boot plates, broader/deeper proportions, smaller
+skull, and a larger axe. Source Warrior geometry and supplied clips are unchanged.
+Added armor follows bone attachments; the smaller head is a local presentation
+pose adjustment after animation. It is a prototype, not the paid KayKit Golem.
+Idle, walk and axe-chop captures completed in Godot 4.7.2, Metal Forward+, 1920×1080
+on Apple M2 Pro. Breastplate/scarf contact and attached shoulder motion still need
+human inspection in continuous motion. Golem mode starts disabled and no version
+of this preview is connected to The Variance's gameplay.
